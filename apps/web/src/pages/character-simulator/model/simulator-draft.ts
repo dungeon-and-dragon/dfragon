@@ -13,9 +13,14 @@ import {
   equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
+  findWeaponVariant,
   resolveEquipmentItems,
   switchEquipmentSet,
-  weaponMaxTuneLevelOf
+  WEAPON_RELEASE_MAX,
+  type WeaponVariant,
+  weaponItemOf,
+  weaponMaxTuneLevelOf,
+  weaponVariantsOf
 } from '@dfragon/lib/equipment-variants'
 import type { BuffSwitching } from '@dfragon/lib/buff-switching'
 import { type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
@@ -73,6 +78,15 @@ const EXALTED_KIND = '유일'
 export const FULL_POTENCY = 100
 // 응답의 정밀도 값 끝에 붙어 올 수 있는 퍼센트 기호다.
 const POTENCY_PERCENT_SUFFIX = /%$/
+const RELEASE_LINE = '해방'
+// 무기 선택지는 아이템 이름 대신 계열 이름으로 부르고, 등급은 글자 색으로만 나타낸다.
+const WEAPON_LINE_NAMES: Readonly<Record<NonNullable<WeaponVariant['line']>, string>> = {
+  기본: '레거시',
+  해방: '디거시',
+  '태초의 별': '태초의 별'
+}
+const UNIQUE_WEAPON_NAME = '유니크'
+export const TUNED_WEAPON_NAME = '레거시 조율 완료'
 
 export type EnchantChoice = Readonly<{
   id: string
@@ -80,7 +94,10 @@ export type EnchantChoice = Readonly<{
   options: EnchantOption[]
 }>
 
-/** maxTune이 0이면 조율할 수 없는 아이템이다. */
+/**
+ * maxTune이 0이면 조율할 수 없는 아이템이다. 무기 선택지는 variant 대신 weapon이 있고, name은 아이템 이름이 아니라 계열
+ * 이름이다.
+ */
 export type VariantChoice = Readonly<{
   id: string
   itemId: string
@@ -88,12 +105,14 @@ export type VariantChoice = Readonly<{
   rarity: ItemView['rarity']
   maxTune: number
   exalted: boolean
-  variant: EquipmentVariant
+  variant: EquipmentVariant | null
+  weapon: WeaponVariant | null
 }>
 
 /**
- * wornVariantId, wornTune, wornPotency는 지금 기준의 아이템, 조율, 정밀도다. 장비 세트를 고르면 그 세트로 옮긴 값이고,
- * wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율 상한이다(무기).
+ * wornVariantId, wornTune, wornPotency, wornRelease는 지금 기준의 아이템, 조율, 정밀도, 해방 수치다. 장비 세트를 고르면 그
+ * 세트로 옮긴 값이고, wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율
+ * 상한이다(무기).
  */
 export type SimulatorSlot = ItemView &
   Readonly<{
@@ -109,6 +128,7 @@ export type SimulatorSlot = ItemView &
     wornVariantId: string | null
     wornTune: number
     wornPotency: number | null
+    wornRelease: number | null
     wornMaxTune: number
   }>
 
@@ -135,7 +155,7 @@ export type SimulatorEquipmentSet = Readonly<{ mainSetId: string; sets: readonly
 
 /**
  * 부위의 원하는 상태다. `enchantId`가 null이면 착용한 마법부여를 그대로 두고, `variantId`가 null이면 선택지에 없는 착용
- * 아이템을 그대로 둔다. `potency`는 유일 장비일 때만 값이 있다.
+ * 아이템을 그대로 둔다. `potency`는 유일 장비일 때만, `release`는 해방 계열 무기일 때만 값이 있다.
  */
 export type SlotDraft = Readonly<{
   reinforce: number
@@ -144,6 +164,7 @@ export type SlotDraft = Readonly<{
   variantId: string | null
   tune: number
   potency: number | null
+  release: number | null
 }>
 
 /**
@@ -168,7 +189,7 @@ export const NO_CHANGES: SimulatorChanges = {
   oath: NO_OATH_CHANGES
 }
 
-/** `variantId`, `tune`, `potency`가 null이면 착용 아이템의 값을 그대로 둔다. */
+/** `variantId`, `tune`, `potency`, `release`가 null이면 착용 아이템의 값을 그대로 둔다. */
 export type SimulationChange = Readonly<{
   slotId: EnchantGradeSlot
   reinforce: number
@@ -177,6 +198,7 @@ export type SimulationChange = Readonly<{
   variantId: string | null
   tune: number | null
   potency: number | null
+  release: number | null
 }>
 
 export type SimulationBody = Readonly<
@@ -272,8 +294,41 @@ function toVariantChoice(variant: EquipmentVariant): VariantChoice {
     rarity,
     maxTune,
     exalted,
-    variant
+    variant,
+    weapon: null
   }
+}
+
+function weaponNameOf({ line, tuned }: WeaponVariant): string {
+  if (tuned) {
+    return TUNED_WEAPON_NAME
+  }
+
+  if (line === null) {
+    return UNIQUE_WEAPON_NAME
+  }
+
+  return WEAPON_LINE_NAMES[line]
+}
+
+function toWeaponChoice(weapon: WeaponVariant): VariantChoice {
+  const name = weaponNameOf(weapon)
+  const rarity = itemRarityOfGrade(weapon.rarity)
+
+  return {
+    id: weapon.id,
+    itemId: weapon.item.itemId,
+    name,
+    rarity,
+    maxTune: weapon.maxTuneLevel,
+    exalted: false,
+    variant: null,
+    weapon
+  }
+}
+
+function isReleaseChoice(choice: VariantChoice | undefined): boolean {
+  return choice?.weapon?.line === RELEASE_LINE
 }
 
 // API처럼 세트 포인트와 setItemId가 있는 세트만 세트 포인트가 큰 순서로 두고, 같은 포인트면 앞 세트를 앞에 둔다.
@@ -300,6 +355,10 @@ function variantChoicesOf(
   slotId: EnchantGradeSlot,
   setIdsByPoint: readonly string[]
 ): VariantChoice[] {
+  if (slotId === WEAPON_SLOT_ID) {
+    return weaponVariantsOf(item.itemTypeDetail ?? '').map(toWeaponChoice)
+  }
+
   if (!isVariantSlot(slotId)) {
     return []
   }
@@ -317,7 +376,10 @@ function variantChoicesOf(
 }
 
 function wornVariantIdOf(item: EquipmentItem, variants: readonly VariantChoice[]): string | null {
-  const match = item.itemId !== null ? findEquipmentVariant(item.itemId) : null
+  const match =
+    item.itemId !== null
+      ? (findEquipmentVariant(item.itemId) ?? findWeaponVariant(item.itemId))
+      : null
   const worn = variants.find(({ id }) => id === match?.variant.id)
 
   if (worn === undefined) {
@@ -369,6 +431,24 @@ function wornPotencyOf(
   return potency
 }
 
+function wornReleaseOf(
+  item: EquipmentItem,
+  variants: readonly VariantChoice[],
+  wornVariantId: string | null
+): number | null {
+  if (!isReleaseChoice(variants.find(({ id }) => id === wornVariantId))) {
+    return null
+  }
+
+  const release = item.weaponRelease?.value
+
+  if (release == null) {
+    return WEAPON_RELEASE_MAX
+  }
+
+  return release
+}
+
 function toSimulatorSlot(
   item: EquipmentItem & { slotId: EnchantGradeSlot },
   role: EnchantRole,
@@ -385,6 +465,7 @@ function toSimulatorSlot(
   const wornVariantId = wornVariantIdOf(item, variants)
   const wornTune = wornTuneOf(item)
   const wornPotency = wornPotencyOf(item, variants, wornVariantId)
+  const wornRelease = wornReleaseOf(item, variants, wornVariantId)
   const wornMaxTune = item.slotId === WEAPON_SLOT_ID ? weaponMaxTuneLevelOf(item.itemName ?? '') : 0
 
   return {
@@ -401,6 +482,7 @@ function toSimulatorSlot(
     wornVariantId,
     wornTune,
     wornPotency,
+    wornRelease,
     wornMaxTune
   }
 }
@@ -540,7 +622,8 @@ function originalDraft(slot: SimulatorSlot): SlotDraft {
     enchantId: null,
     variantId: slot.wornVariantId,
     tune: slot.wornTune,
-    potency: slot.wornPotency
+    potency: slot.wornPotency,
+    release: slot.wornRelease
   }
 }
 
@@ -584,7 +667,8 @@ function isOriginal(slot: SimulatorSlot, draft: SlotDraft): boolean {
     draft.enchantId === original.enchantId &&
     draft.variantId === original.variantId &&
     draft.tune === original.tune &&
-    draft.potency === original.potency
+    draft.potency === original.potency &&
+    draft.release === original.release
   )
 }
 
@@ -617,6 +701,14 @@ function isPotencyAllowed(slot: SimulatorSlot, draft: SlotDraft): boolean {
   return draft.potency !== null && isInRange(draft.potency, FULL_POTENCY)
 }
 
+function isReleaseAllowed(slot: SimulatorSlot, draft: SlotDraft): boolean {
+  if (!isReleaseChoice(variantChoiceOf(slot, draft.variantId))) {
+    return draft.release === null
+  }
+
+  return draft.release !== null && isInRange(draft.release, WEAPON_RELEASE_MAX)
+}
+
 function isAllowed(slot: SimulatorSlot, current: SlotDraft, next: SlotDraft): boolean {
   const changesReinforce =
     next.reinforce !== current.reinforce || next.amplified !== current.amplified
@@ -636,12 +728,17 @@ function isAllowed(slot: SimulatorSlot, current: SlotDraft, next: SlotDraft): bo
   const knownVariant =
     next.variantId === slot.wornVariantId || variantChoiceOf(slot, next.variantId) !== undefined
 
-  return knownVariant && isTuneAllowed(slot, next) && isPotencyAllowed(slot, next)
+  return (
+    knownVariant &&
+    isTuneAllowed(slot, next) &&
+    isPotencyAllowed(slot, next) &&
+    isReleaseAllowed(slot, next)
+  )
 }
 
 /**
- * 아이템을 바꾸면 조율은 바꾼 아이템의 최대 단계까지 유지하고, 유일 장비의 정밀도는 착용한 값이나 100에서 시작한다. 선택지에
- * 없는 착용 아이템으로 되돌리면 착용한 조율로 둔다.
+ * 아이템을 바꾸면 조율은 바꾼 아이템의 최대 단계까지 유지하고, 유일 장비의 정밀도와 해방 계열 무기의 해방 수치는 착용한 값이나
+ * 100에서 시작한다. 선택지에 없는 착용 아이템으로 되돌리면 착용한 조율로 둔다.
  */
 function switchVariant(
   slot: SimulatorSlot,
@@ -655,13 +752,14 @@ function switchVariant(
   const choice = variantChoiceOf(slot, variantId)
 
   if (choice === undefined) {
-    return { ...current, variantId, tune: slot.wornTune, potency: null }
+    return { ...current, variantId, tune: slot.wornTune, potency: null, release: null }
   }
 
   const tune = Math.min(current.tune, choice.maxTune)
   const potency = choice.exalted ? (slot.wornPotency ?? FULL_POTENCY) : null
+  const release = isReleaseChoice(choice) ? (slot.wornRelease ?? WEAPON_RELEASE_MAX) : null
 
-  return { ...current, variantId, tune, potency }
+  return { ...current, variantId, tune, potency, release }
 }
 
 function changeSlot(
@@ -868,9 +966,30 @@ export function simulatorReducer(
   }
 }
 
+function weaponItemViewOf(rows: readonly SimulatorRow[], changes: SimulatorChanges) {
+  return rows.flatMap((row): [EnchantGradeSlot, ItemView][] => {
+    if (row.kind !== 'equipment') {
+      return []
+    }
+
+    const draft = draftOf(row.slot, changes)
+    const choice = variantChoiceOf(row.slot, draft.variantId)
+
+    if (choice?.weapon == null) {
+      return []
+    }
+
+    const item = weaponItemOf(choice.weapon, draft.release ?? WEAPON_RELEASE_MAX)
+    const view = toItemView(item)
+
+    return [[row.slot.slotId, { ...view, itemName: choice.name }]]
+  })
+}
+
 /**
- * 선택한 아이템이 실제로 어떤 아이템이 되는지 부위별로 돌려준다. 방어구 5부위가 모두 축성이면 세트 공용 이름 아이템이 된다.
- * 선택지에 없는 착용 아이템을 그대로 둔 부위는 넣지 않는다.
+ * 선택한 아이템이 실제로 어떤 아이템이 되는지 부위별로 돌려준다. 방어구 5부위가 모두 축성이면 세트 공용 이름 아이템이 되고,
+ * 해방 계열 무기는 해방 수치가 100 미만이면 "억압 - " 아이템이 된다. 무기는 아이템 이름 자리에 계열 이름을 둔다. 선택지에 없는
+ * 착용 아이템을 그대로 둔 부위는 넣지 않는다.
  */
 export function resolvedItemsOf(
   rows: readonly SimulatorRow[],
@@ -882,28 +1001,32 @@ export function resolvedItemsOf(
         return []
       }
 
-      const choice = variantChoiceOf(row.slot, draftOf(row.slot, changes).variantId)
+      const variant = variantChoiceOf(row.slot, draftOf(row.slot, changes).variantId)?.variant
 
-      if (choice === undefined) {
+      if (variant == null) {
         return []
       }
 
-      return [[row.slot.slotId, choice.variant]]
+      return [[row.slot.slotId, variant]]
     })
   )
 
   const items = resolveEquipmentItems(selection)
 
-  return Object.fromEntries(
-    Object.entries(items).map(([slotId, item]) => [slotId, toItemView(item)])
-  )
+  return Object.fromEntries([
+    ...Object.entries(items).map(([slotId, item]) => [slotId, toItemView(item)]),
+    ...weaponItemViewOf(rows, changes)
+  ])
 }
 
 function toSimulationChange(slot: SimulatorSlot, draft: SlotDraft): SimulationChange {
   const variantId = draft.variantId === slot.wornVariantId ? null : draft.variantId
   const keepsItem = variantId === null
-  const tune = keepsItem && draft.tune === slot.wornTune ? null : draft.tune
+  // API는 조율할 수 없는 무기의 조율을 0단계라도 거절하므로, 그런 무기로 바꾸면 조율을 싣지 않는다.
+  const untunableWeapon = slot.slotId === WEAPON_SLOT_ID && tuneLimitOf(slot, draft.variantId) === 0
+  const tune = (keepsItem && draft.tune === slot.wornTune) || untunableWeapon ? null : draft.tune
   const potency = keepsItem && draft.potency === slot.wornPotency ? null : draft.potency
+  const release = keepsItem && draft.release === slot.wornRelease ? null : draft.release
 
   return {
     slotId: slot.slotId,
@@ -912,7 +1035,8 @@ function toSimulationChange(slot: SimulatorSlot, draft: SlotDraft): SimulationCh
     enchantId: draft.enchantId,
     variantId,
     tune,
-    potency
+    potency,
+    release
   }
 }
 

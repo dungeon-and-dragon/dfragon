@@ -1038,6 +1038,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     oathTunes: false,
     equipmentSet: false,
     weaponTune: false,
+    weaponItem: false,
     oathItems: false,
     oathUpgrade: false,
     buffLevel: false,
@@ -2406,6 +2407,299 @@ test('실제 엔진은 장비 세트, 서약 세트, 본체와 결정 등급, �
 
   const weapon = await scoresOf('dealer-blade', { equipment: [{ slotId: 'WEAPON', tune: 3 }] })
   assert.ok(weapon.simulated.value > weapon.baseline.value)
+})
+
+// 무기 상세는 점수 엔진 저장소 테스트 자료에 있는 운영 공개 API 응답에서 엔진과 API가 읽는 칸만 옮긴 값이다.
+// 광검 상세에 없는 종류 id는 같은 무기 종류의 착용 장비 응답에서 채웠다.
+const weaponItemDetails = JSON.parse(
+  readFileSync(new URL('../../test/fixtures/weapon-item-details.json', import.meta.url), 'utf8')
+) as Record<string, Item>
+
+const BEFORE_WEAPON_ENGINE = 'dnfscore-native 0.12.0'
+const WEAPON_ENGINE = 'dnfscore-native 0.13.0'
+// 딜러 원본 무기는 대검 에픽 기본 계열(제2형 - 수식, 방어의 운검), 재련 8이다.
+const GREATSWORD_PRIMEVAL = 'f4ebda346ccd4281a9c37de9cb8936a5'
+const GREATSWORD_TUNED = 'd0bd701ea42d1e6ee03ae7e4c77faa09'
+const GREATSWORD_RELEASE = '91334afd67ca965ff4ed8dab5c4b2352'
+const GREATSWORD_STAR = '9f0dde7a9c78384a9c5a80ff41f98e68'
+const BEAMSWORD_PRIMEVAL = '74bfcf0bd8b6998fc1e5a896d5a90fd7'
+const BEAMSWORD_RELEASE = 'f3302674470356cbaeaf31e46b7067ff'
+const BEAMSWORD_PENDING = '1e8147c4dd8b4f726d772fdda7f85417'
+const BEAMSWORD_TYPE = {
+  itemTypeDetailId: 'bd9c897afd0825ad854f0a81fc8d42ae',
+  itemTypeDetail: '광검'
+}
+
+function weaponDetailFields(itemId: string): Item {
+  const { itemTypeId, itemType, itemTypeDetailId, itemTypeDetail, itemAvailableLevel } =
+    weaponItemDetails[itemId]!
+
+  return { itemTypeId, itemType, itemTypeDetailId, itemTypeDetail, itemAvailableLevel }
+}
+
+function wornWeapon(fields: Item): (items: Item[]) => Item[] {
+  return (items) => items.map((item) => (item.slotId === 'WEAPON' ? { ...item, ...fields } : item))
+}
+
+const wornBeamsword = wornWeapon({
+  ...BEAMSWORD_TYPE,
+  itemId: BEAMSWORD_PRIMEVAL,
+  itemName: '멸룡검 발뭉',
+  itemRarity: '태초',
+  tune: [{ level: 2, status: [{ name: '최종 데미지 증가', value: '400%' }] }]
+})
+
+const wornPendingRelease = wornWeapon({
+  ...BEAMSWORD_TYPE,
+  itemId: BEAMSWORD_PENDING,
+  itemName: '억압 - 구속하는 공작의 차원도',
+  itemRarity: '태초',
+  weaponRelease: { value: 81, damage: '9.9%', buff: 3600 }
+})
+
+async function weaponSimulation(t: TestContext, edit: (items: Item[]) => Item[], fields: Item) {
+  const { original, payloads, details, path } = fixture('dealer-blade', edit, weaponItemDetails)
+  const engine = scoring(versionedEngine(WEAPON_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const items = payloads.equipment.equipment as unknown[]
+  const response = await simulate(origin, path, {
+    equipment: [itemChange(items, 'WEAPON', fields)]
+  })
+  const weapon = itemOf(items, 'WEAPON')
+
+  return { original, weapon, engine, response }
+}
+
+test('무기를 같은 종류의 다른 선택지로 바꾸면 아이템과 종류 칸을 새 상세로 바꾸고 옛 무기 옵션을 빼며, 강화, 재련, 마법부여, 품질과 조율 단계는 유지한다', async (t) => {
+  const { original, weapon, engine, response } = await weaponSimulation(
+    t,
+    wornWeapon({
+      tune: [{ level: 2, status: [] }],
+      asrahanOption: { options: [] },
+      fixedOption: { damage: '1%' }
+    }),
+    { variantId: GREATSWORD_STAR }
+  )
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.simulated.value, 1802)
+  const { input } = engine.requests[0]!
+  assert.deepEqual(input.simulation, {
+    equipment: [
+      {
+        ...withoutKeys(weapon, ['asrahanOption', 'fixedOption']),
+        ...weaponDetailFields(GREATSWORD_STAR),
+        itemId: GREATSWORD_STAR,
+        itemName: '태초의 별 - 대검',
+        itemRarity: '태초',
+        amplificationName: null,
+        tune: [{ level: 2 }]
+      }
+    ]
+  })
+  assert.equal(weapon.refine, 8)
+  assert.deepEqual(input.items, {
+    ...original.items,
+    [GREATSWORD_STAR]: weaponItemDetails[GREATSWORD_STAR]
+  })
+})
+
+for (const [name, fields, expected] of [
+  ['조율을 마친 무기는 조율 0으로 바꾼다', { variantId: GREATSWORD_TUNED }, 0],
+  ['함께 보낸 조율은 새 무기로 검증해 넣는다', { variantId: GREATSWORD_PRIMEVAL, tune: 3 }, 3]
+] as const) {
+  test(`무기 교체: ${name}`, async (t) => {
+    const { engine, response } = await weaponSimulation(
+      t,
+      wornWeapon({ tune: [{ level: 2, status: [] }] }),
+      fields
+    )
+
+    assert.equal(response.status, 200)
+    const replaced = bySlot(engine.requests[0]!.input.simulation!.equipment).WEAPON!
+    assert.equal(replaced.itemId, fields.variantId)
+    assert.deepEqual(replaced.tune, [{ level: expected }])
+  })
+}
+
+test('해방 계열로 바꾸면 해방 수치 100의 해방 아이템이 되고, 100 미만을 함께 보내면 "억압 - " 아이템과 그 수치가 된다', async (t) => {
+  const full = await weaponSimulation(t, wornBeamsword, { variantId: BEAMSWORD_RELEASE })
+  const pending = await weaponSimulation(t, wornBeamsword, {
+    variantId: BEAMSWORD_RELEASE,
+    release: 81
+  })
+
+  assert.equal(full.response.status, 200)
+  assert.deepEqual(full.engine.requests[0]!.input.simulation, {
+    equipment: [
+      {
+        ...full.weapon,
+        ...weaponDetailFields(BEAMSWORD_RELEASE),
+        itemId: BEAMSWORD_RELEASE,
+        itemName: '구속하는 공작의 차원도',
+        amplificationName: null,
+        tune: [{ level: 0 }],
+        weaponRelease: { value: 100 }
+      }
+    ]
+  })
+  assert.equal(pending.response.status, 200)
+  const { input } = pending.engine.requests[0]!
+  // 상세의 이름("LV.115 억압 - ...의 형상")이 아니라 엔진 카탈로그의 이름으로 넣는다.
+  assert.deepEqual(input.simulation, {
+    equipment: [
+      {
+        ...pending.weapon,
+        ...weaponDetailFields(BEAMSWORD_PENDING),
+        itemId: BEAMSWORD_PENDING,
+        itemName: '억압 - 구속하는 공작의 차원도',
+        amplificationName: null,
+        tune: [{ level: 0 }],
+        weaponRelease: { value: 81 }
+      }
+    ]
+  })
+  assert.deepEqual(input.items[BEAMSWORD_PENDING], weaponItemDetails[BEAMSWORD_PENDING])
+})
+
+test('해방 계열 무기는 수치만 바꿀 수 있고, 100으로 올리면 해방 아이템이 되며 100 미만끼리는 아이템을 그대로 둔다', async (t) => {
+  const full = await weaponSimulation(t, wornPendingRelease, { release: 100 })
+  const lower = await weaponSimulation(t, wornPendingRelease, { release: 50 })
+
+  assert.equal(full.response.status, 200)
+  assert.deepEqual(full.engine.requests[0]!.input.simulation, {
+    equipment: [
+      {
+        ...full.weapon,
+        ...weaponDetailFields(BEAMSWORD_RELEASE),
+        itemId: BEAMSWORD_RELEASE,
+        itemName: '구속하는 공작의 차원도',
+        amplificationName: null,
+        tune: [{ level: 0 }],
+        weaponRelease: { value: 100 }
+      }
+    ]
+  })
+  assert.equal(lower.response.status, 200)
+  assert.deepEqual(lower.engine.requests[0]!.input.simulation, {
+    equipment: [{ ...lower.weapon, amplificationName: null, weaponRelease: { value: 50 } }]
+  })
+})
+
+test('착용한 해방 수치와 같은 수치를 보낸 무기는 아이템과 해방 칸을 원본 그대로 둔다', async (t) => {
+  const { weapon, engine, response } = await weaponSimulation(t, wornPendingRelease, {
+    release: 81
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [{ ...weapon, amplificationName: null }]
+  })
+})
+
+for (const [name, package_, fields, expected] of [
+  [
+    '0.13.0 전 엔진에 무기 아이템 교체를 보내면 두 점수 모두 null이다',
+    BEFORE_WEAPON_ENGINE,
+    { variantId: GREATSWORD_STAR },
+    null
+  ],
+  [
+    '0.13.0 전 엔진에 해방 수치 변경을 보내면 두 점수 모두 null이다',
+    BEFORE_WEAPON_ENGINE,
+    { release: 100 },
+    null
+  ],
+  ['0.13.0 전 엔진도 무기 조율만 바꾼 요청은 점수를 낸다', BEFORE_WEAPON_ENGINE, { tune: 1 }, 1802],
+  ['0.13.0 엔진은 무기 아이템 교체를 반영한다', WEAPON_ENGINE, { variantId: GREATSWORD_STAR }, 1802]
+] as const) {
+  test(`엔진 버전: ${name}`, async (t) => {
+    const edit = 'release' in fields ? wornPendingRelease : undefined
+    const { payloads, details, path } = fixture('dealer-blade', edit, weaponItemDetails)
+    const engine = scoring(versionedEngine(package_))
+    const origin = await listen(t, { details, ...engine.options })
+    const items = payloads.equipment.equipment as unknown[]
+
+    const response = await simulate(origin, path, {
+      equipment: [itemChange(items, 'WEAPON', fields)]
+    })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated?.value ?? null, expected)
+    assert.equal(engine.requests.length, 1)
+  })
+}
+
+const invalidWeaponCases: readonly (readonly [string, (items: Item[]) => Item[], Item])[] = [
+  ['다른 무기 종류의 선택지', wornWeapon({}), { slotId: 'WEAPON', variantId: BEAMSWORD_RELEASE }],
+  [
+    '장비 부위의 선택지 id',
+    wornWeapon({}),
+    { slotId: 'WEAPON', variantId: PURIFICATION_EPIC_JACKET }
+  ],
+  [
+    '해방 계열 무기의 조율',
+    wornWeapon({}),
+    { slotId: 'WEAPON', variantId: GREATSWORD_RELEASE, tune: 0 }
+  ],
+  [
+    '조율을 마친 무기의 조율',
+    wornWeapon({}),
+    { slotId: 'WEAPON', variantId: GREATSWORD_TUNED, tune: 1 }
+  ],
+  ['해방 계열이 아닌 착용 무기의 해방 수치', wornWeapon({}), { slotId: 'WEAPON', release: 50 }],
+  [
+    '해방 계열이 아닌 선택지의 해방 수치',
+    wornPendingRelease,
+    { slotId: 'WEAPON', variantId: GREATSWORD_STAR, release: 100 }
+  ],
+  ['무기가 아닌 부위의 해방 수치', wornPendingRelease, { slotId: 'JACKET', release: 50 }],
+  ['100을 넘는 해방 수치', wornPendingRelease, { slotId: 'WEAPON', release: 101 }],
+  ['정수가 아닌 해방 수치', wornPendingRelease, { slotId: 'WEAPON', release: 50.5 }]
+]
+
+for (const [name, edit, change] of invalidWeaponCases) {
+  test(`무기 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture('dealer-blade', edit, weaponItemDetails)
+    const engine = scoring(versionedEngine(WEAPON_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+    const items = payloads.equipment.equipment as unknown[]
+    const { slotId, ...fields } = change
+
+    const response = await simulate(origin, path, {
+      equipment: [itemChange(items, slotId as string, fields)]
+    })
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+const REAL_WEAPON_ENGINE = realEngineSupports({ weaponTune: true, weaponItem: true })
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 딜러의 에픽 무기를 같은 종류의 태초 무기로 바꾼 요청을 건너뛰지 않고 점수를 올린다', {
+  skip: !REAL_WEAPON_ENGINE && '무기 아이템 교체를 반영하는 0.13.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const { details, path, payloads } = fixture('dealer-blade', undefined, weaponItemDetails)
+  const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+  const items = payloads.equipment.equipment as unknown[]
+
+  for (const fields of [
+    { variantId: GREATSWORD_STAR },
+    { variantId: GREATSWORD_PRIMEVAL, tune: 3 },
+    { variantId: GREATSWORD_TUNED }
+  ]) {
+    const response = await simulate(origin, path, {
+      equipment: [itemChange(items, 'WEAPON', fields)]
+    })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, JSON.stringify(fields))
+    assert.equal(response.body.simulated.skipped, null, JSON.stringify(fields))
+    assert.ok(response.body.simulated.value > response.body.baseline.value, JSON.stringify(fields))
+  }
 })
 
 test('착용한 서약 세트를 다시 고르면 다른 세트의 본체와 광휘 결정만 그 세트의 같은 등급으로 옮기고 세트 칸은 넣지 않는다', async (t) => {

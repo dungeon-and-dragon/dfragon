@@ -39,8 +39,10 @@ parsePort('3000') // 3000
 엔진 파일을 바꾸면 Biome format을 적용하고, 대응 파일의 묶음 id와 `test/slot-items.test.mjs`의 기대값을 새 목록에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
 `@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 묵언의 진의 단계와 선택지, 조율 단계별 세트 포인트, 무기 조율 단계를 찾습니다.
+무기는 `weaponVariantsOf(itemTypeDetail)`가 무기 종류마다 115레벨 무기 선택지(계열과 등급)를, `findWeaponVariant(itemId)`가 착용 무기의 선택지를 찾습니다.
 목록은 세 파일로 나뉩니다. `data/equipment-variants.dfragon.json`은 점수 엔진 저장소의 같은 이름 파일(그 저장소의 packages/dnfscore-native/tools/equipment_variants 아래)을 그대로 복사한 파일이며 손으로 고치지 않습니다.
-`data/equipment-variant-ids.json`은 제품이 운영에서 관측한 세트별 `setItemId`와 장비, 서약 본체, 광휘 결정의 itemId, 관측 수(`count`)를 관리하는 파일입니다.
+`data/equipment-variant-ids.json`은 제품이 운영에서 관측한 세트별 `setItemId`와 장비, 서약 본체, 광휘 결정, 무기(`weapons`, 무기 종류와 이름별)의 itemId, 관측 수(`count`)를 관리하는 파일입니다.
+itemId가 없는 선택지는 목록에서 빠지고, 해방 계열 무기는 해방 아이템과 `억압 - ` 아이템의 itemId가 모두 있어야 선택지가 됩니다.
 `src/equipment-variants.json`은 두 파일에서 선택지에 필요한 값만 뽑은 생성 파일이며 `pnpm --filter @dfragon/lib generate:equipment-variants`로만 만듭니다.
 엔진 파일이나 대응 파일을 바꾸면 root에서 `pnpm exec biome format --write packages/lib/data`를 실행하고 생성 명령을 다시 실행한 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 

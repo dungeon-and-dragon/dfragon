@@ -9261,18 +9261,19 @@
     }
   ],
   "weaponMaxTuneLevels": {
+    "(사용하지 않음)": 3,
     "Beast-Saw": 3,
     "Brutal-Saw": 3,
     "Burst-Saw": 3,
-    "改 : 흑룡언월도": 5,
+    "改 : 흑룡언월도": 3,
     "眞 : 흑룡언월도": 3,
     "구원의 올리브 나무 십자가": 3,
     "금지된 지식": 3,
     "나스카 : 영혼의 비명": 3,
     "나스카 : 영혼의 속삭임": 3,
     "나스카 : 영혼의 심판": 3,
-    "넨 비아렉티아": 5,
-    "넨 스텔라": 5,
+    "넨 비아렉티아": 3,
+    "넨 스텔라": 3,
     "넨 아스트론": 3,
     "노블레스 오브 레인저": 3,
     "대룡검 발뭉": 3,
@@ -9295,7 +9296,7 @@
     "만월 : 월광야천도": 3,
     "멸룡검 발뭉": 3,
     "멸망의 근원": 3,
-    "명작 금인예도": 5,
+    "명작 금인예도": 3,
     "무영흑단살": 3,
     "무영흑적살": 3,
     "무영흑주살": 3,
@@ -9322,13 +9323,18 @@
     "백에 하나 나온다는 로드": 3,
     "백에 하나 나온다는 리볼버": 3,
     "백에 하나 나온다는 머스켓": 3,
+    "백에 하나 나온다는 미늘창": 3,
     "백에 하나 나온다는 배틀액스": 3,
     "백에 하나 나온다는 보우건": 3,
     "백에 하나 나온다는 봉": 3,
     "백에 하나 나온다는 빗자루": 3,
+    "백에 하나 나온다는 선현궁": 3,
     "백에 하나 나온다는 소검": 3,
+    "백에 하나 나온다는 소태도": 3,
     "백에 하나 나온다는 스태프": 3,
+    "백에 하나 나온다는 십자가": 3,
     "백에 하나 나온다는 쌍검": 3,
+    "백에 하나 나온다는 앵커": 3,
     "백에 하나 나온다는 에테리얼 보우": 3,
     "백에 하나 나온다는 염주": 3,
     "백에 하나 나온다는 완드": 3,
@@ -9339,6 +9345,7 @@
     "백에 하나 나온다는 중검": 3,
     "백에 하나 나온다는 차크라 웨펀": 3,
     "백에 하나 나온다는 창": 3,
+    "백에 하나 나온다는 컴파운드 보우": 3,
     "백에 하나 나온다는 코어 블레이드": 3,
     "백에 하나 나온다는 크로스슈터": 3,
     "백에 하나 나온다는 클로": 3,
@@ -9346,7 +9353,7 @@
     "백에 하나 나온다는 통파": 3,
     "백에 하나 나온다는 투창": 3,
     "백에 하나 나온다는 핸드캐넌": 3,
-    "범작 금인도": 5,
+    "범작 금인도": 3,
     "봉인된 지식": 3,
     "블레이징 인페르노": 3,
     "비비드 윙, 이카루스": 3,
@@ -9370,9 +9377,12 @@
     "서사시의 영웅담 - 보우건": 3,
     "서사시의 영웅담 - 봉": 3,
     "서사시의 영웅담 - 빗자루": 3,
+    "서사시의 영웅담 - 선현궁": 3,
     "서사시의 영웅담 - 소검": 3,
     "서사시의 영웅담 - 소태도": 3,
     "서사시의 영웅담 - 스태프": 3,
+    "서사시의 영웅담 - 십자가": 3,
+    "서사시의 영웅담 - 쌍검": 3,
     "서사시의 영웅담 - 앵커": 3,
     "서사시의 영웅담 - 에테리얼 보우": 3,
     "서사시의 영웅담 - 염주": 3,
@@ -9389,15 +9399,21 @@
     "서사시의 영웅담 - 크로스슈터": 3,
     "서사시의 영웅담 - 클로": 3,
     "서사시의 영웅담 - 토템": 3,
+    "서사시의 영웅담 - 통파": 3,
     "서사시의 영웅담 - 투창": 3,
     "서사시의 영웅담 - 핸드캐넌": 3,
     "선도의 수레바퀴": 3,
     "성장군 : 유성계": 3,
     "성장군 : 유성광": 3,
     "성장군 : 유성우": 3,
+    "소울 스토커": 3,
     "소울 프레데터": 3,
     "소울 헌터": 3,
-    "슈팅 스타 로저리": 5,
+    "슈팅 스타 로저리": 3,
+    "시크릿 듀엣": 3,
+    "시크릿 솔로": 3,
+    "시크릿 콘서트": 3,
+    "악도의 수레바퀴": 3,
     "앱솔루트 제로": 3,
     "양얼의 나뭇가지 : 강": 3,
     "양얼의 나뭇가지 : 극": 3,
@@ -9415,9 +9431,10 @@
     "역작 금인필살도": 3,
     "영광의 올리브 나무 십자가": 3,
     "영원한 올리브 나무 십자가": 3,
-    "오버클럭 코어": 5,
-    "오버클럭 하트": 5,
+    "오버클럭 코어": 3,
+    "오버클럭 하트": 3,
     "오케아누스 어비스": 3,
+    "오케아누스 타이드": 3,
     "오케아누스 프라이모디어": 3,
     "우르반의 걸작": 3,
     "웨이빙 인페르노": 3,
@@ -9439,10 +9456,13 @@
     "유일무이한 보우건": 3,
     "유일무이한 봉": 3,
     "유일무이한 빗자루": 3,
+    "유일무이한 선현궁": 3,
     "유일무이한 소검": 3,
     "유일무이한 소태도": 3,
     "유일무이한 스태프": 3,
     "유일무이한 십자가": 3,
+    "유일무이한 쌍검": 3,
+    "유일무이한 앵커": 3,
     "유일무이한 에테리얼 보우": 3,
     "유일무이한 염주": 3,
     "유일무이한 완드": 3,
@@ -9453,6 +9473,7 @@
     "유일무이한 중검": 3,
     "유일무이한 차크라 웨펀": 3,
     "유일무이한 창": 3,
+    "유일무이한 컴파운드 보우": 3,
     "유일무이한 코어 블레이드": 3,
     "유일무이한 크로스슈터": 3,
     "유일무이한 클로": 3,
@@ -9462,7 +9483,7 @@
     "유일무이한 핸드캐넌": 3,
     "육도의 수레바퀴": 3,
     "이노베이션 오토매틱 건": 3,
-    "익스터미네이터": 5,
+    "익스터미네이터": 3,
     "인요의 새벽": 3,
     "인요의 여명": 3,
     "인요의 황혼": 3,
@@ -9479,15 +9500,19 @@
     "전설 속의 전승 - 로드": 3,
     "전설 속의 전승 - 리볼버": 3,
     "전설 속의 전승 - 머스켓": 3,
+    "전설 속의 전승 - 미늘창": 3,
     "전설 속의 전승 - 배틀액스": 3,
     "전설 속의 전승 - 보우건": 3,
     "전설 속의 전승 - 봉": 3,
     "전설 속의 전승 - 빗자루": 3,
+    "전설 속의 전승 - 선현궁": 3,
     "전설 속의 전승 - 소검": 3,
     "전설 속의 전승 - 소태도": 3,
     "전설 속의 전승 - 스태프": 3,
+    "전설 속의 전승 - 십자가": 3,
     "전설 속의 전승 - 쌍검": 3,
     "전설 속의 전승 - 앵커": 3,
+    "전설 속의 전승 - 에테리얼 보우": 3,
     "전설 속의 전승 - 염주": 3,
     "전설 속의 전승 - 완드": 3,
     "전설 속의 전승 - 자동권총": 3,
@@ -9497,6 +9522,7 @@
     "전설 속의 전승 - 중검": 3,
     "전설 속의 전승 - 차크라 웨펀": 3,
     "전설 속의 전승 - 창": 3,
+    "전설 속의 전승 - 컴파운드 보우": 3,
     "전설 속의 전승 - 코어 블레이드": 3,
     "전설 속의 전승 - 크로스슈터": 3,
     "전설 속의 전승 - 클로": 3,
@@ -9507,17 +9533,17 @@
     "전장의 지배자": 3,
     "전장의 투신": 3,
     "전장의 패왕": 3,
-    "젊은 우르반의 치기": 5,
+    "젊은 우르반의 치기": 3,
     "제1형 - 공식, 필중의 운검": 3,
     "제2형 - 수식, 방어의 운검": 3,
-    "초기형 우르반 거포": 5,
-    "칠흑의 기도": 5,
-    "칠흑의 기원": 5,
+    "초기형 우르반 거포": 3,
+    "칠흑의 기도": 3,
+    "칠흑의 기원": 3,
     "칠흑의 저주": 3,
     "카르페디엠 : 모어 해피~": 3,
     "카운테스 벳즈": 3,
     "케세라세라 : 포츈": 3,
-    "코멧 로저리": 5,
+    "코멧 로저리": 3,
     "코어 오리진": 3,
     "타버린 얼음의 살": 3,
     "태초의 별 - 건틀릿": 3,
@@ -9538,9 +9564,12 @@
     "태초의 별 - 보우건": 3,
     "태초의 별 - 봉": 3,
     "태초의 별 - 빗자루": 3,
+    "태초의 별 - 선현궁": 3,
     "태초의 별 - 소검": 3,
     "태초의 별 - 소태도": 3,
     "태초의 별 - 스태프": 3,
+    "태초의 별 - 십자가": 3,
+    "태초의 별 - 쌍검": 3,
     "태초의 별 - 앵커": 3,
     "태초의 별 - 에테리얼 보우": 3,
     "태초의 별 - 염주": 3,
@@ -9554,6 +9583,7 @@
     "태초의 별 - 창": 3,
     "태초의 별 - 컴파운드 보우": 3,
     "태초의 별 - 코어 블레이드": 3,
+    "태초의 별 - 크로스슈터": 3,
     "태초의 별 - 클로": 3,
     "태초의 별 - 토템": 3,
     "태초의 별 - 통파": 3,
@@ -9562,6 +9592,7 @@
     "트랜스포메이션 오토매틱 건": 3,
     "특형 - 호위무신의 운검": 3,
     "파운더 오브 마나": 3,
+    "파트너 팔케": 3,
     "패밀리 팔케": 3,
     "페이드 윙, 이카루스": 3,
     "폭군의 본의": 3,
@@ -9569,13 +9600,5120 @@
     "폭군의 친절": 3,
     "폴링 스타 로저리": 3,
     "프렌즈 팔케": 3,
-    "프로즌 익스터미네이터": 5,
+    "프로즌 익스터미네이터": 3,
     "하쿠나마타타 : 원더풀": 3,
     "해방된 지식": 3,
     "행성분쇄자": 3,
     "현월야천도": 3,
-    "흑룡언월도": 5
+    "흑룡언월도": 3,
+    "천지를 뒤흔드는 공포": 0,
+    "구속하는 공작의 차원도": 0,
+    "구속의 대공 : 영원불멸의 추종자": 0,
+    "흉터각인": 0,
+    "재앙의 송곳니": 0,
+    "종언을 끊어내는 주먹": 0,
+    "원한 서린 재앙의 어금니": 0,
+    "찢어지는 비명의 메아리": 0,
+    "요도 : 날뛰는 흑혈": 0,
+    "구속된 공작의 아귀": 0,
+    "아우게이오우 : 이름 잃은 자의 피리": 0,
+    "오염된 피의 쾌": 0,
+    "베놈 앱서버": 0,
+    "위선자의 응징": 0,
+    "묘혈의 배틀액스": 0,
+    "모독을 속삭이는 깃": 0,
+    "비정이 깃든 고목": 0,
+    "종언을 비트는 흑미": 0,
+    "별을 꿈꿨던 눈동자": 0,
+    "끓어오르는 피의 그림자": 0,
+    "차원을 베는 영혼검": 0,
+    "끝없는 분노의 지팡이": 0,
+    "더러운 별의 지배자": 0,
+    "흉터가 깃든 분노": 0,
+    "뒤틀린 신념의 칼날": 0,
+    "구속의 단죄": 0,
+    "일루젼 베놈 로저리": 0,
+    "종언의 선고": 0,
+    "유혹을 부르는 선율": 0,
+    "검은 숨결의 히드라": 0,
+    "불신의 단말마": 0,
+    "종언을 비튼 창": 0,
+    "질병이 깃든 허기": 0,
+    "부패한 심장검": 0,
+    "흘러내리는 썩은 피": 0,
+    "짐조 : 독을 마시는 새": 0,
+    "비명의 장검": 0,
+    "만개하는 불신의 눈": 0,
+    "만 갈래로 뻗어가는 질병": 0,
+    "썩은 시체의 아귀": 0,
+    "육신에 스민 재앙": 0,
+    "독기로 점철된 절규": 0,
+    "광포한 비명의 분노": 0
   },
+  "weapons": [
+    {
+      "itemTypeDetail": "건틀릿",
+      "variants": [
+        {
+          "id": "61d9029189caaf462021614046d88c61",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "61d9029189caaf462021614046d88c61",
+            "itemName": "유일무이한 건틀릿",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "ebb4b4448009b2109e04d5aaf9ff85d1",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ebb4b4448009b2109e04d5aaf9ff85d1",
+            "itemName": "미완성 플래닛 건틀릿",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "5b4e7b99782b0db7c073e43c6fbab38d",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5b4e7b99782b0db7c073e43c6fbab38d",
+            "itemName": "전설 속의 전승 - 건틀릿",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "8ff6f038f74ceb3c09903571f7503ee8",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8ff6f038f74ceb3c09903571f7503ee8",
+            "itemName": "미완성 셀레스티얼 건틀릿",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "40dd298d737531be88e9f8f583ebbc40",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "40dd298d737531be88e9f8f583ebbc40",
+            "itemName": "서사시의 영웅담 - 건틀릿",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "23c3a32b8c83337313f03ac82881e04f",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "23c3a32b8c83337313f03ac82881e04f",
+            "itemName": "미완성 코스믹 건틀릿",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "8a52d768165980eb3398a6b103cc7a9d",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "8a52d768165980eb3398a6b103cc7a9d",
+            "itemName": "검은 질병의 미완성 코스믹 건틀릿",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "df0c0f3e9e5c83502128c6f6b0fc00d8",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "df0c0f3e9e5c83502128c6f6b0fc00d8",
+            "itemName": "천지를 뒤흔드는 공포",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "3551749a761618a1b2db3247b64df33a",
+            "itemName": "억압 - 천지를 뒤흔드는 공포",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4d082793556fe870683d6a2690d2d345",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4d082793556fe870683d6a2690d2d345",
+            "itemName": "태초의 별 - 건틀릿",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광검",
+      "variants": [
+        {
+          "id": "f37efc276a09fb549976a6ef819bd9e1",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f37efc276a09fb549976a6ef819bd9e1",
+            "itemName": "유일무이한 광검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "2e709a666847398dff5c364688866a86",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2e709a666847398dff5c364688866a86",
+            "itemName": "대룡검 발뭉",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "039cb38681a055f663646023ad8804f0",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "039cb38681a055f663646023ad8804f0",
+            "itemName": "전설 속의 전승 - 광검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "4995c44e88946e12811458899134f804",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4995c44e88946e12811458899134f804",
+            "itemName": "살룡검 발뭉",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ecd263f77d6dc442bc57c89d585be70b",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ecd263f77d6dc442bc57c89d585be70b",
+            "itemName": "서사시의 영웅담 - 광검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "74bfcf0bd8b6998fc1e5a896d5a90fd7",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "74bfcf0bd8b6998fc1e5a896d5a90fd7",
+            "itemName": "멸룡검 발뭉",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4f7c8199cd7a85492e985ebb5daa2da8",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "4f7c8199cd7a85492e985ebb5daa2da8",
+            "itemName": "검은 질병의 멸룡검 발뭉",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "f3302674470356cbaeaf31e46b7067ff",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "f3302674470356cbaeaf31e46b7067ff",
+            "itemName": "구속하는 공작의 차원도",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "1e8147c4dd8b4f726d772fdda7f85417",
+            "itemName": "억압 - 구속하는 공작의 차원도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "40a67f2b93ea7e8014180e47b672ba58",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "40a67f2b93ea7e8014180e47b672ba58",
+            "itemName": "태초의 별 - 광검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "광창",
+      "variants": [
+        {
+          "id": "e4bf5c9859c5369add07fdd4300c7dce",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e4bf5c9859c5369add07fdd4300c7dce",
+            "itemName": "유일무이한 광창",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "ad465c92c5ef247e407617f47eeb4afa",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ad465c92c5ef247e407617f47eeb4afa",
+            "itemName": "성장군 : 유성광",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "74c065a6c0b7d69e077765ac811cbfa4",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "74c065a6c0b7d69e077765ac811cbfa4",
+            "itemName": "전설 속의 전승 - 광창",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "aa1499de8aa13db64d969473b1c23a8e",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "aa1499de8aa13db64d969473b1c23a8e",
+            "itemName": "성장군 : 유성우",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "99806a99b87a8aea621bfe177200f254",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "99806a99b87a8aea621bfe177200f254",
+            "itemName": "서사시의 영웅담 - 광창",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "d3760db625f3bd4bcde3ac5904fecac5",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d3760db625f3bd4bcde3ac5904fecac5",
+            "itemName": "성장군 : 유성계",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "eb2d970c237c5c7a58e7045197c13aed",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "eb2d970c237c5c7a58e7045197c13aed",
+            "itemName": "검은 질병의 성장군 : 유성계",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "57195882c49cb21d623b9e217c92926f",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "57195882c49cb21d623b9e217c92926f",
+            "itemName": "구속의 대공 : 영원불멸의 추종자",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "22e52815e6a18b4d69b8488f33380c5d",
+            "itemName": "억압 - 구속의 대공 : 영원불멸의 추종자",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c20fca42d5353ca84db49efc212df1bc",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c20fca42d5353ca84db49efc212df1bc",
+            "itemName": "태초의 별 - 광창",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "권투글러브",
+      "variants": [
+        {
+          "id": "fc859dc2715575f2a65d900aa80b2655",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fc859dc2715575f2a65d900aa80b2655",
+            "itemName": "유일무이한 권투글러브",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "069d3a12378df401969fd3b87273c543",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "069d3a12378df401969fd3b87273c543",
+            "itemName": "더체스 벳즈",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "b3ff6174a20be13ce9f5cbffccc8e78c",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b3ff6174a20be13ce9f5cbffccc8e78c",
+            "itemName": "전설 속의 전승 - 권투글러브",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "78266818790d17675c2694c8b62cfa7b",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "78266818790d17675c2694c8b62cfa7b",
+            "itemName": "카운테스 벳즈",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "17b38e1d7d043b852625c2b7b839a28f",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "17b38e1d7d043b852625c2b7b839a28f",
+            "itemName": "서사시의 영웅담 - 권투글러브",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "bbc3a1e0b819042979df672995a84d04",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "bbc3a1e0b819042979df672995a84d04",
+            "itemName": "엠프레스 벳즈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "eebeaa5d76700a5319dc7550407b70c3",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "eebeaa5d76700a5319dc7550407b70c3",
+            "itemName": "검은 질병의 엠프레스 벳즈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "89022319bcd42c5806905476948ba555",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "89022319bcd42c5806905476948ba555",
+            "itemName": "흉터각인",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "0a3490331cc016e419b24e3ccf00901d",
+            "itemName": "억압 - 흉터각인",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "752fe58eb2610840857c776b3a4db55e",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "752fe58eb2610840857c776b3a4db55e",
+            "itemName": "태초의 별 - 권투글러브",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "낫",
+      "variants": [
+        {
+          "id": "175a5bbb8924e426ac599d8b7bcf1d6b",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "175a5bbb8924e426ac599d8b7bcf1d6b",
+            "itemName": "유일무이한 낫",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "7f64ec29540edbaf17fcc6c75f30ea09",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7f64ec29540edbaf17fcc6c75f30ea09",
+            "itemName": "소울 스토커",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "508bbec61115ad4ef437fb2a28a2cc2b",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "508bbec61115ad4ef437fb2a28a2cc2b",
+            "itemName": "전설 속의 전승 - 낫",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "d523df91971f8fd5f2252a93053d3d26",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d523df91971f8fd5f2252a93053d3d26",
+            "itemName": "소울 헌터",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "b2a35f97ca9d078db32c42eb0bb7d572",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b2a35f97ca9d078db32c42eb0bb7d572",
+            "itemName": "서사시의 영웅담 - 낫",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "413aebce4d4cc7c7346aa6e32e27a6dd",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "413aebce4d4cc7c7346aa6e32e27a6dd",
+            "itemName": "소울 프레데터",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4594a10b84a066d7a78477f9ddd4f142",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "4594a10b84a066d7a78477f9ddd4f142",
+            "itemName": "검은 질병의 소울 프레데터",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "89c42c1d02e6749244ce518e9b34e1c7",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "89c42c1d02e6749244ce518e9b34e1c7",
+            "itemName": "재앙의 송곳니",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "6aeca595f1b6f1c33e28f8d51c3f5b89",
+            "itemName": "억압 - 재앙의 송곳니",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9e08f41c1efa53c838e51eb9f4e4e2a9",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9e08f41c1efa53c838e51eb9f4e4e2a9",
+            "itemName": "태초의 별 - 낫",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "너클",
+      "variants": [
+        {
+          "id": "c607f6509d5e9b7182510b0340571c54",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c607f6509d5e9b7182510b0340571c54",
+            "itemName": "유일무이한 너클",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "0f7270c72c010c5c9d8020b07f271526",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0f7270c72c010c5c9d8020b07f271526",
+            "itemName": "넨 스텔라",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "fab1a69100ac8fe8b4c5996ebdfcc798",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fab1a69100ac8fe8b4c5996ebdfcc798",
+            "itemName": "전설 속의 전승 - 너클",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "b5d390e43b3d3b2e56eb06155240c2d3",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b5d390e43b3d3b2e56eb06155240c2d3",
+            "itemName": "넨 비아렉티아",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "91b6146daf176282f0209a6d18967fdb",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "91b6146daf176282f0209a6d18967fdb",
+            "itemName": "서사시의 영웅담 - 너클",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "52e014d425c5900fb2691c91aa8891f5",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "52e014d425c5900fb2691c91aa8891f5",
+            "itemName": "넨 아스트론",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "89a1262d7c38df9e4e1f2ab836842790",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "89a1262d7c38df9e4e1f2ab836842790",
+            "itemName": "검은 질병의 넨 아스트론",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "1d7ea4b65709a22425cd751e9607486b",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "1d7ea4b65709a22425cd751e9607486b",
+            "itemName": "종언을 끊어내는 주먹",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "7f4113c71514d87875fa89bcd4fb7d4c",
+            "itemName": "억압 - 종언을 끊어내는 주먹",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "46902219ed312eea382fd87dfda1dcac",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "46902219ed312eea382fd87dfda1dcac",
+            "itemName": "태초의 별 - 너클",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "단검",
+      "variants": [
+        {
+          "id": "3fed35b28ff0cfce2e5cac14ec8702c6",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3fed35b28ff0cfce2e5cac14ec8702c6",
+            "itemName": "유일무이한 단검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "45de752180af8164ea3c715cb5aabd31",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "45de752180af8164ea3c715cb5aabd31",
+            "itemName": "여제의 화려한 은장도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "3d69c171faf727a91bbad784e59c9e0e",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3d69c171faf727a91bbad784e59c9e0e",
+            "itemName": "전설 속의 전승 - 단검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "34cc18cd9b91c305f2c90bae5ff22003",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "34cc18cd9b91c305f2c90bae5ff22003",
+            "itemName": "여제의 찬란한 은장도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "1cd71d7cf85029431c07d898d5be4607",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1cd71d7cf85029431c07d898d5be4607",
+            "itemName": "서사시의 영웅담 - 단검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "1bc8070a97e40822a8acf944587172ac",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1bc8070a97e40822a8acf944587172ac",
+            "itemName": "여제의 영롱한 은장도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "288b1985155e3b378e45512b225fe902",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "288b1985155e3b378e45512b225fe902",
+            "itemName": "검은 질병의 여제의 영롱한 은장도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "83fb473c3c241fdb0fef9ee517992bdb",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "83fb473c3c241fdb0fef9ee517992bdb",
+            "itemName": "원한 서린 재앙의 어금니",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "d21d29c6bb4b095cad5688ad66c017dc",
+            "itemName": "억압 - 원한 서린 재앙의 어금니",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "2470861b2f05d1fb5e917f148ba4fc12",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2470861b2f05d1fb5e917f148ba4fc12",
+            "itemName": "태초의 별 - 단검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "대검",
+      "variants": [
+        {
+          "id": "9130e71576b60ef9c620d4b5f8825755",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9130e71576b60ef9c620d4b5f8825755",
+            "itemName": "유일무이한 대검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "d978ce202804d10c1970bab4b46accd8",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d978ce202804d10c1970bab4b46accd8",
+            "itemName": "제1형 - 공식, 필중의 운검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "8215605516a956285743aff73aeb28ca",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8215605516a956285743aff73aeb28ca",
+            "itemName": "전설 속의 전승 - 대검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "49d73ddb4974cc8ee23c0da2e253cf2a",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "49d73ddb4974cc8ee23c0da2e253cf2a",
+            "itemName": "제2형 - 수식, 방어의 운검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ea202d77351094e11332f2aa8ece0d48",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ea202d77351094e11332f2aa8ece0d48",
+            "itemName": "서사시의 영웅담 - 대검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f4ebda346ccd4281a9c37de9cb8936a5",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f4ebda346ccd4281a9c37de9cb8936a5",
+            "itemName": "특형 - 호위무신의 운검",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d0bd701ea42d1e6ee03ae7e4c77faa09",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "d0bd701ea42d1e6ee03ae7e4c77faa09",
+            "itemName": "검은 질병의 특형 - 호위무신의 운검",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "91334afd67ca965ff4ed8dab5c4b2352",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "91334afd67ca965ff4ed8dab5c4b2352",
+            "itemName": "찢어지는 비명의 메아리",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "79c52fac4c9b4bb5d70d2c5880454060",
+            "itemName": "억압 - 찢어지는 비명의 메아리",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9f0dde7a9c78384a9c5a80ff41f98e68",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9f0dde7a9c78384a9c5a80ff41f98e68",
+            "itemName": "태초의 별 - 대검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "도",
+      "variants": [
+        {
+          "id": "f9e9cdcf4a1295cff2a1b088f75b6aaf",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f9e9cdcf4a1295cff2a1b088f75b6aaf",
+            "itemName": "유일무이한 도",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "b503ebf81a6011bfa6ede1467cd84bf0",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b503ebf81a6011bfa6ede1467cd84bf0",
+            "itemName": "범작 금인도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "0282d9787ec3c3f57d840b011b6dc6bf",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0282d9787ec3c3f57d840b011b6dc6bf",
+            "itemName": "전설 속의 전승 - 도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "a1ee6089f23d9612a63a14e27652263c",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a1ee6089f23d9612a63a14e27652263c",
+            "itemName": "명작 금인예도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "57538c2b9b397b70232979076714f28e",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "57538c2b9b397b70232979076714f28e",
+            "itemName": "서사시의 영웅담 - 도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "88d17cd5fc3fb1e5c474d6780035a492",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "88d17cd5fc3fb1e5c474d6780035a492",
+            "itemName": "역작 금인필살도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "dd29abc71fa94f6cc6cc500c69283eb6",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "dd29abc71fa94f6cc6cc500c69283eb6",
+            "itemName": "검은 질병의 역작 금인필살도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "cd49b55e74254b96f8f6ee8dcc5e60e7",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "cd49b55e74254b96f8f6ee8dcc5e60e7",
+            "itemName": "요도 : 날뛰는 흑혈",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "dff71f52e7c60da00f33edb582413638",
+            "itemName": "억압 - 요도 : 날뛰는 흑혈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4e1cca3ced7246d44e36f0fe455f9d9c",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4e1cca3ced7246d44e36f0fe455f9d9c",
+            "itemName": "태초의 별 - 도",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "둔기",
+      "variants": [
+        {
+          "id": "0679ab3d6b8b103d87b9911df88e5d7c",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0679ab3d6b8b103d87b9911df88e5d7c",
+            "itemName": "유일무이한 둔기",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "b83b37ccc8f1f13b442431b2c4473db0",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b83b37ccc8f1f13b442431b2c4473db0",
+            "itemName": "양얼의 나뭇가지 : 강",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "f69fc6fc793f98477851056c6b5e5920",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f69fc6fc793f98477851056c6b5e5920",
+            "itemName": "전설 속의 전승 - 둔기",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "e6581abfc6fcf50c27a2e6678f8c6411",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e6581abfc6fcf50c27a2e6678f8c6411",
+            "itemName": "양얼의 나뭇가지 : 극",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "11d071ef4ee1f90868e8fa6fe2f2112f",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "11d071ef4ee1f90868e8fa6fe2f2112f",
+            "itemName": "서사시의 영웅담 - 둔기",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "53569c0a2863a602cf130d6abbe64e0b",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "53569c0a2863a602cf130d6abbe64e0b",
+            "itemName": "양얼의 나뭇가지 : 초",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "89207ab0258fd50685e94d13bc892dab",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "89207ab0258fd50685e94d13bc892dab",
+            "itemName": "검은 질병의 양얼의 나뭇가지 : 초",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "b6df3ddb64b6ab530c9583b8461790ae",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "b6df3ddb64b6ab530c9583b8461790ae",
+            "itemName": "구속된 공작의 아귀",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "1beea18b7b0d7edbd5d6f41265207c73",
+            "itemName": "억압 - 구속된 공작의 아귀",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "8888dd81dfabf5f1dddcb4fa982aa410",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8888dd81dfabf5f1dddcb4fa982aa410",
+            "itemName": "태초의 별 - 둔기",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "로드",
+      "variants": [
+        {
+          "id": "145fbe4ebeaf51878ce507bc177d1189",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "145fbe4ebeaf51878ce507bc177d1189",
+            "itemName": "유일무이한 로드",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "c9024bc63de93337d3f7541203e2f3ed",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c9024bc63de93337d3f7541203e2f3ed",
+            "itemName": "양치기의 첫번째 거짓말",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "1c8bf025e6dde1d03a54242c2662d102",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1c8bf025e6dde1d03a54242c2662d102",
+            "itemName": "전설 속의 전승 - 로드",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "576b16ece952dfee270e3ff9f87def26",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "576b16ece952dfee270e3ff9f87def26",
+            "itemName": "양치기의 두번째 거짓말",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "8d5ae21e09e1596f95613a0d6cddc56e",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8d5ae21e09e1596f95613a0d6cddc56e",
+            "itemName": "서사시의 영웅담 - 로드",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f46fe4c07fda3827871b6bb8d52a28b4",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f46fe4c07fda3827871b6bb8d52a28b4",
+            "itemName": "양치기의 마지막 진실",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9100895b8156a3a2aa6848e48cb1fa4b",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "9100895b8156a3a2aa6848e48cb1fa4b",
+            "itemName": "검은 질병의 양치기의 마지막 진실",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "a579ba31697a8926e0f70e8299308b75",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "a579ba31697a8926e0f70e8299308b75",
+            "itemName": "아우게이오우 : 이름 잃은 자의 피리",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "c400b1b06d823de30763738c3c9b80f2",
+            "itemName": "억압 - 아우게이오우 : 이름 잃은 자의 피리",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c3e60ef4410a4d5f7e5fb2426894613b",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c3e60ef4410a4d5f7e5fb2426894613b",
+            "itemName": "태초의 별 - 로드",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "리볼버",
+      "variants": [
+        {
+          "id": "16c6fd9179b203587d723d2626f8ed5e",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "16c6fd9179b203587d723d2626f8ed5e",
+            "itemName": "유일무이한 리볼버",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "7d3e5bd6566945826198852fd5d69cdb",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7d3e5bd6566945826198852fd5d69cdb",
+            "itemName": "레인저의 길",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "5855e80462cafde1fb00ca2b51465865",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5855e80462cafde1fb00ca2b51465865",
+            "itemName": "전설 속의 전승 - 리볼버",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "809e878d07bb9fc3cbaf88941eb0bd82",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "809e878d07bb9fc3cbaf88941eb0bd82",
+            "itemName": "레인저의 숙명",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f54e6a52c9066cd20c9023046087a2d0",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f54e6a52c9066cd20c9023046087a2d0",
+            "itemName": "서사시의 영웅담 - 리볼버",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "d4f64370ea0e4436a988d8935fbba365",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d4f64370ea0e4436a988d8935fbba365",
+            "itemName": "노블레스 오브 레인저",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "e98a9b76caeba83d3d8f3341a15323d8",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "e98a9b76caeba83d3d8f3341a15323d8",
+            "itemName": "검은 질병의 노블레스 오브 레인저",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "874ba46dadbc0bdd3a346ce27bd46585",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "874ba46dadbc0bdd3a346ce27bd46585",
+            "itemName": "오염된 피의 쾌",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "e5f44bc789463ad94f781eaab1660804",
+            "itemName": "억압 - 오염된 피의 쾌",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "31b3b9cee22a3ffea2128a481dbcf8ca",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "31b3b9cee22a3ffea2128a481dbcf8ca",
+            "itemName": "태초의 별 - 리볼버",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "머스켓",
+      "variants": [
+        {
+          "id": "1437c6bbde5e841d035daa352ca3fa3a",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1437c6bbde5e841d035daa352ca3fa3a",
+            "itemName": "유일무이한 머스켓",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "f50d313c302d3bad8ce47a24256db4dd",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f50d313c302d3bad8ce47a24256db4dd",
+            "itemName": "리턴드 스나이퍼 오브 파이어",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "24a990153ec9a52c4ceab9dac89d445a",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "24a990153ec9a52c4ceab9dac89d445a",
+            "itemName": "전설 속의 전승 - 머스켓",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "5a9ea8db557c42adb10951a7a61f1720",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5a9ea8db557c42adb10951a7a61f1720",
+            "itemName": "리턴드 스나이퍼 오브 플레임",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "01f76432ae531717912ac159df825b54",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "01f76432ae531717912ac159df825b54",
+            "itemName": "서사시의 영웅담 - 머스켓",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "7b406b9951564c6485d209c90d71cb4e",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7b406b9951564c6485d209c90d71cb4e",
+            "itemName": "리턴드 스나이퍼 오브 블랙 로즈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "04f662fdc3e2885c6c4d385bd6b8ba8f",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "04f662fdc3e2885c6c4d385bd6b8ba8f",
+            "itemName": "검은 질병의 리턴드 스나이퍼 오브 블랙 로즈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "203edfc815ea501a254539a47fb9a9a6",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "203edfc815ea501a254539a47fb9a9a6",
+            "itemName": "베놈 앱서버",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "3a08355ea464fafec89d3f91f68dbadb",
+            "itemName": "억압 - 베놈 앱서버",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "97f8b96a9af284b1181985075a9066ee",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "97f8b96a9af284b1181985075a9066ee",
+            "itemName": "태초의 별 - 머스켓",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "미늘창",
+      "variants": [
+        {
+          "id": "b5af5509b88095ea97b13e90c165267c",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b5af5509b88095ea97b13e90c165267c",
+            "itemName": "유일무이한 미늘창",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "fa34b99590789e6dd56f6e15bc716e6a",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fa34b99590789e6dd56f6e15bc716e6a",
+            "itemName": "흑룡언월도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "d622369b20ff9047011d8223ec1ecf5e",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d622369b20ff9047011d8223ec1ecf5e",
+            "itemName": "전설 속의 전승 - 미늘창",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "b35fc3d286baec88bf3b5ec6851a8a76",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b35fc3d286baec88bf3b5ec6851a8a76",
+            "itemName": "改 : 흑룡언월도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "acddbe1308bead8e8043d3c8f887a560",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "acddbe1308bead8e8043d3c8f887a560",
+            "itemName": "서사시의 영웅담 - 미늘창",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "7ad9b001664f685f438ceae50444bf09",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7ad9b001664f685f438ceae50444bf09",
+            "itemName": "眞 : 흑룡언월도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "b2d0aa447402ddcea06fb1e24757c8f6",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "b2d0aa447402ddcea06fb1e24757c8f6",
+            "itemName": "검은 질병의 眞 : 흑룡언월도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "bb8561b32ea4ea1e6ba85328cb82523b",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "bb8561b32ea4ea1e6ba85328cb82523b",
+            "itemName": "위선자의 응징",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "630ed985d1f3fa908fdaf7a5d734bd13",
+            "itemName": "억압 - 위선자의 응징",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c3a655013ed6f5eee3718e0be9525d03",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c3a655013ed6f5eee3718e0be9525d03",
+            "itemName": "태초의 별 - 미늘창",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "배틀액스",
+      "variants": [
+        {
+          "id": "a7f3e74e3d0af800ea176ff68c3c83b8",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a7f3e74e3d0af800ea176ff68c3c83b8",
+            "itemName": "유일무이한 배틀액스",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "25fa2c34d08fc9e3c6e0b22176185de2",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "25fa2c34d08fc9e3c6e0b22176185de2",
+            "itemName": "대지파괴자",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "20a25045544e45076c936393c0693d06",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "20a25045544e45076c936393c0693d06",
+            "itemName": "전설 속의 전승 - 배틀액스",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "3e784022b7f73107d430c20294dd5097",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3e784022b7f73107d430c20294dd5097",
+            "itemName": "행성분쇄자",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "6a86c6cb8875a4356547e55f3622913e",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6a86c6cb8875a4356547e55f3622913e",
+            "itemName": "서사시의 영웅담 - 배틀액스",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "3838f6fa8a6f5c44a84e101715169bb4",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3838f6fa8a6f5c44a84e101715169bb4",
+            "itemName": "멸망의 근원",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9f9296d4fc841a76282e80914a28737f",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "9f9296d4fc841a76282e80914a28737f",
+            "itemName": "검은 질병의 멸망의 근원",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "0e03244a7c817cc59522bd90be06cf36",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "0e03244a7c817cc59522bd90be06cf36",
+            "itemName": "묘혈의 배틀액스",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "15714b939de18f17f1ef08918ee59775",
+            "itemName": "억압 - 묘혈의 배틀액스",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4a450f5c9fb64b353e7561d89aa35425",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4a450f5c9fb64b353e7561d89aa35425",
+            "itemName": "태초의 별 - 배틀액스",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "보우건",
+      "variants": [
+        {
+          "id": "ff8c5e9913fef22bb1c2000fb0ef5687",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ff8c5e9913fef22bb1c2000fb0ef5687",
+            "itemName": "유일무이한 보우건",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "fdae64ec5068a2e9d1cd88df7d0c48b7",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fdae64ec5068a2e9d1cd88df7d0c48b7",
+            "itemName": "얼어버린 불꽃의 살",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "fdd4c6628ceddd48d26bc96f7079a6e9",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fdd4c6628ceddd48d26bc96f7079a6e9",
+            "itemName": "전설 속의 전승 - 보우건",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "7570fbd7c6f59b4d409c20d9f02055a0",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7570fbd7c6f59b4d409c20d9f02055a0",
+            "itemName": "타버린 얼음의 살",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "eb6ba38c4a210a7950fa8a0e334f8eed",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "eb6ba38c4a210a7950fa8a0e334f8eed",
+            "itemName": "서사시의 영웅담 - 보우건",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "3d1e831cdf674892355cca45d35541ee",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3d1e831cdf674892355cca45d35541ee",
+            "itemName": "얼어붙은 불꽃의 살",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "22677830fb0aaedc0fffba0407cdd9b9",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "22677830fb0aaedc0fffba0407cdd9b9",
+            "itemName": "검은 질병의 얼어붙은 불꽃의 살",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "613652f9e6913690a2af7bcd124a108b",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "613652f9e6913690a2af7bcd124a108b",
+            "itemName": "모독을 속삭이는 깃",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "d04479324ca7899a7528b85c4142b85b",
+            "itemName": "억압 - 모독을 속삭이는 깃",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "6dad9986be24958e4a34ac8fbdd1c17f",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6dad9986be24958e4a34ac8fbdd1c17f",
+            "itemName": "태초의 별 - 보우건",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "봉",
+      "variants": [
+        {
+          "id": "c34e7f1d90ebf4b611430ed171fe5039",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c34e7f1d90ebf4b611430ed171fe5039",
+            "itemName": "유일무이한 봉",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "cc63102a841785caf80706f1d7077b07",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "cc63102a841785caf80706f1d7077b07",
+            "itemName": "케세라세라 : 포츈",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "20800e86887302060a8839d007d2abf6",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "20800e86887302060a8839d007d2abf6",
+            "itemName": "전설 속의 전승 - 봉",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "81bd41c4c3d7ad4d39dd49bdc9538c7e",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "81bd41c4c3d7ad4d39dd49bdc9538c7e",
+            "itemName": "카르페디엠 : 모어 해피~",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ee3c8fb7ba44d20aae6a834d2f22e2a2",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ee3c8fb7ba44d20aae6a834d2f22e2a2",
+            "itemName": "서사시의 영웅담 - 봉",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "2c5f996a25418be71b288c22fa2f9193",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2c5f996a25418be71b288c22fa2f9193",
+            "itemName": "하쿠나마타타 : 원더풀",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "2621a41d6e34a35324fca679d591bd0d",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "2621a41d6e34a35324fca679d591bd0d",
+            "itemName": "검은 질병의 하쿠나마타타 : 원더풀",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "184c1c48bec4d1d1acb4bb210040312d",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "184c1c48bec4d1d1acb4bb210040312d",
+            "itemName": "비정이 깃든 고목",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "e42f57487cf82bcaa552c8b504eae199",
+            "itemName": "억압 - 비정이 깃든 고목",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "3d43dc0356b4d1e805fb5d85d8b1f5a4",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3d43dc0356b4d1e805fb5d85d8b1f5a4",
+            "itemName": "태초의 별 - 봉",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "빗자루",
+      "variants": [
+        {
+          "id": "61a897d22d05c9d5b530962a438bac6a",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "61a897d22d05c9d5b530962a438bac6a",
+            "itemName": "유일무이한 빗자루",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "f227beed455a61916d2232d5fc1d6285",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f227beed455a61916d2232d5fc1d6285",
+            "itemName": "칠흑의 기도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "72b35dffdf7d756a36b5880da0f0904b",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "72b35dffdf7d756a36b5880da0f0904b",
+            "itemName": "전설 속의 전승 - 빗자루",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ec6b9047e4b8ac8261e01dd059cf1357",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ec6b9047e4b8ac8261e01dd059cf1357",
+            "itemName": "칠흑의 기원",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "894e3ce2fb15298feda9cac871b74ea0",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "894e3ce2fb15298feda9cac871b74ea0",
+            "itemName": "서사시의 영웅담 - 빗자루",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ed9e38706cb74cd8dc22344ac0672189",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ed9e38706cb74cd8dc22344ac0672189",
+            "itemName": "칠흑의 저주",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "7e461c6d10b51ba6f43c5d13aa2a82a4",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "7e461c6d10b51ba6f43c5d13aa2a82a4",
+            "itemName": "검은 질병의 칠흑의 저주",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "defa76c37b4300d02c1312a9130c277d",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "defa76c37b4300d02c1312a9130c277d",
+            "itemName": "종언을 비트는 흑미",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "eea305bbc2c12313680cc47bc31a87d8",
+            "itemName": "억압 - 종언을 비트는 흑미",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "f3218f22b56f9f69ff623eab33a7ba0a",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f3218f22b56f9f69ff623eab33a7ba0a",
+            "itemName": "태초의 별 - 빗자루",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "선현궁",
+      "variants": [
+        {
+          "id": "3108a1ff3c63f285d3bb281c86c4f51c",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3108a1ff3c63f285d3bb281c86c4f51c",
+            "itemName": "유일무이한 선현궁",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "a78e6b91e0ac657996cd519f05eec668",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a78e6b91e0ac657996cd519f05eec668",
+            "itemName": "시크릿 솔로",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "f3a801e1f9d93ced175f3f19b9253a43",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f3a801e1f9d93ced175f3f19b9253a43",
+            "itemName": "전설 속의 전승 - 선현궁",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "4c2c36b92f60155c579d36eea9786324",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4c2c36b92f60155c579d36eea9786324",
+            "itemName": "시크릿 듀엣",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "efff31038d3d96c8c2db495a68002df6",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "efff31038d3d96c8c2db495a68002df6",
+            "itemName": "서사시의 영웅담 - 선현궁",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "34c4ba7289d9d0dea8ce3880bc6f8352",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "34c4ba7289d9d0dea8ce3880bc6f8352",
+            "itemName": "시크릿 콘서트",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "8a79cefa4aec25884139327f093ef696",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "8a79cefa4aec25884139327f093ef696",
+            "itemName": "검은 질병의 시크릿 콘서트",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "da48e7a57b27009cc0cc7765722edca2",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "da48e7a57b27009cc0cc7765722edca2",
+            "itemName": "별을 꿈꿨던 눈동자",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "37033cc005f2ab8c3ec42e6f971e7fdf",
+            "itemName": "억압 - 별을 꿈꿨던 눈동자",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "55ef0a5c7c8bda92c0451b1c75fd971e",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "55ef0a5c7c8bda92c0451b1c75fd971e",
+            "itemName": "태초의 별 - 선현궁",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소검",
+      "variants": [
+        {
+          "id": "54201d2b9992fea68e71735ff44f2be0",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "54201d2b9992fea68e71735ff44f2be0",
+            "itemName": "유일무이한 소검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "192710d63f0fc1f592ed34888a2f3cac",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "192710d63f0fc1f592ed34888a2f3cac",
+            "itemName": "무형검 - 고수",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "478d96bae4041585b8810baa4dcf9024",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "478d96bae4041585b8810baa4dcf9024",
+            "itemName": "전설 속의 전승 - 소검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ab88d42e387fe93c2382513cfd53d2c9",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ab88d42e387fe93c2382513cfd53d2c9",
+            "itemName": "무형검 - 절정",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "547fc71a1976699b9edc460a1a34c3d6",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "547fc71a1976699b9edc460a1a34c3d6",
+            "itemName": "서사시의 영웅담 - 소검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ecc073371c23fbac58ce6a055a131ad3",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ecc073371c23fbac58ce6a055a131ad3",
+            "itemName": "무형검 - 생사경",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "1a15504cdb16021cab92baf1fb9d4660",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "1a15504cdb16021cab92baf1fb9d4660",
+            "itemName": "검은 질병의 무형검 - 생사경",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "f7e70667e1fe901bed963dff18cf2380",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "f7e70667e1fe901bed963dff18cf2380",
+            "itemName": "끓어오르는 피의 그림자",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "309bdf994245a04c3ff7763d08c5244a",
+            "itemName": "억압 - 끓어오르는 피의 그림자",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "eb5666ec6e70818cfa40bbfe08580877",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "eb5666ec6e70818cfa40bbfe08580877",
+            "itemName": "태초의 별 - 소검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "소태도",
+      "variants": [
+        {
+          "id": "0fee3e7658566deb0351089d1107a3a0",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0fee3e7658566deb0351089d1107a3a0",
+            "itemName": "유일무이한 소태도",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "2d3b41afe3e58a6bb49b0a9a3fddf1a8",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2d3b41afe3e58a6bb49b0a9a3fddf1a8",
+            "itemName": "나스카 : 영혼의 속삭임",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ed12828f120919a9cc906da503d405f7",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ed12828f120919a9cc906da503d405f7",
+            "itemName": "전설 속의 전승 - 소태도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "d51700c5dcabc4d60342e9fce67e82f0",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d51700c5dcabc4d60342e9fce67e82f0",
+            "itemName": "나스카 : 영혼의 비명",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "01ca6b499ec778f66e03d6b2dc561506",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "01ca6b499ec778f66e03d6b2dc561506",
+            "itemName": "서사시의 영웅담 - 소태도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "08e41c036b44ff5f407a874b5bfc91c1",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "08e41c036b44ff5f407a874b5bfc91c1",
+            "itemName": "나스카 : 영혼의 심판",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9a3605be5e080fdedada13c87fe8b9c9",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "9a3605be5e080fdedada13c87fe8b9c9",
+            "itemName": "검은 질병의 나스카 : 영혼의 심판",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ccb7fcdcf23d7aeab9ca9b6d2b7593ec",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "ccb7fcdcf23d7aeab9ca9b6d2b7593ec",
+            "itemName": "차원을 베는 영혼검",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "a40dff57e56278da386499003bdeff9e",
+            "itemName": "억압 - 차원을 베는 영혼검",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d4032874bc3abd65cc0abbca610c83ce",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d4032874bc3abd65cc0abbca610c83ce",
+            "itemName": "태초의 별 - 소태도",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "스탭",
+      "variants": [
+        {
+          "id": "6da3739e4e8a9839583342a28d6959a5",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6da3739e4e8a9839583342a28d6959a5",
+            "itemName": "유일무이한 스태프",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "5266233710b3d745b22fefab4bb87a71",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5266233710b3d745b22fefab4bb87a71",
+            "itemName": "봉인된 지식",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "1e4fe5dc2901afa95bf4a6a944843960",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1e4fe5dc2901afa95bf4a6a944843960",
+            "itemName": "전설 속의 전승 - 스태프",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "12e79effb3069d8f54799fb26d5bf16d",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "12e79effb3069d8f54799fb26d5bf16d",
+            "itemName": "금지된 지식",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "614582e824e48e16ebca1f7d3c3fe0c3",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "614582e824e48e16ebca1f7d3c3fe0c3",
+            "itemName": "서사시의 영웅담 - 스태프",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "66f7d8714fa7810df4ffdf36e8c97557",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "66f7d8714fa7810df4ffdf36e8c97557",
+            "itemName": "해방된 지식",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "8b7b7b91274adfd9a4bbb07be11543f8",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "8b7b7b91274adfd9a4bbb07be11543f8",
+            "itemName": "검은 질병의 해방된 지식",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "074e07daccc7b30a4a23ed90a12a91ff",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "074e07daccc7b30a4a23ed90a12a91ff",
+            "itemName": "끝없는 분노의 지팡이",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "911844dc4ceaabec00537feb60fc3a13",
+            "itemName": "억압 - 끝없는 분노의 지팡이",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "5a125390e4043b05f981e6583a7ed5ff",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5a125390e4043b05f981e6583a7ed5ff",
+            "itemName": "태초의 별 - 스태프",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "십자가",
+      "variants": [
+        {
+          "id": "ec663f2e33f64c870bf96def27f1892c",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ec663f2e33f64c870bf96def27f1892c",
+            "itemName": "유일무이한 십자가",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "5e67bc4c40fe7996e57ac6b0e5bf85ab",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5e67bc4c40fe7996e57ac6b0e5bf85ab",
+            "itemName": "영광의 올리브 나무 십자가",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "9eed4ab46413679eea0e512b76b824e8",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9eed4ab46413679eea0e512b76b824e8",
+            "itemName": "전설 속의 전승 - 십자가",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "cc0bd19e424a9412be3d98d30db764b8",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "cc0bd19e424a9412be3d98d30db764b8",
+            "itemName": "구원의 올리브 나무 십자가",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "59f18ad6fc75be438eb3700eed7ff0e8",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "59f18ad6fc75be438eb3700eed7ff0e8",
+            "itemName": "서사시의 영웅담 - 십자가",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "7fbc76b53ea0b985ef63b4a53a2e8aeb",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7fbc76b53ea0b985ef63b4a53a2e8aeb",
+            "itemName": "영원한 올리브 나무 십자가",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c0448b6dd4cd3b27572110745580b5cf",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "c0448b6dd4cd3b27572110745580b5cf",
+            "itemName": "검은 질병의 영원한 올리브 나무 십자가",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "480ee2c9741a0ca8d9f2eb0c020489c9",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "480ee2c9741a0ca8d9f2eb0c020489c9",
+            "itemName": "더러운 별의 지배자",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "8a6f0f122e37d5dfae8bef93bcd557ba",
+            "itemName": "억압 - 더러운 별의 지배자",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c3f04d7307e8310fc19bcd4fa9a7c9bf",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c3f04d7307e8310fc19bcd4fa9a7c9bf",
+            "itemName": "태초의 별 - 십자가",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "쌍검",
+      "variants": [
+        {
+          "id": "b4b1a3fa59d940492eea003f4ebffad8",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b4b1a3fa59d940492eea003f4ebffad8",
+            "itemName": "유일무이한 쌍검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "9ba5ea416f34cbb8cd5cc5461a36b752",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9ba5ea416f34cbb8cd5cc5461a36b752",
+            "itemName": "웨이빙 인페르노",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "6289c024aeaa6e3d8cc4a4f87ca4814a",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6289c024aeaa6e3d8cc4a4f87ca4814a",
+            "itemName": "블레이징 인페르노",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "969613ec98c2b8e7e6ee1fdb2b4e9015",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "969613ec98c2b8e7e6ee1fdb2b4e9015",
+            "itemName": "서사시의 영웅담 - 쌍검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f6818a1fd4d3499b995ade1fe5ac76ed",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f6818a1fd4d3499b995ade1fe5ac76ed",
+            "itemName": "샤이닝 인페르노",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "58d4382badc00d1d39731980c139950b",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "58d4382badc00d1d39731980c139950b",
+            "itemName": "검은 질병의 샤이닝 인페르노",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c0e99c7334f24c6ffbe562e246e80e5f",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "c0e99c7334f24c6ffbe562e246e80e5f",
+            "itemName": "흉터가 깃든 분노",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "028ba800f0a42f089a9fe827d419bac5",
+            "itemName": "억압 - 흉터가 깃든 분노",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "7ebe0a5d5f21c59a606096f912fd26f5",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7ebe0a5d5f21c59a606096f912fd26f5",
+            "itemName": "태초의 별 - 쌍검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "앵커",
+      "variants": [
+        {
+          "id": "085ae812cdb25e63694fbdb4187345a2",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "085ae812cdb25e63694fbdb4187345a2",
+            "itemName": "유일무이한 앵커",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "916f71bc9310564dc559a39dec8b1613",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "916f71bc9310564dc559a39dec8b1613",
+            "itemName": "오케아누스 타이드",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "a4e12cbb2b6afe3479a3075a1b0a8291",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a4e12cbb2b6afe3479a3075a1b0a8291",
+            "itemName": "전설 속의 전승 - 앵커",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "61f2a6ce5e67cc1b230739881d92502d",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "61f2a6ce5e67cc1b230739881d92502d",
+            "itemName": "오케아누스 어비스",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "9a3483400ba0d23cc02a806975a55910",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9a3483400ba0d23cc02a806975a55910",
+            "itemName": "서사시의 영웅담 - 앵커",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "e164405e11a46fe1ff683d1fdf3d302b",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e164405e11a46fe1ff683d1fdf3d302b",
+            "itemName": "오케아누스 프라이모디어",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "39a645ef3b151c26b0bd6f4df61f59a4",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "39a645ef3b151c26b0bd6f4df61f59a4",
+            "itemName": "검은 질병의 오케아누스 프라이모디어",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "265849a009b3b7cf0983867c3f9986f0",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "265849a009b3b7cf0983867c3f9986f0",
+            "itemName": "뒤틀린 신념의 칼날",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "c90eb43a4c8e44cae8819b9a39d02b2a",
+            "itemName": "억압 - 뒤틀린 신념의 칼날",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ab24c54fb9093d133f11551014522eec",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ab24c54fb9093d133f11551014522eec",
+            "itemName": "태초의 별 - 앵커",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "에테리얼 보우",
+      "variants": [
+        {
+          "id": "32309b1b527e7c79cff2ce3e206e8b63",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "32309b1b527e7c79cff2ce3e206e8b63",
+            "itemName": "유일무이한 에테리얼 보우",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "d031df5ab3a48e094203184386020d19",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d031df5ab3a48e094203184386020d19",
+            "itemName": "인요의 새벽",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "9df3a8517051126aea8ae34d97e28331",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9df3a8517051126aea8ae34d97e28331",
+            "itemName": "전설 속의 전승 - 에테리얼 보우",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "0b5d9d66b58032214496a00bd790d69d",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0b5d9d66b58032214496a00bd790d69d",
+            "itemName": "인요의 여명",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "1429ab8ff808941ffe2591afe9accdeb",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1429ab8ff808941ffe2591afe9accdeb",
+            "itemName": "서사시의 영웅담 - 에테리얼 보우",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ec942349c845957a8ed9c6ad1db18475",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ec942349c845957a8ed9c6ad1db18475",
+            "itemName": "인요의 황혼",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "e15bef41c414a2cfbd8a4f4b85659295",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "e15bef41c414a2cfbd8a4f4b85659295",
+            "itemName": "검은 질병의 인요의 황혼",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ecc3a3954004d6e8d281424a3cd59146",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "ecc3a3954004d6e8d281424a3cd59146",
+            "itemName": "구속의 단죄",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "dbc85cd59ff4c3227a4d9ed5194fd56c",
+            "itemName": "억압 - 구속의 단죄",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d5e759883fabd926327c534627abdf0f",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d5e759883fabd926327c534627abdf0f",
+            "itemName": "태초의 별 - 에테리얼 보우",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "염주",
+      "variants": [
+        {
+          "id": "f2a7f7a14f2e6ae28021993f35ede61e",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f2a7f7a14f2e6ae28021993f35ede61e",
+            "itemName": "유일무이한 염주",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "3783cfe464239a5812cd6d0581068d11",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3783cfe464239a5812cd6d0581068d11",
+            "itemName": "코멧 로저리",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "8b511fc80547bb9a0162a50ca8ba868a",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8b511fc80547bb9a0162a50ca8ba868a",
+            "itemName": "전설 속의 전승 - 염주",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "302c248ec874fbf41dff7e4bd805d0a7",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "302c248ec874fbf41dff7e4bd805d0a7",
+            "itemName": "슈팅 스타 로저리",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "8d0870c5f3693aa1cc1ece385e288d17",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8d0870c5f3693aa1cc1ece385e288d17",
+            "itemName": "서사시의 영웅담 - 염주",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "4bb4e84551335ec0b22368859b502d96",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4bb4e84551335ec0b22368859b502d96",
+            "itemName": "폴링 스타 로저리",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "f0cdf9f53194fce86e610ace64f00c8e",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "f0cdf9f53194fce86e610ace64f00c8e",
+            "itemName": "검은 질병의 폴링 스타 로저리",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "65da5c13fb2ff7e870a85159c6f669f8",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "65da5c13fb2ff7e870a85159c6f669f8",
+            "itemName": "일루젼 베놈 로저리",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "9bcaae8facee36e00477aafcf5112a44",
+            "itemName": "억압 - 일루젼 베놈 로저리",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "3464b2c0951154f5276371fac2546d3d",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3464b2c0951154f5276371fac2546d3d",
+            "itemName": "태초의 별 - 염주",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "완드",
+      "variants": [
+        {
+          "id": "ed6facaa12ca4b06f172c456e5d3948e",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ed6facaa12ca4b06f172c456e5d3948e",
+            "itemName": "유일무이한 완드",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "a342f0d2194caaca92ac6d032b1af1e0",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a342f0d2194caaca92ac6d032b1af1e0",
+            "itemName": "로드 오브 테러",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "363700e93ab5605626be20b8fabb3210",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "363700e93ab5605626be20b8fabb3210",
+            "itemName": "전설 속의 전승 - 완드",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ec4da2b2a85fa99d9538e9ae190644c1",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ec4da2b2a85fa99d9538e9ae190644c1",
+            "itemName": "로드 오브 피어",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "15ff0b2753cb1f093baef27034d02884",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "15ff0b2753cb1f093baef27034d02884",
+            "itemName": "서사시의 영웅담 - 완드",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "bbbd88f7ee3d443bca540b6c4d5ae1d9",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "bbbd88f7ee3d443bca540b6c4d5ae1d9",
+            "itemName": "로드 오브 호러",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "b14516b04ddee4efb0251cc4fc14cea8",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "b14516b04ddee4efb0251cc4fc14cea8",
+            "itemName": "검은 질병의 로드 오브 호러",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "3fc04b9e515931d1b47b91884aa8a845",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "3fc04b9e515931d1b47b91884aa8a845",
+            "itemName": "종언의 선고",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "f6b010113f6231cde5f6a12e0dde2983",
+            "itemName": "억압 - 종언의 선고",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "94a64b9f8e13406436e3b0bc022a90c6",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "94a64b9f8e13406436e3b0bc022a90c6",
+            "itemName": "태초의 별 - 완드",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "자동권총",
+      "variants": [
+        {
+          "id": "b1b427480987501e6cb9cf5d789bbb4b",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b1b427480987501e6cb9cf5d789bbb4b",
+            "itemName": "유일무이한 자동권총",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "7592eb78b5257121845ff78c6e6233a4",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7592eb78b5257121845ff78c6e6233a4",
+            "itemName": "이노베이션 오토매틱 건",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "e5a303030632df78871cfb3a070e1b78",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e5a303030632df78871cfb3a070e1b78",
+            "itemName": "전설 속의 전승 - 자동권총",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "2b5322493ff443c55ddeba0d3a50a517",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2b5322493ff443c55ddeba0d3a50a517",
+            "itemName": "트랜스포메이션 오토매틱 건",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "5a9165c4d93cef2df8b660f6b2241912",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5a9165c4d93cef2df8b660f6b2241912",
+            "itemName": "서사시의 영웅담 - 자동권총",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f6746b73578df106b51df7907ecf05e9",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f6746b73578df106b51df7907ecf05e9",
+            "itemName": "에볼루션 오토매틱 건",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ee6dbc86c6bc2e04fef4365bd09fe616",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "ee6dbc86c6bc2e04fef4365bd09fe616",
+            "itemName": "검은 질병의 에볼루션 오토매틱 건",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d0e3e5f2e8ec9e19ca6bca641b3dc23c",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "d0e3e5f2e8ec9e19ca6bca641b3dc23c",
+            "itemName": "유혹을 부르는 선율",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "a3562f364f528c6f266b4870b44eea00",
+            "itemName": "억압 - 유혹을 부르는 선율",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "31b7b7bc104551ffabf52b580a69c392",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "31b7b7bc104551ffabf52b580a69c392",
+            "itemName": "태초의 별 - 자동권총",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장궁",
+      "variants": [
+        {
+          "id": "3567491d2012f57a3582e50b8e5fada9",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3567491d2012f57a3582e50b8e5fada9",
+            "itemName": "유일무이한 장궁",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "ae3100c9f624adc1d1fde8afb8570b6b",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ae3100c9f624adc1d1fde8afb8570b6b",
+            "itemName": "미스트 트래블러",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "885f56aaf40281047636dfd03b1f8877",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "885f56aaf40281047636dfd03b1f8877",
+            "itemName": "전설 속의 전승 - 장궁",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "21de642e73e551ff2951f42fe8ecdfed",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "21de642e73e551ff2951f42fe8ecdfed",
+            "itemName": "미스트 익스플로러",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "5af3fe0ed828ab42eefc1b17ea23957e",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5af3fe0ed828ab42eefc1b17ea23957e",
+            "itemName": "서사시의 영웅담 - 장궁",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "102b6df1d79cfc6e77ea2718dafec309",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "102b6df1d79cfc6e77ea2718dafec309",
+            "itemName": "미스트 파이오니어",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "2a5a9152570c6e269b65034ce4e7d715",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "2a5a9152570c6e269b65034ce4e7d715",
+            "itemName": "검은 질병의 미스트 파이오니어",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "e98335c5c2e667e50b1e121eacff12d3",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "e98335c5c2e667e50b1e121eacff12d3",
+            "itemName": "검은 숨결의 히드라",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "982774dee300cf72603008133dae9ce8",
+            "itemName": "억압 - 검은 숨결의 히드라",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "16daa7ea0285c2b16ab3ac7b278d61a9",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "16daa7ea0285c2b16ab3ac7b278d61a9",
+            "itemName": "태초의 별 - 장궁",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장도",
+      "variants": [
+        {
+          "id": "bf6bbeb9df4e07c839f832ee25e0ee3c",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "bf6bbeb9df4e07c839f832ee25e0ee3c",
+            "itemName": "유일무이한 장도",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "133d63a2d614743be2639a8dadeb75b6",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "133d63a2d614743be2639a8dadeb75b6",
+            "itemName": "현월야천도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "d7c314d573629088a6b05c7521da810f",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d7c314d573629088a6b05c7521da810f",
+            "itemName": "전설 속의 전승 - 장도",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "6ae844ca30964cad928cd824413d0e12",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6ae844ca30964cad928cd824413d0e12",
+            "itemName": "반월야천도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "da07efbb1c158c325ea280c27e9c0cce",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "da07efbb1c158c325ea280c27e9c0cce",
+            "itemName": "서사시의 영웅담 - 장도",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "cee3d65f9b96bc9356a38f8fe37222bc",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "cee3d65f9b96bc9356a38f8fe37222bc",
+            "itemName": "만월 : 월광야천도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c01557510f40323bedf83b867d9f0486",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "c01557510f40323bedf83b867d9f0486",
+            "itemName": "검은 질병의 만월 : 월광야천도",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "14b7dbfb32e65bd07db511300d83b3bc",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "14b7dbfb32e65bd07db511300d83b3bc",
+            "itemName": "불신의 단말마",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "9a417971a4f5052714d1bc1518224ee7",
+            "itemName": "억압 - 불신의 단말마",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "3809832c25cd3c458ea9e9a4d5d9bade",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3809832c25cd3c458ea9e9a4d5d9bade",
+            "itemName": "태초의 별 - 장도",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "장창",
+      "variants": [
+        {
+          "id": "a6b737073eea81f1da4193fb2310d29a",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a6b737073eea81f1da4193fb2310d29a",
+            "itemName": "유일무이한 장창",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "609fc6c654ad4d9158229ad7e8819163",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "609fc6c654ad4d9158229ad7e8819163",
+            "itemName": "전장의 지배자",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "b3b1641009f310dd97a5c89f5b69d61a",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b3b1641009f310dd97a5c89f5b69d61a",
+            "itemName": "전설 속의 전승 - 장창",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "dd15d143a5b5fd8199b8c3f163fe6578",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "dd15d143a5b5fd8199b8c3f163fe6578",
+            "itemName": "전장의 패왕",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "7635dc79d1c93a6bf4d48f6b8e8cdc7f",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7635dc79d1c93a6bf4d48f6b8e8cdc7f",
+            "itemName": "서사시의 영웅담 - 장창",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "e47c02a78bfcd7d1bde959d9e3beac50",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e47c02a78bfcd7d1bde959d9e3beac50",
+            "itemName": "전장의 투신",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "1a3b9cfb43b15722c027702de9219c61",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "1a3b9cfb43b15722c027702de9219c61",
+            "itemName": "검은 질병의 전장의 투신",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "749337a83f5b77482ae94e2630de7530",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "749337a83f5b77482ae94e2630de7530",
+            "itemName": "종언을 비튼 창",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "53a875def4d27135362286d09f07d68f",
+            "itemName": "억압 - 종언을 비튼 창",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d0a08ee3dbf19301445164178a363b14",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d0a08ee3dbf19301445164178a363b14",
+            "itemName": "태초의 별 - 장창",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "중검",
+      "variants": [
+        {
+          "id": "fa78fb82f629d871d540a623b354d3e3",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fa78fb82f629d871d540a623b354d3e3",
+            "itemName": "유일무이한 중검",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "92fcfe1019334f64c4ace41533103dcd",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "92fcfe1019334f64c4ace41533103dcd",
+            "itemName": "Burst-Saw",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "2e58b19e21f3c70e1283faafb31405fd",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2e58b19e21f3c70e1283faafb31405fd",
+            "itemName": "전설 속의 전승 - 중검",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "c549cd66e8d187b6d4aa0ca0d398d0b3",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c549cd66e8d187b6d4aa0ca0d398d0b3",
+            "itemName": "Beast-Saw",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "a136de441fc131a39dd80b42c19af5da",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a136de441fc131a39dd80b42c19af5da",
+            "itemName": "서사시의 영웅담 - 중검",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "717aaaf49d09b8e2cbb7fecf56d0f3e8",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "717aaaf49d09b8e2cbb7fecf56d0f3e8",
+            "itemName": "Brutal-Saw",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "fe7bea0350c08d6517e3b6e48461ad19",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "fe7bea0350c08d6517e3b6e48461ad19",
+            "itemName": "검은 질병의 Brutal-Saw",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "70358d52c642ab9405d34e2548a5a5d4",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "70358d52c642ab9405d34e2548a5a5d4",
+            "itemName": "질병이 깃든 허기",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "edebf708a3390beab095f1b76c60e7e8",
+            "itemName": "억압 - 질병이 깃든 허기",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "2cb865aae36fdcb3a3231a654cb5e661",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "2cb865aae36fdcb3a3231a654cb5e661",
+            "itemName": "태초의 별 - 중검",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "차크라 웨펀",
+      "variants": [
+        {
+          "id": "1a3d7477bce40ee410564a002c063896",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1a3d7477bce40ee410564a002c063896",
+            "itemName": "유일무이한 차크라 웨펀",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "eb79fdfe23a07631a7551ef81bb9b1c6",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "eb79fdfe23a07631a7551ef81bb9b1c6",
+            "itemName": "악도의 수레바퀴",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "5b8a493b5960c3a91bc6902d620416db",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5b8a493b5960c3a91bc6902d620416db",
+            "itemName": "전설 속의 전승 - 차크라 웨펀",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "537e05d8afe7aee5eefb73603555d8fb",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "537e05d8afe7aee5eefb73603555d8fb",
+            "itemName": "선도의 수레바퀴",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "44a180c07623e70e2671421f6e1d1836",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "44a180c07623e70e2671421f6e1d1836",
+            "itemName": "서사시의 영웅담 - 차크라 웨펀",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "af2e8519f6b1684f2fb41de6fdb95d18",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "af2e8519f6b1684f2fb41de6fdb95d18",
+            "itemName": "육도의 수레바퀴",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "160306db6814f39d3b5fa29447cffc5b",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "160306db6814f39d3b5fa29447cffc5b",
+            "itemName": "검은 질병의 육도의 수레바퀴",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "cf40c472350b52ae7e4f510b48d261ba",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "cf40c472350b52ae7e4f510b48d261ba",
+            "itemName": "부패한 심장검",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "da11b64832b23bded2aadd1e41319fdc",
+            "itemName": "억압 - 부패한 심장검",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "226ba47a53e349e6d9a8dd2a2450e32a",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "226ba47a53e349e6d9a8dd2a2450e32a",
+            "itemName": "태초의 별 - 차크라 웨펀",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "창",
+      "variants": [
+        {
+          "id": "3f2e25c935ec5508893bfd6fe74f33da",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "3f2e25c935ec5508893bfd6fe74f33da",
+            "itemName": "유일무이한 창",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "9b08692df137d2ce78df56bd6c8d0978",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9b08692df137d2ce78df56bd6c8d0978",
+            "itemName": "익스터미네이터",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "7c0d9481be86c9e7038e2cd56226c787",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7c0d9481be86c9e7038e2cd56226c787",
+            "itemName": "전설 속의 전승 - 창",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "35afb5504849b7b3520679e905e1b1f5",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "35afb5504849b7b3520679e905e1b1f5",
+            "itemName": "프로즌 익스터미네이터",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f64e10aa93a38dd76eea2869e2f030f9",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f64e10aa93a38dd76eea2869e2f030f9",
+            "itemName": "서사시의 영웅담 - 창",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "f52dae0b1e77c293f2ebf095557dc9f0",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f52dae0b1e77c293f2ebf095557dc9f0",
+            "itemName": "앱솔루트 제로",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "775bd8de870ce3c41000e9c92b1a5da4",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "775bd8de870ce3c41000e9c92b1a5da4",
+            "itemName": "검은 질병의 앱솔루트 제로",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "e46ce765e856d53e73e042737eb0242d",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "e46ce765e856d53e73e042737eb0242d",
+            "itemName": "흘러내리는 썩은 피",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "5551e0d4a5f52557e839d6123b578164",
+            "itemName": "억압 - 흘러내리는 썩은 피",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "5908737199ed3dbb63f749109760b277",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5908737199ed3dbb63f749109760b277",
+            "itemName": "태초의 별 - 창",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "컴파운드 보우",
+      "variants": [
+        {
+          "id": "9d569bef7f356e127005ccdd64452690",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9d569bef7f356e127005ccdd64452690",
+            "itemName": "유일무이한 컴파운드 보우",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "4be671bbf76d7a75587d0e92699b821e",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "4be671bbf76d7a75587d0e92699b821e",
+            "itemName": "페이드 윙, 이카루스",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ab4b246e90b262d9ad5a818720c69b2b",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ab4b246e90b262d9ad5a818720c69b2b",
+            "itemName": "전설 속의 전승 - 컴파운드 보우",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "0004494f0b26980e6615f2797d1c0164",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0004494f0b26980e6615f2797d1c0164",
+            "itemName": "비비드 윙, 이카루스",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "ef69748ca2b794324b2085c36609321f",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ef69748ca2b794324b2085c36609321f",
+            "itemName": "서사시의 영웅담 - 컴파운드 보우",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "67fc555fe01cafaf2bc20557be53a7bb",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "67fc555fe01cafaf2bc20557be53a7bb",
+            "itemName": "레디언트 윙, 이카루스",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "52cd62816527e5e0d9b15cd6f4191209",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "52cd62816527e5e0d9b15cd6f4191209",
+            "itemName": "검은 질병의 레디언트 윙, 이카루스",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "82cd87aaec80e2525d57e59d7485f499",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "82cd87aaec80e2525d57e59d7485f499",
+            "itemName": "짐조 : 독을 마시는 새",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "17795a6a478061bca36d8b0544f0255c",
+            "itemName": "억압 - 짐조 : 독을 마시는 새",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "676656c9ac284f893ed8e3132e54b1a2",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "676656c9ac284f893ed8e3132e54b1a2",
+            "itemName": "태초의 별 - 컴파운드 보우",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "코어블레이드",
+      "variants": [
+        {
+          "id": "240f073f45370d4d5338862a654003cf",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "240f073f45370d4d5338862a654003cf",
+            "itemName": "유일무이한 코어 블레이드",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "afe10e6cb0205ac778f595ce64db6f1b",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "afe10e6cb0205ac778f595ce64db6f1b",
+            "itemName": "오버클럭 하트",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "ee5b95de15628b73050482154245fec1",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "ee5b95de15628b73050482154245fec1",
+            "itemName": "전설 속의 전승 - 코어 블레이드",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "7ed00c4a085b145766bfbec049c83eb2",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7ed00c4a085b145766bfbec049c83eb2",
+            "itemName": "오버클럭 코어",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "7f71df8cda4c15587ae74598d9d35d9e",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7f71df8cda4c15587ae74598d9d35d9e",
+            "itemName": "서사시의 영웅담 - 코어 블레이드",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "c36d82d0beb38c2bb576d9389a0320db",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c36d82d0beb38c2bb576d9389a0320db",
+            "itemName": "코어 오리진",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "045cf5942214a2e1cd1be287d4730c6d",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "045cf5942214a2e1cd1be287d4730c6d",
+            "itemName": "검은 질병의 코어 오리진",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "e31ee94b11406697633503171073b031",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "e31ee94b11406697633503171073b031",
+            "itemName": "비명의 장검",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "515afabd2c476a761edad2435efba12a",
+            "itemName": "억압 - 비명의 장검",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "624a32012cb42900e29310643995e54f",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "624a32012cb42900e29310643995e54f",
+            "itemName": "태초의 별 - 코어 블레이드",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "크로스슈터",
+      "variants": [
+        {
+          "id": "b6b237e3a5a3e89e14af8bfaf042b90b",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b6b237e3a5a3e89e14af8bfaf042b90b",
+            "itemName": "유일무이한 크로스슈터",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "225857a19c51fd366854fb1a94627241",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "225857a19c51fd366854fb1a94627241",
+            "itemName": "파트너 팔케",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "034b3a60d5cc0c53552d4fb6c590e521",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "034b3a60d5cc0c53552d4fb6c590e521",
+            "itemName": "전설 속의 전승 - 크로스슈터",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "6e44ccf46ff077dc0ca1a93bbe36d5d5",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6e44ccf46ff077dc0ca1a93bbe36d5d5",
+            "itemName": "프렌즈 팔케",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "e8ece625c89a1aaa2197420f203851b9",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e8ece625c89a1aaa2197420f203851b9",
+            "itemName": "서사시의 영웅담 - 크로스슈터",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "a3e557056061811337aa67eb0ef4a704",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a3e557056061811337aa67eb0ef4a704",
+            "itemName": "패밀리 팔케",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "4b319c435f04c6dbd8aeaa73c1ce4ec5",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "4b319c435f04c6dbd8aeaa73c1ce4ec5",
+            "itemName": "검은 질병의 패밀리 팔케",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "5c198cb7ee5f578209580cf97658be72",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "5c198cb7ee5f578209580cf97658be72",
+            "itemName": "만개하는 불신의 눈",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "ae89549aca28cc5ca4e162d21e535b91",
+            "itemName": "억압 - 만개하는 불신의 눈",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "fb581fde511ae040088795d5f761a774",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "fb581fde511ae040088795d5f761a774",
+            "itemName": "태초의 별 - 크로스슈터",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "클로",
+      "variants": [
+        {
+          "id": "48fa7444f440093219fb6627c1577fca",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "48fa7444f440093219fb6627c1577fca",
+            "itemName": "유일무이한 클로",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "d0df1a4c6412a5c7048a59505b0c9c6b",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d0df1a4c6412a5c7048a59505b0c9c6b",
+            "itemName": "리리스의 슬픔",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "39fba99e1709c8e8df6c0b807ee65e9e",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "39fba99e1709c8e8df6c0b807ee65e9e",
+            "itemName": "전설 속의 전승 - 클로",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "8762cac3b2a480212ec7803d611c796f",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8762cac3b2a480212ec7803d611c796f",
+            "itemName": "리리스의 한",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "5acc8f73edb6962e0146ca82df4b9090",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "5acc8f73edb6962e0146ca82df4b9090",
+            "itemName": "서사시의 영웅담 - 클로",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "8cd53eed89da72eb94486e0676a7194f",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "8cd53eed89da72eb94486e0676a7194f",
+            "itemName": "리리스, 디 이블",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "083e50c4036a10f1f1ee1d09b5f3ada1",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "083e50c4036a10f1f1ee1d09b5f3ada1",
+            "itemName": "검은 질병의 리리스, 디 이블",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "d75a1c1ae66e426019ed0f8b64ff5044",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "d75a1c1ae66e426019ed0f8b64ff5044",
+            "itemName": "만 갈래로 뻗어가는 질병",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "a09886810f6bc5eb1b58074f61448928",
+            "itemName": "억압 - 만 갈래로 뻗어가는 질병",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "c831c093b447b149eddb151bd1ea478c",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "c831c093b447b149eddb151bd1ea478c",
+            "itemName": "태초의 별 - 클로",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "토템",
+      "variants": [
+        {
+          "id": "6ef768bac3ac52e2b92a4588968abc1d",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "6ef768bac3ac52e2b92a4588968abc1d",
+            "itemName": "유일무이한 토템",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "aab89cb8be84744e7d065ca0642f52e5",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "aab89cb8be84744e7d065ca0642f52e5",
+            "itemName": "폭군의 친절",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "0dfd3b4f9f11fda6155313075378c5c2",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0dfd3b4f9f11fda6155313075378c5c2",
+            "itemName": "전설 속의 전승 - 토템",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "a6af051edd9cc6091a85ecf3db29e33f",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a6af051edd9cc6091a85ecf3db29e33f",
+            "itemName": "폭군의 자비",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "cb4c30e30c77704f526cc8c4e8152458",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "cb4c30e30c77704f526cc8c4e8152458",
+            "itemName": "서사시의 영웅담 - 토템",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "64fb6109df6a1d62f45c2049faacf3cb",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "64fb6109df6a1d62f45c2049faacf3cb",
+            "itemName": "폭군의 본의",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "9e54a6bbd2f55c3d4e80c2fe8077cbd7",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "9e54a6bbd2f55c3d4e80c2fe8077cbd7",
+            "itemName": "검은 질병의 폭군의 본의",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ed79977e6c642c9f10e995ffe268f532",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "ed79977e6c642c9f10e995ffe268f532",
+            "itemName": "썩은 시체의 아귀",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "e51e90d38b7574e9ee5fb68798acc9c7",
+            "itemName": "억압 - 썩은 시체의 아귀",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "7a48ac0810e04becab04028add44863f",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "7a48ac0810e04becab04028add44863f",
+            "itemName": "태초의 별 - 토템",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "통파",
+      "variants": [
+        {
+          "id": "b9ab29dc7c17c2dcdf8227bfd0434755",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "b9ab29dc7c17c2dcdf8227bfd0434755",
+            "itemName": "유일무이한 통파",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "0799b5bd0c9282f0b31db5c2cdf00987",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0799b5bd0c9282f0b31db5c2cdf00987",
+            "itemName": "마나 서플라이",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "83d38980ff5420ca5bd19567e0e5dd47",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "83d38980ff5420ca5bd19567e0e5dd47",
+            "itemName": "전설 속의 전승 - 통파",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "0065b9809763f1e36fe45d2f87ad08c9",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "0065b9809763f1e36fe45d2f87ad08c9",
+            "itemName": "마나 액티베이션",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "9342e10deea98287eb0b91a93446e0f9",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9342e10deea98287eb0b91a93446e0f9",
+            "itemName": "서사시의 영웅담 - 통파",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "9a72569c4bff3e862ebcbf4edc9d9f99",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9a72569c4bff3e862ebcbf4edc9d9f99",
+            "itemName": "파운더 오브 마나",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "1c9625815e5ccfe26f3f9f802d26f803",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "1c9625815e5ccfe26f3f9f802d26f803",
+            "itemName": "검은 질병의 파운더 오브 마나",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "0136a822fbb7a662a86cd3c80a5d9de9",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "0136a822fbb7a662a86cd3c80a5d9de9",
+            "itemName": "육신에 스민 재앙",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "c4b4983d03a1a81abd8b385dc4c2a5d8",
+            "itemName": "억압 - 육신에 스민 재앙",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "59744958524f70213168cfe1b89c9068",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "59744958524f70213168cfe1b89c9068",
+            "itemName": "태초의 별 - 통파",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "투창",
+      "variants": [
+        {
+          "id": "d140cd5df09e8778d16e8500a9917849",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d140cd5df09e8778d16e8500a9917849",
+            "itemName": "유일무이한 투창",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "01e87a922735c6bf9a54c05ba3c5e88e",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "01e87a922735c6bf9a54c05ba3c5e88e",
+            "itemName": "무영흑적살",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "d0afb59a4c553dbb2ae92928bb07fba6",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "d0afb59a4c553dbb2ae92928bb07fba6",
+            "itemName": "전설 속의 전승 - 투창",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "81a15acc16ab7a20de5646f04a40080f",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "81a15acc16ab7a20de5646f04a40080f",
+            "itemName": "무영흑주살",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "bd40cdbb95da5356dc25e110cf7d0a86",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "bd40cdbb95da5356dc25e110cf7d0a86",
+            "itemName": "서사시의 영웅담 - 투창",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "a326005c0d5de7e94b0cb95511ebebd2",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "a326005c0d5de7e94b0cb95511ebebd2",
+            "itemName": "무영흑단살",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "430bd751326ac577d377b66c8ba742ae",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "430bd751326ac577d377b66c8ba742ae",
+            "itemName": "검은 질병의 무영흑단살",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "ab25fc52167049aaa9070f8cb09d6d0d",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "ab25fc52167049aaa9070f8cb09d6d0d",
+            "itemName": "독기로 점철된 절규",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "bce7513fd5f8a162969a5a6105fe22e5",
+            "itemName": "억압 - 독기로 점철된 절규",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "f385a6dbe356cb602d24a04acba88d5c",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "f385a6dbe356cb602d24a04acba88d5c",
+            "itemName": "태초의 별 - 투창",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    },
+    {
+      "itemTypeDetail": "핸드캐넌",
+      "variants": [
+        {
+          "id": "144e8411e89c31e6b87bdacb1fffe27f",
+          "rarity": "유니크",
+          "line": null,
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "144e8411e89c31e6b87bdacb1fffe27f",
+            "itemName": "유일무이한 핸드캐넌",
+            "itemRarity": "유니크"
+          }
+        },
+        {
+          "id": "1e0fd50fb48f8979440498f24d8e3c4e",
+          "rarity": "레전더리",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "1e0fd50fb48f8979440498f24d8e3c4e",
+            "itemName": "젊은 우르반의 치기",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "594e0befcbf416ce834ab1ca661bd28c",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "594e0befcbf416ce834ab1ca661bd28c",
+            "itemName": "전설 속의 전승 - 핸드캐넌",
+            "itemRarity": "레전더리"
+          }
+        },
+        {
+          "id": "16c619aa7cd416453d83a93378c1fb2b",
+          "rarity": "에픽",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "16c619aa7cd416453d83a93378c1fb2b",
+            "itemName": "초기형 우르반 거포",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "e7d23724b692903ef31b5a4917053c5a",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "e7d23724b692903ef31b5a4917053c5a",
+            "itemName": "서사시의 영웅담 - 핸드캐넌",
+            "itemRarity": "에픽"
+          }
+        },
+        {
+          "id": "9173c5067d0e368b18bf2e87500f9ac0",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "9173c5067d0e368b18bf2e87500f9ac0",
+            "itemName": "우르반의 걸작",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "5cdc32ad3f2cc3d269944f9aee38e1ae",
+          "rarity": "태초",
+          "line": "기본",
+          "tuned": true,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "5cdc32ad3f2cc3d269944f9aee38e1ae",
+            "itemName": "검은 질병의 우르반의 걸작",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "152c6ddea90f6165cd8b3df09775cfca",
+          "rarity": "태초",
+          "line": "해방",
+          "tuned": false,
+          "maxTuneLevel": 0,
+          "item": {
+            "itemId": "152c6ddea90f6165cd8b3df09775cfca",
+            "itemName": "광포한 비명의 분노",
+            "itemRarity": "태초"
+          },
+          "releasePending": {
+            "itemId": "c06143d91e1ff5f72ab94502944936cd",
+            "itemName": "억압 - 광포한 비명의 분노",
+            "itemRarity": "태초"
+          }
+        },
+        {
+          "id": "97480df0d7fe65a989143514791dd89c",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "tuned": false,
+          "maxTuneLevel": 3,
+          "item": {
+            "itemId": "97480df0d7fe65a989143514791dd89c",
+            "itemName": "태초의 별 - 핸드캐넌",
+            "itemRarity": "태초"
+          }
+        }
+      ]
+    }
+  ],
   "oathUpgradeMaxStep": 9,
   "oathUpgradeSteps": [
     {

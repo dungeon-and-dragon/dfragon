@@ -70,18 +70,21 @@ const SLOT_ITEM_POINTS = 1_000
 const TUNE_POINTS = 10_000
 const VARIANT_POINTS = 100_000
 const POTENCY_POINTS = 1_000_000
-const KEPT_ITEM = { variantId: null, tune: null, potency: null }
+const RELEASE_POINTS = 10_000_000
+const KEPT_ITEM = { variantId: null, tune: null, potency: null, release: null }
 
 // 바꾼 부위의 강화 수치 합, 고른 칭호, 크리쳐, 오라, 장비 세트, 서약 세트, 서약 본체마다 1,000점, 요청한 조율 단계마다
-// 10,000점, 바꾼 아이템과 결정마다 100,000점, 정밀도마다 1,000,000점을 더해, 어떤 요청에 대한 응답인지 화면 숫자로 구분한다.
+// 10,000점, 바꾼 아이템과 결정마다 100,000점, 정밀도마다 1,000,000점, 해방 수치마다 10,000,000점을 더해, 어떤 요청에 대한
+// 응답인지 화면 숫자로 구분한다.
 function scoresFor({ equipment, oath = [], ...chosen }: SimulationBody): Response {
   const equipmentPoints = equipment.reduce(
-    (sum, { reinforce, variantId, tune, potency }) =>
+    (sum, { reinforce, variantId, tune, potency, release }) =>
       sum +
       reinforce +
       (variantId !== null ? VARIANT_POINTS : 0) +
       (tune ?? 0) * TUNE_POINTS +
-      (potency ?? 0) * POTENCY_POINTS,
+      (potency ?? 0) * POTENCY_POINTS +
+      (release ?? 0) * RELEASE_POINTS,
     0
   )
   const oathPoints = oath.reduce(
@@ -727,12 +730,9 @@ function oathSection(): HTMLElement | null {
   return section
 }
 
-it('무기는 고정 표시로 두고 나머지 장비 칸은 그 세트의 등급 선택지를 연다', async () => {
+it('장비 칸은 그 세트의 등급 선택지를 연다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
-
-  expect(has('무기 교체')).toBe(false)
-  expect(has('무기 조율')).toBe(false)
 
   await choose('상의')
 
@@ -746,6 +746,75 @@ it('무기는 고정 표시로 두고 나머지 장비 칸은 그 세트의 등�
   expect(document.querySelector('[role="option"][aria-selected="true"]')?.textContent).toBe(
     variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '축성').item.itemName
   )
+})
+
+// 딜러 fixture는 낫 해방 계열의 해방 수치 100 무기(재앙의 송곳니)를 낀다. 낫 선택지 순서는 엔진 무기 목록 순서다.
+const SCYTHE_OPTIONS = [
+  '유니크',
+  '레거시',
+  '태초의 별',
+  '레거시',
+  '태초의 별',
+  '레거시',
+  '레거시 조율 완료',
+  '디거시',
+  '태초의 별'
+]
+const SCYTHE_LEGACY_PRIMEVAL = '413aebce4d4cc7c7346aa6e32e27a6dd'
+const WEAPON_CHANGE = { slotId: 'WEAPON', reinforce: 10, amplified: false, enchantId: null }
+
+function weaponCell(): string | null {
+  return rowOf('무기').querySelectorAll('td')[1]!.textContent
+}
+
+it('무기는 착용한 무기 종류의 선택지를 계열 이름으로 열고, 해방 계열을 낀 무기는 해방 수치를 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  expect(control('무기 교체').textContent).toBe('디거시')
+  expect((control('무기 해방') as HTMLInputElement).value).toBe('100')
+  expect(has('무기 조율')).toBe(false)
+  expect(weaponCell()).toBe('디거시')
+
+  await act(async () => control('무기 교체').click())
+
+  expect(optionNames()).toEqual(SCYTHE_OPTIONS)
+  expect(document.querySelector('[role="option"][aria-selected="true"]')?.textContent).toBe(
+    '디거시'
+  )
+})
+
+it('해방 수치를 낮추면 수치만 요청한다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  await step('무기 해방 내리기', 19)
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)?.equipment).toEqual([{ ...WEAPON_CHANGE, ...KEPT_ITEM, release: 81 }])
+  )
+})
+
+it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 선택을 열며 바꾼 무기를 요청한다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  await act(async () => control('무기 교체').click())
+  const legacy = document.querySelectorAll<HTMLElement>('[role="option"]')[5]!
+  await act(async () => legacy.click())
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)?.equipment).toEqual([
+      { ...WEAPON_CHANGE, ...KEPT_ITEM, variantId: SCYTHE_LEGACY_PRIMEVAL, tune: 0 }
+    ])
+  )
+  expect(control('무기 교체').textContent).toBe('레거시')
+  expect(has('무기 해방')).toBe(false)
+  expect(has('무기 조율')).toBe(true)
+  expect(weaponCell()).toBe('레거시')
 })
 
 it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결과로 바꾸며, 5축성이 풀린 다른 방어구는 축성 아이템으로 보인다', async () => {
@@ -770,7 +839,8 @@ it('등급을 바꾸면 요청 body에 선택지 id를 싣고 점수를 새 결�
         enchantId: null,
         variantId: corroded.id,
         tune: 0,
-        potency: null
+        potency: null,
+        release: null
       }
     ]
   })
@@ -834,7 +904,8 @@ it('조율을 바꾸면 그 부위의 조율 단계를 요청하고, 조율할 �
         enchantId: null,
         variantId: null,
         tune: 2,
-        potency: null
+        potency: null,
+        release: null
       }
     ]
   })
@@ -867,7 +938,8 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
         enchantId: null,
         variantId: null,
         tune: 3,
-        potency: null
+        potency: null,
+        release: null
       },
       {
         slotId: 'EARRING',
@@ -876,7 +948,8 @@ it('유일 장비를 고르면 조율 대신 정밀도를 100에서 시작하고
         enchantId: null,
         variantId: exalted.id,
         tune: 0,
-        potency: 97
+        potency: 97,
+        release: null
       }
     ])
   )
@@ -975,6 +1048,14 @@ it('좁은 화면에서는 장비창의 줄을 누르면 그 줄의 조작을 �
   const sheet = document.querySelector<HTMLElement>('[role="dialog"]')
   expect(sheet?.querySelector('h2')?.textContent).toBe('상의')
   expect(sheet?.querySelector('[aria-label="상의 교체"]')?.textContent).toBe('긍휼 속 자비의 상의')
+
+  await choose('무기')
+
+  const weaponSheet = document.querySelector<HTMLElement>('[role="dialog"]')
+  expect(weaponSheet?.querySelector('[aria-label="무기 교체"]')?.textContent).toBe('디거시')
+  expect(weaponSheet?.querySelector<HTMLInputElement>('[aria-label="무기 해방"]')?.value).toBe(
+    '100'
+  )
 })
 
 it('캐릭터 띠가 보이는 동안에는 요약 줄이 없고, 띠가 화면 밖으로 나가면 요약 줄이 나타나 서버, 캐릭터명, 점수를 담는다', async () => {
@@ -1069,7 +1150,8 @@ it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열�
           enchantId: null,
           variantId: corroded.id,
           tune: 0,
-          potency: null
+          potency: null,
+          release: null
         }
       ]
     })
@@ -1148,13 +1230,16 @@ it('결정 줄에서 등급을 바꾸면 조율을 새 결정에 맞게 자르�
   expect(oathRowOf('결정 7').querySelectorAll('td')[1]!.textContent).toBe(primeval.item.itemName)
 })
 
-it('조율할 수 있는 무기를 고르면 조율 선택을 열고 바꾼 조율을 요청한다', async () => {
+it('선택지에 없는 조율할 수 있는 무기는 지금 그대로를 착용 아이템 이름으로 두고, 조율 선택을 열어 바꾼 조율을 요청한다', async () => {
   const detail = characterDetailFixture('dealer')
   const equipment = detail.equipment.equipment.map((item) =>
-    item.slotId === 'WEAPON' ? { ...item, itemName: 'Beast-Saw' } : item
+    item.slotId === 'WEAPON' ? { ...item, itemId: 'unlisted-weapon', itemName: 'Beast-Saw' } : item
   )
   await render({ ...detail, equipment: { ...detail.equipment, equipment } })
   await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  expect(control('무기 교체').textContent).toBe('Beast-Saw')
 
   await act(async () => control('무기 조율').click())
 
@@ -1176,10 +1261,15 @@ it('조율할 수 있는 무기를 고르면 조율 선택을 열고 바꾼 조�
         enchantId: null,
         variantId: null,
         tune: 2,
-        potency: null
+        potency: null,
+        release: null
       }
     ]
   })
+
+  await act(async () => control('무기 교체').click())
+
+  expect(option('Beast-Saw').getAttribute('aria-selected')).toBe('true')
 })
 
 it('서약 본체는 서약 카탈로그의 그림으로 장비창 줄, 닫힌 선택 칸, 목록 항목에 보이고 카탈로그에 없는 본체는 빈 칸이다', async () => {

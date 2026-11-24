@@ -1,8 +1,8 @@
 {
   "version": 1,
   "source": {
-    "dataset": "phase32-rev16b pvf:1d9658f799d58202e96c6d210420c02c6cc1fc367e2c82035c9866d5aa124487",
-    "generated_at": "2026-11-18T18:00:00+09:00",
+    "dataset": "phase32-rev16c pvf:1d9658f799d58202e96c6d210420c02c6cc1fc367e2c82035c9866d5aa124487",
+    "generated_at": "2026-11-24T17:00:00+09:00",
     "rule": "세트 포인트 표(setpointinfo [set point]/[table])에 행이 있는 장비 묶음(equipmentgrouping)의 아이템을 세트, 부위별로 나눔. 융합석과 이름에 테스트가 있는 아이템은 뺌. 변형 종류는 이름 접두어(잠식 : , 축성 : , 흑아 : )이고, 접두어가 없어도 축성 : 아이템과 같은 [then]/[appendage]를 단 아이템은 축성. 잠식은 scourge, 축성은 consecrate를 씀. sharedName은 방어구 5부위가 모두 축성이 되면 바뀌는 세트 공용 이름 아이템(세트마다 id가 따로 있음). 조율 단계별 포인트는 그 묶음의 행. 유일 장비 옵션은 [ability by set point]의 행 값이 바로 앞 행의 포인트 이상에서 적용됨. 제품용은 장비의 레어 등급과 기본 세트 이름이 없는 세트를 뺌"
   },
   "sets": [
@@ -23541,6 +23541,7 @@
     ]
   },
   "weaponTune": {
+    "(사용하지 않음)": [0, 1, 2, 3],
     "Beast-Saw": [0, 1, 2, 3],
     "Brutal-Saw": [0, 1, 2, 3],
     "Burst-Saw": [0, 1, 2, 3],
@@ -23602,13 +23603,18 @@
     "백에 하나 나온다는 로드": [0, 1, 2, 3],
     "백에 하나 나온다는 리볼버": [0, 1, 2, 3],
     "백에 하나 나온다는 머스켓": [0, 1, 2, 3],
+    "백에 하나 나온다는 미늘창": [0, 1, 2, 3],
     "백에 하나 나온다는 배틀액스": [0, 1, 2, 3],
     "백에 하나 나온다는 보우건": [0, 1, 2, 3],
     "백에 하나 나온다는 봉": [0, 1, 2, 3],
     "백에 하나 나온다는 빗자루": [0, 1, 2, 3],
+    "백에 하나 나온다는 선현궁": [0, 1, 2, 3],
     "백에 하나 나온다는 소검": [0, 1, 2, 3],
+    "백에 하나 나온다는 소태도": [0, 1, 2, 3],
     "백에 하나 나온다는 스태프": [0, 1, 2, 3],
+    "백에 하나 나온다는 십자가": [0, 1, 2, 3],
     "백에 하나 나온다는 쌍검": [0, 1, 2, 3],
+    "백에 하나 나온다는 앵커": [0, 1, 2, 3],
     "백에 하나 나온다는 에테리얼 보우": [0, 1, 2, 3],
     "백에 하나 나온다는 염주": [0, 1, 2, 3],
     "백에 하나 나온다는 완드": [0, 1, 2, 3],
@@ -23619,6 +23625,7 @@
     "백에 하나 나온다는 중검": [0, 1, 2, 3],
     "백에 하나 나온다는 차크라 웨펀": [0, 1, 2, 3],
     "백에 하나 나온다는 창": [0, 1, 2, 3],
+    "백에 하나 나온다는 컴파운드 보우": [0, 1, 2, 3],
     "백에 하나 나온다는 코어 블레이드": [0, 1, 2, 3],
     "백에 하나 나온다는 크로스슈터": [0, 1, 2, 3],
     "백에 하나 나온다는 클로": [0, 1, 2, 3],
@@ -23650,9 +23657,12 @@
     "서사시의 영웅담 - 보우건": [0, 1, 2, 3],
     "서사시의 영웅담 - 봉": [0, 1, 2, 3],
     "서사시의 영웅담 - 빗자루": [0, 1, 2, 3],
+    "서사시의 영웅담 - 선현궁": [0, 1, 2, 3],
     "서사시의 영웅담 - 소검": [0, 1, 2, 3],
     "서사시의 영웅담 - 소태도": [0, 1, 2, 3],
     "서사시의 영웅담 - 스태프": [0, 1, 2, 3],
+    "서사시의 영웅담 - 십자가": [0, 1, 2, 3],
+    "서사시의 영웅담 - 쌍검": [0, 1, 2, 3],
     "서사시의 영웅담 - 앵커": [0, 1, 2, 3],
     "서사시의 영웅담 - 에테리얼 보우": [0, 1, 2, 3],
     "서사시의 영웅담 - 염주": [0, 1, 2, 3],
@@ -23669,15 +23679,21 @@
     "서사시의 영웅담 - 크로스슈터": [0, 1, 2, 3],
     "서사시의 영웅담 - 클로": [0, 1, 2, 3],
     "서사시의 영웅담 - 토템": [0, 1, 2, 3],
+    "서사시의 영웅담 - 통파": [0, 1, 2, 3],
     "서사시의 영웅담 - 투창": [0, 1, 2, 3],
     "서사시의 영웅담 - 핸드캐넌": [0, 1, 2, 3],
     "선도의 수레바퀴": [0, 1, 2, 3],
     "성장군 : 유성계": [0, 1, 2, 3],
     "성장군 : 유성광": [0, 1, 2, 3],
     "성장군 : 유성우": [0, 1, 2, 3],
+    "소울 스토커": [0, 1, 2, 3],
     "소울 프레데터": [0, 1, 2, 3],
     "소울 헌터": [0, 1, 2, 3],
     "슈팅 스타 로저리": [0, 1, 2, 3, 4, 5],
+    "시크릿 듀엣": [0, 1, 2, 3],
+    "시크릿 솔로": [0, 1, 2, 3],
+    "시크릿 콘서트": [0, 1, 2, 3],
+    "악도의 수레바퀴": [0, 1, 2, 3],
     "앱솔루트 제로": [0, 1, 2, 3],
     "양얼의 나뭇가지 : 강": [0, 1, 2, 3],
     "양얼의 나뭇가지 : 극": [0, 1, 2, 3],
@@ -23698,6 +23714,7 @@
     "오버클럭 코어": [0, 1, 2, 3, 4, 5],
     "오버클럭 하트": [0, 1, 2, 3, 4, 5],
     "오케아누스 어비스": [0, 1, 2, 3],
+    "오케아누스 타이드": [0, 1, 2, 3],
     "오케아누스 프라이모디어": [0, 1, 2, 3],
     "우르반의 걸작": [0, 1, 2, 3],
     "웨이빙 인페르노": [0, 1, 2, 3],
@@ -23719,10 +23736,13 @@
     "유일무이한 보우건": [0, 1, 2, 3],
     "유일무이한 봉": [0, 1, 2, 3],
     "유일무이한 빗자루": [0, 1, 2, 3],
+    "유일무이한 선현궁": [0, 1, 2, 3],
     "유일무이한 소검": [0, 1, 2, 3],
     "유일무이한 소태도": [0, 1, 2, 3],
     "유일무이한 스태프": [0, 1, 2, 3],
     "유일무이한 십자가": [0, 1, 2, 3],
+    "유일무이한 쌍검": [0, 1, 2, 3],
+    "유일무이한 앵커": [0, 1, 2, 3],
     "유일무이한 에테리얼 보우": [0, 1, 2, 3],
     "유일무이한 염주": [0, 1, 2, 3],
     "유일무이한 완드": [0, 1, 2, 3],
@@ -23733,6 +23753,7 @@
     "유일무이한 중검": [0, 1, 2, 3],
     "유일무이한 차크라 웨펀": [0, 1, 2, 3],
     "유일무이한 창": [0, 1, 2, 3],
+    "유일무이한 컴파운드 보우": [0, 1, 2, 3],
     "유일무이한 코어 블레이드": [0, 1, 2, 3],
     "유일무이한 크로스슈터": [0, 1, 2, 3],
     "유일무이한 클로": [0, 1, 2, 3],
@@ -23759,15 +23780,19 @@
     "전설 속의 전승 - 로드": [0, 1, 2, 3],
     "전설 속의 전승 - 리볼버": [0, 1, 2, 3],
     "전설 속의 전승 - 머스켓": [0, 1, 2, 3],
+    "전설 속의 전승 - 미늘창": [0, 1, 2, 3],
     "전설 속의 전승 - 배틀액스": [0, 1, 2, 3],
     "전설 속의 전승 - 보우건": [0, 1, 2, 3],
     "전설 속의 전승 - 봉": [0, 1, 2, 3],
     "전설 속의 전승 - 빗자루": [0, 1, 2, 3],
+    "전설 속의 전승 - 선현궁": [0, 1, 2, 3],
     "전설 속의 전승 - 소검": [0, 1, 2, 3],
     "전설 속의 전승 - 소태도": [0, 1, 2, 3],
     "전설 속의 전승 - 스태프": [0, 1, 2, 3],
+    "전설 속의 전승 - 십자가": [0, 1, 2, 3],
     "전설 속의 전승 - 쌍검": [0, 1, 2, 3],
     "전설 속의 전승 - 앵커": [0, 1, 2, 3],
+    "전설 속의 전승 - 에테리얼 보우": [0, 1, 2, 3],
     "전설 속의 전승 - 염주": [0, 1, 2, 3],
     "전설 속의 전승 - 완드": [0, 1, 2, 3],
     "전설 속의 전승 - 자동권총": [0, 1, 2, 3],
@@ -23777,6 +23802,7 @@
     "전설 속의 전승 - 중검": [0, 1, 2, 3],
     "전설 속의 전승 - 차크라 웨펀": [0, 1, 2, 3],
     "전설 속의 전승 - 창": [0, 1, 2, 3],
+    "전설 속의 전승 - 컴파운드 보우": [0, 1, 2, 3],
     "전설 속의 전승 - 코어 블레이드": [0, 1, 2, 3],
     "전설 속의 전승 - 크로스슈터": [0, 1, 2, 3],
     "전설 속의 전승 - 클로": [0, 1, 2, 3],
@@ -23818,9 +23844,12 @@
     "태초의 별 - 보우건": [0, 1, 2, 3],
     "태초의 별 - 봉": [0, 1, 2, 3],
     "태초의 별 - 빗자루": [0, 1, 2, 3],
+    "태초의 별 - 선현궁": [0, 1, 2, 3],
     "태초의 별 - 소검": [0, 1, 2, 3],
     "태초의 별 - 소태도": [0, 1, 2, 3],
     "태초의 별 - 스태프": [0, 1, 2, 3],
+    "태초의 별 - 십자가": [0, 1, 2, 3],
+    "태초의 별 - 쌍검": [0, 1, 2, 3],
     "태초의 별 - 앵커": [0, 1, 2, 3],
     "태초의 별 - 에테리얼 보우": [0, 1, 2, 3],
     "태초의 별 - 염주": [0, 1, 2, 3],
@@ -23834,6 +23863,7 @@
     "태초의 별 - 창": [0, 1, 2, 3],
     "태초의 별 - 컴파운드 보우": [0, 1, 2, 3],
     "태초의 별 - 코어 블레이드": [0, 1, 2, 3],
+    "태초의 별 - 크로스슈터": [0, 1, 2, 3],
     "태초의 별 - 클로": [0, 1, 2, 3],
     "태초의 별 - 토템": [0, 1, 2, 3],
     "태초의 별 - 통파": [0, 1, 2, 3],
@@ -23842,6 +23872,7 @@
     "트랜스포메이션 오토매틱 건": [0, 1, 2, 3],
     "특형 - 호위무신의 운검": [0, 1, 2, 3],
     "파운더 오브 마나": [0, 1, 2, 3],
+    "파트너 팔케": [0, 1, 2, 3],
     "패밀리 팔케": [0, 1, 2, 3],
     "페이드 윙, 이카루스": [0, 1, 2, 3],
     "폭군의 본의": [0, 1, 2, 3],
@@ -23855,5 +23886,3361 @@
     "행성분쇄자": [0, 1, 2, 3],
     "현월야천도": [0, 1, 2, 3],
     "흑룡언월도": [0, 1, 2, 3, 4, 5]
-  }
+  },
+  "weapons": [
+    {
+      "type": "건틀릿",
+      "folder": "gauntlet",
+      "items": [
+        {
+          "name": "유일무이한 건틀릿",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미완성 플래닛 건틀릿",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 건틀릿",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미완성 셀레스티얼 건틀릿",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 건틀릿",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미완성 코스믹 건틀릿",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 미완성 코스믹 건틀릿",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "천지를 뒤흔드는 공포",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 천지를 뒤흔드는 공포"
+        },
+        {
+          "name": "태초의 별 - 건틀릿",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "광검",
+      "folder": "beamsword",
+      "items": [
+        {
+          "name": "유일무이한 광검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "대룡검 발뭉",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 광검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "살룡검 발뭉",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 광검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "멸룡검 발뭉",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 멸룡검 발뭉",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "구속하는 공작의 차원도",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 구속하는 공작의 차원도"
+        },
+        {
+          "name": "태초의 별 - 광검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "광창",
+      "folder": "beamspear",
+      "items": [
+        {
+          "name": "유일무이한 광창",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "성장군 : 유성광",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 광창",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "성장군 : 유성우",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 광창",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "성장군 : 유성계",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 성장군 : 유성계",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "구속의 대공 : 영원불멸의 추종자",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 구속의 대공 : 영원불멸의 추종자"
+        },
+        {
+          "name": "태초의 별 - 광창",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "권투글러브",
+      "folder": "boxglove",
+      "items": [
+        {
+          "name": "유일무이한 권투글러브",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "더체스 벳즈",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 권투글러브",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "카운테스 벳즈",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 권투글러브",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "엠프레스 벳즈",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 엠프레스 벳즈",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "흉터각인",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 흉터각인"
+        },
+        {
+          "name": "태초의 별 - 권투글러브",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "낫",
+      "folder": "scythe",
+      "items": [
+        {
+          "name": "유일무이한 낫",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "소울 스토커",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 낫",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "소울 헌터",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 낫",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "소울 프레데터",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 소울 프레데터",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "재앙의 송곳니",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 재앙의 송곳니"
+        },
+        {
+          "name": "태초의 별 - 낫",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "너클",
+      "folder": "knuckle",
+      "items": [
+        {
+          "name": "유일무이한 너클",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "넨 스텔라",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 너클",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "넨 비아렉티아",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 너클",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "넨 아스트론",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 넨 아스트론",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "종언을 끊어내는 주먹",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 종언을 끊어내는 주먹"
+        },
+        {
+          "name": "태초의 별 - 너클",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "단검",
+      "folder": "dagger",
+      "items": [
+        {
+          "name": "유일무이한 단검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "여제의 화려한 은장도",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 단검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "여제의 찬란한 은장도",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 단검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "여제의 영롱한 은장도",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 여제의 영롱한 은장도",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "원한 서린 재앙의 어금니",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 원한 서린 재앙의 어금니"
+        },
+        {
+          "name": "태초의 별 - 단검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "대검",
+      "folder": "hsword",
+      "items": [
+        {
+          "name": "유일무이한 대검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "제1형 - 공식, 필중의 운검",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 대검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "제2형 - 수식, 방어의 운검",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 대검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "특형 - 호위무신의 운검",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 특형 - 호위무신의 운검",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "찢어지는 비명의 메아리",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 찢어지는 비명의 메아리"
+        },
+        {
+          "name": "태초의 별 - 대검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "도",
+      "folder": "katana",
+      "items": [
+        {
+          "name": "유일무이한 도",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "범작 금인도",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 도",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "명작 금인예도",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 도",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "역작 금인필살도",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 역작 금인필살도",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "요도 : 날뛰는 흑혈",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 요도 : 날뛰는 흑혈"
+        },
+        {
+          "name": "태초의 별 - 도",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "둔기",
+      "folder": "club",
+      "items": [
+        {
+          "name": "유일무이한 둔기",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양얼의 나뭇가지 : 강",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 둔기",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양얼의 나뭇가지 : 극",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 둔기",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양얼의 나뭇가지 : 초",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 양얼의 나뭇가지 : 초",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "구속된 공작의 아귀",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 구속된 공작의 아귀"
+        },
+        {
+          "name": "태초의 별 - 둔기",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "로드",
+      "folder": "rod",
+      "items": [
+        {
+          "name": "유일무이한 로드",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양치기의 첫번째 거짓말",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 로드",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양치기의 두번째 거짓말",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 로드",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "양치기의 마지막 진실",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 양치기의 마지막 진실",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "아우게이오우 : 이름 잃은 자의 피리",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 아우게이오우 : 이름 잃은 자의 피리"
+        },
+        {
+          "name": "태초의 별 - 로드",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "리볼버",
+      "folder": "revolver",
+      "items": [
+        {
+          "name": "유일무이한 리볼버",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "레인저의 길",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 리볼버",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "레인저의 숙명",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 리볼버",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "노블레스 오브 레인저",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 노블레스 오브 레인저",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오염된 피의 쾌",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 오염된 피의 쾌"
+        },
+        {
+          "name": "태초의 별 - 리볼버",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "머스켓",
+      "folder": "musket",
+      "items": [
+        {
+          "name": "유일무이한 머스켓",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리턴드 스나이퍼 오브 파이어",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 머스켓",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리턴드 스나이퍼 오브 플레임",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 머스켓",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리턴드 스나이퍼 오브 블랙 로즈",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 리턴드 스나이퍼 오브 블랙 로즈",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "베놈 앱서버",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 베놈 앱서버"
+        },
+        {
+          "name": "태초의 별 - 머스켓",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "미늘창",
+      "folder": "halberd",
+      "items": [
+        {
+          "name": "유일무이한 미늘창",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "흑룡언월도",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 미늘창",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "改 : 흑룡언월도",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 미늘창",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "眞 : 흑룡언월도",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 眞 : 흑룡언월도",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "위선자의 응징",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 위선자의 응징"
+        },
+        {
+          "name": "태초의 별 - 미늘창",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "배틀액스",
+      "folder": "axe",
+      "items": [
+        {
+          "name": "유일무이한 배틀액스",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "대지파괴자",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 배틀액스",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "행성분쇄자",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 배틀액스",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "멸망의 근원",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 멸망의 근원",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "묘혈의 배틀액스",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 묘혈의 배틀액스"
+        },
+        {
+          "name": "태초의 별 - 배틀액스",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "보우건",
+      "folder": "bowgun",
+      "items": [
+        {
+          "name": "유일무이한 보우건",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "얼어버린 불꽃의 살",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 보우건",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "타버린 얼음의 살",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 보우건",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "얼어붙은 불꽃의 살",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 얼어붙은 불꽃의 살",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "모독을 속삭이는 깃",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 모독을 속삭이는 깃"
+        },
+        {
+          "name": "태초의 별 - 보우건",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "봉",
+      "folder": "pole",
+      "items": [
+        {
+          "name": "유일무이한 봉",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "케세라세라 : 포츈",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 봉",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "카르페디엠 : 모어 해피~",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 봉",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "하쿠나마타타 : 원더풀",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 하쿠나마타타 : 원더풀",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "비정이 깃든 고목",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 비정이 깃든 고목"
+        },
+        {
+          "name": "태초의 별 - 봉",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "빗자루",
+      "folder": "broom",
+      "items": [
+        {
+          "name": "유일무이한 빗자루",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "칠흑의 기도",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 빗자루",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "칠흑의 기원",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 빗자루",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "칠흑의 저주",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 칠흑의 저주",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "종언을 비트는 흑미",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 종언을 비트는 흑미"
+        },
+        {
+          "name": "태초의 별 - 빗자루",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "선현궁",
+      "folder": "sbow",
+      "items": [
+        {
+          "name": "유일무이한 선현궁",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "시크릿 솔로",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 선현궁",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "시크릿 듀엣",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 선현궁",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "시크릿 콘서트",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 시크릿 콘서트",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "별을 꿈꿨던 눈동자",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 별을 꿈꿨던 눈동자"
+        },
+        {
+          "name": "태초의 별 - 선현궁",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "소검",
+      "folder": "ssword",
+      "items": [
+        {
+          "name": "유일무이한 소검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무형검 - 고수",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 소검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무형검 - 절정",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 소검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무형검 - 생사경",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 무형검 - 생사경",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "끓어오르는 피의 그림자",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 끓어오르는 피의 그림자"
+        },
+        {
+          "name": "태초의 별 - 소검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "소태도",
+      "folder": "sblade",
+      "items": [
+        {
+          "name": "유일무이한 소태도",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "나스카 : 영혼의 속삭임",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 소태도",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "나스카 : 영혼의 비명",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 소태도",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "나스카 : 영혼의 심판",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 나스카 : 영혼의 심판",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "차원을 베는 영혼검",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 차원을 베는 영혼검"
+        },
+        {
+          "name": "태초의 별 - 소태도",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "스탭",
+      "folder": "staff",
+      "items": [
+        {
+          "name": "유일무이한 스태프",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "봉인된 지식",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 스태프",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "금지된 지식",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 스태프",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "해방된 지식",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 해방된 지식",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "끝없는 분노의 지팡이",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 끝없는 분노의 지팡이"
+        },
+        {
+          "name": "태초의 별 - 스태프",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "십자가",
+      "folder": "cross",
+      "items": [
+        {
+          "name": "유일무이한 십자가",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "영광의 올리브 나무 십자가",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 십자가",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "구원의 올리브 나무 십자가",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 십자가",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "영원한 올리브 나무 십자가",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 영원한 올리브 나무 십자가",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "더러운 별의 지배자",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 더러운 별의 지배자"
+        },
+        {
+          "name": "태초의 별 - 십자가",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "쌍검",
+      "folder": "twinsword",
+      "items": [
+        {
+          "name": "유일무이한 쌍검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "웨이빙 인페르노",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 쌍검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "블레이징 인페르노",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 쌍검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "샤이닝 인페르노",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 샤이닝 인페르노",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "흉터가 깃든 분노",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 흉터가 깃든 분노"
+        },
+        {
+          "name": "태초의 별 - 쌍검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "앵커",
+      "folder": "anchor",
+      "items": [
+        {
+          "name": "유일무이한 앵커",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오케아누스 타이드",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 앵커",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오케아누스 어비스",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 앵커",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오케아누스 프라이모디어",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 오케아누스 프라이모디어",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "뒤틀린 신념의 칼날",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 뒤틀린 신념의 칼날"
+        },
+        {
+          "name": "태초의 별 - 앵커",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "에테리얼 보우",
+      "folder": "ebow",
+      "items": [
+        {
+          "name": "유일무이한 에테리얼 보우",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "인요의 새벽",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 에테리얼 보우",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "인요의 여명",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 에테리얼 보우",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "인요의 황혼",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 인요의 황혼",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "구속의 단죄",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 구속의 단죄"
+        },
+        {
+          "name": "태초의 별 - 에테리얼 보우",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "염주",
+      "folder": "rosary",
+      "items": [
+        {
+          "name": "유일무이한 염주",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "코멧 로저리",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 염주",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "슈팅 스타 로저리",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 염주",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "폴링 스타 로저리",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 폴링 스타 로저리",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "일루젼 베놈 로저리",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 일루젼 베놈 로저리"
+        },
+        {
+          "name": "태초의 별 - 염주",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "완드",
+      "folder": "wand",
+      "items": [
+        {
+          "name": "유일무이한 완드",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "로드 오브 테러",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 완드",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "로드 오브 피어",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 완드",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "로드 오브 호러",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 로드 오브 호러",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "종언의 선고",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 종언의 선고"
+        },
+        {
+          "name": "태초의 별 - 완드",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "자동권총",
+      "folder": "automatic",
+      "items": [
+        {
+          "name": "유일무이한 자동권총",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "이노베이션 오토매틱 건",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 자동권총",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "트랜스포메이션 오토매틱 건",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 자동권총",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "에볼루션 오토매틱 건",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 에볼루션 오토매틱 건",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "유혹을 부르는 선율",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 유혹을 부르는 선율"
+        },
+        {
+          "name": "태초의 별 - 자동권총",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "장궁",
+      "folder": "lbow",
+      "items": [
+        {
+          "name": "유일무이한 장궁",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미스트 트래블러",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 장궁",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미스트 익스플로러",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 장궁",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "미스트 파이오니어",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 미스트 파이오니어",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "검은 숨결의 히드라",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 검은 숨결의 히드라"
+        },
+        {
+          "name": "태초의 별 - 장궁",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "장도",
+      "folder": "lblade",
+      "items": [
+        {
+          "name": "유일무이한 장도",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "현월야천도",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 장도",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "반월야천도",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 장도",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "만월 : 월광야천도",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 만월 : 월광야천도",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "불신의 단말마",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 불신의 단말마"
+        },
+        {
+          "name": "태초의 별 - 장도",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "장창",
+      "folder": "pike",
+      "items": [
+        {
+          "name": "유일무이한 장창",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전장의 지배자",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 장창",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전장의 패왕",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 장창",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전장의 투신",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 전장의 투신",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "종언을 비튼 창",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 종언을 비튼 창"
+        },
+        {
+          "name": "태초의 별 - 장창",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "중검",
+      "folder": "mswd",
+      "items": [
+        {
+          "name": "유일무이한 중검",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "Burst-Saw",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 중검",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "Beast-Saw",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 중검",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "Brutal-Saw",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 Brutal-Saw",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "질병이 깃든 허기",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 질병이 깃든 허기"
+        },
+        {
+          "name": "태초의 별 - 중검",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "차크라 웨펀",
+      "folder": "chakraweapon",
+      "items": [
+        {
+          "name": "유일무이한 차크라 웨펀",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "악도의 수레바퀴",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 차크라 웨펀",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "선도의 수레바퀴",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 차크라 웨펀",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "육도의 수레바퀴",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 육도의 수레바퀴",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "부패한 심장검",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 부패한 심장검"
+        },
+        {
+          "name": "태초의 별 - 차크라 웨펀",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "창",
+      "folder": "spear",
+      "items": [
+        {
+          "name": "유일무이한 창",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "익스터미네이터",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 창",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "프로즌 익스터미네이터",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 창",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "앱솔루트 제로",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 앱솔루트 제로",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "흘러내리는 썩은 피",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 흘러내리는 썩은 피"
+        },
+        {
+          "name": "태초의 별 - 창",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "컴파운드 보우",
+      "folder": "pbow",
+      "items": [
+        {
+          "name": "유일무이한 컴파운드 보우",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "페이드 윙, 이카루스",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 컴파운드 보우",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "비비드 윙, 이카루스",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 컴파운드 보우",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "레디언트 윙, 이카루스",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 레디언트 윙, 이카루스",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "짐조 : 독을 마시는 새",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 짐조 : 독을 마시는 새"
+        },
+        {
+          "name": "태초의 별 - 컴파운드 보우",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "코어블레이드",
+      "folder": "coreswd",
+      "items": [
+        {
+          "name": "유일무이한 코어 블레이드",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오버클럭 하트",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 코어 블레이드",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "오버클럭 코어",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 코어 블레이드",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "코어 오리진",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 코어 오리진",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "비명의 장검",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 비명의 장검"
+        },
+        {
+          "name": "태초의 별 - 코어 블레이드",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "크로스슈터",
+      "folder": "cbow",
+      "items": [
+        {
+          "name": "유일무이한 크로스슈터",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "파트너 팔케",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 크로스슈터",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "프렌즈 팔케",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 크로스슈터",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "패밀리 팔케",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 패밀리 팔케",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "만개하는 불신의 눈",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 만개하는 불신의 눈"
+        },
+        {
+          "name": "태초의 별 - 크로스슈터",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "클로",
+      "folder": "claw",
+      "items": [
+        {
+          "name": "유일무이한 클로",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리리스의 슬픔",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 클로",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리리스의 한",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 클로",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "리리스, 디 이블",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 리리스, 디 이블",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "만 갈래로 뻗어가는 질병",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 만 갈래로 뻗어가는 질병"
+        },
+        {
+          "name": "태초의 별 - 클로",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "토템",
+      "folder": "totem",
+      "items": [
+        {
+          "name": "유일무이한 토템",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "폭군의 친절",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 토템",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "폭군의 자비",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 토템",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "폭군의 본의",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 폭군의 본의",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "썩은 시체의 아귀",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 썩은 시체의 아귀"
+        },
+        {
+          "name": "태초의 별 - 토템",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "통파",
+      "folder": "tonfa",
+      "items": [
+        {
+          "name": "유일무이한 통파",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "마나 서플라이",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 통파",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "마나 액티베이션",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 통파",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "파운더 오브 마나",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 파운더 오브 마나",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "육신에 스민 재앙",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 육신에 스민 재앙"
+        },
+        {
+          "name": "태초의 별 - 통파",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "투창",
+      "folder": "javelin",
+      "items": [
+        {
+          "name": "유일무이한 투창",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무영흑적살",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 투창",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무영흑주살",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 투창",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "무영흑단살",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 무영흑단살",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "독기로 점철된 절규",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 독기로 점철된 절규"
+        },
+        {
+          "name": "태초의 별 - 투창",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    },
+    {
+      "type": "핸드캐넌",
+      "folder": "hcannon",
+      "items": [
+        {
+          "name": "유일무이한 핸드캐넌",
+          "rarity": "유니크",
+          "line": null,
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "젊은 우르반의 치기",
+          "rarity": "레전더리",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "전설 속의 전승 - 핸드캐넌",
+          "rarity": "레전더리",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "초기형 우르반 거포",
+          "rarity": "에픽",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "서사시의 영웅담 - 핸드캐넌",
+          "rarity": "에픽",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "우르반의 걸작",
+          "rarity": "태초",
+          "line": "기본",
+          "maxTune": 3,
+          "tuned": "검은 질병의 우르반의 걸작",
+          "release": false,
+          "releasePending": null
+        },
+        {
+          "name": "광포한 비명의 분노",
+          "rarity": "태초",
+          "line": "해방",
+          "maxTune": 0,
+          "tuned": null,
+          "release": true,
+          "releasePending": "억압 - 광포한 비명의 분노"
+        },
+        {
+          "name": "태초의 별 - 핸드캐넌",
+          "rarity": "태초",
+          "line": "태초의 별",
+          "maxTune": 3,
+          "tuned": null,
+          "release": false,
+          "releasePending": null
+        }
+      ]
+    }
+  ]
 }

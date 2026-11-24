@@ -1,3 +1,4 @@
+import { WEAPON_RELEASE_MAX } from '@dfragon/lib/equipment-variants'
 import { NumberField, Select, Switch } from '@dfragon/ui'
 import {
   type EnchantOption,
@@ -161,6 +162,32 @@ export function PotencyControl({
         onValueChange={changePotency}
         min={0}
         max={FULL_POTENCY}
+      />
+    </div>
+  )
+}
+
+export function ReleaseControl({
+  slotLabel,
+  draft,
+  onChange
+}: {
+  slotLabel: string
+  draft: SlotDraft
+  onChange: (draft: Partial<SlotDraft>) => void
+}): React.JSX.Element {
+  function changeRelease(release: number): void {
+    onChange({ release })
+  }
+
+  return (
+    <div className="self-start">
+      <NumberField
+        aria-label={`${slotLabel} 해방`}
+        value={draft.release ?? WEAPON_RELEASE_MAX}
+        onValueChange={changeRelease}
+        min={0}
+        max={WEAPON_RELEASE_MAX}
       />
     </div>
   )

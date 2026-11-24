@@ -30,6 +30,7 @@ const equipmentItem = z.object({
   slotId: text,
   slotName: text,
   ...itemShape,
+  itemTypeDetail: text,
   setItemId: text,
   itemAvailableLevel: count,
   reinforce: count,
@@ -40,7 +41,8 @@ const equipmentItem = z.object({
     status: list(namedStat),
     reinforceSkill: list(z.object({ skills: list(z.object({ name: text, value: count })) }))
   }),
-  potency: section({ value: statValue })
+  potency: section({ value: statValue }),
+  weaponRelease: section({ value: count })
 })
 
 const setItem = z.object({
