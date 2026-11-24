@@ -254,6 +254,7 @@ export type {
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SkillAdoption,
+  SkillChainCount,
   SkillLevelCount,
   SkillSelectionCount
 } from './skill-adoption.js'
