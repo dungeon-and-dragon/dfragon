@@ -16,6 +16,11 @@ function backfillStart(backfilledUntil: Date | null): Date {
   return new Date(backfilledUntil.getTime() + MINUTE_MS)
 }
 
+// 남은 구간이 없으면 백필은 Neople을 부르지 않고 끝나, 요청을 넣는 쪽도 이 판정으로 요청하지 않는다.
+export function isEnhancementBackfilled(backfilledUntil: Date | null): boolean {
+  return splitTimelineRanges(backfillStart(backfilledUntil), BACKFILL_END).length === 0
+}
+
 export class EnhancementBackfillService {
   constructor(
     private readonly repository: EnhancementBackfillRepository,
