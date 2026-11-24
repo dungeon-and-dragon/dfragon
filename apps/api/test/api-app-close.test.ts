@@ -4,6 +4,7 @@ import { CatalogService } from '@dfragon/server-core/application/character-catal
 import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { ScoreWorker } from '@dfragon/server-core/infrastructure/score/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
+import { memoryTimelineRequests } from './timeline-request-fixtures.js'
 
 // 실제 라이브러리를 열지 않는다. worker는 테스트가 준 fake다.
 const SYNTHETIC_LIBRARY_PATH = '/synthetic/libdnfscore.so'
@@ -14,11 +15,9 @@ function scoreWorker(terminate: () => Promise<void>): ScoreWorker {
 
 function timelineClosedBy(close: () => Promise<void>): ApiHttpAppOptions['timeline'] {
   return {
-    sync: async () => undefined,
-    backfillEnhancements: async () => undefined,
-    backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
     read: async () => EMPTY_CHARACTER_TIMELINE,
     readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+    requests: memoryTimelineRequests().repository,
     close
   }
 }

@@ -949,51 +949,60 @@ test('이력 저장이 실패해도 상세 응답의 상태 코드와 본문은 
   assert.deepEqual(codes, ['CHARACTER_HISTORY_RECORD_FAILED'])
 })
 
-test('타임라인 동기화 요청이 예외를 던져도 상세 응답은 그대로이고 기본 정보를 저장한다', async (t) => {
+test('타임라인 동기화 요청 넣기가 실패해도 상세 응답은 그대로이고 기본 정보를 저장하며 실패 code를 남긴다', {
+  timeout: 10_000
+}, async (t) => {
   const payloads = payloadsWith(basicFields)
   const recorded: CharacterBasicInput[] = []
-  let backfillRequests = 0
-  const throwing = await listen({
+  const codes: string[] = []
+  let failureReported!: () => void
+  const reported = new Promise<void>((resolve) => {
+    failureReported = resolve
+  })
+  const failing = await listen({
     details: detailsReturning(payloads),
     timeline: {
-      // queue가 일을 시작하는 자리에서 던져, 동기화를 요청한 구독 함수까지 예외가 올라간다.
-      sync: () => {
-        throw new Error('synthetic subscriber failure')
-      },
-      backfillEnhancements: async () => {
-        backfillRequests++
-      },
-      backfillSeason: async () => assert.fail('옛 시즌 받기를 부르면 안 된다'),
       read: async () => assert.fail('타임라인을 읽으면 안 된다'),
       readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
+      requests: {
+        readStates: async () => {
+          throw new Error('database closed')
+        },
+        request: async () => assert.fail('상태를 읽지 못하면 넣으면 안 된다'),
+        has: async () => assert.fail('기다리면 안 된다'),
+        readSeasonBackfillSeasons: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
+      },
       close: async () => undefined
     },
     recordCharacterBasic: async (basic) => {
       recorded.push(basic)
+    },
+    writeAccessLog: (line) => {
+      const { code } = JSON.parse(line)
+      if (code !== undefined) {
+        codes.push(code)
+        failureReported()
+      }
     }
   })
-  t.after(() => throwing.app.close())
+  t.after(() => failing.app.close())
   const withoutDatabase = await listen({ details: detailsReturning(payloads) })
   t.after(() => withoutDatabase.app.close())
 
-  const response = await getDetails(throwing.origin)
+  const response = await getDetails(failing.origin)
   const expected = await getDetails(withoutDatabase.origin)
+  await reported
 
-  // 타임라인 구독 함수는 동기화 다음에 백필을 요청하므로, 백필 요청이 없어야 예외가 구독 함수 밖으로 나온 것이다.
-  assert.equal(backfillRequests, 0)
   assert.equal(response.status, 200)
   assert.deepEqual(withoutFetchTimes(response.body), withoutFetchTimes(expected.body))
   assert.deepEqual(recorded, [basicFields])
+  assert.deepEqual(codes, ['TIMELINE_SYNC_REQUEST_FAILED'])
 })
 
 for (const [name, database, connected] of [
+  ['DB 설정이 없으면 타임라인 요청 저장소와 기본 정보 기록 option이 없다', undefined, false],
   [
-    'DB 설정이 없으면 공개 app에 타임라인 queue가 없고 기본 정보 기록 option도 없다',
-    undefined,
-    false
-  ],
-  [
-    'DB 설정이 있으면 공개 app에 타임라인 queue가 있고 기본 정보 기록 option도 있다',
+    'DB 설정이 있으면 타임라인 요청 저장소와 기본 정보 기록 option이 있다',
     // 합성 값이며 실제 credential이 아니다. 연결은 첫 query 때 하므로 이 테스트는 DB에 연결하지 않는다.
     {
       host: '127.0.0.1',
@@ -1013,22 +1022,10 @@ for (const [name, database, connected] of [
       database,
       scoreLibraryPath: null
     })
-    const { app, readQueueCounts } = await createApiHttpApp(options)
+    const { app } = await createApiHttpApp(options)
     t.after(() => app.close())
 
-    // 상세 조회가 타임라인 동기화를 요청할 queue는 DB 설정을 준 app에만 있고, 없는 app에서 세면 던진다.
-    const queueNames = (() => {
-      try {
-        return readQueueCounts().map(({ name }) => name)
-      } catch {
-        return []
-      }
-    })()
-
-    const expectedQueueNames = connected
-      ? ['timeline-sync', 'enhancement-backfill', 'season-backfill']
-      : []
-    assert.deepEqual(queueNames, expectedQueueNames)
+    assert.equal(options.timeline?.requests !== undefined, connected)
     assert.equal(options.recordCharacterBasic !== undefined, connected)
   })
 }
