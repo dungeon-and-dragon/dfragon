@@ -23,7 +23,7 @@ import {
   weaponVariantsOf
 } from '@dfragon/lib/equipment-variants'
 import type { BuffSwitching } from '@dfragon/lib/buff-switching'
-import { type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
+import { findWornSlotItem, type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
 import {
   type CharacterDetailView,
   type EnchantOption,
@@ -145,6 +145,7 @@ export type SimulatorSlotItem = ItemView &
     category: SlotItemCategory
     slotName: string
     choices: readonly SlotItemChoice[]
+    wornChoiceId: string | null
   }>
 
 export type SimulatorRow =
@@ -493,6 +494,12 @@ function toSimulatorSlot(
   }
 }
 
+const LEVEL_SUFFIX = /\[\d+Lv\]$/
+
+function withoutLevel(name: string): string {
+  return name.replace(LEVEL_SUFFIX, '')
+}
+
 function slotItemRow(
   category: SlotItemCategory,
   item: WornItem | null | undefined,
@@ -505,12 +512,16 @@ function slotItemRow(
 
   const choices = slotItemsOf(category).map(({ id, name, item: represented }) => {
     const { itemId, rarity } = toItemView(represented)
+    const choiceName = withoutLevel(name)
 
-    return { id, name, itemId, rarity }
+    return { id, name: choiceName, itemId, rarity }
   })
   const view = toItemView(item)
+  const itemName = view.itemName !== null ? withoutLevel(view.itemName) : null
+  const wornChoiceId =
+    findWornSlotItem(category, { itemId: item.itemId, itemName: item.itemName })?.id ?? null
   const name = slotName ?? SLOT_ITEM_NAMES[category]
-  const slotItem = { ...view, category, slotName: name, choices }
+  const slotItem = { ...view, itemName, category, slotName: name, choices, wornChoiceId }
 
   return [{ kind: 'slotItem', slotItem }]
 }
@@ -814,7 +825,7 @@ function changeSlotItem(
 ): SimulatorChanges {
   const { [slotItem.category]: _previous, ...others } = changes.slotItems
 
-  if (id === null) {
+  if (id === null || id === slotItem.wornChoiceId) {
     return { ...changes, slotItems: others }
   }
 
