@@ -35,7 +35,7 @@ import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
 import { ITEM_DETAIL_URL, itemDetailHandlers } from '#widgets/item-tooltip/api/item-detail.handlers'
-import { simulationScore } from './api/simulation.fixture'
+import { simulationScore, withSwitchingEquipment } from './api/simulation.fixture'
 import { simulationUrl } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
 import type { SimulationBody } from './model/simulator-draft'
@@ -1092,6 +1092,14 @@ it('좁은 화면에서는 장비창의 줄을 누르면 그 줄의 조작을 �
   expect(weaponSheet?.querySelector<HTMLInputElement>('[aria-label="무기 해방"]')?.value).toBe(
     '100'
   )
+
+  await choose('스위칭')
+
+  const switchingSheet = document.querySelector<HTMLElement>('[role="dialog"]')
+  expect(switchingSheet?.querySelector('h2')?.textContent).toBe('스위칭')
+  expect(
+    switchingSheet?.querySelector<HTMLInputElement>('[aria-label="짙편린 부위 수"]')?.value
+  ).toBe('0')
 })
 
 it('캐릭터 띠가 보이는 동안에는 요약 줄이 없고, 띠가 화면 밖으로 나가면 요약 줄이 나타나 서버, 캐릭터명, 점수를 담는다', async () => {
@@ -1458,18 +1466,34 @@ function editorTitle(): string | null | undefined {
   return container.querySelector('aside h2')?.textContent
 }
 
-it('아바타 줄은 현재 착용 아바타를, 스위칭 줄은 버프 강화 스킬 이름과 지금 레벨을 보인다', async () => {
+it('아바타 줄은 현재 착용 아바타를, 스위칭 줄은 버프 강화 스킬 이름과 지금 레벨, 지금 등록한 짙편린 부위 수를 보인다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
   expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
-  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 0부위')
 })
 
-it('버퍼는 주 버프 스킬의 지금 레벨을 스위칭 줄에 보인다', async () => {
+it('딜러가 버프 강화 장비에 등록한 짙편린 수를 스위칭 줄과 짙편린 칸에 보인다', async () => {
+  await render(withSwitchingEquipment(characterDetailFixture('dealer'), 9))
+  await waitForScores(UNCHANGED_SCORES)
+
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 9부위')
+
+  await choose('스위칭')
+
+  expect((control('짙편린 부위 수') as HTMLInputElement).value).toBe('9')
+})
+
+it('버퍼는 주 버프 스킬의 지금 레벨만 스위칭 줄에 보이고 짙편린 칸이 없다', async () => {
   await render(characterDetailFixture('buffer'))
 
   await vi.waitFor(() => expect(rowValueOf('스위칭')).toBe('러블리 템포 30레벨'))
+
+  await choose('스위칭')
+
+  expect(has('스위칭 레벨')).toBe(true)
+  expect(has('짙편린 부위 수')).toBe(false)
 })
 
 it('종결 아바타 프리셋이 없는 전직에는 아바타 줄만 없다', async () => {
@@ -1512,13 +1536,38 @@ it('스위칭 줄을 고르면 스킬 이름 칸에 배운 레벨부터 10레벨
 
   await waitForScores(ONE_CHOICE_SCORES)
   expect(bodies.at(-1)).toEqual({ equipment: [], buffLevel: 20 })
-  expect(rowValueOf('스위칭')).toBe('광적인 믿음 20레벨')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 20레벨, 짙편린 0부위')
   expect(resetButton().disabled).toBe(false)
 
   await pick('스위칭 레벨', '16레벨')
 
   await waitForScores(UNCHANGED_SCORES)
-  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 0부위')
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('딜러가 짙편린 칸에서 부위 수를 12까지 올리면 그 수를 요청하고, 지금 등록한 수로 돌아오면 원본 점수로 돌아간다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await choose('스위칭')
+
+  expect(container.querySelectorAll('aside .label')[1]?.textContent).toBe('짙편린')
+  expect((control('짙편린 부위 수') as HTMLInputElement).value).toBe('0')
+  expect(control('짙편린 부위 수 내리기').hasAttribute('disabled')).toBe(true)
+
+  await step('짙편린 부위 수 올리기', 12)
+
+  await waitForScores(ONE_CHOICE_SCORES)
+  expect(bodies.at(-1)).toEqual({ equipment: [], switchingEquipment: 12 })
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 12부위')
+  expect(control('짙편린 부위 수 올리기').hasAttribute('disabled')).toBe(true)
+  expect(resetButton().disabled).toBe(false)
+
+  await step('짙편린 부위 수 내리기', 12)
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 0부위')
   expect(resetButton().disabled).toBe(true)
 })
 
@@ -1544,24 +1593,31 @@ it('아바타 줄에서 종결 아바타와 엠블렘을 고르면 프리셋을 
   expect(resetButton().disabled).toBe(true)
 })
 
-it('초기화하면 고른 아바타 프리셋과 스위칭 레벨을 함께 되돌린다', async () => {
+it('초기화하면 고른 아바타 프리셋, 스위칭 레벨과 짙편린 부위 수를 함께 되돌린다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
   await choose('아바타')
   await pick('아바타', '종결 아바타와 엠블렘')
   await choose('스위칭')
   await pick('스위칭 레벨', '12레벨')
+  await step('짙편린 부위 수 올리기', 2)
   await waitForScores([
     ['현재', '1,000,000'],
-    ['변경 후', '1,002,000'],
-    ['차이', '+2,000']
+    ['변경 후', '1,003,000'],
+    ['차이', '+3,000']
   ])
-  expect(bodies.at(-1)).toEqual({ equipment: [], avatarPreset: 'best', buffLevel: 12 })
+  expect(bodies.at(-1)).toEqual({
+    equipment: [],
+    avatarPreset: 'best',
+    buffLevel: 12,
+    switchingEquipment: 2
+  })
 
   await act(async () => resetButton().click())
 
   await waitForScores(UNCHANGED_SCORES)
   expect(rowValueOf('아바타')).toBe('현재 착용 아바타')
-  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨')
+  expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 0부위')
   expect(control('스위칭 레벨').textContent).toBe('16레벨')
+  expect((control('짙편린 부위 수') as HTMLInputElement).value).toBe('0')
 })
