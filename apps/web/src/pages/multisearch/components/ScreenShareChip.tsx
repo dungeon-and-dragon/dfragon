@@ -57,8 +57,8 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
     // 보드 헤더 끝의 도구 간격(4px)에 더해 마지막 캡처 시각, 스냅샷과 12px씩 띄운다.
     <span className="mr-2 inline-flex">
       <HeaderTooltip label={status} disabled={status.length === 0}>
-        {sharePrompt ? (
-          <span className={tooltipTriggerClass}>
+        <span className={tooltipTriggerClass}>
+          {sharePrompt ? (
             <Button
               variant="primary"
               size="sm"
@@ -68,25 +68,22 @@ export function ScreenShareChip({ host }: { host: BrowserHost }): React.JSX.Elem
               <MonitorIcon className="size-icon-sm" />
               화면 공유
             </Button>
-          </span>
-        ) : (
-          <button
-            type="button"
-            aria-label={
-              sourceReady ? `화면 공유 중지, ${state.label}` : `화면 공유, ${state.label}`
-            }
-            onClick={sourceReady ? disconnect : connect}
-            className="inline-flex cursor-pointer rounded-badge focus-ring"
-          >
-            <StatusChip tone={state.tone} busy={state.busy} size="md">
-              {state.label}
-            </StatusChip>
-          </button>
-        )}
+          ) : (
+            <button
+              type="button"
+              aria-label={
+                sourceReady ? `화면 공유 중지, ${state.label}` : `화면 공유, ${state.label}`
+              }
+              onClick={sourceReady ? disconnect : connect}
+              className="inline-flex cursor-pointer rounded-badge focus-ring"
+            >
+              <StatusChip tone={state.tone} busy={state.busy} size="md">
+                {state.label}
+              </StatusChip>
+            </button>
+          )}
+        </span>
       </HeaderTooltip>
-      <span role="status" data-capture-announcer="" className="sr-only">
-        {status}
-      </span>
     </span>
   )
 }
