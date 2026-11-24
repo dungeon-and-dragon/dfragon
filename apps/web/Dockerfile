@@ -26,6 +26,9 @@ RUN node scripts/server-build-info.mjs web "$SOURCE_COMMIT" /workspace/build-inf
 FROM docker.io/library/node:26-bookworm-slim@sha256:86f07bc9c5dce4578cf37e5a418b7bfc7f817cda25cde66e2b66e95ed86c4567 AS runtime
 ENV NODE_ENV=production
 ENV PORT=8080
+# Without this the cluster forks one worker per host CPU, not per container CPU limit, and runs out of memory.
+# The deploy raises it together with the service's CPU and memory limits.
+ENV NITRO_CLUSTER_WORKERS=1
 WORKDIR /app
 # The fleet probes this service with wget, as it did the earlier Caddy image. Keeping that probe working lets a
 # deploy move between the two images in either direction without changing the service definition first.

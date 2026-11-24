@@ -141,7 +141,12 @@ export default defineConfig(({ command }) => {
         client: { entry: 'app/client.tsx' },
         start: { entry: 'app/start.ts' }
       }),
-      nitro({ routeRules, cache: { memory: { maxBytes: PAGE_CACHE_MAX_BYTES } } }),
+      // node-cluster는 worker 수를 NITRO_CLUSTER_WORKERS로 받고, 없으면 컨테이너 CPU 상한이 아닌 host의 CPU 수만큼 띄운다.
+      nitro({
+        preset: 'node-cluster',
+        routeRules,
+        cache: { memory: { maxBytes: PAGE_CACHE_MAX_BYTES } }
+      }),
       react(),
       uiNotices(),
       clientNotices(),
