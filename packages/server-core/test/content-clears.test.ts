@@ -12,6 +12,7 @@ import {
   toLatestContentsMinFame,
   toPopulationMinFame
 } from '../src/domain/content-clears/contents.js'
+import { CLEAR_LEGIONS } from '../src/domain/content-clears/legions.js'
 import { sortClearCountsByRelease } from '../src/domain/content-clears/release-order.js'
 
 // 합성 타임라인 기록이다. data는 운영 DB에서 본 Neople 응답의 필드 모양을 따른다.
@@ -184,9 +185,12 @@ test('점수 계산 하한은 종류별 최신 컨텐츠의 입장 명성 가운
   assert.equal(toLatestContentsMinFame(), 104_292)
 })
 
-test('분모 기준 명성은 컨텐츠마다 그 입장 명성이다', () => {
+test('분모 기준 명성은 컨텐츠마다 그 입장 명성이고, 입장 명성이 수집 하한보다 낮은 베누스는 수집 하한이다', () => {
   assert.deepEqual(
-    CLEAR_CONTENTS.map((content) => [content.id, toPopulationMinFame(content, 47_684)]),
+    [...CLEAR_CONTENTS, ...CLEAR_LEGIONS].map((content) => [
+      content.id,
+      toPopulationMinFame(content, 47_684)
+    ]),
     [
       ['nabel-normal', 47_684],
       ['nabel-hard', 47_684],
@@ -195,7 +199,9 @@ test('분모 기준 명성은 컨텐츠마다 그 입장 명성이다', () => {
       ['diregie-hard', 63_257],
       ['michaela-normal', 104_292],
       ['michaela-hard', 104_292],
-      ['engraved-nightmare-1', 119_414]
+      ['engraved-nightmare-1', 119_414],
+      ['legion-apocalypse', 73_993],
+      ['legion-venus', 47_684]
     ]
   )
 })
