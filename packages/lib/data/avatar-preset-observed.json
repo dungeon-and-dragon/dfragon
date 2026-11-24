@@ -1,0 +1,7431 @@
+{
+  "observedAt": "2026-11-24",
+  "sample": {
+    "fameAtLeast": 120000,
+    "topPerJob": 200
+  },
+  "parts": {
+    "HEADGEAR": {
+      "slotName": "모자 아바타",
+      "itemName": "레어 모자 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "붉은빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "붉은빛"
+        }
+      ],
+      "count": 14394,
+      "total": 14394
+    },
+    "HAIR": {
+      "slotName": "머리 아바타",
+      "itemName": "레어 머리 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "붉은빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "붉은빛"
+        }
+      ],
+      "count": 14393,
+      "total": 14393
+    },
+    "FACE": {
+      "slotName": "얼굴 아바타",
+      "itemName": "레어 얼굴 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "노란빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "노란빛"
+        }
+      ],
+      "count": 14395,
+      "total": 14395
+    },
+    "BREAST": {
+      "slotName": "목가슴 아바타",
+      "itemName": "레어 목가슴 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "노란빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "노란빛"
+        }
+      ],
+      "count": 14392,
+      "total": 14392
+    },
+    "JACKET": {
+      "slotName": "상의 아바타",
+      "itemName": "레어 상의 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "플래티넘"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "녹색빛"
+        },
+        {
+          "slotNo": 3,
+          "slotColor": "녹색빛"
+        }
+      ],
+      "count": 14394,
+      "total": 14394
+    },
+    "PANTS": {
+      "slotName": "하의 아바타",
+      "itemName": "레어 하의 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "플래티넘"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "녹색빛"
+        },
+        {
+          "slotNo": 3,
+          "slotColor": "녹색빛"
+        }
+      ],
+      "count": 14394,
+      "total": 14394
+    },
+    "WAIST": {
+      "slotName": "허리 아바타",
+      "itemName": "레어 허리 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "푸른빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "푸른빛"
+        }
+      ],
+      "count": 14393,
+      "total": 14393
+    },
+    "SHOES": {
+      "slotName": "신발 아바타",
+      "itemName": "레어 신발 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "푸른빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "푸른빛"
+        }
+      ],
+      "count": 14393,
+      "total": 14393
+    },
+    "WEAPON": {
+      "slotName": "무기 아바타",
+      "itemName": "레어 무기 클론 아바타[75Lv]",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "다색"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "다색"
+        }
+      ],
+      "count": 13918,
+      "total": 13922
+    }
+  },
+  "emblemItems": [
+    {
+      "itemName": "찬란한 그린 엠블렘[정신력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "f6a59d1b221a1cde3bb14e7e5ad8c35b",
+          "count": 450
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 그린 엠블렘[체력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "01351c7a80190bbbf8c75c2186af523a",
+          "count": 144
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "count": 5378
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "d34435a47f1397d2e1ae8347e6fae64e",
+          "count": 1478
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "count": 4419
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "count": 3363
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[공격속도 + 이동속도]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "8d96a7ecbc126cad8363ee2d6dd1a120",
+          "count": 7468
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "d8847b5c0076e252d858804b09079ba3",
+          "count": 1518
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "count": 12388
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[캐스트속도 + 이동속도]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "a3ed746bd0391b3522290b3acf218f48",
+          "count": 1899
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "count": 14386
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 듀얼 엠블렘[힘 + 회피율]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "8aea91f1f560e7a16aa66b912a84e472",
+          "count": 1398
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+          "count": 1942
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 붉은빛 엠블렘[지능]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "count": 16360
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 붉은빛 엠블렘[체력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "0cf04676a99d95decd2cb6070b762348",
+          "count": 1251
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 붉은빛 엠블렘[힘]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "count": 18890
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 옐로우 엠블렘[정신력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "2b59d0a1dd5e577230bca0d05ca92f24",
+          "count": 414
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 옐로우 엠블렘[지능]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "count": 2442
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 옐로우 엠블렘[체력]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "a7a0538826ccea6c9f30601443fa99ed",
+          "count": 144
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 옐로우 엠블렘[힘]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "count": 1622
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "count": 13489
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[apius::전장정보();]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2ec1a22c7adace44069e2c7bda75c649",
+          "count": 266
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2760dde03c50010d863c16e387e7b675",
+          "count": 257
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ffb65c6ef4f29989ad99ca52ff25e726",
+          "count": 274
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[강인한 신념]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "87521b6f1e7e997ace6c4131b282ded7",
+          "count": 200
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[검귀의 도 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "eae9440cbc61c443d10bd70afa780ae8",
+          "count": 154
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[검기상인]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b0f0c19cba4a6960d83249aaf0186362",
+          "count": 195
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[계시 : 아리아]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "75a3c4d82581e501c77b18640348f9ff",
+          "count": 201
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[계열강화]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "103b9ee0e3bb8f6dbc287e78225dd273",
+          "count": 324
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[광창 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9b8503d6df8d81c18e346c8c4b5a2a19",
+          "count": 194
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[교감]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "ab05403429c41d99a10a0669e423a7cb",
+          "count": 163
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[급소 지정](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "df1271d77ba411d2e99421d760402e93",
+          "count": 214
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[나선의 넨](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "77a1b8bac9e7a8d3a4ab73997dd71f36",
+          "count": 233
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[나선의 넨](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "98c425d8b167c4c7527ba7bda1058538",
+          "count": 137
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[날카로운 단검]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0d15dcddb486dcff01b555d34d7bc64e",
+          "count": 282
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[노 쿼터]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "84490a00af3c6f16993ff49df5440efb",
+          "count": 338
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[니우의 전투술]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "63c2c7e8c446915a9866fc392e1d5c67",
+          "count": 102
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[달의 커튼]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a1cadc6f1029d448d775527602409119",
+          "count": 211
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[대식가]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "38735ff0b55d5c6983967a7fbca60738",
+          "count": 287
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[도그마 디바이스]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "6bf72fa33176ea30122e242664c10e84",
+          "count": 309
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[도발](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f4795d99bc49c1d784972687cf2377d7",
+          "count": 266
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[도발](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f0aa750bb897aad0599fa819785b1204",
+          "count": 229
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[로그의 무기 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3b0a072b854748f3960102335ec7db59",
+          "count": 125
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[마검 제어]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "13ffa1403a2600d699f78bfed120cb9c",
+          "count": 287
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[머슬 시프트](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "c80a4640e862bf8cdc88c3dbf0e98867",
+          "count": 295
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[무기 숙련]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d8c5ed1c6da38dceb6c7e17da17f2183",
+          "count": 86
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[미라지 부스트]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "dbeef919b226cf955536265249de33ec",
+          "count": 213
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[발라크르의 맹약]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "27ceb755ec09c5ba8ab04ae97dd27224",
+          "count": 310
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[발현]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3f8671a7369fb406cabf68d7cc04b7e4",
+          "count": 327
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[법력 강화]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "c4b4c4e42a4495411882ee3178d66ce3",
+          "count": 301
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[병기 숙련](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e4395fa332a5ac427722e38700b6e327",
+          "count": 268
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[병기 숙련](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f5f7774d7fa258649dc4558bcc30244f",
+          "count": 254
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[복제의 유산]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "63a7d050821cf644a18cef5389834136",
+          "count": 198
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[블러드 혼]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "be422d450eb91d1aa8a28ba92d31384b",
+          "count": 173
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[빈티지]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "73a64ed9d2d90cfc5167e091c5ca53a1",
+          "count": 85
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[사냥감 식별]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "72a8b9a282f44e343224464e48787de0",
+          "count": 136
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[삼화취정]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "eb93f3de4225632baa0849f2a8ee48ec",
+          "count": 260
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[성화]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "76ad4a6586f6259e65921f69227e9103",
+          "count": 87
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[세라픽 페더]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "005b66b3b82b8b7a7f947ccbcc4e1ea4",
+          "count": 221
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[센서빌리티]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d097efe44f3caaecb49bc0d1e677e94f",
+          "count": 190
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[센세이션]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "279782ac7c319218fb7d4de89a54f7af",
+          "count": 150
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[소태도 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "f9c1c5a2f2a6cdc3bf54ea5defd55f7b",
+          "count": 245
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[쇼타임]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "bbfef5c78c7f14b77c07a5dd628397e0",
+          "count": 368
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[수호의 은총]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3dc682e58027c0b67e88d1da28f880b8",
+          "count": 262
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[스타일리쉬](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "224cebf19acfc1430287e817d88c8edb",
+          "count": 238
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[스타일리쉬](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a5a06612a631777aa8a16e98b63a06d7",
+          "count": 170
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[스티그마]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "71073672f51fd42382ac0001fd84a716",
+          "count": 158
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[아크리액터]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b3ed45afc1162e0ae1a866f3218832d8",
+          "count": 303
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[어둠의 검사]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b0aeaddb31b4970afcda8521c076fbac",
+          "count": 110
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[어둠의 투창 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "dc1ef956a605d13af3a54eaa95aa7670",
+          "count": 287
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[여행자의 직감]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "0f6ffa4f3247b24b66acfba4732829b8",
+          "count": 112
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[용기의 은총]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2a8f574295422680ce324ee586c956fe",
+          "count": 208
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[원소의 이해]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "1bdb1e4410efa63f8be4e19cf9515ef1",
+          "count": 276
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[윌 드라이버]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "eb58057babfc5760a4b90f09d451c7b3",
+          "count": 268
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[윌 오브 피스트]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b65594c3551f4e7386f2e485ce5c4100",
+          "count": 312
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[인법 : 잔영 남기기]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e554480ad4dc2fa9f23cb285e48c6d47",
+          "count": 278
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[임팩트 스매쉬]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "3c679f111e29baf8bd0bdb6843e8a36f",
+          "count": 218
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[장도 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "844f8b3d2f5d7e5d83f4b46f4bca3ef4",
+          "count": 131
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[정신이 번쩍!]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "6ebc2fb5b29e049731e82422227f1f58",
+          "count": 194
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2f250777a60877eb6c34f4599232001b",
+          "count": 211
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[중검 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "8eeb278455b12860d797ed12940788a9",
+          "count": 252
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[중화기 마스터리](남)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a168829a90efd41a0ec9f767ce7de0d2",
+          "count": 266
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[중화기 마스터리](여)",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "c8a1b32c06de4756837a1c723cb89577",
+          "count": 327
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[코어 블레이드 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a8988eba1404649131b393bddbc11959",
+          "count": 274
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[퇴마의 서]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fb91922f84f9a5305d1721b2064a25f6",
+          "count": 234
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[트랜스포메이션]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9077665b40cb54148ad96130d87faa99",
+          "count": 208
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[특이체질]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "75a0679d48ccddd453cbaa6819c216d4",
+          "count": 147
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "79dc52fb4528ba8a3310d966499cdea3",
+          "count": 243
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[퍼페티어]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "49e624061c93d62a7dc91f43103687fe",
+          "count": 198
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[혈십자]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "cfd92fbcced6313a4b2a58888356246f",
+          "count": 240
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[혼혈]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d38715c6e9f2c461682f5020e76e43d7",
+          "count": 270
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[환청]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "dc2b6f6a18e5f054ab6ba10427759958",
+          "count": 302
+        }
+      ]
+    },
+    {
+      "itemName": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b6472003b71ae0fc1bd1411458eced6c",
+          "count": 203
+        }
+      ]
+    }
+  ],
+  "jobs": [
+    {
+      "role": "buffer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 패러메딕",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "tactics::지역거부(); 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 190,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "정신력 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 800,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[정신력]",
+          "count": 780,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 그린 엠블렘[정신력]",
+          "count": 788,
+          "total": 800
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 774,
+          "total": 792
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 800,
+          "total": 800
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[apius::전장정보();]",
+        "PANTS": "플래티넘 엠블렘[apius::전장정보();]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 인챈트리스",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 112,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 115,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "마리오네트 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 189,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 96,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 194,
+          "total": 194
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 800,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 798,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+          "count": 341,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 679,
+          "total": 766
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 780,
+          "total": 780
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[퍼페티어]",
+        "PANTS": "플래티넘 엠블렘[퍼페티어]",
+        "count": 195,
+        "total": 200
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "아처",
+      "jobGrowName": "眞 뮤즈",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 178,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "온 더 스테이지 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 194,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 130,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 197,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "정신력 55 증가",
+          "count": 195,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 800,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[정신력]",
+          "count": 800,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 그린 엠블렘[정신력]",
+          "count": 796,
+          "total": 800
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 678,
+          "total": 753
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 800,
+          "total": 800
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[센세이션]",
+        "PANTS": "플래티넘 엠블렘[센세이션]",
+        "count": 196,
+        "total": 200
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 113,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 113,
+          "total": 198
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 170,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 167,
+          "total": 198
+        },
+        "JACKET": {
+          "optionAbility": "아포칼립스 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 187,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 84,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "체력 55 증가",
+          "count": 134,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "체력 55 증가",
+          "count": 130,
+          "total": 194
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[체력]",
+          "count": 528,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[체력]",
+          "count": 524,
+          "total": 798
+        },
+        "녹색빛": {
+          "itemName": "찬란한 그린 엠블렘[체력]",
+          "count": 514,
+          "total": 800
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 525,
+          "total": 766
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[체력]",
+          "count": 530,
+          "total": 792
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[수호의 은총]",
+        "PANTS": "플래티넘 엠블렘[수호의 은총]",
+        "count": 189,
+        "total": 200
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 크루세이더",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 168,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "크럭스 오브 빅토리아 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 193,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 87,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 800,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 792,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+          "count": 390,
+          "total": 800
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 689,
+          "total": 782
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 796,
+          "total": 796
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[계시 : 아리아]",
+        "PANTS": "플래티넘 엠블렘[계시 : 아리아]",
+        "count": 196,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 런처",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 166,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 168,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "중화기 마스터리 스킬Lv +1",
+          "count": 196,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 174,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 109,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 173,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 783,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 673,
+          "total": 793
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 536,
+          "total": 793
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 662,
+          "total": 790
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 761,
+          "total": 775
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[중화기 마스터리](남)",
+        "PANTS": "플래티넘 엠블렘[중화기 마스터리](남)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 레인저",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 184,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 185,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "스타일리쉬 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 167,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 112,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 186,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 199,
+          "total": 199
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 800,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 627,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 613,
+          "total": 795
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 590,
+          "total": 800
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 778,
+          "total": 786
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[스타일리쉬](남)",
+        "PANTS": "플래티넘 엠블렘[스타일리쉬](남)",
+        "count": 196,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 메카닉",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 133,
+          "total": 199
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 128,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "아크리액터 스킬Lv +1",
+          "count": 153,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 160,
+          "total": 199
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 99,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 192,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 721,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 542,
+          "total": 769
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 381,
+          "total": 792
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 677,
+          "total": 776
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 711,
+          "total": 774
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[아크리액터]",
+        "PANTS": "플래티넘 엠블렘[아크리액터]",
+        "count": 199,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 스핏파이어",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 104,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 108,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "병기 숙련 스킬Lv +1",
+          "count": 195,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 167,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 121,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 114,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 116,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 443,
+          "total": 799
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 313,
+          "total": 783
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 205,
+          "total": 795
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 656,
+          "total": 773
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 440,
+          "total": 782
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[병기 숙련](남)",
+        "PANTS": "플래티넘 엠블렘[병기 숙련](남)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 어썰트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 156,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 156,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 173,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "센서빌리티 스킬Lv +1",
+          "count": 193,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 167,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 78,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 184,
+          "total": 185
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 758,
+          "total": 793
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 392,
+          "total": 784
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 462,
+          "total": 781
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 547,
+          "total": 775
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 716,
+          "total": 762
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[센서빌리티]",
+        "PANTS": "플래티넘 엠블렘[센서빌리티]",
+        "count": 193,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 런처",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 141,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 138,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 169,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "중화기 마스터리 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 156,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 87,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 173,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 195
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 741,
+          "total": 793
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 598,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 335,
+          "total": 784
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 642,
+          "total": 768
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 698,
+          "total": 762
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[중화기 마스터리](여)",
+        "PANTS": "플래티넘 엠블렘[중화기 마스터리](여)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 레인저",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 170,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 184,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 188,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "스타일리쉬 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 172,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 90,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 186,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 773,
+          "total": 799
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 532,
+          "total": 792
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 461,
+          "total": 787
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 501,
+          "total": 775
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 745,
+          "total": 774
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[스타일리쉬](여)",
+        "PANTS": "플래티넘 엠블렘[스타일리쉬](여)",
+        "count": 190,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 메카닉",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 151,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 151,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "G-오퍼레이터 스킬Lv +1",
+          "count": 181,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 170,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 107,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 196,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 664,
+          "total": 793
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 542,
+          "total": 788
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 395,
+          "total": 790
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 665,
+          "total": 775
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 656,
+          "total": 771
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[트랜스포메이션]",
+        "PANTS": "플래티넘 엠블렘[트랜스포메이션]",
+        "count": 141,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 스핏파이어",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 173,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "병기 숙련 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 156,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 109,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 150,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 139,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 477,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "count": 630,
+          "total": 785
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 242,
+          "total": 799
+        },
+        "푸른빛": {
+          "itemName": "찬란한 듀얼 엠블렘[캐스트속도 + 이동속도]",
+          "count": 431,
+          "total": 787
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 401,
+          "total": 774
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[병기 숙련](여)",
+        "PANTS": "플래티넘 엠블렘[병기 숙련](여)",
+        "count": 196,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 그래플러",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 117,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 115,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 177,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "강렬한 테이크 다운 스킬Lv +1",
+          "count": 187,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 157,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 90,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 178,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 187,
+          "total": 187
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 784,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 410,
+          "total": 781
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 345,
+          "total": 760
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 651,
+          "total": 772
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 708,
+          "total": 742
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
+        "PANTS": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 넨마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 172,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "나선의 넨 스킬Lv +1",
+          "count": 186,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 165,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 83,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 790,
+          "total": 795
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 405,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 417,
+          "total": 789
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 617,
+          "total": 776
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 755,
+          "total": 776
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[나선의 넨](남)",
+        "PANTS": "플래티넘 엠블렘[나선의 넨](남)",
+        "count": 193,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트라이커",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 170,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 165,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "화염의 각 스킬Lv +1",
+          "count": 199,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 172,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 95,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 183,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 193
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 783,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 561,
+          "total": 793
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 435,
+          "total": 774
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 604,
+          "total": 773
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 750,
+          "total": 778
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[머슬 시프트](남)",
+        "PANTS": "플래티넘 엠블렘[머슬 시프트](남)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트리트파이터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 129,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 131,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 182,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "도발 스킬Lv +1",
+          "count": 186,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 171,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 124,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 108,
+          "total": 187
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 441,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 411,
+          "total": 775
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 231,
+          "total": 767
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 621,
+          "total": 773
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 394,
+          "total": 741
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[도발](남)",
+        "PANTS": "플래티넘 엠블렘[도발](남)",
+        "count": 197,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 그래플러",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 106,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 105,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 199
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 178,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "강렬한 테이크 다운 스킬Lv +1",
+          "count": 197,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 155,
+          "total": 199
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 186,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 193
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 762,
+          "total": 787
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 562,
+          "total": 794
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 438,
+          "total": 783
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 641,
+          "total": 772
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 758,
+          "total": 776
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
+        "PANTS": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
+        "count": 194,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 넨마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "낙화태염성 스킬Lv +1",
+          "count": 193,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 169,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 123,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 766,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 558,
+          "total": 787
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 444,
+          "total": 794
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 633,
+          "total": 786
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 777,
+          "total": 788
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[나선의 넨](여)",
+        "PANTS": "플래티넘 엠블렘[나선의 넨](여)",
+        "count": 195,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트라이커",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 146,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 145,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 172,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 182,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "급소 지정 스킬Lv +1",
+          "count": 194,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 133,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 86,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 188,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 197,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 792,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 569,
+          "total": 799
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 509,
+          "total": 776
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 575,
+          "total": 791
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 777,
+          "total": 791
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[급소 지정](여)",
+        "PANTS": "플래티넘 엠블렘[급소 지정](여)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트리트파이터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 177,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 176,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 195,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 194,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "독문무공 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 176,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 103,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 170,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 169,
+          "total": 193
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 682,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 520,
+          "total": 779
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 359,
+          "total": 775
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 387,
+          "total": 772
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 626,
+          "total": 766
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[도발](여)",
+        "PANTS": "플래티넘 엠블렘[도발](여)",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 검귀",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 124,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 126,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "검귀의 도 마스터리 스킬Lv +1",
+          "count": 172,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 164,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 96,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 182,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 194
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 791,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 471,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 387,
+          "total": 790
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 560,
+          "total": 791
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 731,
+          "total": 780
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[검귀의 도 마스터리]",
+        "PANTS": "플래티넘 엠블렘[검귀의 도 마스터리]",
+        "count": 174,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 버서커",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 167,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 167,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "혈십자 스킬Lv +1",
+          "count": 111,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 180,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "암속성 저항 35 증가",
+          "count": 96,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 199,
+          "total": 199
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 765,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 653,
+          "total": 793
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 493,
+          "total": 800
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 565,
+          "total": 785
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 770,
+          "total": 798
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[혈십자]",
+        "PANTS": "플래티넘 엠블렘[혈십자]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 소울브링어",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 184,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "팬텀 마스터리 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 166,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 194,
+          "total": 199
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 745,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 466,
+          "total": 792
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 483,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 574,
+          "total": 799
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 729,
+          "total": 784
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[달의 커튼]",
+        "PANTS": "플래티넘 엠블렘[달의 커튼]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 아수라",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "뇌신의 기운 스킬Lv +1",
+          "count": 176,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 174,
+          "total": 199
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 99,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 766,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 380,
+          "total": 792
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 489,
+          "total": 783
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 512,
+          "total": 786
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 745,
+          "total": 780
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[정신이 번쩍!]",
+        "PANTS": "플래티넘 엠블렘[정신이 번쩍!]",
+        "count": 196,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 웨펀마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 162,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 158,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "검기상인 스킬Lv +1",
+          "count": 189,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 172,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 103,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 178,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 199,
+          "total": 200
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 788,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 606,
+          "total": 798
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 551,
+          "total": 793
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 668,
+          "total": 792
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 773,
+          "total": 788
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[검기상인]",
+        "PANTS": "플래티넘 엠블렘[검기상인]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 다크템플러",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 181,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 182,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "스티그마 스킬Lv +1",
+          "count": 199,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 172,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 111,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 197,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 195,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 755,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 481,
+          "total": 786
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 500,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 600,
+          "total": 778
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 764,
+          "total": 778
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[스티그마]",
+        "PANTS": "플래티넘 엠블렘[스티그마]",
+        "count": 197,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 데몬슬레이어",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 160,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 151,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 173,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "마검 제어 스킬Lv +1",
+          "count": 187,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 161,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "암속성 저항 35 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 189,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 200
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 734,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 606,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 400,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 569,
+          "total": 788
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 737,
+          "total": 774
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[마검 제어]",
+        "PANTS": "플래티넘 엠블렘[마검 제어]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 베가본드",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 167,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 167,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 181,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "삼화취정 스킬Lv +1",
+          "count": 199,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 154,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 86,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 192,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 724,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 602,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 371,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 591,
+          "total": 790
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 732,
+          "total": 786
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[삼화취정]",
+        "PANTS": "플래티넘 엠블렘[삼화취정]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 블레이드",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 157,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 154,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "빈티지 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 171,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 192,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 194,
+          "total": 195
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 768,
+          "total": 794
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 462,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 327,
+          "total": 798
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 640,
+          "total": 787
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 749,
+          "total": 781
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[빈티지]",
+        "PANTS": "플래티넘 엠블렘[빈티지]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 소드마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 161,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 160,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 188,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "무기 숙련 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 165,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 105,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 180,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 199
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 788,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 564,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 438,
+          "total": 786
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 565,
+          "total": 788
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 753,
+          "total": 787
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[무기 숙련]",
+        "PANTS": "플래티넘 엠블렘[무기 숙련]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "나이트",
+      "jobGrowName": "眞 드래곤나이트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 150,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 147,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "대식가 스킬Lv +1",
+          "count": 186,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 161,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 173,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 190,
+          "total": 191
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 772,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 445,
+          "total": 787
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 422,
+          "total": 768
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 603,
+          "total": 774
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 698,
+          "total": 742
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[대식가]",
+        "PANTS": "플래티넘 엠블렘[대식가]",
+        "count": 194,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "나이트",
+      "jobGrowName": "眞 엘븐나이트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 129,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 132,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 178,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "대자연의 가호 스킬Lv +1",
+          "count": 141,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 142,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 109,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 178,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 726,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 439,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 376,
+          "total": 794
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 513,
+          "total": 776
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 690,
+          "total": 753
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[강인한 신념]",
+        "PANTS": "플래티넘 엠블렘[강인한 신념]",
+        "count": 140,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "나이트",
+      "jobGrowName": "眞 카오스",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 177,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "혼혈 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 160,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 103,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 194,
+          "total": 194
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 737,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 447,
+          "total": 782
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 368,
+          "total": 795
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 697,
+          "total": 792
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 718,
+          "total": 766
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[혼혈]",
+        "PANTS": "플래티넘 엠블렘[혼혈]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "나이트",
+      "jobGrowName": "眞 팔라딘",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 163,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 163,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 181,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 182,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "세라픽 페더 스킬Lv +1",
+          "count": 192,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 184,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 124,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 179,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 789,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 530,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 435,
+          "total": 782
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 646,
+          "total": 786
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 727,
+          "total": 768
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[세라픽 페더]",
+        "PANTS": "플래티넘 엠블렘[세라픽 페더]",
+        "count": 197,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "17e417b31686389eebff6d754c3401ea",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "다크나이트",
+      "jobGrowName": "眞 다크나이트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 153,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 149,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "차원일치 스킬Lv +1",
+          "count": 195,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 188,
+          "total": 197
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 92,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 142,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 141,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 544,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 697,
+          "total": 797
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 296,
+          "total": 782
+        },
+        "푸른빛": {
+          "itemName": "찬란한 듀얼 엠블렘[공격속도 + 이동속도]",
+          "count": 561,
+          "total": 782
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 331,
+          "total": 774
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[어둠의 검사]",
+        "PANTS": "플래티넘 엠블렘[어둠의 검사]",
+        "count": 199,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "도적",
+      "jobGrowName": "眞 로그",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 113,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 113,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 169,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "로그의 무기 마스터리 스킬Lv +1",
+          "count": 197,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 163,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 117,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 191,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 196,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 790,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 606,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 290,
+          "total": 777
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 525,
+          "total": 765
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 766,
+          "total": 778
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[로그의 무기 마스터리]",
+        "PANTS": "플래티넘 엠블렘[로그의 무기 마스터리]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "도적",
+      "jobGrowName": "眞 사령술사",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 104,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 101,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 124,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 126,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "발라크르의 맹약 스킬Lv +1",
+          "count": 139,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 163,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "암속성 저항 35 증가",
+          "count": 115,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 198,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 191,
+          "total": 192
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 746,
+          "total": 793
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "count": 373,
+          "total": 770
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 358,
+          "total": 785
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 524,
+          "total": 759
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 730,
+          "total": 764
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[발라크르의 맹약]",
+        "PANTS": "플래티넘 엠블렘[발라크르의 맹약]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "도적",
+      "jobGrowName": "眞 섀도우댄서",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 123,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 123,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 169,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "날카로운 단검 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 176,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 117,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 179,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 184,
+          "total": 186
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 758,
+          "total": 780
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 470,
+          "total": 778
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 308,
+          "total": 720
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 576,
+          "total": 752
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 716,
+          "total": 748
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[날카로운 단검]",
+        "PANTS": "플래티넘 엠블렘[날카로운 단검]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "도적",
+      "jobGrowName": "眞 쿠노이치",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 158,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 160,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "인법 : 잔영 남기기 스킬Lv +1",
+          "count": 195,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 157,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 98,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 190,
+          "total": 192
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 736,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 435,
+          "total": 771
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 386,
+          "total": 770
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 693,
+          "total": 785
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 713,
+          "total": 758
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[인법 : 잔영 남기기]",
+        "PANTS": "플래티넘 엠블렘[인법 : 잔영 남기기]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 디멘션워커",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 151,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 151,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "도그마 디바이스 스킬Lv +1",
+          "count": 189,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 171,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 84,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 173,
+          "total": 175
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 746,
+          "total": 778
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 310,
+          "total": 743
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 363,
+          "total": 767
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 644,
+          "total": 757
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 702,
+          "total": 746
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[도그마 디바이스]",
+        "PANTS": "플래티넘 엠블렘[도그마 디바이스]",
+        "count": 198,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 블러드 메이지",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 149,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 147,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 172,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "블러드 혼 스킬Lv +1",
+          "count": 137,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 184,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 95,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 180,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 189,
+          "total": 191
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 751,
+          "total": 784
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 408,
+          "total": 789
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 420,
+          "total": 788
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 649,
+          "total": 774
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 708,
+          "total": 769
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[블러드 혼]",
+        "PANTS": "플래티넘 엠블렘[블러드 혼]",
+        "count": 128,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 빙결사",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 198,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "발현 스킬Lv +1",
+          "count": 169,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 169,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 88,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 193,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 726,
+          "total": 795
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 395,
+          "total": 768
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 361,
+          "total": 788
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 617,
+          "total": 783
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 716,
+          "total": 779
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[발현]",
+        "PANTS": "플래티넘 엠블렘[발현]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 스위프트 마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 150,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 149,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "휘몰아치는 질풍의 봉 마스터리 스킬Lv +1",
+          "count": 191,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 179,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 108,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 168,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 185,
+          "total": 186
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 720,
+          "total": 788
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 411,
+          "total": 787
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 475,
+          "total": 785
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 579,
+          "total": 773
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 692,
+          "total": 754
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
+        "PANTS": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 엘레멘탈 바머",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 191,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 190,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 164,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 169,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "원소의 이해 스킬Lv +1",
+          "count": 188,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 166,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 87,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 181,
+          "total": 182
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 717,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 368,
+          "total": 753
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 415,
+          "total": 777
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 662,
+          "total": 743
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 689,
+          "total": 770
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[원소의 이해]",
+        "PANTS": "플래티넘 엠블렘[원소의 이해]",
+        "count": 197,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 마도학자",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 192,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 190,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 141,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 143,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "퍼밀리어와 친하게 지내기 스킬Lv +1",
+          "count": 193,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 149,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 89,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 708,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 450,
+          "total": 776
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 375,
+          "total": 793
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 610,
+          "total": 776
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 714,
+          "total": 758
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
+        "PANTS": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 배틀메이지",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 106,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 105,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 185,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "니우의 전투술 스킬Lv +1",
+          "count": 114,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 171,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 130,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 109,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 116,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 474,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 380,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 회피율]",
+          "count": 178,
+          "total": 791
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 522,
+          "total": 786
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 452,
+          "total": 764
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[니우의 전투술]",
+        "PANTS": "플래티넘 엠블렘[니우의 전투술]",
+        "count": 103,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 소환사",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 197,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 125,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 124,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "교감 스킬Lv +1",
+          "count": 195,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 183,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 103,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 196,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 723,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 485,
+          "total": 777
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 362,
+          "total": 788
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 700,
+          "total": 789
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 702,
+          "total": 754
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[교감]",
+        "PANTS": "플래티넘 엠블렘[교감]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 엘레멘탈마스터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 186,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 187,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 152,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 155,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "속성 마스터리 스킬Lv +1",
+          "count": 196,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 147,
+          "total": 199
+        },
+        "WAIST": {
+          "optionAbility": "암속성 저항 35 증가",
+          "count": 74,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 199
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 738,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 510,
+          "total": 794
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 463,
+          "total": 787
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 652,
+          "total": 791
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 727,
+          "total": 760
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[쇼타임]",
+        "PANTS": "플래티넘 엠블렘[쇼타임]",
+        "count": 182,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마창사",
+      "jobGrowName": "眞 다크 랜서",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 184,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 184,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "어둠의 투창 마스터리 스킬Lv +1",
+          "count": 191,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 160,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 97,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 186,
+          "total": 189
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 758,
+          "total": 788
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 404,
+          "total": 762
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 367,
+          "total": 771
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 631,
+          "total": 762
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 705,
+          "total": 763
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[어둠의 투창 마스터리]",
+        "PANTS": "플래티넘 엠블렘[어둠의 투창 마스터리]",
+        "count": 198,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마창사",
+      "jobGrowName": "眞 듀얼리스트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 149,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 148,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 187,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "미라지 부스트 스킬Lv +1",
+          "count": 176,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 176,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 105,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 175,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 182,
+          "total": 183
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 726,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 448,
+          "total": 783
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 374,
+          "total": 778
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 541,
+          "total": 762
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 668,
+          "total": 749
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[미라지 부스트]",
+        "PANTS": "플래티넘 엠블렘[미라지 부스트]",
+        "count": 176,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마창사",
+      "jobGrowName": "眞 드래고니안 랜서",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 190,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "광창 마스터리 스킬Lv +1",
+          "count": 191,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 163,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 107,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 187,
+          "total": 188
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 776,
+          "total": 795
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 523,
+          "total": 776
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 468,
+          "total": 784
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 565,
+          "total": 751
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 710,
+          "total": 776
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[광창 마스터리]",
+        "PANTS": "플래티넘 엠블렘[광창 마스터리]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마창사",
+      "jobGrowName": "眞 뱅가드",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 134,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 132,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "임팩트 스매쉬 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 179,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 96,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 186,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 187,
+          "total": 189
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 782,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 399,
+          "total": 784
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 344,
+          "total": 770
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 531,
+          "total": 759
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 719,
+          "total": 763
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[임팩트 스매쉬]",
+        "PANTS": "플래티넘 엠블렘[임팩트 스매쉬]",
+        "count": 189,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "아처",
+      "jobGrowName": "眞 비질란테",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 173,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 174,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "특이체질 스킬Lv +1",
+          "count": 185,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 194,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 123,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 195,
+          "total": 197
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 791,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 469,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 369,
+          "total": 784
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 690,
+          "total": 794
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 759,
+          "total": 788
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[특이체질]",
+        "PANTS": "플래티넘 엠블렘[특이체질]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "아처",
+      "jobGrowName": "眞 키메라",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 172,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 172,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "복제의 유산 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 189,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 189,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 200
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 796,
+          "total": 797
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 495,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 357,
+          "total": 796
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 712,
+          "total": 800
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 774,
+          "total": 792
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[복제의 유산]",
+        "PANTS": "플래티넘 엠블렘[복제의 유산]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "아처",
+      "jobGrowName": "眞 트래블러",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 182,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 180,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "여행자의 직감 스킬Lv +1",
+          "count": 200,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 166,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 124,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 187,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 195,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 786,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 398,
+          "total": 776
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 331,
+          "total": 778
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 648,
+          "total": 769
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 758,
+          "total": 784
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[여행자의 직감]",
+        "PANTS": "플래티넘 엠블렘[여행자의 직감]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "아처",
+      "jobGrowName": "眞 헌터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 177,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 183,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 187,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "사냥감 식별 스킬Lv +1",
+          "count": 198,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 188,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 133,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 184,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 193,
+          "total": 193
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 795,
+          "total": 798
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 488,
+          "total": 783
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 327,
+          "total": 778
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 714,
+          "total": 766
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 759,
+          "total": 783
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[사냥감 식별]",
+        "PANTS": "플래티넘 엠블렘[사냥감 식별]",
+        "count": 198,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "8d4d2001cdb357e41633c234eb7501b5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "제국기사",
+      "jobGrowName": "眞 브레이커",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 187,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 186,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "노 쿼터 스킬Lv +1",
+          "count": 198,
+          "total": 199
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 196,
+          "total": 199
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 193,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 183,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 786,
+          "total": 786
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 516,
+          "total": 792
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 457,
+          "total": 792
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 758,
+          "total": 790
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 730,
+          "total": 758
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[노 쿼터]",
+        "PANTS": "플래티넘 엠블렘[노 쿼터]",
+        "count": 199,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "총검사",
+      "jobGrowName": "眞 스페셜리스트",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 198,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 175,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "코어 블레이드 마스터리 스킬Lv +1",
+          "count": 176,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 179,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 109,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 198,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 170,
+          "total": 174
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 740,
+          "total": 774
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 519,
+          "total": 753
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 491,
+          "total": 748
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 623,
+          "total": 752
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 653,
+          "total": 710
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[코어 블레이드 마스터리]",
+        "PANTS": "플래티넘 엠블렘[코어 블레이드 마스터리]",
+        "count": 190,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "총검사",
+      "jobGrowName": "眞 요원",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 163,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 162,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 168,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "소태도 마스터리 스킬Lv +1",
+          "count": 188,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 163,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 89,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 184,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 189,
+          "total": 189
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 791,
+          "total": 796
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 502,
+          "total": 794
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 471,
+          "total": 780
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 584,
+          "total": 780
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 750,
+          "total": 766
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[소태도 마스터리]",
+        "PANTS": "플래티넘 엠블렘[소태도 마스터리]",
+        "count": 193,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "총검사",
+      "jobGrowName": "眞 트러블 슈터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 151,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 154,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 181,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "중검 마스터리 스킬Lv +1",
+          "count": 190,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 169,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 95,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 185,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 189,
+          "total": 189
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 733,
+          "total": 792
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 503,
+          "total": 772
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 451,
+          "total": 781
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 569,
+          "total": 768
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 688,
+          "total": 760
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[중검 마스터리]",
+        "PANTS": "플래티넘 엠블렘[중검 마스터리]",
+        "count": 198,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "총검사",
+      "jobGrowName": "眞 히트맨",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 164,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 165,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 181,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "장도 마스터리 스킬Lv +1",
+          "count": 129,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 173,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 87,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 181,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 186,
+          "total": 186
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 743,
+          "total": 781
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 414,
+          "total": 754
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 430,
+          "total": 764
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 555,
+          "total": 742
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 696,
+          "total": 754
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[장도 마스터리]",
+        "PANTS": "플래티넘 엠블렘[장도 마스터리]",
+        "count": 131,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b522a95d819a5559b775deb9a490e49a",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "크리에이터",
+      "jobGrowName": "眞 크리에이터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 194,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 193,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 152,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 156,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "계열 강화 스킬Lv +1",
+          "count": 192,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 149,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 87,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 182,
+          "total": 183
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 691,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "count": 359,
+          "total": 768
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 384,
+          "total": 759
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 611,
+          "total": 735
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 646,
+          "total": 729
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[계열강화]",
+        "PANTS": "플래티넘 엠블렘[계열강화]",
+        "count": 200,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 어벤저",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 199,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 199,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 197,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "환청 스킬Lv +1",
+          "count": 188,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 170,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 89,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 199,
+          "total": 199
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 189,
+          "total": 192
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 737,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 487,
+          "total": 774
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 419,
+          "total": 771
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 459,
+          "total": 743
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 710,
+          "total": 767
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[환청]",
+        "PANTS": "플래티넘 엠블렘[환청]",
+        "count": 197,
+        "total": 199
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 인파이터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 149,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 147,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 179,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 186,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "윌 드라이버 스킬Lv +1",
+          "count": 189,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 166,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 129,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 187,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 198,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 775,
+          "total": 800
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 510,
+          "total": 796
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 363,
+          "total": 791
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 485,
+          "total": 765
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 739,
+          "total": 772
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[윌 드라이버]",
+        "PANTS": "플래티넘 엠블렘[윌 드라이버]",
+        "count": 199,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 166,
+          "total": 199
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 166,
+          "total": 199
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 199
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 176,
+          "total": 199
+        },
+        "JACKET": {
+          "optionAbility": "용기의 은총 스킬Lv +1",
+          "count": 163,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 142,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 84,
+          "total": 199
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 178,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 158,
+          "total": 183
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 645,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 297,
+          "total": 778
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 297,
+          "total": 760
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 602,
+          "total": 739
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 587,
+          "total": 742
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[용기의 은총]",
+        "PANTS": "플래티넘 엠블렘[용기의 은총]",
+        "count": 167,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 퇴마사",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 140,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "캐스팅 속도 14.0% 증가",
+          "count": 136,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 177,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 177,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "신선의 경지 스킬Lv +1",
+          "count": 174,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 159,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 100,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 134,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 151,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 602,
+          "total": 793
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "count": 324,
+          "total": 775
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "count": 289,
+          "total": 765
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 644,
+          "total": 757
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 580,
+          "total": 771
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[퇴마의 서]",
+        "PANTS": "플래티넘 엠블렘[퇴마의 서]",
+        "count": 198,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 무녀",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 165,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 167,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 134,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "모든 상태 이상 내성 3.6% 증가",
+          "count": 123,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "천녀기우제 스킬Lv +1",
+          "count": 101,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 167,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 75,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 195,
+          "total": 196
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 766,
+          "total": 797
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "count": 357,
+          "total": 759
+        },
+        "녹색빛": {
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "count": 425,
+          "total": 784
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 602,
+          "total": 775
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 719,
+          "total": 760
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[법력 강화]",
+        "PANTS": "플래티넘 엠블렘[법력 강화]",
+        "count": 182,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 미스트리스",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "지능 55 증가",
+          "count": 200,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 191,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 189,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "퍼스트 프라나 : 금단의 결정체 스킬Lv +1",
+          "count": 129,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 170,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 92,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "지능 55 증가",
+          "count": 189,
+          "total": 189
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 770,
+          "total": 790
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 409,
+          "total": 769
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "count": 397,
+          "total": 778
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 635,
+          "total": 769
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "count": 744,
+          "total": 776
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
+        "PANTS": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
+        "count": 188,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 이단심판관",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 145,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 149,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 188,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 188,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "성화 스킬Lv +1",
+          "count": 108,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 171,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 113,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 176,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 184,
+          "total": 190
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 749,
+          "total": 786
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 439,
+          "total": 791
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 365,
+          "total": 780
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 648,
+          "total": 782
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 722,
+          "total": 769
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[성화]",
+        "PANTS": "플래티넘 엠블렘[성화]",
+        "count": 86,
+        "total": 200
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 인파이터",
+      "sample": 200,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "MP 1분당 45 회복",
+          "count": 132,
+          "total": 200
+        },
+        "HAIR": {
+          "optionAbility": "MP 1분당 45 회복",
+          "count": 133,
+          "total": 200
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 200,
+          "total": 200
+        },
+        "JACKET": {
+          "optionAbility": "윌 오브 피스트 스킬Lv +1",
+          "count": 195,
+          "total": 200
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 196,
+          "total": 200
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 197,
+          "total": 200
+        },
+        "SHOES": {
+          "optionAbility": "힘 55 증가",
+          "count": 178,
+          "total": 200
+        },
+        "WEAPON": {
+          "optionAbility": "힘 55 증가",
+          "count": 197,
+          "total": 198
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 791,
+          "total": 795
+        },
+        "노란빛": {
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "count": 472,
+          "total": 800
+        },
+        "녹색빛": {
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "count": 379,
+          "total": 795
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 770,
+          "total": 800
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "count": 766,
+          "total": 776
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[윌 오브 피스트]",
+        "PANTS": "플래티넘 엠블렘[윌 오브 피스트]",
+        "count": 198,
+        "total": 200
+      }
+    }
+  ]
+}

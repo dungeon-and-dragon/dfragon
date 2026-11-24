@@ -1,0 +1,4245 @@
+{
+  "version": 1,
+  "parts": {
+    "HEADGEAR": {
+      "slotName": "모자 아바타",
+      "itemName": "레어 모자 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "붉은빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "붉은빛"
+        }
+      ]
+    },
+    "HAIR": {
+      "slotName": "머리 아바타",
+      "itemName": "레어 머리 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "붉은빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "붉은빛"
+        }
+      ]
+    },
+    "FACE": {
+      "slotName": "얼굴 아바타",
+      "itemName": "레어 얼굴 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "노란빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "노란빛"
+        }
+      ]
+    },
+    "BREAST": {
+      "slotName": "목가슴 아바타",
+      "itemName": "레어 목가슴 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "노란빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "노란빛"
+        }
+      ]
+    },
+    "JACKET": {
+      "slotName": "상의 아바타",
+      "itemName": "레어 상의 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "플래티넘"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "녹색빛"
+        },
+        {
+          "slotNo": 3,
+          "slotColor": "녹색빛"
+        }
+      ]
+    },
+    "PANTS": {
+      "slotName": "하의 아바타",
+      "itemName": "레어 하의 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "플래티넘"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "녹색빛"
+        },
+        {
+          "slotNo": 3,
+          "slotColor": "녹색빛"
+        }
+      ]
+    },
+    "WAIST": {
+      "slotName": "허리 아바타",
+      "itemName": "레어 허리 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "푸른빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "푸른빛"
+        }
+      ]
+    },
+    "SHOES": {
+      "slotName": "신발 아바타",
+      "itemName": "레어 신발 클론 아바타",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "푸른빛"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "푸른빛"
+        }
+      ]
+    },
+    "WEAPON": {
+      "slotName": "무기 아바타",
+      "itemName": "레어 무기 클론 아바타[75Lv]",
+      "sockets": [
+        {
+          "slotNo": 1,
+          "slotColor": "다색"
+        },
+        {
+          "slotNo": 2,
+          "slotColor": "다색"
+        }
+      ]
+    }
+  },
+  "presets": [
+    {
+      "role": "buffer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 패러메딕",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "tactics::지역거부(); 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "정신력 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "2b59d0a1dd5e577230bca0d05ca92f24",
+          "itemName": "찬란한 옐로우 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f6a59d1b221a1cde3bb14e7e5ad8c35b",
+          "itemName": "찬란한 그린 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "2ec1a22c7adace44069e2c7bda75c649",
+          "itemName": "플래티넘 엠블렘[apius::전장정보();]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "2ec1a22c7adace44069e2c7bda75c649",
+          "itemName": "플래티넘 엠블렘[apius::전장정보();]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 인챈트리스",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "모든 상태 이상 내성 3.6% 증가",
+        "BREAST": "모든 상태 이상 내성 3.6% 증가",
+        "JACKET": "마리오네트 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "d8847b5c0076e252d858804b09079ba3",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "49e624061c93d62a7dc91f43103687fe",
+          "itemName": "플래티넘 엠블렘[퍼페티어]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "49e624061c93d62a7dc91f43103687fe",
+          "itemName": "플래티넘 엠블렘[퍼페티어]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "아처",
+      "jobGrowName": "眞 뮤즈",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "온 더 스테이지 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "정신력 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "2b59d0a1dd5e577230bca0d05ca92f24",
+          "itemName": "찬란한 옐로우 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f6a59d1b221a1cde3bb14e7e5ad8c35b",
+          "itemName": "찬란한 그린 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "279782ac7c319218fb7d4de89a54f7af",
+          "itemName": "플래티넘 엠블렘[센세이션]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "279782ac7c319218fb7d4de89a54f7af",
+          "itemName": "플래티넘 엠블렘[센세이션]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "아포칼립스 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "체력 55 증가",
+        "WEAPON": "체력 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "0cf04676a99d95decd2cb6070b762348",
+          "itemName": "찬란한 붉은빛 엠블렘[체력]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "a7a0538826ccea6c9f30601443fa99ed",
+          "itemName": "찬란한 옐로우 엠블렘[체력]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "01351c7a80190bbbf8c75c2186af523a",
+          "itemName": "찬란한 그린 엠블렘[체력]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "0cf04676a99d95decd2cb6070b762348",
+          "itemName": "찬란한 붉은빛 엠블렘[체력]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "3dc682e58027c0b67e88d1da28f880b8",
+          "itemName": "플래티넘 엠블렘[수호의 은총]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "3dc682e58027c0b67e88d1da28f880b8",
+          "itemName": "플래티넘 엠블렘[수호의 은총]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 크루세이더",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "크럭스 오브 빅토리아 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "d8847b5c0076e252d858804b09079ba3",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "75a3c4d82581e501c77b18640348f9ff",
+          "itemName": "플래티넘 엠블렘[계시 : 아리아]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "75a3c4d82581e501c77b18640348f9ff",
+          "itemName": "플래티넘 엠블렘[계시 : 아리아]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 런처",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "중화기 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "a168829a90efd41a0ec9f767ce7de0d2",
+          "itemName": "플래티넘 엠블렘[중화기 마스터리](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "a168829a90efd41a0ec9f767ce7de0d2",
+          "itemName": "플래티넘 엠블렘[중화기 마스터리](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 레인저",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "스타일리쉬 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "224cebf19acfc1430287e817d88c8edb",
+          "itemName": "플래티넘 엠블렘[스타일리쉬](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "224cebf19acfc1430287e817d88c8edb",
+          "itemName": "플래티넘 엠블렘[스타일리쉬](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 메카닉",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "아크리액터 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "b3ed45afc1162e0ae1a866f3218832d8",
+          "itemName": "플래티넘 엠블렘[아크리액터]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "b3ed45afc1162e0ae1a866f3218832d8",
+          "itemName": "플래티넘 엠블렘[아크리액터]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 스핏파이어",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "병기 숙련 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "e4395fa332a5ac427722e38700b6e327",
+          "itemName": "플래티넘 엠블렘[병기 숙련](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "e4395fa332a5ac427722e38700b6e327",
+          "itemName": "플래티넘 엠블렘[병기 숙련](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 어썰트",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "센서빌리티 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "d097efe44f3caaecb49bc0d1e677e94f",
+          "itemName": "플래티넘 엠블렘[센서빌리티]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "d097efe44f3caaecb49bc0d1e677e94f",
+          "itemName": "플래티넘 엠블렘[센서빌리티]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 런처",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "중화기 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "c8a1b32c06de4756837a1c723cb89577",
+          "itemName": "플래티넘 엠블렘[중화기 마스터리](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "c8a1b32c06de4756837a1c723cb89577",
+          "itemName": "플래티넘 엠블렘[중화기 마스터리](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 레인저",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "스타일리쉬 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "a5a06612a631777aa8a16e98b63a06d7",
+          "itemName": "플래티넘 엠블렘[스타일리쉬](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "a5a06612a631777aa8a16e98b63a06d7",
+          "itemName": "플래티넘 엠블렘[스타일리쉬](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 메카닉",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "G-오퍼레이터 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "9077665b40cb54148ad96130d87faa99",
+          "itemName": "플래티넘 엠블렘[트랜스포메이션]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "9077665b40cb54148ad96130d87faa99",
+          "itemName": "플래티넘 엠블렘[트랜스포메이션]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 스핏파이어",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "병기 숙련 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "d34435a47f1397d2e1ae8347e6fae64e",
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "a3ed746bd0391b3522290b3acf218f48",
+          "itemName": "찬란한 듀얼 엠블렘[캐스트속도 + 이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "f5f7774d7fa258649dc4558bcc30244f",
+          "itemName": "플래티넘 엠블렘[병기 숙련](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "f5f7774d7fa258649dc4558bcc30244f",
+          "itemName": "플래티넘 엠블렘[병기 숙련](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 그래플러",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "강렬한 테이크 다운 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "2760dde03c50010d863c16e387e7b675",
+          "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "2760dde03c50010d863c16e387e7b675",
+          "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 넨마스터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "나선의 넨 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "77a1b8bac9e7a8d3a4ab73997dd71f36",
+          "itemName": "플래티넘 엠블렘[나선의 넨](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "77a1b8bac9e7a8d3a4ab73997dd71f36",
+          "itemName": "플래티넘 엠블렘[나선의 넨](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트라이커",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "화염의 각 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "c80a4640e862bf8cdc88c3dbf0e98867",
+          "itemName": "플래티넘 엠블렘[머슬 시프트](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "c80a4640e862bf8cdc88c3dbf0e98867",
+          "itemName": "플래티넘 엠블렘[머슬 시프트](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트리트파이터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "도발 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "f4795d99bc49c1d784972687cf2377d7",
+          "itemName": "플래티넘 엠블렘[도발](남)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "f4795d99bc49c1d784972687cf2377d7",
+          "itemName": "플래티넘 엠블렘[도발](남)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 그래플러",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "강렬한 테이크 다운 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "ffb65c6ef4f29989ad99ca52ff25e726",
+          "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "ffb65c6ef4f29989ad99ca52ff25e726",
+          "itemName": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 넨마스터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "낙화태염성 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "98c425d8b167c4c7527ba7bda1058538",
+          "itemName": "플래티넘 엠블렘[나선의 넨](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "98c425d8b167c4c7527ba7bda1058538",
+          "itemName": "플래티넘 엠블렘[나선의 넨](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트라이커",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "급소 지정 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "df1271d77ba411d2e99421d760402e93",
+          "itemName": "플래티넘 엠블렘[급소 지정](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "df1271d77ba411d2e99421d760402e93",
+          "itemName": "플래티넘 엠블렘[급소 지정](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트리트파이터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "독문무공 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "f0aa750bb897aad0599fa819785b1204",
+          "itemName": "플래티넘 엠블렘[도발](여)",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "f0aa750bb897aad0599fa819785b1204",
+          "itemName": "플래티넘 엠블렘[도발](여)",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 검귀",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "검귀의 도 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "eae9440cbc61c443d10bd70afa780ae8",
+          "itemName": "플래티넘 엠블렘[검귀의 도 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "eae9440cbc61c443d10bd70afa780ae8",
+          "itemName": "플래티넘 엠블렘[검귀의 도 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 버서커",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "혈십자 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "암속성 저항 35 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "cfd92fbcced6313a4b2a58888356246f",
+          "itemName": "플래티넘 엠블렘[혈십자]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "cfd92fbcced6313a4b2a58888356246f",
+          "itemName": "플래티넘 엠블렘[혈십자]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 소울브링어",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "팬텀 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "a1cadc6f1029d448d775527602409119",
+          "itemName": "플래티넘 엠블렘[달의 커튼]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "a1cadc6f1029d448d775527602409119",
+          "itemName": "플래티넘 엠블렘[달의 커튼]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 아수라",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "뇌신의 기운 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "6ebc2fb5b29e049731e82422227f1f58",
+          "itemName": "플래티넘 엠블렘[정신이 번쩍!]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "6ebc2fb5b29e049731e82422227f1f58",
+          "itemName": "플래티넘 엠블렘[정신이 번쩍!]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 웨펀마스터",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "검기상인 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "b0f0c19cba4a6960d83249aaf0186362",
+          "itemName": "플래티넘 엠블렘[검기상인]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "b0f0c19cba4a6960d83249aaf0186362",
+          "itemName": "플래티넘 엠블렘[검기상인]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 다크템플러",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "스티그마 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "71073672f51fd42382ac0001fd84a716",
+          "itemName": "플래티넘 엠블렘[스티그마]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "71073672f51fd42382ac0001fd84a716",
+          "itemName": "플래티넘 엠블렘[스티그마]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 데몬슬레이어",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "마검 제어 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "암속성 저항 35 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "13ffa1403a2600d699f78bfed120cb9c",
+          "itemName": "플래티넘 엠블렘[마검 제어]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "13ffa1403a2600d699f78bfed120cb9c",
+          "itemName": "플래티넘 엠블렘[마검 제어]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 베가본드",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "삼화취정 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "eb93f3de4225632baa0849f2a8ee48ec",
+          "itemName": "플래티넘 엠블렘[삼화취정]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "eb93f3de4225632baa0849f2a8ee48ec",
+          "itemName": "플래티넘 엠블렘[삼화취정]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 블레이드",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "빈티지 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "73a64ed9d2d90cfc5167e091c5ca53a1",
+          "itemName": "플래티넘 엠블렘[빈티지]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "73a64ed9d2d90cfc5167e091c5ca53a1",
+          "itemName": "플래티넘 엠블렘[빈티지]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 소드마스터",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "무기 숙련 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "d8c5ed1c6da38dceb6c7e17da17f2183",
+          "itemName": "플래티넘 엠블렘[무기 숙련]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "d8c5ed1c6da38dceb6c7e17da17f2183",
+          "itemName": "플래티넘 엠블렘[무기 숙련]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "나이트",
+      "jobGrowName": "眞 드래곤나이트",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "대식가 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "38735ff0b55d5c6983967a7fbca60738",
+          "itemName": "플래티넘 엠블렘[대식가]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "38735ff0b55d5c6983967a7fbca60738",
+          "itemName": "플래티넘 엠블렘[대식가]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "나이트",
+      "jobGrowName": "眞 엘븐나이트",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "대자연의 가호 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "87521b6f1e7e997ace6c4131b282ded7",
+          "itemName": "플래티넘 엠블렘[강인한 신념]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "87521b6f1e7e997ace6c4131b282ded7",
+          "itemName": "플래티넘 엠블렘[강인한 신념]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "나이트",
+      "jobGrowName": "眞 카오스",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "혼혈 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "d38715c6e9f2c461682f5020e76e43d7",
+          "itemName": "플래티넘 엠블렘[혼혈]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "d38715c6e9f2c461682f5020e76e43d7",
+          "itemName": "플래티넘 엠블렘[혼혈]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "나이트",
+      "jobGrowName": "眞 팔라딘",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "세라픽 페더 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "005b66b3b82b8b7a7f947ccbcc4e1ea4",
+          "itemName": "플래티넘 엠블렘[세라픽 페더]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "005b66b3b82b8b7a7f947ccbcc4e1ea4",
+          "itemName": "플래티넘 엠블렘[세라픽 페더]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "17e417b31686389eebff6d754c3401ea",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "다크나이트",
+      "jobGrowName": "眞 다크나이트",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "차원일치 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "8d96a7ecbc126cad8363ee2d6dd1a120",
+          "itemName": "찬란한 듀얼 엠블렘[공격속도 + 이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "b0aeaddb31b4970afcda8521c076fbac",
+          "itemName": "플래티넘 엠블렘[어둠의 검사]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "b0aeaddb31b4970afcda8521c076fbac",
+          "itemName": "플래티넘 엠블렘[어둠의 검사]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "도적",
+      "jobGrowName": "眞 로그",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "로그의 무기 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "3b0a072b854748f3960102335ec7db59",
+          "itemName": "플래티넘 엠블렘[로그의 무기 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "3b0a072b854748f3960102335ec7db59",
+          "itemName": "플래티넘 엠블렘[로그의 무기 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "도적",
+      "jobGrowName": "眞 사령술사",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "발라크르의 맹약 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "암속성 저항 35 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "d34435a47f1397d2e1ae8347e6fae64e",
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "27ceb755ec09c5ba8ab04ae97dd27224",
+          "itemName": "플래티넘 엠블렘[발라크르의 맹약]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "27ceb755ec09c5ba8ab04ae97dd27224",
+          "itemName": "플래티넘 엠블렘[발라크르의 맹약]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "도적",
+      "jobGrowName": "眞 섀도우댄서",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "날카로운 단검 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "0d15dcddb486dcff01b555d34d7bc64e",
+          "itemName": "플래티넘 엠블렘[날카로운 단검]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "0d15dcddb486dcff01b555d34d7bc64e",
+          "itemName": "플래티넘 엠블렘[날카로운 단검]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "도적",
+      "jobGrowName": "眞 쿠노이치",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "인법 : 잔영 남기기 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "e554480ad4dc2fa9f23cb285e48c6d47",
+          "itemName": "플래티넘 엠블렘[인법 : 잔영 남기기]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "e554480ad4dc2fa9f23cb285e48c6d47",
+          "itemName": "플래티넘 엠블렘[인법 : 잔영 남기기]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 디멘션워커",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "도그마 디바이스 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "6bf72fa33176ea30122e242664c10e84",
+          "itemName": "플래티넘 엠블렘[도그마 디바이스]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "6bf72fa33176ea30122e242664c10e84",
+          "itemName": "플래티넘 엠블렘[도그마 디바이스]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 블러드 메이지",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "블러드 혼 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "be422d450eb91d1aa8a28ba92d31384b",
+          "itemName": "플래티넘 엠블렘[블러드 혼]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "be422d450eb91d1aa8a28ba92d31384b",
+          "itemName": "플래티넘 엠블렘[블러드 혼]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 빙결사",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "발현 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "3f8671a7369fb406cabf68d7cc04b7e4",
+          "itemName": "플래티넘 엠블렘[발현]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "3f8671a7369fb406cabf68d7cc04b7e4",
+          "itemName": "플래티넘 엠블렘[발현]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 스위프트 마스터",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "휘몰아치는 질풍의 봉 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "b6472003b71ae0fc1bd1411458eced6c",
+          "itemName": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "b6472003b71ae0fc1bd1411458eced6c",
+          "itemName": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 엘레멘탈 바머",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "원소의 이해 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "1bdb1e4410efa63f8be4e19cf9515ef1",
+          "itemName": "플래티넘 엠블렘[원소의 이해]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "1bdb1e4410efa63f8be4e19cf9515ef1",
+          "itemName": "플래티넘 엠블렘[원소의 이해]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 마도학자",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "퍼밀리어와 친하게 지내기 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "79dc52fb4528ba8a3310d966499cdea3",
+          "itemName": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "79dc52fb4528ba8a3310d966499cdea3",
+          "itemName": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 배틀메이지",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "니우의 전투술 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "8aea91f1f560e7a16aa66b912a84e472",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 회피율]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "63c2c7e8c446915a9866fc392e1d5c67",
+          "itemName": "플래티넘 엠블렘[니우의 전투술]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "63c2c7e8c446915a9866fc392e1d5c67",
+          "itemName": "플래티넘 엠블렘[니우의 전투술]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 소환사",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "모든 상태 이상 내성 3.6% 증가",
+        "BREAST": "모든 상태 이상 내성 3.6% 증가",
+        "JACKET": "교감 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "ab05403429c41d99a10a0669e423a7cb",
+          "itemName": "플래티넘 엠블렘[교감]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "ab05403429c41d99a10a0669e423a7cb",
+          "itemName": "플래티넘 엠블렘[교감]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 엘레멘탈마스터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "모든 상태 이상 내성 3.6% 증가",
+        "BREAST": "모든 상태 이상 내성 3.6% 증가",
+        "JACKET": "속성 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "암속성 저항 35 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "bbfef5c78c7f14b77c07a5dd628397e0",
+          "itemName": "플래티넘 엠블렘[쇼타임]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "bbfef5c78c7f14b77c07a5dd628397e0",
+          "itemName": "플래티넘 엠블렘[쇼타임]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마창사",
+      "jobGrowName": "眞 다크 랜서",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "어둠의 투창 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "dc1ef956a605d13af3a54eaa95aa7670",
+          "itemName": "플래티넘 엠블렘[어둠의 투창 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "dc1ef956a605d13af3a54eaa95aa7670",
+          "itemName": "플래티넘 엠블렘[어둠의 투창 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마창사",
+      "jobGrowName": "眞 듀얼리스트",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "미라지 부스트 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "dbeef919b226cf955536265249de33ec",
+          "itemName": "플래티넘 엠블렘[미라지 부스트]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "dbeef919b226cf955536265249de33ec",
+          "itemName": "플래티넘 엠블렘[미라지 부스트]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마창사",
+      "jobGrowName": "眞 드래고니안 랜서",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "광창 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "9b8503d6df8d81c18e346c8c4b5a2a19",
+          "itemName": "플래티넘 엠블렘[광창 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "9b8503d6df8d81c18e346c8c4b5a2a19",
+          "itemName": "플래티넘 엠블렘[광창 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마창사",
+      "jobGrowName": "眞 뱅가드",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "임팩트 스매쉬 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "3c679f111e29baf8bd0bdb6843e8a36f",
+          "itemName": "플래티넘 엠블렘[임팩트 스매쉬]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "3c679f111e29baf8bd0bdb6843e8a36f",
+          "itemName": "플래티넘 엠블렘[임팩트 스매쉬]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "아처",
+      "jobGrowName": "眞 비질란테",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "특이체질 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "75a0679d48ccddd453cbaa6819c216d4",
+          "itemName": "플래티넘 엠블렘[특이체질]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "75a0679d48ccddd453cbaa6819c216d4",
+          "itemName": "플래티넘 엠블렘[특이체질]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "아처",
+      "jobGrowName": "眞 키메라",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "복제의 유산 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "63a7d050821cf644a18cef5389834136",
+          "itemName": "플래티넘 엠블렘[복제의 유산]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "63a7d050821cf644a18cef5389834136",
+          "itemName": "플래티넘 엠블렘[복제의 유산]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "아처",
+      "jobGrowName": "眞 트래블러",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "여행자의 직감 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "0f6ffa4f3247b24b66acfba4732829b8",
+          "itemName": "플래티넘 엠블렘[여행자의 직감]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "0f6ffa4f3247b24b66acfba4732829b8",
+          "itemName": "플래티넘 엠블렘[여행자의 직감]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "아처",
+      "jobGrowName": "眞 헌터",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "사냥감 식별 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "72a8b9a282f44e343224464e48787de0",
+          "itemName": "플래티넘 엠블렘[사냥감 식별]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "72a8b9a282f44e343224464e48787de0",
+          "itemName": "플래티넘 엠블렘[사냥감 식별]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "8d4d2001cdb357e41633c234eb7501b5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "제국기사",
+      "jobGrowName": "眞 브레이커",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "노 쿼터 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "84490a00af3c6f16993ff49df5440efb",
+          "itemName": "플래티넘 엠블렘[노 쿼터]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "84490a00af3c6f16993ff49df5440efb",
+          "itemName": "플래티넘 엠블렘[노 쿼터]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "총검사",
+      "jobGrowName": "眞 스페셜리스트",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "코어 블레이드 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "a8988eba1404649131b393bddbc11959",
+          "itemName": "플래티넘 엠블렘[코어 블레이드 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "a8988eba1404649131b393bddbc11959",
+          "itemName": "플래티넘 엠블렘[코어 블레이드 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "총검사",
+      "jobGrowName": "眞 요원",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "소태도 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "f9c1c5a2f2a6cdc3bf54ea5defd55f7b",
+          "itemName": "플래티넘 엠블렘[소태도 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "f9c1c5a2f2a6cdc3bf54ea5defd55f7b",
+          "itemName": "플래티넘 엠블렘[소태도 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "총검사",
+      "jobGrowName": "眞 트러블 슈터",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "중검 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "8eeb278455b12860d797ed12940788a9",
+          "itemName": "플래티넘 엠블렘[중검 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "8eeb278455b12860d797ed12940788a9",
+          "itemName": "플래티넘 엠블렘[중검 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "총검사",
+      "jobGrowName": "眞 히트맨",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "장도 마스터리 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "844f8b3d2f5d7e5d83f4b46f4bca3ef4",
+          "itemName": "플래티넘 엠블렘[장도 마스터리]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "844f8b3d2f5d7e5d83f4b46f4bca3ef4",
+          "itemName": "플래티넘 엠블렘[장도 마스터리]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "b522a95d819a5559b775deb9a490e49a",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "크리에이터",
+      "jobGrowName": "眞 크리에이터",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "모든 상태 이상 내성 3.6% 증가",
+        "BREAST": "모든 상태 이상 내성 3.6% 증가",
+        "JACKET": "계열 강화 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+          "itemName": "찬란한 옐로우 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "103b9ee0e3bb8f6dbc287e78225dd273",
+          "itemName": "플래티넘 엠블렘[계열강화]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "103b9ee0e3bb8f6dbc287e78225dd273",
+          "itemName": "플래티넘 엠블렘[계열강화]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 어벤저",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "환청 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "dc2b6f6a18e5f054ab6ba10427759958",
+          "itemName": "플래티넘 엠블렘[환청]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "dc2b6f6a18e5f054ab6ba10427759958",
+          "itemName": "플래티넘 엠블렘[환청]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 인파이터",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "윌 드라이버 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "eb58057babfc5760a4b90f09d451c7b3",
+          "itemName": "플래티넘 엠블렘[윌 드라이버]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "eb58057babfc5760a4b90f09d451c7b3",
+          "itemName": "플래티넘 엠블렘[윌 드라이버]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "용기의 은총 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "2a8f574295422680ce324ee586c956fe",
+          "itemName": "플래티넘 엠블렘[용기의 은총]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "2a8f574295422680ce324ee586c956fe",
+          "itemName": "플래티넘 엠블렘[용기의 은총]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 퇴마사",
+      "options": {
+        "HEADGEAR": "캐스팅 속도 14.0% 증가",
+        "HAIR": "캐스팅 속도 14.0% 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "신선의 경지 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+          "itemName": "찬란한 옐로우 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "f9467cbe0180ed53840a3eeca80ca1b6",
+          "itemName": "찬란한 듀얼 엠블렘[힘 + 물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "fb91922f84f9a5305d1721b2064a25f6",
+          "itemName": "플래티넘 엠블렘[퇴마의 서]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "fb91922f84f9a5305d1721b2064a25f6",
+          "itemName": "플래티넘 엠블렘[퇴마의 서]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 무녀",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "모든 상태 이상 내성 3.6% 증가",
+        "BREAST": "모든 상태 이상 내성 3.6% 증가",
+        "JACKET": "천녀기우제 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "d34435a47f1397d2e1ae8347e6fae64e",
+          "itemName": "찬란한 노란빛 엠블렘[캐스트속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b187832f68ac1271d2da6bc3814a053a",
+          "itemName": "찬란한 듀얼 엠블렘[지능 + 마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "c4b4c4e42a4495411882ee3178d66ce3",
+          "itemName": "플래티넘 엠블렘[법력 강화]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "c4b4c4e42a4495411882ee3178d66ce3",
+          "itemName": "플래티넘 엠블렘[법력 강화]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 미스트리스",
+      "options": {
+        "HEADGEAR": "지능 55 증가",
+        "HAIR": "지능 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "퍼스트 프라나 : 금단의 결정체 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "이동 속도 6.0% 증가",
+        "WEAPON": "지능 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
+          "itemName": "찬란한 녹색빛 엠블렘[마법크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+          "itemName": "찬란한 붉은빛 엠블렘[지능]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "2f250777a60877eb6c34f4599232001b",
+          "itemName": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "2f250777a60877eb6c34f4599232001b",
+          "itemName": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 이단심판관",
+      "options": {
+        "HEADGEAR": "정신력 55 증가",
+        "HAIR": "정신력 55 증가",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "성화 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "76ad4a6586f6259e65921f69227e9103",
+          "itemName": "플래티넘 엠블렘[성화]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "76ad4a6586f6259e65921f69227e9103",
+          "itemName": "플래티넘 엠블렘[성화]",
+          "itemRarity": "레전더리"
+        }
+      }
+    },
+    {
+      "role": "dealer",
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 인파이터",
+      "options": {
+        "HEADGEAR": "MP 1분당 45 회복",
+        "HAIR": "MP 1분당 45 회복",
+        "FACE": "공격 속도 6.0% 증가",
+        "BREAST": "공격 속도 6.0% 증가",
+        "JACKET": "윌 오브 피스트 스킬Lv +1",
+        "PANTS": "HP MAX 400 증가",
+        "WAIST": "회피율 5.5% 증가",
+        "SHOES": "힘 55 증가",
+        "WEAPON": "힘 55 증가"
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        },
+        "노란빛": {
+          "itemId": "3de1f0a371e19a648d0cf6ec46dd895e",
+          "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+          "itemRarity": "유니크"
+        },
+        "녹색빛": {
+          "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+          "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+          "itemRarity": "유니크"
+        },
+        "푸른빛": {
+          "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "itemRarity": "유니크"
+        },
+        "다색": {
+          "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+          "itemName": "찬란한 붉은빛 엠블렘[힘]",
+          "itemRarity": "유니크"
+        }
+      },
+      "platinum": {
+        "JACKET": {
+          "itemId": "b65594c3551f4e7386f2e485ce5c4100",
+          "itemName": "플래티넘 엠블렘[윌 오브 피스트]",
+          "itemRarity": "레전더리"
+        },
+        "PANTS": {
+          "itemId": "b65594c3551f4e7386f2e485ce5c4100",
+          "itemName": "플래티넘 엠블렘[윌 오브 피스트]",
+          "itemRarity": "레전더리"
+        }
+      }
+    }
+  ]
+}
