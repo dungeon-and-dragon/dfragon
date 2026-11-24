@@ -1,4 +1,6 @@
 import {
+  CHARACTER_PAGE_PATHS,
+  type CharacterPage,
   characterImageUrl,
   displayJobName,
   isMaxLevel,
@@ -18,11 +20,13 @@ export type CharacterCellCharacter = Pick<
 export function CharacterCell({
   character,
   adventureName = null,
-  narrowStats
+  narrowStats,
+  characterPage = 'detail'
 }: {
   character: CharacterCellCharacter
   adventureName?: string | null
   narrowStats?: ReactNode
+  characterPage?: CharacterPage
 }): React.JSX.Element {
   const job = displayJobName(character, character.role)
   const showsLevel = character.level != null && !isMaxLevel(character.level)
@@ -42,7 +46,7 @@ export function CharacterCell({
           <span aria-hidden="true" className="hidden sm:max-md:block sm:max-md:basis-full" />
           <span className="flex min-w-0 items-center gap-2 sm:max-md:max-w-full">
             <Link
-              to="/c/$serverId/$characterId"
+              to={CHARACTER_PAGE_PATHS[characterPage]}
               params={{ serverId: character.serverId, characterId: character.characterId }}
               className="link min-w-0 truncate text-sm font-semibold text-fg sm:max-md:shrink-0"
             >

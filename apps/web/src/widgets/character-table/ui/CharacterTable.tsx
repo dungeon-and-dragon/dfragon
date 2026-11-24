@@ -2,7 +2,7 @@ import { ChevronDownIcon } from '@dfragon/ui'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
-import type { ListScore } from '#entities/character'
+import type { CharacterPage, ListScore } from '#entities/character'
 import type { StoredCharacter } from '#entities/ranking'
 import { CharacterCell, type CharacterCellCharacter } from './CharacterCell'
 import { RankNumber } from './RankNumber'
@@ -63,7 +63,8 @@ export function CharacterTable<Row extends CharacterTableRow>({
   affiliations = ALL_AFFILIATIONS,
   adventureBesideName = false,
   scorePlacement,
-  sortedBy
+  sortedBy,
+  characterPage
 }: {
   rows: readonly Row[]
   ranked?: boolean
@@ -75,6 +76,7 @@ export function CharacterTable<Row extends CharacterTableRow>({
   trailing?: ReactNode
   affiliations?: readonly Affiliation[]
   adventureBesideName?: boolean
+  characterPage?: CharacterPage
 }): React.JSX.Element {
   const rankClass = rankOnNarrow ? '' : WIDE_ONLY
 
@@ -135,6 +137,7 @@ export function CharacterTable<Row extends CharacterTableRow>({
                 <CharacterCell
                   character={row}
                   adventureName={adventureBesideName ? row.adventureName : null}
+                  characterPage={characterPage}
                   narrowStats={
                     <NarrowStats
                       fame={row.fame}

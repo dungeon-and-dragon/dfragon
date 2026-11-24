@@ -11,24 +11,23 @@ import { TodayGrade } from './TodayGrade'
 type GlobalMenuItem = {
   label: string
   to: NonNullable<LinkProps['to']>
-  sectionOf?: string
+  currentOn?: RegExp
 }
+
+const CLEARS_PATH = /^\/clears(\/|$)/
+const CHARACTER_SIMULATOR_PATH = /^\/c\/[^/]+\/[^/]+\/simulator$/
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '멀티서치', to: '/multisearch' },
   { label: '검색', to: '/rankings' },
-  { label: '통계', to: '/stats', sectionOf: '/clears' },
+  { label: '통계', to: '/stats', currentOn: CLEARS_PATH },
   { label: '모험단', to: '/adventures' },
+  { label: '장비 시뮬레이터', to: '/simulator', currentOn: CHARACTER_SIMULATOR_PATH },
   { label: '즐겨찾기', to: '/favorites' }
 ]
 
-function isInSection(pathname: string, section: string | undefined): boolean {
-  if (section === undefined) {
-    return false
-  }
-
-  return pathname === section || pathname.startsWith(`${section}/`)
-}
+// 첫 화면과 시뮬레이터 검색 화면은 본문에 큰 검색창이 있어 전역 바의 검색창을 숨긴다.
+const PATHS_WITHOUT_SEARCH_BOX = new Set(['/', '/simulator'])
 
 export function GlobalBar(): React.JSX.Element {
   const grade = useTodayGrade()
@@ -36,7 +35,6 @@ export function GlobalBar(): React.JSX.Element {
   const underlineRef = useRef<HTMLSpanElement>(null)
   // 지금 항목은 Link만 다시 그려 바뀌므로 주소가 바뀔 때 메뉴도 다시 그려 밑줄을 옮긴다.
   const pathname = useLocation({ select: (location) => location.pathname })
-  const isHome = pathname === '/'
   useIndicatorSlide({
     containerRef: menuRef,
     indicatorRef: underlineRef,
@@ -72,14 +70,14 @@ export function GlobalBar(): React.JSX.Element {
               key={item.to}
               to={item.to}
               activeOptions={{ includeSearch: false }}
-              aria-current={isInSection(pathname, item.sectionOf) ? 'page' : undefined}
+              aria-current={item.currentOn?.test(pathname) === true ? 'page' : undefined}
               className="inline-flex shrink-0 items-center px-3 text-sm font-medium whitespace-nowrap text-fg-muted no-underline transition-colors focus-ring-inset hover:text-fg aria-[current=page]:font-semibold aria-[current=page]:text-fg"
             >
               {item.label}
             </Link>
           ))}
         </nav>
-        {!isHome && <CharacterSearchBox />}
+        {!PATHS_WITHOUT_SEARCH_BOX.has(pathname) && <CharacterSearchBox />}
         <TodayGrade grade={grade} />
         {/* 고른 색 모드와 시스템 설정은 브라우저만 알아, 서버가 만드는 HTML에는 누를 수 없는 빈 버튼으로 자리만 둔다. */}
         <ClientOnly fallback={<IconButton aria-label="색 모드 바꾸기" icon={null} disabled />}>
