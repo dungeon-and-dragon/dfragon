@@ -6,10 +6,10 @@ import type {
   TimelineRange,
   TimelineSyncState
 } from '@dfragon/database'
-import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
-import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
-import type { ItemDictionaryRepository } from '@dfragon/server-core/application/item-dictionary/repository.js'
-import type { TimelineInputs } from '@dfragon/server-core/domain/character-timeline/index.js'
+import { ItemDictionaryService } from '../src/application/item-dictionary/index.js'
+import type { FetchItemDetails } from '../src/application/item-dictionary/ports.js'
+import type { ItemDictionaryRepository } from '../src/application/item-dictionary/repository.js'
+import type { TimelineInputs } from '../src/domain/character-timeline/index.js'
 import type { TimelineSyncRepository } from '../src/application/character-timeline/repository.js'
 import { TimelineSyncService } from '../src/application/character-timeline/sync.js'
 

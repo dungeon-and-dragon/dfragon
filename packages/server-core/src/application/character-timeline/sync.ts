@@ -1,22 +1,20 @@
 import type { TimelineCharacter, TimelineItemInput, TimelineSyncState } from '@dfragon/database'
-import type { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
-import { isRecentlyActive } from '@dfragon/server-core/domain/character-activity.js'
+import type { ItemDictionaryService } from '#application/item-dictionary/index.js'
+import { isRecentlyActive } from '#domain/character-activity.js'
 import {
   TIMELINE_RECORD_DELAY_MS,
   TimelineFailure,
-  type TimelineFailureKind,
+  type TimelineSyncFailure,
   type TimelineInputs,
   splitTimelineRanges
-} from '@dfragon/server-core/domain/character-timeline/index.js'
-import { dictionaryItemIds } from '@dfragon/server-core/domain/item-dictionary/index.js'
-import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
+} from '#domain/character-timeline/index.js'
+import { dictionaryItemIds } from '#domain/item-dictionary/index.js'
+import type { FetchCharacterTimeline } from './ports.js'
 import type { TimelineSyncRepository } from './repository.js'
 
 // 중천 시즌 시작이다. 그 전 이력은 받지 않는다(#1175).
 export const TIMELINE_COLLECTION_START = new Date('2025-01-09T06:00:00+09:00')
 const RESYNC_INTERVAL_MS = 60 * 60 * 1000
-
-export type TimelineSyncFailure = `neople-${TimelineFailureKind}` | 'database'
 
 function syncFailureOf(error: unknown): TimelineSyncFailure {
   if (error instanceof TimelineFailure) {

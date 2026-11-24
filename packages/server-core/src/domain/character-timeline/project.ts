@@ -46,6 +46,8 @@ export const ENHANCEMENT_KINDS: ReadonlyMap<number, EnhancementKind> = new Map([
   [403, 'refine']
 ])
 export const ENHANCEMENT_CODES = [...ENHANCEMENT_KINDS.keys()]
+// 정기 동기화가 받지 않는 중천 전의 캐릭터명 변경(102), 모험단명 변경(105)도 같은 요청으로 받는다.
+export const ENHANCEMENT_BACKFILL_CODES = [102, 105, ...ENHANCEMENT_CODES]
 export const ACQUISITION_CODES = [
   501, 502, 503, 504, 505, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 516, 517, 518, 519,
   520, 521, 550, 551, 552, 553, 554, 555, 556, 557
