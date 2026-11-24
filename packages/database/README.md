@@ -19,6 +19,7 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `readCharacterHistory(client, character)`, `readCharacterHistorySnapshot(client, character, at)`: 캐릭터의 기본 정보, 점수 이력과 섹션별 변경 시각을 읽고, 한 시각 이전의 최신 기본 정보, 점수, 섹션 본문과 그 값을 받은 시각을 읽습니다.
 - `readCharacterSectionHistory(client, character, sections)`: 고른 섹션의 이력 행을 받은 시각 순으로 본문과 함께 읽습니다.
 - `readSampleCharactersWithoutSkillStyle(client)`: 전직별 명성 상위 표본 가운데 지금 전직의 스킬 스타일이 저장되지 않은 활성 캐릭터를 읽습니다.
+- `readSkillStyleChainBackfillPage(client, page)`, `fillCharacterSkillStyleChain(client, style)`: 스킬 체인이 없는 스킬 스타일 행을 그 캐릭터의 가장 새 스킬 스타일 이력 원문, 원문을 받을 때의 전직과 함께 key 순으로 읽고, 아직 체인이 없고 전직이 같은 행만 원문 값으로 다시 씁니다.
 - `enqueueCollectedCharacters`, `takeCollectionBatch`, `recordCollectionFailure`: 기본 정보 대기열에 넣고, 꺼내고, 실패를 남깁니다.
 - `readAdventureCharacters`, `readAdventureNames`, `readGuild`: 모험단, 길드의 캐릭터와 캐릭터의 모험단 이름을 읽습니다.
 - `readFameRanking`, `readCharacterStats`, `readJobSkillAdoption`: 명성 랭킹, 캐릭터 통계, 전직별 스킬 채택 수를 읽습니다.
