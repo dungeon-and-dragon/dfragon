@@ -23,6 +23,20 @@ export {
 export type { ItemDictionaryEntry, UnlistedAcquisitionQuery } from './item-dictionary.js'
 export { readTimelineQueueCounts, writeTimelineQueueCounts } from './timeline-queue-count.js'
 export type { TimelineQueueCount } from './timeline-queue-count.js'
+export {
+  TIMELINE_SYNC_REQUEST_KINDS,
+  claimTimelineSyncRequests,
+  countTimelineSyncRequests,
+  deleteTimelineSyncRequest,
+  releaseStartedTimelineSyncRequests,
+  releaseTimelineSyncRequest,
+  requestTimelineSync
+} from './timeline-sync-request.js'
+export type {
+  TimelineSyncRequest,
+  TimelineSyncRequestCount,
+  TimelineSyncRequestKind
+} from './timeline-sync-request.js'
 export { recordCharacter } from './character.js'
 export type { CharacterBasicInput, CharacterInput } from './character.js'
 export {
