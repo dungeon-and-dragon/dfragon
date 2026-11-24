@@ -36,7 +36,7 @@ export function StatsScreenFrame<Stats extends SampledStats>({
   )
 }
 
-function StatsBody<Stats extends SampledStats>({
+export function StatsBody<Stats extends SampledStats>({
   result,
   filterBox,
   skeleton,

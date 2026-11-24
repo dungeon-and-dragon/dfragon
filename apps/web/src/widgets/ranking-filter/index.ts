@@ -2,6 +2,7 @@ export { itemChoicesOf, itemIdsInStats } from './lib/ranking-items'
 export { rankingName } from './lib/ranking-jobs'
 export { rankingSetLines, setChoicesOf, setFilterLabel } from './lib/ranking-sets'
 export {
+  parseJobSearch,
   parseRankingSearch,
   parseSetStatsSearch,
   rankingFilterOf,
