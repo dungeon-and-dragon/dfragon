@@ -91,6 +91,7 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `timeline_items`: 코드 4xx, 5xx, 55x, 6xx 타임라인. 시즌별 range partition `timeline_items_season_<시즌 id>`입니다
 - `items`: 타임라인 획득 아이템의 itemId마다 레벨, 종류, 부위, 등급, 세트 한 행
 - `timeline_sync_state`: 캐릭터별 동기화, 강화 백필 위치
+- `timeline_sync_requests`: 캐릭터의 종류, 시즌별 타임라인 동기화 요청
 - `timeline_season_backfill`: 캐릭터와 시즌별 옛 시즌 받기 위치
 - `clear_records`: 캐릭터의 레이드(모든 단계), 레기온 클리어 기록 한 번이 한 행
 - `clear_record_backfills`: 진행 중인 지난 클리어 기록 받기의 진행 위치
