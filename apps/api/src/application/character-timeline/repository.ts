@@ -1,4 +1,9 @@
-import type { TimelineCharacter, TimelineItemCursor, TimelineQueueCount } from '@dfragon/database'
+import type {
+  TimelineCharacter,
+  TimelineItemCursor,
+  TimelineSyncRequest,
+  TimelineSyncStateRow
+} from '@dfragon/database'
 import type {
   CharacterTimeline,
   TimelineItemPage,
@@ -14,6 +19,9 @@ export interface CharacterTimelineRepository {
   ): Promise<TimelineItemPage>
 }
 
-export interface TimelineQueueCountRepository {
-  writeCounts(counts: readonly TimelineQueueCount[]): Promise<void>
+export interface TimelineSyncRequestRepository {
+  readStates(characters: readonly TimelineCharacter[]): Promise<TimelineSyncStateRow[]>
+  request(requests: readonly TimelineSyncRequest[], options: { awaited: boolean }): Promise<void>
+  has(request: TimelineSyncRequest): Promise<boolean>
+  readSeasonBackfillSeasons(characters: readonly TimelineCharacter[]): Promise<number[]>
 }

@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises'
 import type { TimelineCharacter } from '@dfragon/database'
 import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
 import type { ReportCode } from '@dfragon/http-server'
@@ -31,16 +32,14 @@ import {
 } from '#application/character-search/index.js'
 import {
   CharacterTimelineService,
-  createEnhancementBackfillQueue,
-  createSeasonBackfillQueue,
-  createTimelineSyncQueue,
+  type RequestTimelineSync,
+  TimelineSyncRequestService,
   emptyCharacterTimelineRepository,
-  noTimelineSync,
-  startQueueCountsWriter
+  noTimelineSync
 } from '#application/character-timeline/index.js'
 import type {
   CharacterTimelineRepository,
-  TimelineQueueCountRepository
+  TimelineSyncRequestRepository
 } from '#application/character-timeline/repository.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearStatsService, emptyClearStatsRepository } from '#application/content-clears/index.js'
@@ -54,7 +53,6 @@ import { SoulPriceService } from '#application/soul-prices/index.js'
 import type { FetchShopGrade } from '#application/today-grade/ports.js'
 import { TodayGradeService } from '#application/today-grade/index.js'
 import { CharacterFetched } from '#domain/character-events.js'
-import type { SeasonBackfillJob } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { SoulPriceFailure } from '#domain/soul-prices/index.js'
 import { readApiBuildInfo } from '#infrastructure/build-info.js'
 import {
@@ -69,17 +67,10 @@ import {
 } from '@dfragon/server-core/infrastructure/score/index.js'
 
 export interface TimelineSyncOptions {
-  readonly sync: (
-    character: TimelineCharacter,
-    reportItemDictionaryFailure: () => void
-  ) => Promise<void>
-  readonly backfillEnhancements: (character: TimelineCharacter) => Promise<void>
-  readonly backfillSeason: (job: SeasonBackfillJob) => Promise<void>
   readonly read: CharacterTimelineRepository['readTimeline']
   readonly readPage: CharacterTimelineRepository['readPage']
-  // 있으면 queue의 대기, 처리 중 수를 주기마다 쓴다. 운영 경로가 이 값을 읽는다.
-  readonly writeQueueCounts?: TimelineQueueCountRepository['writeCounts']
-  // 진행 중인 동기화를 기다리지 않고 닫는다.
+  // 동기화는 캐릭터 목록 worker가 하고, API는 요청 테이블에 넣고 행이 없어지기를 기다린다(ADR 0091).
+  readonly requests: TimelineSyncRequestRepository
   readonly close: () => Promise<void>
 }
 
@@ -106,7 +97,6 @@ export interface ApiServicesOptions {
   readonly buildInfoPath?: string
   readonly scoreLibraryPath?: string | null
   readonly spawnScoreWorker?: ScoreEngineOptions['spawn']
-  readonly queueCountsIntervalMs?: number
 }
 
 type CharacterFetchedSubscriber = (event: CharacterFetched) => void
@@ -123,36 +113,36 @@ const noLowestListing: FetchLowestListing = async () => {
 }
 
 function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCode) {
-  // 타임라인 조회가 백필을 기다리지 않도록 백필은 따로 queue를 둔다.
-  const queues = {
-    sync: createTimelineSyncQueue(
-      (character) => timeline.sync(character, () => reportCode('TIMELINE_ITEM_DICTIONARY_FAILED')),
-      () => reportCode('TIMELINE_SYNC_FAILED')
-    ),
-    enhancementBackfill: createEnhancementBackfillQueue(timeline.backfillEnhancements, () =>
-      reportCode('TIMELINE_BACKFILL_FAILED')
-    ),
-    seasonBackfill: createSeasonBackfillQueue(timeline.backfillSeason, () =>
-      reportCode('TIMELINE_SEASON_BACKFILL_FAILED')
-    )
+  const requests = new TimelineSyncRequestService(timeline.requests, {
+    now: () => new Date(),
+    pause: setTimeout
+  })
+
+  const requestInBackground = (
+    characters: readonly TimelineCharacter[],
+    enhancementBackfill: boolean
+  ) => {
+    requests.request(characters, { enhancementBackfill }).catch(() => {
+      reportCode('TIMELINE_SYNC_REQUEST_FAILED')
+    })
   }
 
   const repository: CharacterTimelineRepository = {
     readTimeline: timeline.read,
     readPage: timeline.readPage
   }
-  const service = new CharacterTimelineService(repository, queues.sync)
+  const service = new CharacterTimelineService(repository, requests)
 
-  return { queues, service }
+  return { requests, requestInBackground, service }
 }
 
-type TimelineQueues = ReturnType<typeof createTimelineSync>['queues']
+type TimelineSync = ReturnType<typeof createTimelineSync>
 
 export type ApiServices = Awaited<ReturnType<typeof createApiServices>>['services']
 
 function createAdventureGuild(
   repository: AdventureGuildRepository | undefined,
-  queues: TimelineQueues | undefined
+  timelineSync: TimelineSync | undefined
 ): AdventureGuildService {
   if (repository === undefined) {
     return new AdventureGuildService(
@@ -162,9 +152,12 @@ function createAdventureGuild(
     )
   }
 
-  // 타임라인 queue는 DB 설정이 있을 때만 있어, 테스트처럼 모험단 읽기만 준 앱은 동기화를 요청하지 않는다.
-  const requestTimelineSync = queues?.sync.request ?? (() => undefined)
-  const seasonBackfill = queues?.seasonBackfill ?? noSeasonBackfill
+  // 요청 테이블은 DB 설정이 있을 때만 있어, 테스트처럼 모험단 읽기만 준 앱은 동기화를 요청하지 않는다.
+  const requestTimelineSync: RequestTimelineSync =
+    timelineSync !== undefined
+      ? (characters) => timelineSync.requestInBackground(characters, false)
+      : () => undefined
+  const seasonBackfill = timelineSync?.requests ?? noSeasonBackfill
 
   return new AdventureGuildService(repository, requestTimelineSync, seasonBackfill)
 }
@@ -193,35 +186,12 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     spawn: options.spawnScoreWorker
   })
   const timelineSync = timeline && createTimelineSync(timeline, reportCode)
-  const queues = timelineSync?.queues
-  // queue는 DB 설정(`timeline`)을 준 app에만 있어, 그 밖의 app에서 부르면 던진다.
-  const readQueueCounts = () => {
-    if (queues === undefined) {
-      throw new Error('Timeline queues need the timeline option')
-    }
-
-    return [
-      { name: 'timeline-sync', ...queues.sync.counts() },
-      { name: 'enhancement-backfill', ...queues.enhancementBackfill.counts() },
-      { name: 'season-backfill', ...queues.seasonBackfill.counts() }
-    ]
-  }
-
-  const queueCountsWriter =
-    timeline?.writeQueueCounts &&
-    startQueueCountsWriter(
-      readQueueCounts,
-      timeline.writeQueueCounts,
-      () => reportCode('TIMELINE_QUEUE_COUNTS_WRITE_FAILED'),
-      options.queueCountsIntervalMs
-    )
 
   // DB 설정이 없으면 구독 함수가 없어, 상세 조회가 캐릭터를 받아도 동기화와 기록을 하지 않는다.
   const subscribers: CharacterFetchedSubscriber[] = []
-  if (queues !== undefined) {
+  if (timelineSync !== undefined) {
     subscribers.push(({ serverId, characterId }) => {
-      queues.sync.request({ serverId, characterId })
-      queues.enhancementBackfill.request({ serverId, characterId })
+      timelineSync.requestInBackground([{ serverId, characterId }], true)
     })
   }
 
@@ -285,7 +255,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const timelineService =
     timelineSync?.service ??
     new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
-  const adventureGuild = createAdventureGuild(options.adventureGuild, queues)
+  const adventureGuild = createAdventureGuild(options.adventureGuild, timelineSync)
   const rankingStats = new RankingStatsService(options.rankingStats ?? emptyRankingStatsRepository)
   const clearStats = new ClearStatsService(options.clearStats ?? emptyClearStatsRepository, () =>
     reportCode('CLEAR_STATS_REFRESH_FAILED')
@@ -308,7 +278,6 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       soulPrices
     },
     refreshClearStats: () => clearStats.refresh(),
-    readQueueCounts,
     /** 한 단계가 실패해도 나머지 단계를 실행하고, 실패를 모아 던진다. */
     close(closeServer: () => Promise<void>): Promise<void> {
       return runCloseSteps([
@@ -319,12 +288,9 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
         () => details.close(),
         () => todayGrade.close(),
         () => clearStats.close(),
+        // server는 열린 요청이 끝나야 닫히므로, 동기화를 기다리던 타임라인 조회가 저장된 값으로 바로 답하게 한다.
+        () => timelineSync?.requests.close(),
         closeServer,
-        () => queueCountsWriter?.stop(),
-        // Prisma는 닫은 뒤에도 다음 query에서 다시 연결하므로, queue를 닫지 않으면 대기열에 남은 일과 종료 뒤에 온 요청도 시작한다.
-        () => queues?.sync.close(),
-        () => queues?.enhancementBackfill.close(),
-        () => queues?.seasonBackfill.close(),
         // worker를 멈추면 기다리던 계산이 점수 없이 끝나므로, 상세 조회가 진행 중인 요청을 취소한 뒤에 멈춘다.
         () => engine.close(),
         () => timeline?.close()
