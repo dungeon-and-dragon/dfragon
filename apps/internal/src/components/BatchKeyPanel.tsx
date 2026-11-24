@@ -192,9 +192,7 @@ function BatchKeyTable({ keys }: { keys: readonly BatchKey[] }): React.JSX.Eleme
           <th>상태</th>
           <th>추가</th>
           <th>사용</th>
-          <th className="table-num">
-            <span className="sr-only">삭제</span>
-          </th>
+          <th className="table-num" />
         </tr>
       </thead>
       <tbody>

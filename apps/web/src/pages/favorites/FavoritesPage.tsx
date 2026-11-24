@@ -7,7 +7,6 @@ export function FavoritesPage(): React.JSX.Element {
   const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
   const empty = favoriteCharacters.length === 0
   const unfavorite: CharacterTableAction = {
-    name: '해제',
     render: (row) => <UnfavoriteButton character={row} />
   }
 

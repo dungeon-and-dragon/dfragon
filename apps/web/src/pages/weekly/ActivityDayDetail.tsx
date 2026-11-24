@@ -197,12 +197,7 @@ export function ActivityDayDetail({
         <span className="text-fg">{formatActivityDate(date)}</span>
       </div>
       {seasonDays.status === 'loading' && (
-        <>
-          <span role="status" className="sr-only">
-            하루 활동을 받는 중입니다.
-          </span>
-          <span aria-hidden="true" className="skeleton my-1 h-12" />
-        </>
+        <span aria-hidden="true" className="skeleton my-1 h-12" />
       )}
       {seasonDays.status === 'error' && (
         <p role="alert" className="state state-error">

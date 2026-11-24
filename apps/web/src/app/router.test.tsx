@@ -104,8 +104,35 @@ function hostWithAutoRound(): {
   return { watchedHost, sendAutoRound: (signal) => listener!(signal), setWatchedScreen }
 }
 
-function captureStatus(): string | null {
-  return container.querySelector('[data-capture-announcer]')!.textContent
+async function captureStatus(): Promise<string | null> {
+  const chip = container.querySelector('button[aria-label^="화면 공유"]')!
+  const trigger = chip.parentElement!
+  const openPopup = (): Element | null =>
+    document.querySelector('[data-base-ui-portal] > [data-open]')
+
+  await act(async () => {
+    trigger.dispatchEvent(new MouseEvent('mouseenter'))
+  })
+  const popup = await vi.waitFor(() => {
+    const opened = openPopup()
+    if (opened === null) {
+      throw new Error('Tooltip이 열리지 않았다')
+    }
+
+    return opened
+  })
+
+  const text = popup.textContent
+  await act(async () => {
+    trigger.dispatchEvent(new MouseEvent('mouseleave'))
+  })
+  await vi.waitFor(() => {
+    if (openPopup() !== null) {
+      throw new Error('Tooltip이 닫히지 않았다')
+    }
+  })
+
+  return text
 }
 
 function seats(): HTMLTableRowElement[] {
@@ -225,16 +252,13 @@ it('브라우저 host만으로 전역 바의 오늘 등급과 파티 표의 네 
   expect(requested.map(String)).toContain(`${SITE_API_URL}/items/today-grade`)
 })
 
-it('화면 밖에 빌드 commit을 두고 숨긴 라벨과 함께 빌드 commit으로 읽히게 한다', async () => {
+it('화면 밖에 빌드 commit을 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
-  const label = [...container.querySelectorAll('span')].find(
-    (span) => span.textContent === '빌드 '
+  const buildCommit = [...container.querySelectorAll('span')].find(
+    (span) => span.textContent === __BUILD_COMMIT__
   )!
 
-  const buildCommit = label.parentElement!
-
-  expect(buildCommit.textContent).toBe(`빌드 ${__BUILD_COMMIT__}`)
   expect(buildCommit.closest('footer, a, header, main')).toBeNull()
 })
 
@@ -952,7 +976,7 @@ it('화면 공유는 메인 화면에 다녀와도 연결된 채 남고, 다른 
   await waitForPath('/multisearch')
 
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
-  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
 })
 
 it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는다', async () => {
@@ -963,7 +987,7 @@ it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는
   await openMultisearch()
 
   expect(decodeBrowserImage).not.toHaveBeenCalled()
-  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
 })
 
 it('문서 전체의 드래그를 막지 않는다', async () => {
@@ -977,12 +1001,14 @@ it('문서 전체의 드래그를 막지 않는다', async () => {
 
 it('창을 고르기 전에는 붙여넣기 안내를 보이고, 이미지를 붙여 넣으면 지금 화면의 회차가 웹 문구로 진행된다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
-  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
 
   await act(async () => pasteImage())
 
   // jsdom에는 Worker가 없어 OCR 준비 실패로 끝나므로 그 웹 문구까지 확인한다.
-  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.ocrPrepareFailed))
+  await vi.waitFor(async () =>
+    expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.ocrPrepareFailed)
+  )
   expect(decodeBrowserImage).toHaveBeenCalledExactlyOnceWith(expect.any(File))
 })
 
@@ -1021,7 +1047,7 @@ it('공대 화면에서 붙여 넣으면 공대 회차가 host의 공대 프레�
   await act(async () => pasteImage())
 
   // 템플릿을 받지 못하면 공대 프레임 읽기가 거절돼 그 회차가 웹의 읽기 실패 문구로 끝난다.
-  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.disconnected))
+  await vi.waitFor(async () => expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.disconnected))
   expect(readRaidFrame).toHaveBeenCalledOnce()
   expect(readPartyFrame).not.toHaveBeenCalled()
   readRaidFrame.mockRestore()
@@ -1061,7 +1087,7 @@ it('게임 연결 칩으로 던파 창을 공유하면 캡처 버튼이 공유 �
   await act(async () => track.dispatchEvent(new Event('ended')))
 
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
-  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
   expect(captureButton().disabled).toBe(true)
 })
 
@@ -1092,7 +1118,7 @@ it('공유가 연결된 동안 게임 연결 칩을 누르면 창 공유를 다�
   expect(chip().textContent).toBe('화면 공유')
   expect(getDisplayMedia).toHaveBeenCalledOnce()
   expect(track.stop).toHaveBeenCalledOnce()
-  expect(captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
+  expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
   expect(captureButton().disabled).toBe(true)
 
   await act(async () => chip().click())
@@ -1167,9 +1193,11 @@ it('던파 창을 연결한 동안 칩은 지금 화면의 마을 자동 인식�
 
   await act(async () => chip.click())
 
-  await vi.waitFor(() => expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.party.waiting))
+  await vi.waitFor(async () =>
+    expect(await captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.party.waiting)
+  )
   await act(async () => useSearchModeStore.setState({ searchMode: 'raid' }))
-  expect(captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.raid.waiting)
+  expect(await captureStatus()).toBe(WEB_SCREEN_WATCH_TEXTS.raid.waiting)
   await act(async () => host.party.selectCaptureSource(''))
 })
 
@@ -1467,7 +1495,7 @@ it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기
   await act(async () => root.render(<WebApp host={host} />))
   const input = container.querySelector<HTMLInputElement>('header input[aria-label="캐릭터 이름"]')!
   const before = seats().map(nameOf)
-  const status = captureStatus()
+  const status = await captureStatus()
   const altArrow = new KeyboardEvent('keydown', {
     key: 'ArrowDown',
     altKey: true,
@@ -1487,7 +1515,7 @@ it('전역 검색창의 Alt+방향키와 글자 붙여넣기는 브라우저 기
   expect(altArrow.defaultPrevented).toBe(false)
   expect(paste.defaultPrevented).toBe(false)
   expect(seats().map(nameOf)).toEqual(before)
-  expect(captureStatus()).toBe(status)
+  expect(await captureStatus()).toBe(status)
 })
 
 function summaryHeart(): HTMLButtonElement | null {

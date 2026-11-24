@@ -280,15 +280,6 @@ function filledPercent(name: string): number | undefined {
   return Number(width)
 }
 
-function progressText(name: string): string | undefined {
-  const last = seasonButton(name).lastElementChild?.textContent ?? ''
-  if (!last.endsWith('%')) {
-    return undefined
-  }
-
-  return last
-}
-
 function withBackfill(
   activity: AdventureActivity,
   backfill: NonNullable<AdventureActivity['seasons'][number]['backfill']>,
@@ -443,7 +434,6 @@ it('받기 전 옛 시즌을 누르면 그 시즌 받기를 요청하고 고른 
   expect(backfillRequests()).toEqual([backfillRequest(9)])
   expect(onSeasonChange).not.toHaveBeenCalled()
   expect(currentSeasonName()).toBe('합성 시즌 11')
-  expect(progressText('합성 시즌 9')).toBe('40%')
   expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBe('true')
 
   // 두 번째 받기 요청이 나갔다면 MSW에 닿을 틈을 준 뒤 센다.
@@ -468,8 +458,7 @@ it('받는 동안 시즌 활동을 다시 조회해 막대를 늘리고, 다 받
     await vi.waitFor(() => expect(filledPercent('합성 시즌 9')).toBe(80))
 
     await act(async () => vi.advanceTimersByTimeAsync(3000))
-    await vi.waitFor(() => expect(progressText('합성 시즌 9')).toBeUndefined())
-    expect(filledPercent('합성 시즌 9')).toBeUndefined()
+    await vi.waitFor(() => expect(filledPercent('합성 시즌 9')).toBeUndefined())
     expect(seasonButton('합성 시즌 9').getAttribute('aria-busy')).toBeNull()
 
     const calls = activityRequests().length

@@ -158,12 +158,6 @@ async function drag(
   return { event, setData: dataTransfer.setData }
 }
 
-function moveNotices(): (string | null)[] {
-  return [...container.querySelectorAll('section > [role="status"]')].map(
-    (region) => region.textContent
-  )
-}
-
 it('R, Y, G 파티마다 파티 헤더 행에 파티 배지와 찾은 수를 두고 그 아래 네 자리 행을 놓는다', async () => {
   await render({ characters: [member, member, null, null, member] })
 
@@ -182,7 +176,7 @@ it('R, Y, G 파티마다 파티 헤더 행에 파티 배지와 찾은 수를 두
       ?.split(' ')
       .map((id) => document.getElementById(id)?.textContent)
       .join(', ')
-  expect(describedBy(seats()[0])).toBe('R 파티2/4, Alt와 방향키로 위, 아래 자리와 맞바꿉니다.')
+  expect(describedBy(seats()[0])).toBe('R 파티2/4')
   expect(describedBy(seats()[4])?.startsWith('Y 파티')).toBe(true)
   expect(describedBy(seats()[11])?.startsWith('G 파티')).toBe(true)
   expect(seats()[0].getAttribute('aria-keyshortcuts')).toBe('Alt+ArrowUp Alt+ArrowDown')
@@ -318,9 +312,6 @@ it('행에 포커스한 채 Alt와 위, 아래 방향키로 이웃 자리와 맞
 
   await pressAlt(first, 'ArrowDown')
   expect(swap).toHaveBeenCalledExactlyOnceWith(0, 1)
-  expect(container.querySelector('section > [role="status"]')?.textContent).toBe(
-    '1번 자리와 2번 자리를 맞바꿨습니다.'
-  )
   // Chromium은 React가 옮긴 행 노드의 포커스를 잃지만 jsdom은 그대로 두므로, 다시 그리기 전에 잃은 상태를 만든다.
   await act(async () => first.blur())
   await render({
@@ -426,14 +417,13 @@ it('자리 드래그 형식이 없는 드래그는 자리 드래그 중이어도
   expect(swap).not.toHaveBeenCalled()
 })
 
-it('맞바꾸기를 거절하면 알리지 않고, 다음 배치 변경에서 그 행으로 포커스를 가져가지 않는다', async () => {
+it('맞바꾸기를 거절하면 다음 배치 변경에서 그 행으로 포커스를 가져가지 않는다', async () => {
   const swap = vi.fn(() => false)
   await render({ characters: [member], swapSeats: swap })
   await act(async () => seats()[0].focus())
 
   await pressAlt(seats()[0], 'ArrowDown')
   expect(swap).toHaveBeenCalledExactlyOnceWith(0, 1)
-  expect(moveNotices()).toEqual(['', ''])
 
   const outsideButton = document.createElement('button')
   container.after(outsideButton)
@@ -448,20 +438,6 @@ it('맞바꾸기를 거절하면 알리지 않고, 다음 배치 변경에서 �
   } finally {
     outsideButton.remove()
   }
-})
-
-it('같은 두 자리를 연달아 맞바꿔도 알림 영역을 번갈아 채워 다시 읽히게 한다', async () => {
-  await render({ characters: [member] })
-  const text = '1번 자리와 2번 자리를 맞바꿨습니다.'
-
-  await pressAlt(seats()[0], 'ArrowDown')
-  const first = moveNotices()
-  expect(first.filter((notice) => notice === text)).toHaveLength(1)
-  expect(first.filter((notice) => notice === '')).toHaveLength(1)
-  await pressAlt(seats()[0], 'ArrowDown')
-  const second = moveNotices()
-  expect(second.filter((notice) => notice === text)).toHaveLength(1)
-  expect(second.indexOf(text)).not.toBe(first.indexOf(text))
 })
 
 it('스냅샷 모험단 입력은 그 슬롯이 놓인 자리 행에 열리고 바꾼 값을 자리 번호로 알린다', async () => {

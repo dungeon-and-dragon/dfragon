@@ -166,13 +166,6 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
     })
   }
 
-  function describe(index: number): string {
-    const rows = rowsAt(index).map(({ name, value }) => `${name} ${value}`)
-    const title = x[index]?.title ?? ''
-
-    return [title, ...rows].join(', ')
-  }
-
   const places = x.map((_, index) => {
     const center = xOf(index)
     const start = index > 0 ? (xOf(index - 1) + center) / 2 : left
@@ -314,7 +307,6 @@ function LinePlot(props: LineChartProps): React.JSX.Element {
         <HitList
           x={x}
           places={places}
-          describe={describe}
           onHover={show}
           areaProps={areaProps}
           register={registerHit}

@@ -228,7 +228,7 @@ function pointButtons(): HTMLButtonElement[] {
   return [...container.querySelectorAll<HTMLButtonElement>('button[aria-pressed]')]
 }
 
-it('받는 동안 받는 중을 알리고, 받지 못하면 이력을 받지 못했다고 알린다', async () => {
+it('받는 동안 뼈대를 두고, 받지 못하면 이력을 받지 못했다고 알린다', async () => {
   const { promise, resolve } = Promise.withResolvers<void>()
   const requested: string[] = []
   server.use(
@@ -241,7 +241,7 @@ it('받는 동안 받는 중을 알리고, 받지 못하면 이력을 받지 못
   )
   await render()
 
-  expect(text('[role="status"]')).toEqual(['이력을 받는 중입니다.'])
+  expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
 
   resolve()
 

@@ -116,9 +116,6 @@ function SetStatsBody({
   if (result.status === 'loading' || catalog.status === 'loading') {
     return (
       <div aria-busy="true">
-        <span role="status" className="sr-only">
-          세트 통계를 받는 중입니다.
-        </span>
         {filterBox}
         <div aria-hidden="true">
           {SKELETON_ROWS.map((row) => (

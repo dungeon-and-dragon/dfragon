@@ -77,10 +77,6 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
     }
   }
 
-  function describe({ name, value }: SplitSegment): string {
-    return `${name} ${formatValue(value)} ${percent.format(value / total)}`
-  }
-
   function tooltipRows({ key, value, color }: SplitSegment): TooltipRow[] {
     const share = percent.format(value / total)
     const formatted = formatValue(value)
@@ -98,7 +94,6 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
             key={segment.key}
             segment={segment}
             text={splitLabelShown(segment.value, total) ? formatValue(segment.value) : null}
-            description={describe(segment)}
             dimmed={hover.open && segment.key !== hover.key}
             onHover={show}
             register={registerSegment}
@@ -113,14 +108,12 @@ function SplitBarPlot({ label, segments, formatValue }: SplitBarProps): React.JS
 function Segment({
   segment: { key, value, color, textColor },
   text,
-  description,
   dimmed,
   onHover,
   register
 }: {
   segment: SplitSegment
   text: string | null
-  description: string
   dimmed: boolean
   onHover: (key: string) => void
   register: (key: string, element: HTMLLIElement) => () => void
@@ -151,7 +144,6 @@ function Segment({
           {text}
         </span>
       )}
-      <span className="sr-only">{description}</span>
     </li>
   )
 }

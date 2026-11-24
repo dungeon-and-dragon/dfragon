@@ -24,7 +24,7 @@
 
 공개 타입은 `className`, `style`을 받지 않는다. 아이콘은 `svg` 속성을 그대로 받아 `className`으로 크기, 색, 배치를 정한다. Base UI 부품 그대로인 `Select.Root`, `Tabs.Root` 같은 부품은 Base UI 문서의 API를 따른다.
 
-Entry는 `@dfragon/ui` 하나다. 앱에서 눈에는 숨기고 보조 기술이 읽게 할 글자는 Tailwind CSS의 `sr-only`를 쓴다.
+Entry는 `@dfragon/ui` 하나다.
 
 `@base-ui/react`, React, React DOM은 peer이다. Library build는 이들을 external로 두고 CSS를 출력하지 않는다.
 

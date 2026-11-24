@@ -18,7 +18,6 @@ export type CharacterTableRow = CharacterCellCharacter &
   }
 
 export type CharacterTableAction = {
-  name: string
   render: (row: CharacterTableRow) => ReactNode
 }
 
@@ -118,11 +117,7 @@ export function CharacterTable<Row extends CharacterTableRow>({
                 {AFFILIATION_HEADINGS[affiliation]}
               </th>
             ))}
-            {action != null && (
-              <th scope="col">
-                <span className="sr-only">{action.name}</span>
-              </th>
-            )}
+            {action != null && <th scope="col" />}
           </tr>
         </thead>
         <tbody>

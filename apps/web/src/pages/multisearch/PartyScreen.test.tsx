@@ -231,9 +231,6 @@ it('파티 행을 다른 행에 끌어 놓으면 두 자리를 맞바꾼다', as
   await drag('drop', third, ['application/x-dfragon-seat'])
 
   expect(swap).toHaveBeenCalledExactlyOnceWith(0, 2)
-  expect(container.querySelector('section > [role="status"]')?.textContent).toBe(
-    '1번 자리와 3번 자리를 맞바꿨습니다.'
-  )
 })
 
 it('이름 칸을 고치는 동안은 그 파티 행을 끌 수 없다', async () => {
@@ -252,8 +249,6 @@ it('이름 칸을 고치는 동안은 그 파티 행을 끌 수 없다', async (
 it('파티 행은 Alt와 위, 아래 방향키로만 위아래 자리와 맞바꾼다', async () => {
   const swap = vi.fn(() => true)
   await render({ slots: ['idle', 'idle', 'idle', 'idle'], swapSeats: swap })
-  const hint = document.getElementById(seats()[1].getAttribute('aria-describedby')!)
-  expect(hint?.textContent).toBe('Alt와 방향키로 위, 아래 자리와 맞바꿉니다.')
   expect(seats()[1].getAttribute('aria-keyshortcuts')).toBe('Alt+ArrowUp Alt+ArrowDown')
 
   await pressAlt(seats()[1], 'ArrowLeft')

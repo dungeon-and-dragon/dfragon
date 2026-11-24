@@ -8,9 +8,6 @@ const CARD_SKELETON_COUNT = 6
 export function ClearScreenSkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true" className={clearClasses.screen}>
-      <span role="status" className="sr-only">
-        클리어 집계를 받는 중입니다.
-      </span>
       <TitleBox title={CLEAR_TITLE} />
       <div aria-hidden="true" className="section px-4">
         <div className="-m-1 flex gap-3 overflow-hidden p-1">

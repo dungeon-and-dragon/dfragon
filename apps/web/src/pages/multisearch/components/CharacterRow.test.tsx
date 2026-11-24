@@ -132,7 +132,7 @@ function hasStyle(element: Element, style: keyof typeof expectedColors): boolean
 
 function visibleText(element: Element): string {
   const copy = element.cloneNode(true) as HTMLElement
-  for (const hidden of copy.querySelectorAll('[aria-hidden="true"], .sr-only')) {
+  for (const hidden of copy.querySelectorAll('[aria-hidden="true"]')) {
     hidden.remove()
   }
 
@@ -405,7 +405,7 @@ it('점수 열은 딜러 장비 라벨과 파란 숫자, 버퍼 버프 라벨과
   expect(await score({ ...dealerCard, role: null })).toEqual(['장비', []])
 })
 
-it('근사값 점수는 ≈를 붙이고 이유를 마우스 설명과 보조 기술로 전한다', async () => {
+it('근사값 점수는 ≈를 붙이고 이유를 마우스 설명으로 전한다', async () => {
   await render({
     state: 'success',
     character: {
@@ -427,10 +427,9 @@ it('근사값 점수는 ≈를 붙이고 이유를 마우스 설명과 보조 �
 
   expect(visibleText(value)).toBe('≈321,000')
   expect(value.getAttribute('title')).toBe(reason)
-  expect(value.textContent).toBe(`≈321,000${reason}`)
 })
 
-it('검색 응답에 없는 길드, 명성, 점수는 -로 보이고 계산하지 못한 점수는 사유를 보조 기술로 전한다', async () => {
+it('검색 응답에 없는 길드, 명성, 점수는 -로 보이고 계산하지 못한 점수는 사유를 마우스 설명으로 전한다', async () => {
   await render({
     state: 'success',
     character: {
@@ -447,7 +446,9 @@ it('검색 응답에 없는 길드, 명성, 점수는 -로 보이고 계산하�
   expect(cell('길드')?.textContent).toBe('-')
   expect(cell('명성')?.textContent).toBe('-')
   expect(visibleText(cell('점수')!)).toBe('장비-')
-  expect(cell('점수')?.textContent).toBe('장비-계산하지 못함, 장비 정보 부족')
+  expect(cell('점수')!.lastElementChild!.getAttribute('title')).toBe(
+    '계산하지 못함, 장비 정보 부족'
+  )
 })
 
 it('스냅샷 열은 제자리 순번, 신호색으로 채운 바뀐 순번, 빨간 없음 배지 하나만 둔다', async () => {
@@ -479,22 +480,6 @@ it('스냅샷 열은 제자리 순번, 신호색으로 채운 바뀐 순번, 빨
     danger: true
   })
   expect(cell('스냅샷')?.textContent).toBe('없음')
-})
-
-it('찾은 이름은 보조 기술에 알리고 고치는 동안에는 이름 대신 문구를 알린다', async () => {
-  const announced = (): string | null => row().querySelector('[aria-live]')!.textContent
-
-  await render({ state: 'success', character: found })
-  expect(announced()).toBe('찾은이름')
-  await enterName('')
-  await pressEnter()
-  expect(announced()).toBe('캐릭터 이름을 입력해 주세요.')
-  await render({
-    state: 'empty',
-    notice: { text: '캐릭터를 찾지 못함', tone: 'failure' },
-    resetKey: 'next-round'
-  })
-  expect(announced()).toBe('캐릭터를 찾지 못함')
 })
 
 it('찾은 이름을 지우고 Enter를 누르면 빈 자리처럼 입력 안내만 두고 이전 캐릭터 값을 감춘다', async () => {

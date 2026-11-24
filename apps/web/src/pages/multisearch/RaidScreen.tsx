@@ -11,7 +11,6 @@ import {
   useSeatMove
 } from '#features/capture-search'
 import { Seat } from './components/Seat'
-import { SeatMoveStatus } from './components/SeatMoveStatus'
 import { SeatTable } from './components/SeatTable'
 import { SEAT_TABLE_COLUMN_COUNT } from './components/SeatTable.columns'
 import { isBusySlot } from './card-presentation'
@@ -40,11 +39,10 @@ export function RaidScreen({
   seats: SeatArrangement
   actions: SlotCardActions
 }): React.JSX.Element {
-  const { seatOrder, canMoveSeats } = seats
+  const { seatOrder } = seats
   const { lookupSlot, pickCandidate, changeSnapshotAdventure } = actions
   const id = useId()
-  const { moveSeat, notice } = useSeatMove({ resetKey, seats })
-  const hintId = `${id}-move-hint`
+  const { moveSeat } = useSeatMove({ resetKey, seats })
 
   function renderSeat(seat: number, partyLabelId: string): React.JSX.Element {
     const slot = seatOrder[seat]
@@ -61,7 +59,7 @@ export function RaidScreen({
         label={`${seat + 1}번 자리`}
         move={moveSeat(seat)}
         busy={isBusySlot(slots[slot])}
-        describedBy={canMoveSeats ? `${partyLabelId} ${hintId}` : partyLabelId}
+        describedBy={partyLabelId}
       >
         <CharacterRow
           cardKey={{ id: `raid-${slot}`, resetKey }}
@@ -109,7 +107,6 @@ export function RaidScreen({
           ]
         })}
       </SeatTable>
-      <SeatMoveStatus hintId={hintId} layout={seats.layout} notice={notice} />
     </section>
   )
 }

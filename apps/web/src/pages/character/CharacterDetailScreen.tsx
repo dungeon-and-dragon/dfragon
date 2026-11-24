@@ -23,9 +23,6 @@ export function CharacterDetailScreen({
     case 'loading':
       return (
         <div aria-busy="true" className={SCREEN}>
-          <span role="status" className="sr-only">
-            캐릭터 정보를 받는 중입니다.
-          </span>
           <CharacterSummarySkeleton />
           <CharacterTabsSkeleton />
         </div>

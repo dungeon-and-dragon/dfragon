@@ -365,9 +365,6 @@ function Tile({
 function HistorySkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true">
-      <span role="status" className="sr-only">
-        이력을 받는 중입니다.
-      </span>
       <div aria-hidden="true" className={`grid grid-cols-2 gap-4 p-4 ${LINE}`}>
         <span className="skeleton h-[296px]" />
         <span className="skeleton h-[296px]" />
@@ -387,9 +384,6 @@ function HistorySkeleton(): React.JSX.Element {
 function SummarySkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true">
-      <span role="status" className="sr-only">
-        시점 요약을 받는 중입니다.
-      </span>
       <div aria-hidden="true" className={`grid grid-cols-4 gap-2 p-4 ${LINE}`}>
         {Array.from({ length: TILE_COUNT }, (_, index) => (
           <span key={index} className="skeleton h-16" />
