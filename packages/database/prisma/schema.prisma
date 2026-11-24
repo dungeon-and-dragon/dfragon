@@ -89,6 +89,7 @@ model CharacterSkillStyle {
   skills       Json
   evolutions   Json
   enhancements Json
+  chain        Json?
   fetchedAt    DateTime  @map("fetched_at") @db.Timestamptz(3)
 
   @@id([serverId, characterId])
