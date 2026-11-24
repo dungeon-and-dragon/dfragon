@@ -27,6 +27,7 @@ import {
 } from '../src/infrastructure/database/adventure-activity.js'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import { syncRequestRecorder } from './timeline-request-fixtures.js'
 
 // 합성 타임라인이다. 시즌 구간은 천해천 시작부터 가상의 다음 시즌 시작까지로 둔다.
 const at = (time: string) => new Date(`${time}+09:00`)
@@ -777,11 +778,9 @@ async function listen(
       ...reader
     },
     timeline: {
-      sync: syncTimeline,
       read: unused,
       readPage: unused,
-      backfillEnhancements: unused,
-      backfillSeason: unused,
+      requests: syncRequestRecorder(syncTimeline),
       close: async () => undefined
     },
     writeAccessLog: () => undefined

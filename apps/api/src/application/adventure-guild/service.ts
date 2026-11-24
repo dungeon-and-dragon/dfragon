@@ -36,9 +36,7 @@ export class AdventureGuildService {
     const weekly = await this.repository.readAdventureWeeklyClears(adventureName)
 
     // 동기화는 기다리지 않아 이번 응답은 지금 저장된 값이고, 다음 조회부터 새 클리어가 보인다.
-    for (const { serverId, characterId } of weekly.characters) {
-      this.requestTimelineSync({ serverId, characterId })
-    }
+    this.requestTimelineSync(weekly.characters.map(toTimelineCharacter))
 
     return weekly
   }
@@ -49,11 +47,9 @@ export class AdventureGuildService {
   ): Promise<SelectedAdventureEquipment> {
     const equipment = await this.repository.readAdventureEquipment(adventureName)
 
-    for (const { characters } of equipment.servers) {
-      for (const { serverId, characterId } of characters) {
-        this.requestTimelineSync({ serverId, characterId })
-      }
-    }
+    this.requestTimelineSync(
+      equipment.servers.flatMap(({ characters }) => characters.map(toTimelineCharacter))
+    )
 
     return selectAdventureEquipment(equipment, query)
   }
@@ -66,9 +62,7 @@ export class AdventureGuildService {
 
     // 이어 받기는 첫 묶음 뒤에만 오므로 첫 묶음을 줄 때만 동기화를 요청한다.
     if (query.before === undefined) {
-      for (const { serverId, characterId } of characters) {
-        this.requestTimelineSync({ serverId, characterId })
-      }
+      this.requestTimelineSync(characters.map(toTimelineCharacter))
     }
 
     return page
@@ -84,11 +78,10 @@ export class AdventureGuildService {
       throw new CharacterDetailFailure('query')
     }
 
-    for (const { serverId, characterId } of read.characters) {
-      this.requestTimelineSync({ serverId, characterId })
-    }
+    this.requestTimelineSync(read.characters.map(toTimelineCharacter))
 
-    const seasons = read.activity.seasons.map((season) => this.withRunning(season, read.characters))
+    const running = await this.seasonBackfill.readSeasonBackfillRunning(read.characters)
+    const seasons = read.activity.seasons.map((season) => withRunning(season, running))
 
     return { ...read.activity, seasons }
   }
@@ -103,7 +96,7 @@ export class AdventureGuildService {
     return days
   }
 
-  // 받기는 기다리지 않고 queue에 넣은 직후의 진행률을 준다.
+  // 받기는 기다리지 않고, 요청 행을 넣은 직후의 진행률과 받는 중 여부를 준다.
   async adventureSeasonBackfill(adventureName: string, seasonId: number): Promise<ActivitySeason> {
     const read = await this.repository.readAdventureSeasonBackfill(adventureName, seasonId)
 
@@ -111,33 +104,34 @@ export class AdventureGuildService {
       throw new CharacterDetailFailure('query')
     }
 
-    for (const job of read.jobs) {
-      this.seasonBackfill.request(job)
-    }
+    await this.seasonBackfill.requestSeasonBackfill(read.jobs)
+    const running = await this.seasonBackfill.readSeasonBackfillRunning(read.characters)
 
-    return this.withRunning(read.season, read.characters)
-  }
-
-  // 받는 중인지는 메모리 queue만 알아, DB에서 읽은 진행률에 여기서 붙인다.
-  private withRunning(
-    { backfill, ...season }: StoredActivitySeason,
-    characters: readonly TimelineCharacter[]
-  ): ActivitySeason {
-    if (backfill === undefined) {
-      return season
-    }
-
-    const running = characters.some((character) =>
-      this.seasonBackfill.has({ character, seasonId: season.id })
-    )
-
-    return { ...season, backfill: { ...backfill, running } }
+    return withRunning(read.season, running)
   }
 }
 
+function toTimelineCharacter({ serverId, characterId }: TimelineCharacter): TimelineCharacter {
+  return { serverId, characterId }
+}
+
+// 받는 중인지는 요청 행으로 알아, DB에서 읽은 진행률에 여기서 붙인다.
+function withRunning(
+  { backfill, ...season }: StoredActivitySeason,
+  runningSeasons: ReadonlySet<number>
+): ActivitySeason {
+  if (backfill === undefined) {
+    return season
+  }
+
+  const running = runningSeasons.has(season.id)
+
+  return { ...season, backfill: { ...backfill, running } }
+}
+
 export const noSeasonBackfill: SeasonBackfillRequests = {
-  request: () => undefined,
-  has: () => false
+  requestSeasonBackfill: async () => undefined,
+  readSeasonBackfillRunning: async () => new Set()
 }
 
 export const emptyAdventureGuildRepository: AdventureGuildRepository = {

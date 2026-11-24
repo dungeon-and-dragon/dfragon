@@ -13,6 +13,7 @@ import type { CharacterRow, CharacterRowScore } from '../src/domain/character-ro
 import { parseAdventureWeeklyClears as toAdventureWeeklyClears } from '../src/infrastructure/database/adventure-weekly.js'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
+import { syncRequestRecorder } from './timeline-request-fixtures.js'
 
 // 합성 캐릭터다. DB 읽기는 fake이며 정렬, 저장과 주간 경계는 container-adventure-guild-check.mjs가 실제 DB로 확인한다.
 const fetchedAt = new Date('2026-11-06T00:00:00.000Z')
@@ -61,11 +62,9 @@ async function listen(
     todayGrade: { fetchShopGrade: unused },
     adventureGuild,
     timeline: syncTimeline && {
-      sync: syncTimeline,
       read: unused,
       readPage: unused,
-      backfillEnhancements: unused,
-      backfillSeason: unused,
+      requests: syncRequestRecorder(syncTimeline),
       close: async () => undefined
     },
     writeAccessLog: () => undefined

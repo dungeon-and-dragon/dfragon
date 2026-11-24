@@ -926,9 +926,11 @@ try {
     "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now()), ('character-fame-refresh', 'probe', '{}', 0, now(), now()), ('inactive-character-recheck', 'probe', '{}', 0, now(), now()), ('item-dictionary-fill', 'probe', '{}', 0, now(), now()), ('skill-style-collection', 'probe', '{}', 0, now(), now())"
   )
 
+  // 앞 단계의 모험단 조회가 넣은 동기화 요청은 batch key가 없어 처리되지 않으므로 지운다.
   // 1시간 안에 동기화에 성공한 캐릭터라 Neople을 부르지 않고 끝나는 요청이다. 끝난 worker가 집어 둔 채 남긴 행으로 넣는다.
   await psql(
     [
+      'DELETE FROM timeline_sync_requests',
       "INSERT INTO timeline_sync_state (server_id, character_id, last_succeeded_at) VALUES ('cain', 'timeline-request-recent', now())",
       "INSERT INTO timeline_sync_requests (kind, server_id, character_id, started_at) VALUES ('sync', 'cain', 'timeline-request-recent', now())"
     ].join('; ')
@@ -1100,14 +1102,9 @@ try {
   await psql(
     "INSERT INTO character_collection (server_id, character_id, queued_at, attempted_at, failure) VALUES ('cain', 'ops-waiting', '2026-11-09T00:00:00Z', NULL, NULL), ('cain', 'ops-api', '2026-11-08T00:00:00Z', '2026-11-08T01:00:00Z', 'neople-api'), ('cain', 'ops-internal', '2026-11-08T00:00:00Z', '2026-11-08T02:00:00Z', 'neople-internal')"
   )
-  // 운영 경로는 API가 쓴 queue 수를 테이블에서 읽는다. 앞 단계에서 끝난 일의 수는 다음 쓰기 주기에 0으로 써진다.
-  await waitFor(
-    async () =>
-      (
-        await psql(
-          "SELECT string_agg(name || ':' || waiting || ':' || running, ',' ORDER BY name) FROM timeline_queue_counts"
-        )
-      ).stdout.trim() === 'enhancement-backfill:0:0,season-backfill:0:0,timeline-sync:0:0'
+  // API는 queue 수를 더 쓰지 않고, 운영 경로는 아직 이 테이블에서 읽어 이전에 API가 쓰던 값을 넣는다.
+  await psql(
+    "INSERT INTO timeline_queue_counts (name, waiting, running) VALUES ('timeline-sync', 0, 0), ('enhancement-backfill', 0, 0), ('season-backfill', 0, 0)"
   )
   // 운영 app 이미지를 API 컨테이너의 network namespace에 붙여, 운영 포트 3001과 공개 포트 3000을 같은 127.0.0.1에서 확인한다.
   await podman([
