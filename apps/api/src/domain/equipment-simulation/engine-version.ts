@@ -4,6 +4,7 @@ type EngineVersion = readonly [number, number, number]
 const SLOT_ITEM_ENGINE_VERSION: EngineVersion = [0, 6, 0]
 const EQUIPMENT_ITEM_ENGINE_VERSION: EngineVersion = [0, 7, 0]
 const OATH_TUNE_ENGINE_VERSION: EngineVersion = [0, 8, 0]
+const SET_ENGINE_VERSION: EngineVersion = [0, 9, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -12,6 +13,10 @@ export interface SimulationFeatures {
   /** 무기를 뺀 11부위의 아이템, 조율, 정밀도 변경 */
   readonly equipmentItems: boolean
   readonly oathTunes: boolean
+  readonly equipmentSet: boolean
+  readonly weaponTune: boolean
+  /** 서약 세트, 본체, 결정 아이템 교체 */
+  readonly oathItems: boolean
 }
 
 function versionOf(engine: string): number[] | null {
@@ -49,6 +54,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.oathTunes) {
     minimums.push(OATH_TUNE_ENGINE_VERSION)
+  }
+
+  if (features.equipmentSet || features.weaponTune || features.oathItems) {
+    minimums.push(SET_ENGINE_VERSION)
   }
 
   return minimums

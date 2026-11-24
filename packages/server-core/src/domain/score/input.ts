@@ -11,8 +11,15 @@ export type ScoreSimulationInput = Readonly<{
   creature?: CharacterPayload
   /** 엔진은 `slotId`가 AURORA인 항목만 바꾼다. */
   avatar?: readonly CharacterPayload[]
-  /** 조율을 바꾼 `oath.crystal[]` 항목만 담고, 엔진 0.8.0부터 `slotNo`가 같은 원본 결정을 바꾼다. */
-  oath?: Readonly<{ crystal: readonly CharacterPayload[] }>
+  /**
+   * 엔진 0.9.0부터 `info`는 서약 본체, `set`은 서약 세트, `crystal`은 바꾼 결정이고 셋 다 선택이다.
+   * 결정은 `slotNo`가 같은 원본 결정을 바꾸며, 0.8.0은 결정의 조율만 받는다.
+   */
+  oath?: Readonly<{
+    info?: CharacterPayload
+    set?: Readonly<{ setId: number }>
+    crystal?: readonly CharacterPayload[]
+  }>
 }>
 
 export type ScoreEngineInput = Readonly<{

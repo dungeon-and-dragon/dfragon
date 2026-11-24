@@ -1,3 +1,4 @@
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
 import type { SimulationBody } from '#pages/character-simulator/model/simulator-draft'
 import type { EquipmentSimulation } from './useEquipmentSimulation'
@@ -12,8 +13,36 @@ const SLOT_ITEM_POINTS = 15_300
 const VARIANT_POINTS = 21_700
 const POINTS_PER_TUNE = 4_600
 const POINTS_PER_POTENCY = 310
+const EQUIPMENT_SET_POINTS = 64_500
+const OATH_SET_POINTS = 18_900
+const OATH_BODY_POINTS = 27_300
 
 type Calculator = CharacterCardScore['calculator']
+
+// Storybook에서 서약 본체 그림이 보이도록 운영 사이트의 서약 데이터 묶음 2ca27db1판 그림을 쓴다. 이름과 등급도 그 판의 값이다.
+const OATH_ART = 'https://dfragon.com/skilltab/2ca27db1/oath-item'
+
+export const simulatorOathCatalog = {
+  ...oathCatalogFixture.characterDetail,
+  items: [
+    {
+      name: '전장을 태우는 용투 서약',
+      rarity: '유니크',
+      icon: `${OATH_ART}/100313758.0f5b0fb8.webp`
+    },
+    {
+      name: '하늘을 태우는 용투 서약',
+      rarity: '레전더리',
+      icon: `${OATH_ART}/100313759.4c688687.webp`
+    },
+    {
+      name: '대지를 태우는 용투 서약',
+      rarity: '에픽',
+      icon: `${OATH_ART}/100610080.268bb3af.webp`
+    },
+    { name: '세계를 태우는 용투 서약', rarity: '태초', icon: `${OATH_ART}/100610081.d3308fec.webp` }
+  ]
+}
 
 export function simulationScore(
   calculator: Calculator,
@@ -46,33 +75,51 @@ function wornTuneOf(tunes: Tunes): number {
 function oathPointsOf(detail: CharacterDetailView, oath: SimulationBody['oath'] = []): number {
   const crystals = detail.oath?.crystal ?? []
 
-  return oath.reduce((sum, { slotNo, tune }) => {
+  return oath.reduce((sum, { slotNo, tune, variantId }) => {
     const crystal = crystals.find((candidate) => candidate.slotNo === slotNo)
     const worn = crystal?.tune?.level ?? 0
+    const tunePoints = tune !== null ? (tune - worn) * POINTS_PER_TUNE : 0
+    const variantPoints = variantId !== null ? VARIANT_POINTS : 0
 
-    return sum + (tune - worn) * POINTS_PER_TUNE
+    return sum + tunePoints + variantPoints
   }, 0)
 }
 
-function pointsOf(
-  detail: CharacterDetailView,
-  { equipment, oath, ...slotItems }: SimulationBody
-): number {
+function setPointsOf({ equipmentSet, oathSet, oathBody }: SimulationBody): number {
+  const equipmentSetPoints = equipmentSet !== undefined ? EQUIPMENT_SET_POINTS : 0
+  const oathSetPoints = oathSet !== undefined ? OATH_SET_POINTS : 0
+  const oathBodyPoints = oathBody !== undefined ? OATH_BODY_POINTS : 0
+
+  return equipmentSetPoints + oathSetPoints + oathBodyPoints
+}
+
+function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
+  const {
+    equipment,
+    oath,
+    equipmentSet: _set,
+    oathSet: _oathSet,
+    oathBody: _body,
+    ...slotItems
+  } = body
   const items = detail.equipment.equipment
   const slotItemPoints = Object.keys(slotItems).length * SLOT_ITEM_POINTS
 
-  return equipment.reduce((sum, change) => {
-    const item = items.find(({ slotId }) => slotId === change.slotId)
-    const reinforce = (change.reinforce - (item?.reinforce ?? 0)) * POINTS_PER_REINFORCE
-    const amplified = change.amplified !== (item?.amplificationName != null) ? AMPLIFY_POINTS : 0
-    const enchant = change.enchantId !== null ? ENCHANT_POINTS : 0
-    const variant = change.variantId !== null ? VARIANT_POINTS : 0
-    const tune =
-      change.tune !== null ? (change.tune - wornTuneOf(item?.tune ?? [])) * POINTS_PER_TUNE : 0
-    const potency = change.potency !== null ? change.potency * POINTS_PER_POTENCY : 0
+  return equipment.reduce(
+    (sum, change) => {
+      const item = items.find(({ slotId }) => slotId === change.slotId)
+      const reinforce = (change.reinforce - (item?.reinforce ?? 0)) * POINTS_PER_REINFORCE
+      const amplified = change.amplified !== (item?.amplificationName != null) ? AMPLIFY_POINTS : 0
+      const enchant = change.enchantId !== null ? ENCHANT_POINTS : 0
+      const variant = change.variantId !== null ? VARIANT_POINTS : 0
+      const tune =
+        change.tune !== null ? (change.tune - wornTuneOf(item?.tune ?? [])) * POINTS_PER_TUNE : 0
+      const potency = change.potency !== null ? change.potency * POINTS_PER_POTENCY : 0
 
-    return sum + reinforce + amplified + enchant + variant + tune + potency
-  }, slotItemPoints + oathPointsOf(detail, oath))
+      return sum + reinforce + amplified + enchant + variant + tune + potency
+    },
+    slotItemPoints + oathPointsOf(detail, oath) + setPointsOf(body)
+  )
 }
 
 export function syntheticSimulation(

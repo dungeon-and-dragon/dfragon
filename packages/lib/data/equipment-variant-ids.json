@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-11-23",
+  "observedAt": "2026-11-24",
   "setItemIds": {
     "고대 전장의 발키리 세트": "854dc8c01b1bc231e132dae5df3c52bc",
     "그림자에 숨은 죽음 세트": "3af7c961e7d8cd8b5b42c5f82af2a0ad",
@@ -8307,6 +8307,1010 @@
         {
           "itemId": "14449881bc371352c250502e7b201506",
           "count": 140
+        }
+      ]
+    }
+  ],
+  "oaths": [
+    {
+      "itemName": "희미한 어둠 속 그림자 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ef88571590c58c3aab785b9535bc81af",
+          "count": 26
+        }
+      ]
+    },
+    {
+      "itemName": "흐르는 어둠 속 그림자 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "bf2038e1d33cb90ea5585bb9b387e9eb",
+          "count": 366
+        }
+      ]
+    },
+    {
+      "itemName": "짙은 어둠 속 그림자 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "acde288e06c6a6dda5e2b5d1e606dd00",
+          "count": 3884
+        }
+      ]
+    },
+    {
+      "itemName": "태초의 어둠 속 그림자 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "72adf78e645d9a821b9adcc98ef00044",
+          "count": 37482
+        }
+      ]
+    },
+    {
+      "itemName": "속삭이는 페어리 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "39adf87e6cbd16490e3eaf86cad58ec9",
+          "count": 21
+        }
+      ]
+    },
+    {
+      "itemName": "손짓하는 페어리 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "5f4b235d937627d37b7e5dfa4bace99a",
+          "count": 396
+        }
+      ]
+    },
+    {
+      "itemName": "안내하는 페어리 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "144ba1c731db82466df21532c12e921d",
+          "count": 5376
+        }
+      ]
+    },
+    {
+      "itemName": "태초로 인도하는 페어리 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "668569e5ec21cde2c90c573364ea167b",
+          "count": 46428
+        }
+      ]
+    },
+    {
+      "itemName": "꿈꾸는 이상 속 황금 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "0b0c7a3eb7051c1f2b27c508bf68ae4b",
+          "count": 66
+        }
+      ]
+    },
+    {
+      "itemName": "목표하는 이상 속 황금 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e214d4d4f9c89978969ee13445756564",
+          "count": 553
+        }
+      ]
+    },
+    {
+      "itemName": "손에 잡힌 이상 속 황금 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "f6e3fa493b3253d99541f3cc290fbb85",
+          "count": 6877
+        }
+      ]
+    },
+    {
+      "itemName": "현실이 된 이상 속 황금 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a41a6666654f4d5b4a29bde4a767a368",
+          "count": 80659
+        }
+      ]
+    },
+    {
+      "itemName": "전장을 태우는 용투 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "94668150b2942de22b741ad19b4c64e5",
+          "count": 41
+        }
+      ]
+    },
+    {
+      "itemName": "대지를 태우는 용투 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "85fec6e8eef95d2123e52ca12a048813",
+          "count": 477
+        }
+      ]
+    },
+    {
+      "itemName": "하늘을 태우는 용투 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1ba6aa755dcdd294057f7fd44ae03f28",
+          "count": 6427
+        }
+      ]
+    },
+    {
+      "itemName": "세계를 태우는 용투 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "97edf2846698bad4055330d5f7fe90b4",
+          "count": 84582
+        }
+      ]
+    },
+    {
+      "itemName": "미약한 신념의 정화 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "92d0c8efa25b291892c2497502c273f8",
+          "count": 32
+        }
+      ]
+    },
+    {
+      "itemName": "굳건한 신념의 정화 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "4e3c091285561ea485fb8170c7ddc7e7",
+          "count": 596
+        }
+      ]
+    },
+    {
+      "itemName": "뚜렷한 신념의 정화 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "16292a5dd085b902d478f2a21ffd00bd",
+          "count": 8060
+        }
+      ]
+    },
+    {
+      "itemName": "찬란한 신념의 정화 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "d2dc93ebab431b6edd1680f87d118b59",
+          "count": 105699
+        }
+      ]
+    },
+    {
+      "itemName": "선택된 행운 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "59fe758f76385cc2c3ae6ef021d78f6b",
+          "count": 22
+        }
+      ]
+    },
+    {
+      "itemName": "각인된 행운 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9024a81dd833642f038d182e44dfd50c",
+          "count": 378
+        }
+      ]
+    },
+    {
+      "itemName": "필연성의 행운 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "f423a7bdeab06f3683f6eb42525bd9ec",
+          "count": 3808
+        }
+      ]
+    },
+    {
+      "itemName": "영원불변의 행운 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "a6e5b36dea755a4eea867623ea31083b",
+          "count": 29653
+        }
+      ]
+    },
+    {
+      "itemName": "넘어서는 한계 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "0fd1e9195a8680c9bcd9fc3ca9e4a304",
+          "count": 19
+        }
+      ]
+    },
+    {
+      "itemName": "돌파하는 한계 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "fdb6930febc5e0a8538463f1b96bc1ed",
+          "count": 328
+        }
+      ]
+    },
+    {
+      "itemName": "극복하는 한계 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1d5765c7823aeff8e794c0c12d8f7105",
+          "count": 3710
+        }
+      ]
+    },
+    {
+      "itemName": "초월하는 한계 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4b2e60a6f302a35f6fe2c2c8f01181c2",
+          "count": 44104
+        }
+      ]
+    },
+    {
+      "itemName": "흐르는 자연 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "c7a49c9c6bef1bcf9ca11d794e78e61f",
+          "count": 16
+        }
+      ]
+    },
+    {
+      "itemName": "피어나는 자연 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "68cb18881e9ee92815dffd5b83a19e8c",
+          "count": 409
+        }
+      ]
+    },
+    {
+      "itemName": "만개하는 자연 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "481ba255b6dce9fb3f3bcfeb58fe28b0",
+          "count": 4477
+        }
+      ]
+    },
+    {
+      "itemName": "근원에 닿은 자연 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "249bbdca841dbd7609887cd1051c5d32",
+          "count": 50322
+        }
+      ]
+    },
+    {
+      "itemName": "숭고함이 깃든 발키리 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "80064f29b1582bccbc3713bafd3c635e",
+          "count": 20
+        }
+      ]
+    },
+    {
+      "itemName": "용기가 깃든 발키리 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b45a339389b1e3c9d5b559971b6471d3",
+          "count": 349
+        }
+      ]
+    },
+    {
+      "itemName": "결연함이 깃든 발키리 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5ba07e1413ea2671dda546376b56274d",
+          "count": 3700
+        }
+      ]
+    },
+    {
+      "itemName": "태초에서 현신한 발키리 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "db5930dcaf3723eae9189222eb94b124",
+          "count": 34548
+        }
+      ]
+    },
+    {
+      "itemName": "기운이 감도는 여우 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "d99faea2e739946a9b0ea0a2c7861635",
+          "count": 14
+        }
+      ]
+    },
+    {
+      "itemName": "부름에 이끌린 여우 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "a358624900c0876c0b689d25d94216c6",
+          "count": 360
+        }
+      ]
+    },
+    {
+      "itemName": "빙의된 여우 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "6a9706ebcbfe44e754a77c45f8d4a4aa",
+          "count": 3691
+        }
+      ]
+    },
+    {
+      "itemName": "강림한 여우 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "15a42c9cfd0709f609b22bb590f0a1e8",
+          "count": 41170
+        }
+      ]
+    },
+    {
+      "itemName": "믿음으로 맺어진 무리 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "301b8d0d5be6eaddcc04fd2648ae4099",
+          "count": 11
+        }
+      ]
+    },
+    {
+      "itemName": "순수한 약속의 무리 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "997cddcf2e335651d1cdfef852ba13bf",
+          "count": 320
+        }
+      ]
+    },
+    {
+      "itemName": "영원한 맹약의 무리 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1e73b751a64d1efa8ae28fa4a96803b1",
+          "count": 3642
+        }
+      ]
+    },
+    {
+      "itemName": "태동하는 울림의 무리 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "20103b50a325efab69497427d864aad8",
+          "count": 43968
+        }
+      ]
+    },
+    {
+      "itemName": "미동하는 마력 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ce1c8b1e2be8df9202ca5020ffd0e65b",
+          "count": 60
+        }
+      ]
+    },
+    {
+      "itemName": "맥동하는 마력 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "7badbd47eceef122b793ede417c779cc",
+          "count": 771
+        }
+      ]
+    },
+    {
+      "itemName": "태동하는 마력 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "774dcc27d90a1d2bcd9b129ca6a45f7a",
+          "count": 9208
+        }
+      ]
+    },
+    {
+      "itemName": "태초에 고동치는 마력 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "b5031dbb3e68f781441515ae6d5889b5",
+          "count": 55406
+        }
+      ]
+    },
+    {
+      "itemName": "영겁의 안개 서약",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "79757c67d64623286761749ee6666b5f",
+          "count": 191
+        }
+      ]
+    },
+    {
+      "itemName": "영겁의 안개 서약",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "8b75878dd4e1904f1bfc131b52319bde",
+          "count": 3934
+        }
+      ]
+    },
+    {
+      "itemName": "영겁의 안개 서약",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "316e1b0f26a3a471be2a95e33a315171",
+          "count": 49385
+        }
+      ]
+    },
+    {
+      "itemName": "영겁의 안개 서약",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "ac0586536083d560b38659de8bc0c2b8",
+          "count": 295456
+        }
+      ]
+    }
+  ],
+  "oathCrystals": [
+    {
+      "itemName": "그림자 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "5a984f4a7e3e3d7360c183b95b6546bb",
+          "count": 1092
+        }
+      ]
+    },
+    {
+      "itemName": "그림자 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "9e4a229d4c36cced0945526d93db17b3",
+          "count": 58389
+        }
+      ]
+    },
+    {
+      "itemName": "그림자 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "5f722339a3f5c7ef9ba0b290873e19f1",
+          "count": 436469
+        }
+      ]
+    },
+    {
+      "itemName": "그림자 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5fe3c29985f15b1fdafd4c4d6a247839",
+          "count": 125521
+        }
+      ]
+    },
+    {
+      "itemName": "페어리 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "e866805c7e6fdec910a635074e43fcc6",
+          "count": 2088
+        }
+      ]
+    },
+    {
+      "itemName": "페어리 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "c5f7a001e13bacc92c2b375488bce8ff",
+          "count": 100757
+        }
+      ]
+    },
+    {
+      "itemName": "페어리 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "2a8e8670feecfcba30137722769c0463",
+          "count": 605585
+        }
+      ]
+    },
+    {
+      "itemName": "페어리 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "aa2ff87fb95331f8c728f398d0e13ccd",
+          "count": 157961
+        }
+      ]
+    },
+    {
+      "itemName": "황금 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "3df0bc00abb3aa2677fb71e176249621",
+          "count": 1452
+        }
+      ]
+    },
+    {
+      "itemName": "황금 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "2a2074e9f9b5697a75a138bb2840a47f",
+          "count": 73674
+        }
+      ]
+    },
+    {
+      "itemName": "황금 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1bf8c2d64c3ed8cf73c902d7dc4fc808",
+          "count": 808173
+        }
+      ]
+    },
+    {
+      "itemName": "황금 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "b0c80cc630ca0d458eb9608774d47cd0",
+          "count": 253736
+        }
+      ]
+    },
+    {
+      "itemName": "용투 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "a4a263850a49401e8f174ce437596486",
+          "count": 1507
+        }
+      ]
+    },
+    {
+      "itemName": "용투 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "6edbae57d1a6f5aa7838126874324906",
+          "count": 79558
+        }
+      ]
+    },
+    {
+      "itemName": "용투 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "089e68a1c3a6103f1323dc51c231d6ab",
+          "count": 847971
+        }
+      ]
+    },
+    {
+      "itemName": "용투 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "5573cd49fa3b6248104b8b1319ef5671",
+          "count": 264041
+        }
+      ]
+    },
+    {
+      "itemName": "정화 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "740e1216085bdf18271d23072fe6bf4c",
+          "count": 1813
+        }
+      ]
+    },
+    {
+      "itemName": "정화 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "43495d47e246a5404cadde1e338d5938",
+          "count": 100703
+        }
+      ]
+    },
+    {
+      "itemName": "정화 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "39b9d0c16485ca9428f5a70ff6ea0f18",
+          "count": 1046574
+        }
+      ]
+    },
+    {
+      "itemName": "정화 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "155b20fbde6a0e9590293d4babf27ef8",
+          "count": 326119
+        }
+      ]
+    },
+    {
+      "itemName": "행운 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "ec841699d815e71fcce59b21987af0e9",
+          "count": 1073
+        }
+      ]
+    },
+    {
+      "itemName": "행운 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e3ae83543f938f8caa08b3512dce8560",
+          "count": 57138
+        }
+      ]
+    },
+    {
+      "itemName": "행운 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "30136d70dfde916c1cd4d70f5d09142b",
+          "count": 365022
+        }
+      ]
+    },
+    {
+      "itemName": "행운 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "4f1a14f1124369922fa22bc45b768f74",
+          "count": 101051
+        }
+      ]
+    },
+    {
+      "itemName": "한계 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "7519ae3b67a232138c2d46732eb4b284",
+          "count": 1058
+        }
+      ]
+    },
+    {
+      "itemName": "한계 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d104f031411a5f2e0140c6fc711e5757",
+          "count": 57391
+        }
+      ]
+    },
+    {
+      "itemName": "한계 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "9bc17d81d2b81d9c64d69b4147cf43db",
+          "count": 482219
+        }
+      ]
+    },
+    {
+      "itemName": "한계 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "9d7dece7ad3213817be4d371c86f488c",
+          "count": 141479
+        }
+      ]
+    },
+    {
+      "itemName": "자연 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "288ac5fe56da6cd813263e6224f9d944",
+          "count": 1166
+        }
+      ]
+    },
+    {
+      "itemName": "자연 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "b68dc2619b53df2f7f3bbe441450e0a5",
+          "count": 66297
+        }
+      ]
+    },
+    {
+      "itemName": "자연 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "1d5302fb4d0f7dba6e22dbdad8a8e6a2",
+          "count": 564123
+        }
+      ]
+    },
+    {
+      "itemName": "자연 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e48760bf96b6b9da793f5ee38733f523",
+          "count": 166178
+        }
+      ]
+    },
+    {
+      "itemName": "발키리 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "e2ae50a4f7790f3185b9af91c2797148",
+          "count": 964
+        }
+      ]
+    },
+    {
+      "itemName": "발키리 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "e2facc8c3ece877818fc484a79485327",
+          "count": 55653
+        }
+      ]
+    },
+    {
+      "itemName": "발키리 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "4b842bd9f4b36b3136b05c91d4f1e55b",
+          "count": 409418
+        }
+      ]
+    },
+    {
+      "itemName": "발키리 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "e5d4086fb45b43861155b291e3c02a47",
+          "count": 116143
+        }
+      ]
+    },
+    {
+      "itemName": "여우 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "de8cd3255b6c2faeb8a1abbc26784ee0",
+          "count": 1008
+        }
+      ]
+    },
+    {
+      "itemName": "여우 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "d69975940844b63c704b27b66731614d",
+          "count": 53331
+        }
+      ]
+    },
+    {
+      "itemName": "여우 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "05efe7c9d4cf9f5bd0fc1aa56f1cf157",
+          "count": 445166
+        }
+      ]
+    },
+    {
+      "itemName": "여우 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "c78cae5798f4b3d8991323d6e9274463",
+          "count": 132638
+        }
+      ]
+    },
+    {
+      "itemName": "무리 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "d61a64fd59177de8d2d9bb3cc6f4e43c",
+          "count": 1063
+        }
+      ]
+    },
+    {
+      "itemName": "무리 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "667733fbd81888807f5c69226a375171",
+          "count": 57212
+        }
+      ]
+    },
+    {
+      "itemName": "무리 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "4d753a61b206e085665be3de2e53f2d0",
+          "count": 494199
+        }
+      ]
+    },
+    {
+      "itemName": "무리 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "04702c73a373a5f5c9a504f2123dc80b",
+          "count": 144517
+        }
+      ]
+    },
+    {
+      "itemName": "마력 : 희미한 광휘 결정",
+      "itemRarity": "유니크",
+      "itemIds": [
+        {
+          "itemId": "e3f4ca0fc46dba190b74820740a97863",
+          "count": 9822
+        }
+      ]
+    },
+    {
+      "itemName": "마력 : 선명한 광휘 결정",
+      "itemRarity": "레전더리",
+      "itemIds": [
+        {
+          "itemId": "6342459341686700fccc7183cd2852bd",
+          "count": 174784
+        }
+      ]
+    },
+    {
+      "itemName": "마력 : 완전한 광휘 결정",
+      "itemRarity": "에픽",
+      "itemIds": [
+        {
+          "itemId": "d32e6439778ed64b9f3831ccb5b4dfc8",
+          "count": 880072
+        }
+      ]
+    },
+    {
+      "itemName": "마력 : 태초의 광휘 결정",
+      "itemRarity": "태초",
+      "itemIds": [
+        {
+          "itemId": "0b991785c50799890f4b1821c309d39c",
+          "count": 189358
         }
       ]
     }

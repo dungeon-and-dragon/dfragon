@@ -1,9 +1,5 @@
 import { type EnchantGradeSlot, enchantOptionsOf } from '@dfragon/lib/enchant-grades'
-import {
-  type EquipmentVariantSlot,
-  equipmentVariantsOf,
-  findOathCrystal
-} from '@dfragon/lib/equipment-variants'
+import { type EquipmentVariantSlot, equipmentVariantsOf } from '@dfragon/lib/equipment-variants'
 import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { expect, it } from 'vitest'
 import type { CharacterDetailView } from '#entities/character'
@@ -12,8 +8,8 @@ import {
   draftOf,
   hasChanges,
   NO_CHANGES,
-  oathTuneOf,
   resolvedItemsOf,
+  rowsInEquipmentSet,
   type SimulatorAction,
   type SimulatorChanges,
   type SimulatorRow,
@@ -22,8 +18,9 @@ import {
   simulationBody,
   simulatorReducer,
   slotItemChoiceOf,
-  toOathCrystals,
-  toSimulatorRows
+  toEquipmentSet,
+  toSimulatorRows,
+  tuneLimitOf
 } from './simulator-draft'
 
 const GRADE_SLOTS = [
@@ -43,6 +40,7 @@ const GRADE_SLOTS = [
 
 // 딜러 fixture는 소울 페어리 세트의 5축성 공용 이름 아이템을, 버퍼 fixture는 에테리얼 오브 아츠 세트와 세트 밖 고유 팔찌를 낀다.
 const SOUL_FAIRY_SET = '4ee7bd5912cda6e2a24c1f36d5202b46'
+const SHADOW_SET = '3af7c961e7d8cd8b5b42c5f82af2a0ad'
 const ETHEREAL_SET = '93e7825053bdec4e0f4c12837cf4f57e'
 const EXALTED_RING_ID = 'aa5273499f19ddba846919dbb6857d82'
 const UNCHANGED_ITEM = { enchantId: null, variantId: null, tune: 0, potency: null }
@@ -126,7 +124,7 @@ it('장비 12부위를 응답 순서대로 두고, 착용한 수치와 강화, �
     amplified: true,
     variantId: variantOf(SOUL_FAIRY_SET, 'EARRING', '에픽', '일반').id
   })
-  expect(simulationBody(dealerRows, NO_CHANGES)).toEqual({ equipment: [] })
+  expect(simulationBody(dealerRows, null, NO_CHANGES)).toEqual({ equipment: [] })
 })
 
 it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버퍼 등급표에서만 고른다', () => {
@@ -155,7 +153,7 @@ it('바꾼 부위만 그 부위의 원하는 상태 전체로 요청 body에 넣
     { type: 'change', slot: weapon, draft: { amplified: true } }
   )
 
-  expect(simulationBody(dealerRows, changed)).toEqual({
+  expect(simulationBody(dealerRows, null, changed)).toEqual({
     equipment: [
       { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 12, amplified: true, enchantId: null },
       { ...KEPT_ITEM, slotId: 'AMULET', reinforce: 0, amplified: false, enchantId }
@@ -250,7 +248,7 @@ it('115레벨이 아닌 장비는 수치와 강화, 증폭을 바꾸지 않고 �
 
   expect(oldAmulet.reinforceEditable).toBe(false)
   expect(weapon.reinforceEditable).toBe(true)
-  expect(simulationBody([{ kind: 'equipment', slot: oldAmulet }], changed)).toEqual({
+  expect(simulationBody([{ kind: 'equipment', slot: oldAmulet }], null, changed)).toEqual({
     equipment: [{ ...KEPT_ITEM, slotId: 'AMULET', reinforce: 0, amplified: false, enchantId }]
   })
 })
@@ -295,7 +293,7 @@ it('칭호, 크리쳐, 오라는 고른 것만 장비 변경과 함께 body에 �
   )
 
   expect(slotItemChoiceOf(title!, chosen)).toBe(titleItem!.id)
-  expect(simulationBody(dealerRows, chosen)).toEqual({
+  expect(simulationBody(dealerRows, null, chosen)).toEqual({
     equipment: [],
     title: titleItem!.id,
     aura: auraItem!.id
@@ -303,7 +301,7 @@ it('칭호, 크리쳐, 오라는 고른 것만 장비 변경과 함께 body에 �
 
   const withWeapon = apply(chosen, { type: 'change', slot: weapon, draft: { reinforce: 11 } })
 
-  expect(simulationBody(dealerRows, withWeapon)).toEqual({
+  expect(simulationBody(dealerRows, null, withWeapon)).toEqual({
     equipment: [
       { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }
     ],
@@ -427,7 +425,7 @@ it('세트 밖 유일 장비를 낀 부위는 주 세트의 선택지에서 유�
 
   expect(idsOf(ring.variants)).toEqual(idsOf(equipmentVariantsOf(SOUL_FAIRY_SET, 'RING')))
   expect(draftOf(ring, NO_CHANGES)).toMatchObject({ variantId: EXALTED_RING_ID, potency: 35 })
-  expect(simulationBody([{ kind: 'equipment', slot: ring }], changed).equipment).toEqual([
+  expect(simulationBody([{ kind: 'equipment', slot: ring }], null, changed).equipment).toEqual([
     { slotId: 'RING', reinforce: 0, amplified: false, enchantId: null, ...KEPT_ITEM, potency: 60 }
   ])
 
@@ -530,7 +528,7 @@ it('아이템, 조율, 정밀도를 바꾼 부위는 바꾼 값만 요청 body�
   )
   const base = { reinforce: 0, amplified: false, enchantId: null }
 
-  expect(simulationBody(dealerRows, changed)).toEqual({
+  expect(simulationBody(dealerRows, null, changed)).toEqual({
     equipment: [
       { slotId: 'JACKET', ...base, variantId: corroded.id, tune: 0, potency: null },
       { slotId: 'SUPPORT', ...base, variantId: null, tune: 2, potency: null },
@@ -600,49 +598,202 @@ it('선택지에 없는 착용 아이템을 그대로 둔 부위는 닫힌 선�
   expect(resolvedItemsOf(bufferRows, NO_CHANGES).WRIST).toBeUndefined()
 })
 
-const dealerCrystals = toOathCrystals(characterDetailFixture('dealer'))
+const dealerSet = toEquipmentSet(characterDetailFixture('dealer'))!
 
-it('서약 결정은 slotNo 순서로 두고 착용한 조율과 결정의 최대 조율 단계를 둔다', () => {
-  expect(dealerCrystals.map(({ slotNo }) => slotNo)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
-  expect(dealerCrystals.map(({ tune }) => tune)).toEqual([3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0])
-  expect(dealerCrystals.map(({ maxTune }) => maxTune)).toEqual([3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0])
-  expect(findOathCrystal(dealerCrystals[8]!.itemName!)?.rarity).toBe('태초')
-  expect(toOathCrystals({ oath: null })).toEqual([])
+function switchSet(changes: SimulatorChanges, rows: readonly SimulatorRow[], setItemId: string) {
+  return apply(changes, { type: 'equipmentSet', rows, equipmentSet: dealerSet, setItemId })
+}
+
+it('장비 세트 줄은 선택 목록에 있는 세트 가운데 세트 포인트가 가장 큰 세트를 주 세트로 둔다', () => {
+  expect(dealerSet.mainSetId).toBe(SOUL_FAIRY_SET)
+  expect(dealerSet.sets).toHaveLength(13)
+  expect(toEquipmentSet(withSets(bufferDetail, [pointed('unlisted-set', 9_999)]))).toBeNull()
 })
 
-it('서약 결정 조율은 바꾼 결정만 slotNo 순서로 요청 body에 싣고, 착용한 단계로 되돌리면 뺀다', () => {
-  const [first] = dealerCrystals
-  const seventh = dealerCrystals[7]!
-  const changed = apply(
-    NO_CHANGES,
-    { type: 'oathTune', crystal: seventh, tune: 2 },
-    { type: 'oathTune', crystal: first!, tune: 0 }
-  )
+it('장비 세트를 고르면 11부위의 선택지와 기준 아이템이 그 세트의 같은 등급, 같은 종류가 되고 세트만 요청한다', () => {
+  const changed = switchSet(NO_CHANGES, dealerRows, SHADOW_SET)
+  const rows = rowsInEquipmentSet(dealerRows, changed.equipmentSet)
+  const slots = slotsOf(rows)
+  const jacket = slotOf(slots, 'JACKET')
+  const earring = slotOf(slots, 'EARRING')
 
-  expect(oathTuneOf(seventh, changed)).toBe(2)
-  expect(hasChanges(changed)).toBe(true)
-  expect(simulationBody(dealerRows, changed)).toEqual({
-    equipment: [],
-    oath: [
-      { slotNo: 0, tune: 0 },
-      { slotNo: 7, tune: 2 }
+  expect(changed.equipmentSet).toBe(SHADOW_SET)
+  expect(slotOf(slots, 'WEAPON')).toEqual(weapon)
+  expect(idsOf(jacket.variants)).toEqual(idsOf(equipmentVariantsOf(SHADOW_SET, 'JACKET')))
+  expect(jacket.wornVariantId).toBe(variantOf(SHADOW_SET, 'JACKET', '에픽', '축성').id)
+  expect(earring.wornVariantId).toBe(variantOf(SHADOW_SET, 'EARRING', '에픽', '일반').id)
+  expect(resolvedItemsOf(rows, changed).JACKET?.itemId).toBe(
+    variantOf(SHADOW_SET, 'JACKET', '에픽', '축성').consecrated?.itemId
+  )
+  expect(simulationBody(rows, null, changed)).toEqual({ equipmentSet: SHADOW_SET, equipment: [] })
+  expect(switchSet(changed, dealerRows, SOUL_FAIRY_SET)).toEqual(NO_CHANGES)
+})
+
+it('장비 세트를 고른 뒤 바꾼 부위의 등급은 새 세트의 선택지 id로 요청한다', () => {
+  const corroded = variantOf(SHADOW_SET, 'JACKET', '에픽', '잠식')
+  const switched = switchSet(NO_CHANGES, dealerRows, SHADOW_SET)
+  const rows = rowsInEquipmentSet(dealerRows, switched.equipmentSet)
+  const jacket = slotOf(slotsOf(rows), 'JACKET')
+  const changed = apply(switched, {
+    type: 'change',
+    slot: jacket,
+    draft: { variantId: corroded.id }
+  })
+
+  expect(simulationBody(rows, null, changed)).toEqual({
+    equipmentSet: SHADOW_SET,
+    equipment: [
+      {
+        slotId: 'JACKET',
+        reinforce: 0,
+        amplified: false,
+        enchantId: null,
+        variantId: corroded.id,
+        tune: 0,
+        potency: null
+      }
     ]
   })
-  expect(
-    apply(
-      changed,
-      { type: 'oathTune', crystal: seventh, tune: 0 },
-      { type: 'oathTune', crystal: first!, tune: 3 }
-    )
-  ).toEqual(NO_CHANGES)
+})
+
+it('장비 세트를 바꾸면 부위에서 고른 등급을 새 세트의 같은 등급으로 옮기고 마법부여와 조율은 유지한다', () => {
+  const enchantId = firstOptionId('EARRING', 'dealer')
+  const legendary = variantOf(SOUL_FAIRY_SET, 'EARRING', '레전더리', '일반')
+  const before = apply(
+    NO_CHANGES,
+    { type: 'change', slot: dealerEarring, draft: { enchantId } },
+    { type: 'change', slot: dealerEarring, draft: { tune: 2 } },
+    { type: 'change', slot: dealerEarring, draft: { variantId: legendary.id } }
+  )
+  const changed = switchSet(before, dealerRows, SHADOW_SET)
+  const rows = rowsInEquipmentSet(dealerRows, changed.equipmentSet)
+
+  const movedLegendary = variantOf(SHADOW_SET, 'EARRING', '레전더리', '일반').id
+
+  expect(changed.equipment.EARRING).toEqual({
+    reinforce: 8,
+    amplified: true,
+    enchantId,
+    variantId: movedLegendary,
+    tune: 2,
+    potency: null
+  })
+  expect(simulationBody(rows, null, changed).equipment).toEqual([
+    {
+      slotId: 'EARRING',
+      reinforce: 8,
+      amplified: true,
+      enchantId,
+      variantId: movedLegendary,
+      tune: 2,
+      potency: null
+    }
+  ])
+})
+
+it('장비 세트를 바꿔도 부위에서 고른 유일 장비와 정밀도는 그대로 둔다', () => {
+  const exalted = variantOf(SOUL_FAIRY_SET, 'EARRING', '태초', '유일')
+  const before = apply(
+    NO_CHANGES,
+    { type: 'change', slot: dealerEarring, draft: { variantId: exalted.id } },
+    { type: 'change', slot: dealerEarring, draft: { potency: 60 } }
+  )
+  const changed = switchSet(before, dealerRows, SHADOW_SET)
+
+  expect(changed.equipment.EARRING).toMatchObject({ variantId: exalted.id, tune: 0, potency: 60 })
+})
+
+it('세트가 섞인 캐릭터는 주 세트를 골라도 다른 세트의 부위가 그 세트로 옮겨 가 세트를 요청하고, 바뀌는 부위가 없으면 고르지 않은 것으로 둔다', () => {
+  const shadowJacket = variantOf(SHADOW_SET, 'JACKET', '에픽', '일반')
+  const mixed = withItem(characterDetailFixture('dealer'), 'JACKET', {
+    itemId: shadowJacket.item.itemId,
+    itemName: shadowJacket.item.itemName,
+    setItemId: SHADOW_SET
+  })
+  const rows = toSimulatorRows(mixed)
+  const mixedSet = toEquipmentSet(mixed)!
+  const changed = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows,
+    equipmentSet: mixedSet,
+    setItemId: SOUL_FAIRY_SET
+  })
+  const jacket = slotOf(slotsOf(rowsInEquipmentSet(rows, changed.equipmentSet)), 'JACKET')
+
+  expect(mixedSet.mainSetId).toBe(SOUL_FAIRY_SET)
+  expect(changed.equipmentSet).toBe(SOUL_FAIRY_SET)
+  expect(jacket.wornVariantId).toBe(variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반').id)
+  expect(simulationBody(rows, null, changed)).toEqual({
+    equipmentSet: SOUL_FAIRY_SET,
+    equipment: []
+  })
+  expect(switchSet(NO_CHANGES, dealerRows, SOUL_FAIRY_SET)).toEqual(NO_CHANGES)
+})
+
+it('장비 세트를 바꿔도 선택지에 없는 착용 아이템은 그대로 두고 새 세트의 선택지를 둔다', () => {
+  const bufferSetChanges = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows: bufferRows,
+    equipmentSet: toEquipmentSet(bufferDetail)!,
+    setItemId: SHADOW_SET
+  })
+  const wrist = slotOf(
+    slotsOf(rowsInEquipmentSet(bufferRows, bufferSetChanges.equipmentSet)),
+    'WRIST'
+  )
+
+  expect(wrist.wornVariantId).toBeNull()
+  expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(SHADOW_SET, 'WRIST')))
+})
+
+it('조율할 수 있는 무기는 그 무기의 최대 단계까지 조율을 받아 tune만 요청하고, 조율할 수 없는 무기는 받지 않는다', () => {
+  const rows = toSimulatorRows(
+    withItem(characterDetailFixture('dealer'), 'WEAPON', { itemName: 'Beast-Saw' })
+  )
+  const tunable = slotOf(slotsOf(rows), 'WEAPON')
+  const changed = apply(NO_CHANGES, { type: 'change', slot: tunable, draft: { tune: 2 } })
+
+  expect(tuneLimitOf(tunable, null)).toBe(3)
+  expect(tuneLimitOf(weapon, null)).toBe(0)
+  expect(simulationBody(rows, null, changed).equipment).toEqual([
+    {
+      slotId: 'WEAPON',
+      reinforce: 10,
+      amplified: false,
+      enchantId: null,
+      variantId: null,
+      tune: 2,
+      potency: null
+    }
+  ])
+  expect(apply(NO_CHANGES, { type: 'change', slot: tunable, draft: { tune: 4 } })).toEqual(
+    NO_CHANGES
+  )
+})
+
+it('초기화하면 고른 장비 세트도 지운다', () => {
+  const changed = switchSet(NO_CHANGES, dealerRows, SHADOW_SET)
+
+  expect(hasChanges(changed)).toBe(true)
   expect(apply(changed, { type: 'reset' })).toEqual(NO_CHANGES)
 })
 
-it('조율할 수 없는 서약 결정과 결정의 단계를 넘는 조율은 받지 않는다', () => {
-  expect(apply(NO_CHANGES, { type: 'oathTune', crystal: dealerCrystals[8]!, tune: 1 })).toEqual(
-    NO_CHANGES
-  )
-  expect(apply(NO_CHANGES, { type: 'oathTune', crystal: dealerCrystals[7]!, tune: 4 })).toEqual(
-    NO_CHANGES
-  )
+it('장비 세트를 골라도 선택지 밖 착용 아이템을 낀 부위는 조율까지 그대로 두고 요청에 넣지 않는다', () => {
+  const detail = withItem(bufferDetail, 'WRIST', { tune: [{ level: 2, setPoint: 235 }] })
+  const rows = toSimulatorRows(detail)
+  const changed = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows,
+    equipmentSet: toEquipmentSet(detail)!,
+    setItemId: SHADOW_SET
+  })
+  const viewRows = rowsInEquipmentSet(rows, changed.equipmentSet)
+  const wrist = slotOf(slotsOf(viewRows), 'WRIST')
+
+  expect(changed.equipment.WRIST).toBeUndefined()
+  expect(draftOf(wrist, changed)).toMatchObject({ variantId: null, tune: 2 })
+  expect(simulationBody(viewRows, null, changed)).toEqual({
+    equipmentSet: SHADOW_SET,
+    equipment: []
+  })
 })
