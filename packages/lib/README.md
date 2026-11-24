@@ -41,6 +41,7 @@ parsePort('3000') // 3000
 
 `@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 묵언의 진의 단계와 선택지, 조율 단계별 세트 포인트, 무기 조율 단계를 찾고, 유니크 스위칭 장비 이름의 접두어와 등록 부위 상한(`switching`)을 엔진 파일에서 옮겨 둡니다.
 무기는 `weaponVariantsOf(itemTypeDetail)`가 무기 종류마다 115레벨 무기 선택지(계열과 등급)를, `findWeaponVariant(itemId)`가 착용 무기의 선택지를 찾습니다.
+서약 응답에 세트(`setInfo`)가 없으면 `inferOathSetId`가 세트 전용 본체와 광휘 결정의 세트 포인트 합이 가장 큰 세트를 지금 세트로 찾고, 웹과 API가 같은 함수를 씁니다.
 목록은 세 파일로 나뉩니다. `data/equipment-variants.dfragon.json`은 점수 엔진 저장소의 같은 이름 파일(그 저장소의 packages/dnfscore-native/tools/equipment_variants 아래)을 그대로 복사한 파일이며 손으로 고치지 않습니다.
 `data/equipment-variant-ids.json`은 제품이 운영에서 관측한 세트별 `setItemId`와 장비, 서약 본체, 광휘 결정, 무기(`weapons`, 무기 종류와 이름별)의 itemId, 관측 수(`count`)를 관리하는 파일입니다.
 itemId가 없는 선택지는 목록에서 빠지고, 해방 계열 무기는 해방 아이템과 `억압 - ` 아이템의 itemId가 모두 있어야 선택지가 됩니다.
