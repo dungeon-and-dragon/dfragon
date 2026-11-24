@@ -38,7 +38,7 @@ parsePort('3000') // 3000
 대응 파일의 `name`은 엔진 목록의 대표 이름 대신 그 묶음에서 가장 많이 착용하는 이름을 보이게 덮어씁니다. 엔진은 같은 명성의 다른 묶음과 겹치지 않는 이름을 고르므로, 겹치던 묶음이 목록에서 빠졌거나 착용이 적은 이름이 대표로 뽑힌 묶음에 둡니다.
 엔진 파일을 바꾸면 Biome format을 적용하고, 대응 파일의 묶음 id와 `test/slot-items.test.mjs`의 기대값을 새 목록에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
 
-`@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 조율 단계별 세트 포인트, 무기 조율 단계를 찾습니다.
+`@dfragon/lib/equipment-variants`는 장비 시뮬레이터에서 고를 수 있는 장비의 같은 세트 다른 등급 아이템, 장비 세트와 서약 세트 전환, 서약 본체와 광휘 결정의 등급, 묵언의 진의 단계와 선택지, 조율 단계별 세트 포인트, 무기 조율 단계를 찾습니다.
 목록은 세 파일로 나뉩니다. `data/equipment-variants.dfragon.json`은 점수 엔진 저장소의 같은 이름 파일(그 저장소의 packages/dnfscore-native/tools/equipment_variants 아래)을 그대로 복사한 파일이며 손으로 고치지 않습니다.
 `data/equipment-variant-ids.json`은 제품이 운영에서 관측한 세트별 `setItemId`와 장비, 서약 본체, 광휘 결정의 itemId, 관측 수(`count`)를 관리하는 파일입니다.
 `src/equipment-variants.json`은 두 파일에서 선택지에 필요한 값만 뽑은 생성 파일이며 `pnpm --filter @dfragon/lib generate:equipment-variants`로만 만듭니다.

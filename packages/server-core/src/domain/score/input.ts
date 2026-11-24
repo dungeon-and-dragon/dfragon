@@ -19,6 +19,8 @@ export type ScoreSimulationInput = Readonly<{
     info?: CharacterPayload
     set?: Readonly<{ setId: number }>
     crystal?: readonly CharacterPayload[]
+    /** 엔진 0.10.0부터 바꾼 뒤의 묵언의 진의 전체를 1단계부터 차례로 담는다. */
+    upgrade?: readonly Readonly<{ step: number; option: string }>[]
   }>
 }>
 

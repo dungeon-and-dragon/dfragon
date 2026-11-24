@@ -1,6 +1,7 @@
 import { createRef } from 'react'
 import {
   Button,
+  Checkbox,
   Chip,
   ChipGroup,
   IconButton,
@@ -29,6 +30,7 @@ import type {
 
 export const components = [
   Button,
+  Checkbox,
   Chip,
   ChipGroup,
   IconButton,

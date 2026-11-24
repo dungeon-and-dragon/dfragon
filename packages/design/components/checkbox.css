@@ -1,0 +1,47 @@
+/*
+ * <span class="checkbox" role="checkbox" aria-checked="true" data-checked><span class="checkbox-indicator" data-checked><svg /></span></span>.
+ * 켜짐은 data-checked, 비활성은 data-disabled를 root에 붙이고, 표시는 켜진 동안만 그린다.
+ */
+.checkbox {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  --checkbox-line: var(--color-line-input);
+  box-shadow: inset 0 0 0 1px var(--checkbox-line);
+  border-radius: var(--radius-badge);
+  background-color: var(--color-inset);
+  color: var(--color-on-signal);
+  cursor: pointer;
+  transition-property: background-color, box-shadow;
+  transition-duration: var(--duration-state);
+  transition-timing-function: var(--ease-standard);
+}
+
+.checkbox:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+.checkbox[data-checked] {
+  --checkbox-line: var(--color-signal);
+  background-color: var(--color-signal);
+}
+
+.checkbox[data-disabled] {
+  --checkbox-line: var(--color-line);
+  background-color: var(--color-control);
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.checkbox-indicator {
+  display: flex;
+  font-size: var(--size-icon-sm);
+}

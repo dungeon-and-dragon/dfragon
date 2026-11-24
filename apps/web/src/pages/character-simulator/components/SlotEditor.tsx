@@ -1,3 +1,4 @@
+import { Checkbox } from '@dfragon/ui'
 import {
   draftOf,
   equipmentSetIdOf,
@@ -25,6 +26,11 @@ import {
   type SimulatorOathBody,
   type SimulatorOathCrystal
 } from '#pages/character-simulator/model/simulator-oath'
+import {
+  isOathpointChosen,
+  type SimulatorOathUpgrade,
+  upgradeOf
+} from '#pages/character-simulator/model/simulator-oath-upgrade'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
@@ -34,7 +40,7 @@ import {
   OathItemControl,
   PotencyControl,
   ReinforceControl,
-  SetControl,
+  TextControl,
   SlotItemControl
 } from './SlotControls'
 import { TuneSelect } from './TuneSelect'
@@ -45,6 +51,16 @@ export type SlotEditorActions = Readonly<{
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
   onOathSetChange: (setId: number) => void
   onOathBodyChange: (body: SimulatorOathBody, id: string) => void
+  onOathUpgradeUnlockChange: (
+    upgrade: SimulatorOathUpgrade,
+    step: number,
+    unlocked: boolean
+  ) => void
+  onOathUpgradeOathpointChange: (
+    upgrade: SimulatorOathUpgrade,
+    step: number,
+    oathpoint: boolean
+  ) => void
   onCrystalChange: (crystal: SimulatorOathCrystal, draft: Partial<CrystalDraft>) => void
 }>
 
@@ -107,6 +123,8 @@ export function SlotEditor({
       return <OathSetEditor oath={target.oath} actions={actions} />
     case 'oathBody':
       return <OathBodyEditor body={target.body} changes={changes} actions={actions} />
+    case 'oathUpgrade':
+      return <OathUpgradeEditor upgrade={target.upgrade} changes={changes} actions={actions} />
     case 'crystal':
       return (
         <CrystalEditor
@@ -140,7 +158,7 @@ function EquipmentSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <SetControl
+        <TextControl
           label="장비 세트"
           value={equipmentSetIdOf(equipmentSet, changes)}
           options={options}
@@ -224,7 +242,7 @@ function OathSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <SetControl
+        <TextControl
           label="서약 세트"
           value={String(oath.setId)}
           options={options}
@@ -317,5 +335,59 @@ function CrystalEditor({
         </Field>
       )}
     </Fields>
+  )
+}
+
+const DAMAGE = 'damage'
+const OATHPOINT = 'oathpoint'
+// 엔진은 서약 포인트가 아닌 선택지를 모두 같은 값으로 계산해, 서약 포인트가 아닌 선택지는 최종 데미지 하나로 보인다.
+const UPGRADE_OPTIONS = [
+  { id: DAMAGE, name: '최종 데미지' },
+  { id: OATHPOINT, name: '서약 포인트' }
+]
+
+function OathUpgradeEditor({
+  upgrade,
+  changes,
+  actions
+}: {
+  upgrade: SimulatorOathUpgrade
+  changes: SimulatorChanges
+  actions: SlotEditorActions
+}): React.JSX.Element {
+  const level = upgradeOf(upgrade, changes.oath.upgrade).length
+
+  return (
+    <div className="flex flex-col gap-2 p-4">
+      {upgrade.steps.map(({ step, name, oathpointOption }) => {
+        const unlocked = step <= level
+        const oathpoint = isOathpointChosen(upgrade, changes.oath.upgrade, step)
+
+        function changeUnlock(checked: boolean): void {
+          actions.onOathUpgradeUnlockChange(upgrade, step, checked)
+        }
+
+        function changeOption(id: string): void {
+          actions.onOathUpgradeOathpointChange(upgrade, step, id === OATHPOINT)
+        }
+
+        return (
+          <div key={step} className="grid h-control-sm grid-cols-2 items-center gap-3">
+            <label className="flex min-w-0 cursor-pointer items-center gap-2">
+              <Checkbox aria-label={name} checked={unlocked} onCheckedChange={changeUnlock} />
+              <span className="min-w-0 truncate">{name}</span>
+            </label>
+            {unlocked && oathpointOption !== null && (
+              <TextControl
+                label={`${name} 선택지`}
+                value={oathpoint ? OATHPOINT : DAMAGE}
+                options={UPGRADE_OPTIONS}
+                onChange={changeOption}
+              />
+            )}
+          </div>
+        )
+      })}
+    </div>
   )
 }

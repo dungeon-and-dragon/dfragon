@@ -132,6 +132,10 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
       }
     },
     onOathBodyChange: (oathBody, id) => dispatch({ type: 'oathBody', body: oathBody, id }),
+    onOathUpgradeUnlockChange: (upgrade, step, unlocked) =>
+      dispatch({ type: 'oathUpgradeUnlock', upgrade, step, unlocked }),
+    onOathUpgradeOathpointChange: (upgrade, step, oathpoint) =>
+      dispatch({ type: 'oathUpgradeOathpoint', upgrade, step, oathpoint }),
     onCrystalChange: (crystal, draft) => {
       if (oath !== null) {
         dispatch({ type: 'crystal', oath, crystal, draft })

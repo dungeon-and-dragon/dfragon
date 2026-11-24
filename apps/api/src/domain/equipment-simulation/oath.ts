@@ -1,9 +1,11 @@
 import {
   type OathCrystalVariant,
+  type OathUpgradeSelection,
   type OathVariant,
   findOathCrystal,
   findOathCrystalVariant,
   findOathVariant,
+  isValidOathUpgrade,
   moveOathCrystalToSet,
   oathCrystalVariantsOf,
   oathSets,
@@ -30,6 +32,8 @@ export interface OathChanges {
   /** 서약 본체 선택지 id이고, null이면 그대로 둔다. */
   readonly body: string | null
   readonly crystals: readonly OathCrystalChange[]
+  /** 바꾼 뒤의 묵언의 진의 전체이고, null이면 그대로 둔다. */
+  readonly upgrade: readonly OathUpgradeSelection[] | null
 }
 
 export interface OathEdit {
@@ -37,6 +41,8 @@ export interface OathEdit {
   readonly set: number | null
   readonly body: CharacterPayload | null
   readonly crystals: readonly CharacterPayload[]
+  /** 원본과 다른 진의일 때만 있다. */
+  readonly upgrade: readonly OathUpgradeSelection[] | null
   /** 서약 세트, 본체, 결정 아이템 가운데 하나라도 바꿨는지 */
   readonly changesItems: boolean
 }
@@ -45,10 +51,69 @@ type SimulatedOath = NonNullable<ScoreSimulationInput['oath']>
 
 const PRIMEVAL_RARITY = '태초'
 
-const noOathEdit: OathEdit = { set: null, body: null, crystals: [], changesItems: false }
+const noOathEdit: OathEdit = {
+  set: null,
+  body: null,
+  crystals: [],
+  upgrade: null,
+  changesItems: false
+}
 
 function hasChanges(changes: OathChanges): boolean {
-  return changes.set !== null || changes.body !== null || changes.crystals.length > 0
+  return (
+    changes.set !== null ||
+    changes.body !== null ||
+    changes.crystals.length > 0 ||
+    changes.upgrade !== null
+  )
+}
+
+/** 엔진과 같이 응답 배열의 순서를 단계로 읽고, 진의가 없으면 빈 목록이다. */
+function wornUpgrade(info: unknown): OathUpgradeSelection[] {
+  const upgrade = isRecord(info) ? info.oathUpgrade : null
+  const options = isRecord(upgrade) && Array.isArray(upgrade.options) ? upgrade.options : []
+
+  return options.map((option, index) => {
+    const optionName = isRecord(option) ? option.optionName : null
+    const name = typeof optionName === 'string' ? optionName : ''
+    const step = index + 1
+
+    return { step, option: name }
+  })
+}
+
+function isSameUpgrade(
+  left: readonly OathUpgradeSelection[],
+  right: readonly OathUpgradeSelection[]
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every(({ step, option }, index) => {
+      const other = right[index]!
+
+      return step === other.step && option === other.option
+    })
+  )
+}
+
+/** 서약 본체가 없는 캐릭터와 1단계부터 이어지지 않거나 그 단계에 없는 선택지는 거절하고, 원본과 같으면 바꾸지 않는다. */
+function changedUpgrade(
+  info: unknown,
+  upgrade: readonly OathUpgradeSelection[] | null
+): OathUpgradeSelection[] | null {
+  if (upgrade === null) {
+    return null
+  }
+
+  if (!isRecord(info) || !isValidOathUpgrade(upgrade)) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  if (isSameUpgrade(upgrade, wornUpgrade(info))) {
+    return null
+  }
+
+  return upgrade.map(({ step, option }) => ({ step, option }))
 }
 
 function wornOath(oath: CharacterPayload): CharacterPayload {
@@ -287,13 +352,16 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
     throw new EquipmentSimulationFailure('request')
   }
 
+  const upgrade = changedUpgrade(section.info, changes.upgrade)
   const changesItems = changedSet !== null || body !== null || changesCrystals
 
-  return { set: changedSet, body, crystals: edited, changesItems }
+  return { set: changedSet, body, crystals: edited, upgrade, changesItems }
 }
 
 export function hasOathEdit(edit: OathEdit): boolean {
-  return edit.set !== null || edit.body !== null || edit.crystals.length > 0
+  return (
+    edit.set !== null || edit.body !== null || edit.crystals.length > 0 || edit.upgrade !== null
+  )
 }
 
 /** 바꾼 칸만 담고, 아무것도 바꾸지 않았으면 null이다. */
@@ -314,6 +382,10 @@ export function simulatedOath(edit: OathEdit): SimulatedOath | null {
 
   if (edit.crystals.length > 0) {
     oath.crystal = edit.crystals
+  }
+
+  if (edit.upgrade !== null) {
+    oath.upgrade = edit.upgrade
   }
 
   return oath
