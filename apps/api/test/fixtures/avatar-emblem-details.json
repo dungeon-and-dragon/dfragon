@@ -1,4 +1,42 @@
 {
+  "01351c7a80190bbbf8c75c2186af523a": {
+    "itemId": "01351c7a80190bbbf8c75c2186af523a",
+    "itemName": "찬란한 그린 엠블렘[체력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "체력",
+        "value": 15
+      }
+    ]
+  },
+  "0cf04676a99d95decd2cb6070b762348": {
+    "itemId": "0cf04676a99d95decd2cb6070b762348",
+    "itemName": "찬란한 붉은빛 엠블렘[체력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "체력",
+        "value": 25
+      }
+    ]
+  },
   "279782ac7c319218fb7d4de89a54f7af": {
     "itemId": "279782ac7c319218fb7d4de89a54f7af",
     "itemName": "플래티넘 엠블렘[센세이션]",
@@ -65,6 +103,37 @@
       {
         "name": "정신력",
         "value": 15
+      }
+    ]
+  },
+  "3dc682e58027c0b67e88d1da28f880b8": {
+    "itemId": "3dc682e58027c0b67e88d1da28f880b8",
+    "itemName": "플래티넘 엠블렘[수호의 은총]",
+    "itemRarity": "레전더리",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 232,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 232
+      },
+      {
+        "name": "힘",
+        "value": 8
+      },
+      {
+        "name": "체력",
+        "value": 8
+      },
+      {
+        "name": "지능",
+        "value": 8
+      },
+      {
+        "name": "정신력",
+        "value": 8
       }
     ]
   },
@@ -137,6 +206,94 @@
       }
     ]
   },
+  "75a3c4d82581e501c77b18640348f9ff": {
+    "itemId": "75a3c4d82581e501c77b18640348f9ff",
+    "itemName": "플래티넘 엠블렘[계시 : 아리아]",
+    "itemRarity": "레전더리",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 232,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 232
+      },
+      {
+        "name": "힘",
+        "value": 8
+      },
+      {
+        "name": "체력",
+        "value": 8
+      },
+      {
+        "name": "지능",
+        "value": 8
+      },
+      {
+        "name": "정신력",
+        "value": 8
+      }
+    ]
+  },
+  "9bc2ba1851cbafed53affa0e49c3ee05": {
+    "itemId": "9bc2ba1851cbafed53affa0e49c3ee05",
+    "itemName": "찬란한 옐로우 엠블렘[지능]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "지능",
+        "value": 15
+      }
+    ]
+  },
+  "a7a0538826ccea6c9f30601443fa99ed": {
+    "itemId": "a7a0538826ccea6c9f30601443fa99ed",
+    "itemName": "찬란한 옐로우 엠블렘[체력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "체력",
+        "value": 15
+      }
+    ]
+  },
+  "adbc4cc9f51a5f2fa103add45c92884f": {
+    "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
+    "itemName": "찬란한 붉은빛 엠블렘[지능]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "지능",
+        "value": 25
+      }
+    ]
+  },
   "b48e55e72a590c64b0066b58ba007d6a": {
     "itemId": "b48e55e72a590c64b0066b58ba007d6a",
     "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
@@ -172,6 +329,29 @@
       {
         "name": "정신력",
         "value": 25
+      }
+    ]
+  },
+  "d8847b5c0076e252d858804b09079ba3": {
+    "itemId": "d8847b5c0076e252d858804b09079ba3",
+    "itemName": "찬란한 듀얼 엠블렘[지능 + HP MAX]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "지능",
+        "value": 15
+      },
+      {
+        "name": "HP MAX",
+        "value": 80
       }
     ]
   },
