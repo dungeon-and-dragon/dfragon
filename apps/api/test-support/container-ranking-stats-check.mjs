@@ -401,6 +401,7 @@ try {
         { name: '합성 랭킹 보조 스킬', type: 1 }
       ],
       enhancements: [],
+      chain: null,
       fetchedAt: new Date()
     })
   }

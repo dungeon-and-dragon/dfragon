@@ -95,8 +95,15 @@ const learnedSkillSchema = z.looseObject({
 
 const selectedSkillSchema = z.looseObject({ skillId: nonblankString, type: z.int() })
 
+// 체인 모양이 어긋나도 스킬, 개화, 강화는 저장해야 하므로 체인만 모름으로 받는다.
+const skillChainSchema = z
+  .looseObject({ skills: z.array(nonblankString.nullable()) })
+  .nullable()
+  .catch(null)
+
 type LearnedSkill = z.output<typeof learnedSkillSchema>
 type SelectedSkill = z.output<typeof selectedSkillSchema>
+type SkillChain = NonNullable<z.output<typeof skillChainSchema>>
 
 function namedSelections(selections: readonly SelectedSkill[], learned: readonly LearnedSkill[]) {
   const names = new Map(learned.map(({ skillId, name }) => [skillId, name]))
@@ -110,6 +117,32 @@ function namedSelections(selections: readonly SelectedSkill[], learned: readonly
 
     return [{ name, type }]
   })
+}
+
+// 스킬 체인은 칸마다 스킬 ID나 null이 온다. 한 칸이라도 이름으로 잇지 못하면 순서가 어긋난 조합이 되므로 체인 전체를 모름으로 둔다.
+function namedChain(chain: SkillChain | null, learned: readonly LearnedSkill[]) {
+  if (chain === null) {
+    return null
+  }
+
+  const names = new Map(learned.map(({ skillId, name }) => [skillId, name]))
+  const slots: (string | null)[] = []
+
+  for (const skillId of chain.skills) {
+    if (skillId === null) {
+      slots.push(null)
+      continue
+    }
+
+    const name = names.get(skillId)
+    if (name === undefined) {
+      return null
+    }
+
+    slots.push(name)
+  }
+
+  return slots
 }
 
 function listOrEmpty<T extends z.ZodType>(item: T) {
@@ -128,7 +161,8 @@ export const characterSkillStyleSchema = z
         active: z.array(learnedSkillSchema),
         passive: listOrEmpty(learnedSkillSchema),
         evolution: listOrEmpty(selectedSkillSchema),
-        enhancement: listOrEmpty(selectedSkillSchema)
+        enhancement: listOrEmpty(selectedSkillSchema),
+        chain: skillChainSchema
       })
     })
   })
@@ -137,8 +171,9 @@ export const characterSkillStyleSchema = z
     const skills = learned.map(({ name, level }) => ({ name, level }))
     const evolutions = namedSelections(style.evolution, learned)
     const enhancements = namedSelections(style.enhancement, learned)
+    const chain = namedChain(style.chain, learned)
 
-    return { jobId, jobGrowId, skills, evolutions, enhancements }
+    return { jobId, jobGrowId, skills, evolutions, enhancements, chain }
   })
 
 export type NeopleCharacterSkillStyle = z.output<typeof characterSkillStyleSchema>

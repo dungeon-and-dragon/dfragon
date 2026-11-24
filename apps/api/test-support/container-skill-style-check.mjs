@@ -20,7 +20,7 @@ const basic = (characterId) => ({
   guildId: null,
   guildName: null
 })
-const style = (characterId, skill, level, fetchedAt) => ({
+const style = (characterId, skill, level, fetchedAt, chain) => ({
   serverId: 'cain',
   characterId,
   jobId: 'synthetic-skill-job',
@@ -28,6 +28,7 @@ const style = (characterId, skill, level, fetchedAt) => ({
   skills: [{ name: skill, level }],
   evolutions: [{ name: skill, type: 1 }],
   enhancements: [{ name: skill, type: 2 }],
+  chain,
   fetchedAt: new Date(fetchedAt)
 })
 
@@ -35,10 +36,22 @@ const client = createDatabaseClient(readDatabaseConfiguration(process.env))
 try {
   await recordCharacterBasic(client, basic('skill-a'))
   await recordCharacterBasic(client, basic('skill-b'))
-  await recordCharacterSkillStyle(client, style('skill-a', '합성A', 1, '2026-11-01T00:00:00Z'))
-  await recordCharacterSkillStyle(client, style('skill-b', '합성B', 1, '2026-11-01T00:00:00Z'))
-  await recordCharacterSkillStyle(client, style('skill-a', '합성A2', 13, '2026-11-07T00:00:00Z'))
-  await recordCharacterSkillStyle(client, style('skill-a', '합성A1', 5, '2026-11-03T00:00:00Z'))
+  await recordCharacterSkillStyle(
+    client,
+    style('skill-a', '합성A', 1, '2026-11-01T00:00:00Z', ['합성A', null, null, null])
+  )
+  await recordCharacterSkillStyle(
+    client,
+    style('skill-b', '합성B', 1, '2026-11-01T00:00:00Z', null)
+  )
+  await recordCharacterSkillStyle(
+    client,
+    style('skill-a', '합성A2', 13, '2026-11-07T00:00:00Z', [null, '합성A2', null, '합성A2'])
+  )
+  await recordCharacterSkillStyle(
+    client,
+    style('skill-a', '합성A1', 5, '2026-11-03T00:00:00Z', ['합성A1', null, null, null])
+  )
 } finally {
   await client.$disconnect()
 }

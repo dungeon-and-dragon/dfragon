@@ -6,6 +6,8 @@ import type {
   JobSkillAdoptionQuery,
   JobSkillAdoptionSnapshot,
   SetAdoptionReplacement,
+  SkillStyleChainBackfillKey,
+  SkillStyleChainBackfillRow,
   SkillStyleSampleCharacter,
   SkillStyleSampleJob
 } from '@dfragon/database'
@@ -24,4 +26,12 @@ export interface StatsJobRepository {
 export interface SkillStyleCollectionRepository {
   readTargets(): Promise<SkillStyleSampleCharacter[]>
   recordSkillStyle(style: CharacterSkillStyleInput): Promise<void>
+}
+
+export interface SkillChainBackfillRepository {
+  readPage(page: {
+    after: SkillStyleChainBackfillKey | null
+    limit: number
+  }): Promise<SkillStyleChainBackfillRow[]>
+  fillChain(style: CharacterSkillStyleInput): Promise<boolean>
 }

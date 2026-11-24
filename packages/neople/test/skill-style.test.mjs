@@ -47,9 +47,57 @@ test('active와 passive를 합쳐 이름과 레벨만 남기고 개화, 강화�
       { name: '참회의 망치', type: 2 },
       { name: '홀리 스매쉬', type: 1 }
     ],
-    enhancements: [{ name: '홀리 스매쉬', type: 1 }]
+    enhancements: [{ name: '홀리 스매쉬', type: 1 }],
+    chain: ['홀리 스매쉬']
   })
 })
+
+const chainSkills = {
+  active: [
+    { skillId: 'active-a', name: '홀리 스매쉬', level: 13, requiredLevel: 1 },
+    { skillId: 'active-b', name: '참회의 망치', level: 1, requiredLevel: 100 },
+    { skillId: 'active-c', name: '디바인 퍼니시먼트', level: 10, requiredLevel: 60 }
+  ],
+  passive: [{ skillId: 'passive-a', name: '기본기 숙련', level: 115, requiredLevel: 1 }]
+}
+
+test('체인 4칸은 순서대로 스킬 이름으로 바꾸고 비운 칸은 null로 둔다', () => {
+  const full = characterSkillStyleSchema.parse(
+    skillStyleBody({
+      ...chainSkills,
+      chain: { resetTime: 1, skills: ['active-c', 'active-a', 'passive-a', 'active-b'] }
+    })
+  )
+  const partial = characterSkillStyleSchema.parse(
+    skillStyleBody({
+      ...chainSkills,
+      chain: { resetTime: 0, skills: [null, 'active-b', null, 'active-a'] }
+    })
+  )
+
+  assert.deepEqual(full.chain, ['디바인 퍼니시먼트', '홀리 스매쉬', '기본기 숙련', '참회의 망치'])
+  assert.deepEqual(partial.chain, [null, '참회의 망치', null, '홀리 스매쉬'])
+})
+
+for (const [name, chain] of [
+  ['체인이 없는 응답', undefined],
+  ['체인이 null인 응답', null],
+  [
+    '배운 목록에 없는 스킬 ID가 있는 체인',
+    { resetTime: 0, skills: ['active-a', 'unknown', null, null] }
+  ],
+  ['칸 목록이 없는 체인', { resetTime: 0 }]
+]) {
+  test(`${name}은 스킬, 개화, 강화를 남기고 체인을 모름(null)으로 둔다`, () => {
+    const parsed = characterSkillStyleSchema.parse(
+      skillStyleBody({ ...chainSkills, enhancement: [{ skillId: 'active-a', type: 2 }], chain })
+    )
+
+    assert.equal(parsed.chain, null)
+    assert.equal(parsed.skills.length, 4)
+    assert.deepEqual(parsed.enhancements, [{ name: '홀리 스매쉬', type: 2 }])
+  })
+}
 
 test('배운 목록에 없는 스킬의 개화, 강화는 빼고 나머지는 남긴다', () => {
   const parsed = characterSkillStyleSchema.parse(

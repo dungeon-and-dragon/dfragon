@@ -270,11 +270,18 @@ export type {
   SetAdoptionReplacement,
   SetComboCount
 } from './set-adoption.js'
-export { recordCharacterSkillStyle } from './skill-style.js'
+export {
+  fillCharacterSkillStyleChain,
+  readSkillStyleChainBackfillPage,
+  recordCharacterSkillStyle
+} from './skill-style.js'
 export { readSampleCharactersWithoutSkillStyle } from './skill-style-sample.js'
 export type { SkillStyleSampleCharacter, SkillStyleSampleJob } from './skill-style-sample.js'
 export type {
   CharacterSkillStyleInput,
+  SkillStyleChainBackfillKey,
+  SkillStyleChainBackfillRow,
+  SkillStyleHistorySource,
   SkillStyleSelection,
   SkillStyleSkill
 } from './skill-style.js'

@@ -45,6 +45,9 @@ const rankingStatsCheckPath = fileURLToPath(
 const skillStyleCheckPath = fileURLToPath(
   new URL('./container-skill-style-check.mjs', import.meta.url)
 )
+const skillChainBackfillCheckPath = fileURLToPath(
+  new URL('./container-skill-chain-backfill-check.mjs', import.meta.url)
+)
 const skillAdoptionCheckPath = fileURLToPath(
   new URL('./container-skill-adoption-check.mjs', import.meta.url)
 )
@@ -810,12 +813,12 @@ try {
   assert.equal(
     (
       await psql(
-        "SELECT string_agg(character_id || ':' || job_grow_id || ':' || skills::text || ':' || evolutions::text || ':' || enhancements::text || ':' || to_char(fetched_at AT TIME ZONE 'UTC', 'YYYY-MM-DD'), E'\\n' ORDER BY character_id) FROM character_skill_styles"
+        "SELECT string_agg(character_id || ':' || job_grow_id || ':' || skills::text || ':' || evolutions::text || ':' || enhancements::text || ':' || coalesce(chain::text, 'NULL') || ':' || to_char(fetched_at AT TIME ZONE 'UTC', 'YYYY-MM-DD'), E'\\n' ORDER BY character_id) FROM character_skill_styles"
       )
     ).stdout.trim(),
     [
-      'skill-a:synthetic-skill-grow:[{"name": "합성A2", "level": 13}]:[{"name": "합성A2", "type": 1}]:[{"name": "합성A2", "type": 2}]:2026-11-07',
-      'skill-b:synthetic-skill-grow:[{"name": "합성B", "level": 1}]:[{"name": "합성B", "type": 1}]:[{"name": "합성B", "type": 2}]:2026-11-01'
+      'skill-a:synthetic-skill-grow:[{"name": "합성A2", "level": 13}]:[{"name": "합성A2", "type": 1}]:[{"name": "합성A2", "type": 2}]:[null, "합성A2", null, "합성A2"]:2026-11-07',
+      'skill-b:synthetic-skill-grow:[{"name": "합성B", "level": 1}]:[{"name": "합성B", "type": 1}]:[{"name": "합성B", "type": 2}]:NULL:2026-11-01'
     ].join('\n')
   )
   // 캐릭터 행을 지우면 스킬 스타일 행도 함께 지워진다.
@@ -824,6 +827,9 @@ try {
     (await psql("SELECT string_agg(character_id, ',') FROM character_skill_styles")).stdout.trim(),
     'skill-a'
   )
+
+  stage = 'skill chain backfill job'
+  await runWorkerCheck(skillChainBackfillCheckPath)
 
   stage = 'skill adoption reads'
   await podman([
