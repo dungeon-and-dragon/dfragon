@@ -20,7 +20,6 @@ import {
 } from '#features/capture-search'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { CandidatePopover } from './CandidatePopover'
-import { CardAnnouncer } from './CardAnnouncer'
 import { LookupProgress } from './LookupProgress'
 import { NameField } from './NameField'
 import { ServerSelect } from '#shared/ui/ServerSelect'
@@ -135,9 +134,6 @@ export function CharacterRow({
           {picker !== undefined && (
             <CandidatePopover slot={slot} picker={picker} onPick={onPickCandidate} />
           )}
-          <CardAnnouncer>
-            {shown !== undefined && !draft.editing ? shown.name : (notice?.text ?? '')}
-          </CardAnnouncer>
         </div>
       </td>
       <td>
@@ -494,7 +490,6 @@ function FameCell({
 
 function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
   const { value, tone, approximate, description } = score
-  const note = description !== undefined && <span className="sr-only">{description}</span>
 
   return (
     <td className="text-right">
@@ -505,12 +500,10 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
           className={`${numberClass}${tone !== null ? ` ${scoreToneClasses[tone]}` : ''}${approximate ? ' border-b border-dotted border-fg-subtle' : ''}`}
         >
           {approximate ? formatApproximateScore(value) : integer.format(value)}
-          {note}
         </span>
       ) : (
-        <span className={`${numberClass} text-fg-subtle`}>
+        <span title={description} className={`${numberClass} text-fg-subtle`}>
           {MISSING_VALUE}
-          {note}
         </span>
       )}
     </td>

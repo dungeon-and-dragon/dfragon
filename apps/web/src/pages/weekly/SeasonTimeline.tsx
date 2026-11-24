@@ -123,9 +123,6 @@ function SeasonButton({
       >
         {season.name}
       </span>
-      {bar.state === 'backfill' && (
-        <span className="sr-only">{Math.floor(bar.progress * 100)}%</span>
-      )}
     </button>
   )
 }

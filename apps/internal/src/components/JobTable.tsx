@@ -166,9 +166,7 @@ export function JobTable({ jobs, now }: JobTableProps): React.JSX.Element {
                 <th>마지막 실행</th>
                 <th className="table-num">걸린 시간</th>
                 <th>정기 실행</th>
-                <th className="table-num">
-                  <span className="sr-only">실행</span>
-                </th>
+                <th className="table-num" />
               </tr>
             </thead>
             {groupByNeopleApi(jobs).map((group) => (

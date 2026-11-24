@@ -73,9 +73,6 @@ function CharacterStatsBody(): React.JSX.Element {
 function StatsSkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true" className={SCREEN}>
-      <span role="status" className="sr-only">
-        통계를 받는 중입니다.
-      </span>
       <div aria-hidden="true">
         {STAT_BOX_ROWS.map((row) => (
           <div key={row.join()} className="section section-cols">

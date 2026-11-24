@@ -114,7 +114,6 @@ function ScoreRow({
   row: string
 }): React.JSX.Element {
   const { tone, value, approximate, description } = view
-  const note = description !== undefined && <span className="sr-only">{description}</span>
   const toneClass = tone !== null ? SCORE_TONES[tone] : ''
 
   return (
@@ -126,12 +125,10 @@ function ScoreRow({
           className={`${VALUE} ${toneClass} ${approximate ? APPROXIMATE_CLASS : ''}`}
         >
           {approximate ? formatApproximateScore(value) : integer.format(value)}
-          {note}
         </dd>
       ) : (
-        <dd className={`${VALUE} text-fg-subtle`}>
+        <dd title={description} className={`${VALUE} text-fg-subtle`}>
           {MISSING_VALUE}
-          {note}
         </dd>
       )}
     </div>

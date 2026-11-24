@@ -1,5 +1,5 @@
 import { Button, CheckIcon, CopyIcon } from '@dfragon/ui'
-import { type ClipboardCopyStatus, useClipboardCopy } from '#shared/lib/useClipboardCopy'
+import { useClipboardCopy } from '#shared/lib/useClipboardCopy'
 import { HeaderTooltip, tooltipTriggerClass } from './HeaderTooltip'
 
 const FAILURE_MESSAGE = '클립보드에 복사하지 못했습니다.'
@@ -49,22 +49,6 @@ export function ClipboardCopyButton({
           </span>
         </HeaderTooltip>
       )}
-      {/* 화면 밖에 두어 버튼 사이 간격을 바꾸지 않는다. */}
-      <span role="status" data-clipboard-announcer="" className="sr-only">
-        {clipboardAnnouncement(clipboard.status)}
-      </span>
     </>
   )
-}
-
-function clipboardAnnouncement(status: ClipboardCopyStatus): string {
-  if (status === 'copied') {
-    return '클립보드로 복사했습니다.'
-  }
-
-  if (status === 'failed') {
-    return FAILURE_MESSAGE
-  }
-
-  return ''
 }

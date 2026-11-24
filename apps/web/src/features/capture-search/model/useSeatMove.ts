@@ -24,8 +24,6 @@ export type SeatMove = Pick<
   ref: RefCallback<HTMLTableRowElement>
 }
 
-export type SeatMoveNotice = { text: string; sequence: number }
-
 const SEAT_DRAG_TYPE = 'application/x-dfragon-seat'
 const seatKeys: Readonly<Record<string, SeatDirection>> = {
   ArrowUp: 'up',
@@ -42,7 +40,6 @@ const directionKeys: Readonly<Record<SeatDirection, string>> = {
 
 export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: SeatArrangement }): {
   moveSeat: (seat: number) => SeatMove
-  notice: SeatMoveNotice
 } {
   const { layout, seatOrder, canMoveSeats, swapSeats } = seats
   const { dragging, dropTarget, startDrag, hoverSeat, leaveSeat, endDrag } = useSeatDrag({
@@ -50,7 +47,6 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
     seatOrder,
     canMoveSeats
   })
-  const [notice, setNotice] = useState<SeatMoveNotice>({ text: '', sequence: 0 })
   const seatElements = useRef(new Map<number, HTMLTableRowElement>())
   const movedSlot = useRef<number | null>(null)
   const keyShortcuts = canMoveSeats
@@ -72,16 +68,6 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
     }
     element.focus()
   }, [seatOrder])
-
-  function swap(from: number, to: number): boolean {
-    const swapped = swapSeats(from, to)
-    if (swapped) {
-      const text = `${from + 1}번 자리와 ${to + 1}번 자리를 맞바꿨습니다.`
-      setNotice((previous) => ({ text, sequence: previous.sequence + 1 }))
-    }
-
-    return swapped
-  }
 
   function moveSeat(seat: number): SeatMove {
     const slot = seatOrder[seat]
@@ -108,7 +94,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
         return
       }
       event.preventDefault()
-      if (swap(seat, target)) {
+      if (swapSeats(seat, target)) {
         movedSlot.current = slot
       }
     }
@@ -145,7 +131,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
       event.preventDefault()
       const from = seatOrder.indexOf(draggedSlot)
       if (from !== seat) {
-        swap(from, seat)
+        swapSeats(from, seat)
       }
       endDrag()
     }
@@ -165,7 +151,7 @@ export function useSeatMove({ resetKey, seats }: { resetKey: string; seats: Seat
     }
   }
 
-  return { moveSeat, notice }
+  return { moveSeat }
 }
 
 function useSeatDrag({

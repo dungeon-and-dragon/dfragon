@@ -50,9 +50,6 @@ export function FameRankingList({
         <ListBox name={name}>
           {/* 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다. */}
           <div aria-busy="true" className="min-h-dvh">
-            <span role="status" className="sr-only">
-              검색 결과를 받는 중입니다.
-            </span>
             <CharacterTable
               rows={[]}
               detail={setColumnOf(catalog)}

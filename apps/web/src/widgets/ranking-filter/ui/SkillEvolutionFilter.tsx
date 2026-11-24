@@ -275,9 +275,6 @@ function EvolutionButton({
 export function SkillEvolutionSkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true" className={GRID}>
-      <span role="status" className="sr-only">
-        개화 스킬을 받는 중입니다.
-      </span>
       {Array.from({ length: LOADING_CELLS }, (_, index) => (
         <div key={index} aria-hidden="true" className="flex h-8 items-center gap-3">
           <span className="skeleton block size-game-icon shrink-0" />

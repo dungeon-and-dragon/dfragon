@@ -159,13 +159,6 @@ function BarLinePlot({
     return [...barRows, lineRow]
   }
 
-  function describe(index: number): string {
-    const rows = rowsAt(index).map(({ name, value }) => `${name} ${value}`)
-    const title = x[index]?.title ?? ''
-
-    return [title, ...rows].join(', ')
-  }
-
   const barLegend = bars.map(({ key, name, color }) => ({
     key,
     name,
@@ -305,7 +298,6 @@ function BarLinePlot({
         <HitList
           x={x}
           places={places}
-          describe={describe}
           onHover={show}
           areaProps={areaProps}
           register={registerHit}
