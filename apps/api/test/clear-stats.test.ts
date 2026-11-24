@@ -1221,8 +1221,8 @@ test('목록은 레기온을 contents와 따로 주고, 레기온 분모가 없�
         weeks
       ]),
       [
-        ['legion-apocalypse', 'legion', null, true, []],
-        ['legion-venus', 'legion', null, false, []]
+        ['legion-apocalypse', 'legion', 73_993, true, []],
+        ['legion-venus', 'legion', 41_929, false, []]
       ]
     )
   } finally {
@@ -1332,7 +1332,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
       },
       {
         kind: 'legion',
-        entryFame: null,
+        entryFame: 41_929,
         weekStart: '2026-11-05',
         cleared: 7,
         bothCleared: 7,

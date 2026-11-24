@@ -1,7 +1,9 @@
-import type { StoredClearPopulation } from '@dfragon/database'
+import type { ClearPopulationJob, StoredClearPopulation } from '@dfragon/database'
 import {
   CLEAR_CONTENTS,
   CLEAR_LEGIONS,
+  toCollectionMinFame,
+  toPopulationMinFame,
   type ClearContent
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import type { ClearWeekSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
@@ -111,9 +113,13 @@ export class ClearWeekSampleService {
   private async moveLegionClears(): Promise<number> {
     const populations = await this.repository.readPopulations()
     const moves = planLegionClearMoves(CLEAR_LEGIONS, populations, this.now())
+    const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
+    const jobsByMinFame = new Map<number, ClearPopulationJob[]>()
 
-    for (const { legion, collection, copySnapshot } of moves) {
-      const { weekStart, population, minFame, jobs } = collection
+    for (const { legion, weekStart, copySnapshot } of moves) {
+      const minFame = toPopulationMinFame(legion, collectionMinFame)
+      const jobs = jobsByMinFame.get(minFame) ?? (await this.repository.readPopulationJobs(minFame))
+      jobsByMinFame.set(minFame, jobs)
 
       await this.repository.recordLegionClears({
         contentId: legion.id,
@@ -122,6 +128,7 @@ export class ClearWeekSampleService {
         copySnapshot
       })
 
+      const population = jobs.reduce((sum, { count }) => sum + count, 0)
       const collectedAt = this.now()
       await this.repository.recordPopulation({
         contentId: legion.id,

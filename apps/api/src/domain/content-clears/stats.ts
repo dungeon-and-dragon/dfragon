@@ -25,13 +25,12 @@ export type ClearWeek = {
   ratios: ClearRatioCount[]
 }
 
-// 레기온은 입장 명성을 정하지 않아 entryFame이 null이다.
 export type ClearContentHeader = {
   id: string
   kind: ContentClearKind
   name: string
   releasedAt: string
-  entryFame: number | null
+  entryFame: number
   latest: boolean
 }
 
