@@ -336,19 +336,32 @@ function legendMarkClass(name: string): string | undefined {
   return items.find((item) => item.textContent === name)?.querySelector('i')?.className
 }
 
+async function columnTooltips(name: string): Promise<(string | null)[]> {
+  const box = panel(name)!
+  const tooltip = box.querySelector('ul + [aria-hidden="true"]')!
+  const texts: (string | null)[] = []
+
+  for (const column of box.querySelectorAll('li')) {
+    await act(async () => {
+      column.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    })
+    texts.push(tooltip.textContent)
+  }
+
+  return texts
+}
+
 function click(element: Element): Promise<void> {
   return act(async () => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }))
   })
 }
 
-it('받는 중에는 제목과 받는 중 안내를 두고 주 선택과 패널은 두지 않는다', async () => {
+it('받는 중에는 제목만 두고 주 선택과 패널은 두지 않는다', async () => {
   await render(undefined, { stats: pending })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
-  expect(container.querySelector('[role="status"]')?.textContent).toBe(
-    '클리어 집계를 받는 중입니다.'
-  )
+  expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
   expect(container.querySelector('[aria-label="주 선택"]')).toBeNull()
   expect(panelNames()).toEqual([])
 })
@@ -499,12 +512,10 @@ it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주�
   expect(requestsTo('/stats/clears/michaela-hard')).toEqual([
     `/stats/clears/michaela-hard?week=${LATEST_WEEK}`
   ])
-  const columns = [...(panel('모험단 기준 클리어 횟수')?.querySelectorAll('li') ?? [])].map(
-    (column) => column.querySelector('span')?.textContent
-  )
-  expect(columns.at(0)).toMatch(/^1명 40 /)
-  expect(columns.at(11)).toMatch(/^12명 3 /)
-  expect(columns.at(12)).toMatch(/^13명 이상 7 /)
+  const columns = await columnTooltips('모험단 기준 클리어 횟수')
+  expect(columns.at(0)).toMatch(/^1명40 /)
+  expect(columns.at(11)).toMatch(/^12명3 /)
+  expect(columns.at(12)).toMatch(/^13명 이상7 /)
   expect(columns).toHaveLength(13)
 })
 

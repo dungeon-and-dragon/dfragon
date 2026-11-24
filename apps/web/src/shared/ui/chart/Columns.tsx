@@ -163,7 +163,7 @@ export function Columns({
 }
 
 function Column({
-  bar: { key, label, range, count, share, ratio },
+  bar: { key, label, ratio },
   dimmed,
   scrollable,
   height,
@@ -192,9 +192,6 @@ function Column({
       onMouseEnter={handleMouseEnter}
       className={`flex grow basis-0 flex-col pt-[44px] ${scrollable ? 'min-w-1' : 'min-w-0'}`}
     >
-      <span className="sr-only">
-        {[range, integer.format(count), share].filter((text) => text != null).join(' ')}
-      </span>
       <span
         className="flex min-h-[160px] grow items-end"
         style={height !== undefined ? { minHeight: height } : undefined}

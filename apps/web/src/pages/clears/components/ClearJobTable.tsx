@@ -187,10 +187,7 @@ function JobTableRow({
   onHover: (key: string) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
-  const { key, name, counts, rate, stats } = row
-  const description = statsRowsOf(row)
-    .map(({ name: statName, value }) => `${statName} ${value}`)
-    .join(', ')
+  const { key, name, rate, stats } = row
 
   function handleMouseEnter(): void {
     onHover(key)
@@ -208,14 +205,10 @@ function JobTableRow({
     <tr onMouseEnter={handleMouseEnter}>
       <th scope="row" className="text-left font-normal">
         {name}
-        <span className="sr-only">{`, ${COUNTS_LABEL} ${counts}`}</span>
       </th>
       <td ref={plotRef}>
         {stats !== null && scale !== undefined && (
-          <>
-            <span className="sr-only">{description}</span>
-            <BoxPlot stats={stats} color={PLOT_COLOR} scale={scale} width={width} />
-          </>
+          <BoxPlot stats={stats} color={PLOT_COLOR} scale={scale} width={width} />
         )}
       </td>
       <td className="table-num">{rate}</td>

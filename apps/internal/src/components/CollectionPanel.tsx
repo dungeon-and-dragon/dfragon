@@ -46,9 +46,7 @@ export function CollectionPanel(): React.JSX.Element {
                 <th>실패 종류</th>
                 <th className="table-num">건수</th>
                 <th>마지막 시도</th>
-                <th className="table-num">
-                  <span className="sr-only">되돌리기</span>
-                </th>
+                <th className="table-num" />
               </tr>
             </thead>
             <tbody>

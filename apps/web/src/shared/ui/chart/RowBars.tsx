@@ -253,7 +253,7 @@ function railHeightOf(thick: boolean, small: boolean): string {
 type DetailsToggle = Readonly<{ open: boolean; onToggle: (key: string) => void }>
 
 function BarRow({
-  bar: { key, name, label, value, share, link, base = false },
+  bar: { key, name, label, value, link, base = false },
   layout: {
     columns,
     style,
@@ -324,7 +324,6 @@ function BarRow({
       >
         {formatValue(value)}
       </span>
-      {share != null && <span className="sr-only">{share}</span>}
     </>
   )
 

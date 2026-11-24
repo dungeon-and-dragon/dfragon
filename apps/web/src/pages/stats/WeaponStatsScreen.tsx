@@ -9,7 +9,6 @@ const SKELETON_NAME = '무기'
 const SKELETON_ROWS = 2
 const EMPTY = '아이템 통계가 없습니다.'
 const FAILED = '아이템 통계를 받지 못했습니다.'
-const LOADING = '아이템 통계를 받는 중입니다.'
 const BOXES_PER_ROW = 2
 
 function rowsOf(types: readonly WeaponType[]): WeaponType[][] {
@@ -56,7 +55,7 @@ export function WeaponStatsScreen({
       filter={filter}
       onFilterChange={onFilterChange}
       skeleton={<WeaponSkeleton />}
-      messages={{ empty: EMPTY, failed: FAILED, loading: LOADING }}
+      messages={{ empty: EMPTY, failed: FAILED }}
     >
       {(stats) =>
         rowsOf(weaponTypesOf(stats, filter)).map((row) => (

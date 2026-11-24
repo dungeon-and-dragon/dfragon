@@ -486,14 +486,14 @@ it('시즌 9의 칸 Tooltip은 장비와 서약을 나누지 않고 아이템 �
   )
 })
 
-it('히트맵을 그리면 시즌 하루 상세를 한 번 받고, 받기 전에 칸에 올리면 받는 중을 보이다가 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보인다', async () => {
+it('히트맵을 그리면 시즌 하루 상세를 한 번 받고, 받기 전에 칸에 올리면 뼈대를 보이다가 날짜와 묶음 제목은 합계 없이 두고, 8개가 넘는 아이템은 태초 이름과 레전더리 개수로, 강화 단계와 결과를 보인다', async () => {
   const loaded = Promise.withResolvers<AdventureActivitySeasonDays>()
   serve({ days: () => loaded.promise })
   await renderLoaded()
   await vi.waitFor(() => expect(dayRequests()).toEqual([dayRequest(11)]))
 
   await act(async () => hover(cell('4월 2일')))
-  expect(popupText()).toEqual(['4월 2일 (목)', '하루 활동을 받는 중입니다.', ''])
+  expect(popupText()).toEqual(['4월 2일 (목)', ''])
 
   loaded.resolve(seasonDays(april2))
   await vi.waitFor(() =>

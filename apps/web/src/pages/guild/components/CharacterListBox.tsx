@@ -25,9 +25,6 @@ export function CharacterListBox({
       return (
         <ListBox name={name}>
           <div aria-busy="true">
-            <span role="status" className="sr-only">
-              목록을 받는 중입니다.
-            </span>
             <CharacterTable
               rankOnNarrow={false}
               rows={[]}

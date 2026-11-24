@@ -120,8 +120,8 @@ function SlotHead({ sticky = false }: { sticky?: boolean }): React.JSX.Element {
         </th>
         {EQUIPMENT_SLOTS.map((slot) => (
           <th key={slot} scope="col" className={`${SLOT_CELL} ${cell}`}>
-            {/* 900px 미만에서는 칸이 좁아 부위 이름이 겹치므로 화면에서는 숨기고 보조 기술에만 남긴다. */}
-            <span className="max-md:sr-only">{slot}</span>
+            {/* 900px 미만에서는 칸이 좁아 부위 이름이 겹치므로 숨긴다. */}
+            <span className="max-md:hidden">{slot}</span>
           </th>
         ))}
       </tr>
@@ -198,9 +198,6 @@ export function EquipmentSection({
 export function EquipmentSkeleton(): React.JSX.Element {
   return (
     <div className="table-scroll" aria-busy="true">
-      <span role="status" className="sr-only">
-        장비를 받는 중입니다.
-      </span>
       <table className="table table-fixed">
         <SlotColumns />
         <SlotHead />

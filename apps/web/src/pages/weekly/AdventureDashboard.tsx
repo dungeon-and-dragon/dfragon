@@ -72,12 +72,7 @@ function DashboardHero({
             hasOaths={seasonHasOaths(seasonId)}
           />
         ) : (
-          <>
-            <span role="status" className="sr-only">
-              시즌 활동을 받는 중입니다.
-            </span>
-            <ActivitySummarySkeleton hasLegion={hasLegion} />
-          </>
+          <ActivitySummarySkeleton hasLegion={hasLegion} />
         )}
       </div>
     </div>

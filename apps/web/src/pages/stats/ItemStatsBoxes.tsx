@@ -41,9 +41,6 @@ export function ItemStatsBoxes({ filter }: { filter: SetStatsFilter }): React.JS
     case 'loading':
       return (
         <div aria-busy="true">
-          <span role="status" className="sr-only">
-            아이템 통계를 받는 중입니다.
-          </span>
           <div aria-hidden="true">
             <SameContentRow content={<span className="skeleton h-[160px]" />} />
           </div>

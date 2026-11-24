@@ -44,9 +44,6 @@ function SearchedCharacterList({
       return (
         <ListBox name={name}>
           <div aria-busy="true">
-            <span role="status" className="sr-only">
-              캐릭터를 찾는 중입니다.
-            </span>
             <CharacterTable
               rows={[]}
               ranked={false}

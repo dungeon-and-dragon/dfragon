@@ -39,9 +39,6 @@ function SoulPrices(): React.JSX.Element {
       return (
         <ListBox name={NAME}>
           <div aria-busy="true">
-            <span role="status" className="sr-only">
-              가격을 받는 중입니다.
-            </span>
             <SoulPriceTable>
               {Array.from({ length: SKELETON_COUNT }, (_, index) => (
                 <SkeletonRow key={index} />
@@ -70,7 +67,6 @@ function SoulPrices(): React.JSX.Element {
                       itemId={crystal.itemId}
                       rarity={itemRarityOfGrade(crystal.itemRarity)}
                     />
-                    <span className="sr-only">{crystal.itemName}</span>
                   </span>
                 </td>
                 <td className="table-num">{goldOf(crystal.unitPrice)}</td>
@@ -89,9 +85,7 @@ function SoulPriceTable({ children }: { children: React.ReactNode }): React.JSX.
       <table className="table">
         <thead>
           <tr>
-            <th scope="col">
-              <span className="sr-only">소울 결정</span>
-            </th>
+            <th scope="col" />
             <th scope="col" className="table-num">
               가격
             </th>

@@ -359,7 +359,6 @@ it('받는 중에는 장비 표에 빈 행 4개를 보인다', async () => {
   await render({})
 
   await vi.waitFor(() => expect(requests).toHaveLength(1))
-  expect(container.querySelector('[role="status"]')?.textContent).toBe('장비를 받는 중입니다.')
   expect(
     container.querySelectorAll('section[aria-label="장비"] tbody tr[aria-hidden="true"]')
   ).toHaveLength(4)

@@ -51,7 +51,7 @@ function render(): Promise<void> {
   )
 }
 
-it('응답을 기다리는 동안 목록 상자에 받는 중임을 알리고 고른 서버를 제목 상자에 보인다', async () => {
+it('응답을 기다리는 동안 목록 상자를 받는 중으로 두고 고른 서버를 제목 상자에 보인다', async () => {
   respond(async () => {
     await delay('infinite')
 
@@ -63,9 +63,7 @@ it('응답을 기다리는 동안 목록 상자에 받는 중임을 알리고 �
     expect(queries).toEqual([{ characterName: '합성', serverId: 'prey', limit: '200' }])
   )
   expect(container.querySelector('header')?.textContent).toBe('캐릭터 검색서버프레이')
-  expect(container.querySelector('[aria-busy="true"] [role="status"]')?.textContent).toBe(
-    '캐릭터를 찾는 중입니다.'
-  )
+  expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
 })
 
 it('검색이 실패하면 오류를 알린다', async () => {

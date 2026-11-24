@@ -306,6 +306,21 @@ function buttonNamed(name: string): HTMLButtonElement {
   )!
 }
 
+async function columnTooltips(name: string): Promise<(string | null)[]> {
+  const box = panel(name)!
+  const tooltip = box.querySelector('ul + [aria-hidden="true"]')!
+  const texts: (string | null)[] = []
+
+  for (const column of box.querySelectorAll('li')) {
+    await act(async () => {
+      column.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    })
+    texts.push(tooltip.textContent)
+  }
+
+  return texts
+}
+
 function click(element: Element): Promise<void> {
   return act(async () => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }))
@@ -448,12 +463,10 @@ it('클리어 캐릭터의 명성은 분포가 있는 그룹만 둔다', async (
 it('모험단 기준 클리어 횟수는 1명부터 16명과 17명 이상으로 센다', async () => {
   await open({ contentKey: 'michaela' })
 
-  const columns = [...(panel('모험단 기준 클리어 횟수')?.querySelectorAll('li') ?? [])].map(
-    (column) => column.querySelector('span')?.textContent
-  )
+  const columns = await columnTooltips('모험단 기준 클리어 횟수')
   expect(columns).toHaveLength(17)
-  expect(columns.at(15)).toMatch(/^16명 3 /)
-  expect(columns.at(16)).toMatch(/^17명 이상 3 /)
+  expect(columns.at(15)).toMatch(/^16명3 /)
+  expect(columns.at(16)).toMatch(/^17명 이상3 /)
 })
 
 it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
@@ -461,8 +474,8 @@ it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 �
 
   const first = panel('전직별 클리어')?.querySelector('tbody tr')
   expect([...(first?.children ?? [])].map((cell) => cell.textContent)).toEqual([
-    '전직6, 클리어 / 캐릭터 수 25 / 50',
-    '최고 140,000, 95% 132,000, 75% 126,000, 중앙값 120,006, 25% 118,000, 5% 110,000',
+    '전직6',
+    '',
     '50.0%'
   ])
   expect(jobNames()).toHaveLength(10)
@@ -613,9 +626,9 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
   )
 
   const columns = [...(panel('장비 점수 구간별 클리어율')?.querySelectorAll('li') ?? [])]
-  expect(columns.map((column) => column.querySelector('span')?.textContent)).toEqual([
-    '300,000~ 10 20.0%',
-    '350,000~ 40 10.0%'
+  expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
+    '300,000~10  20.0%',
+    '350,000~40  10.0%'
   ])
   const heights = columns.map((column) =>
     column.querySelector('[data-chart-mark]')?.getAttribute('style')
