@@ -60,7 +60,7 @@ async function pick(canvas: HTMLElement, label: string, option: string): Promise
   item.click()
 }
 
-// 장비, 조율, 마법부여는 펼쳐 둔 버튼 묶음이라 묶음 안에서 버튼을 누른다.
+// 장비, 조율, 마법부여, 세트, 아바타는 펼쳐 둔 버튼 묶음이라 묶음 안에서 버튼을 누른다.
 async function toggle(canvas: HTMLElement, label: string, name: string): Promise<void> {
   const button = await waitForElement(() =>
     [...canvas.querySelectorAll<HTMLElement>(`:not(aside)[aria-label="${label}"] button`)].find(
@@ -188,12 +188,12 @@ async function changeOathTune({ canvasElement }: { canvasElement: HTMLElement })
 
 async function changeEquipmentSet({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '세트')
-  await pick(canvasElement, '장비 세트', '그림자에 숨은 죽음 세트')
+  await toggle(canvasElement, '장비 세트', '그림자에 숨은 죽음 세트')
 }
 
 async function changeOathSet({ canvasElement }: { canvasElement: HTMLElement }) {
   await chooseOath(canvasElement, '세트')
-  await pick(canvasElement, '서약 세트', '어둠에 잠긴 그림자 서약')
+  await toggle(canvasElement, '서약 세트', '어둠에 잠긴 그림자 서약')
 }
 
 async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -207,9 +207,8 @@ async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement 
 }
 
 async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement }) {
-  await chooseOath(canvasElement, '묵언의 진의')
+  await choose(canvasElement, '묵언의 진의')
   await press(canvasElement, '여섯 번째 진의')
-  await pick(canvasElement, '두 번째 진의 선택지', '서약 포인트')
 }
 
 async function changeSwitching({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -220,7 +219,7 @@ async function changeSwitching({ canvasElement }: { canvasElement: HTMLElement }
 
 async function chooseBestAvatar({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '아바타')
-  await pick(canvasElement, '아바타', '종결 아바타와 엠블렘')
+  await toggle(canvasElement, '아바타', '종결 아바타와 엠블렘')
 }
 
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {

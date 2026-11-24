@@ -29,7 +29,6 @@ import {
   type SimulatorOathCrystal
 } from '#pages/character-simulator/model/simulator-oath'
 import {
-  isOathpointChosen,
   type SimulatorOathUpgrade,
   upgradeOf
 } from '#pages/character-simulator/model/simulator-oath-upgrade'
@@ -48,6 +47,7 @@ import {
   PotencyControl,
   ReinforceControl,
   ReleaseControl,
+  TextChoiceControl,
   TextControl,
   SlotItemControl
 } from './SlotControls'
@@ -66,11 +66,6 @@ export type SlotEditorActions = Readonly<{
     upgrade: SimulatorOathUpgrade,
     step: number,
     unlocked: boolean
-  ) => void
-  onOathUpgradeOathpointChange: (
-    upgrade: SimulatorOathUpgrade,
-    step: number,
-    oathpoint: boolean
   ) => void
   onCrystalChange: (crystal: SimulatorOathCrystal, draft: Partial<CrystalDraft>) => void
 }>
@@ -171,7 +166,7 @@ function EquipmentSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <TextControl
+        <TextChoiceControl
           label="장비 세트"
           value={equipmentSetIdOf(equipmentSet, changes)}
           options={options}
@@ -235,7 +230,7 @@ function EquipmentEditor({
   )
 }
 
-// 선택 칸의 값은 문자열이라 프리셋을 고르지 않은 상태에 따로 id를 둔다.
+// 선택 버튼의 값은 문자열이라 프리셋을 고르지 않은 상태에 따로 id를 둔다.
 const WORN_AVATAR = 'worn'
 const WORN_AVATAR_NAME = avatarPresetNameOf(null)
 const BEST_AVATAR_NAME = avatarPresetNameOf(BEST_AVATAR_PRESET)
@@ -259,7 +254,7 @@ function AvatarEditor({
   return (
     <Fields>
       <Field label="아바타">
-        <TextControl
+        <TextChoiceControl
           label="아바타"
           value={changes.avatarPreset ?? WORN_AVATAR}
           options={AVATAR_OPTIONS}
@@ -336,7 +331,7 @@ function OathSetEditor({
   return (
     <Fields>
       <Field label="세트">
-        <TextControl
+        <TextChoiceControl
           label="서약 세트"
           value={String(oath.setId)}
           options={options}
@@ -430,14 +425,6 @@ function CrystalEditor({
   )
 }
 
-const DAMAGE = 'damage'
-const OATHPOINT = 'oathpoint'
-// 엔진은 서약 포인트가 아닌 선택지를 모두 같은 값으로 계산해, 서약 포인트가 아닌 선택지는 최종 데미지 하나로 보인다.
-const UPGRADE_OPTIONS = [
-  { id: DAMAGE, name: '최종 데미지' },
-  { id: OATHPOINT, name: '서약 포인트' }
-]
-
 function OathUpgradeEditor({
   upgrade,
   changes,
@@ -451,33 +438,18 @@ function OathUpgradeEditor({
 
   return (
     <div className="flex flex-col gap-2 p-4">
-      {upgrade.steps.map(({ step, name, oathpointOption }) => {
+      {upgrade.steps.map(({ step, name }) => {
         const unlocked = step <= level
-        const oathpoint = isOathpointChosen(upgrade, changes.oath.upgrade, step)
 
         function changeUnlock(checked: boolean): void {
           actions.onOathUpgradeUnlockChange(upgrade, step, checked)
         }
 
-        function changeOption(id: string): void {
-          actions.onOathUpgradeOathpointChange(upgrade, step, id === OATHPOINT)
-        }
-
         return (
-          <div key={step} className="grid h-control-sm grid-cols-2 items-center gap-3">
-            <label className="flex min-w-0 cursor-pointer items-center gap-2">
-              <Checkbox aria-label={name} checked={unlocked} onCheckedChange={changeUnlock} />
-              <span className="min-w-0 truncate">{name}</span>
-            </label>
-            {unlocked && oathpointOption !== null && (
-              <TextControl
-                label={`${name} 선택지`}
-                value={oathpoint ? OATHPOINT : DAMAGE}
-                options={UPGRADE_OPTIONS}
-                onChange={changeOption}
-              />
-            )}
-          </div>
+          <label key={step} className="flex h-control-sm min-w-0 cursor-pointer items-center gap-2">
+            <Checkbox aria-label={name} checked={unlocked} onCheckedChange={changeUnlock} />
+            <span className="min-w-0 truncate">{name}</span>
+          </label>
         )
       })}
     </div>

@@ -111,36 +111,7 @@ export function EquipmentList({
                 />
               )
             case 'avatar':
-              return (
-                <TextRow
-                  key={target.key}
-                  label="아바타"
-                  target={target.key}
-                  selected={selected}
-                  onSelect={onSelect}
-                >
-                  {avatarPresetNameOf(changes.avatarPreset)}
-                </TextRow>
-              )
-            case 'switching': {
-              const text = switchingTextOf(
-                target.switching,
-                changes.buffLevel,
-                changes.switchingEquipment
-              )
-
-              return (
-                <TextRow
-                  key={target.key}
-                  label="스위칭"
-                  target={target.key}
-                  selected={selected}
-                  onSelect={onSelect}
-                >
-                  {text}
-                </TextRow>
-              )
-            }
+            case 'switching':
             case 'oathSet':
             case 'oathBody':
             case 'oathUpgrade':
@@ -171,34 +142,11 @@ function EquipmentSetRow({
       <td className={`${SLOT} max-sm:hidden`}>세트</td>
       <td>
         <PickButton selected={selected}>
-          <ItemName name={equipmentSetNameOf(equipmentSet, changes)} rarity={equipmentSet.rarity} />
-        </PickButton>
-      </td>
-      <td />
-      <td className="max-sm:hidden" />
-    </PickRow>
-  )
-}
-
-function TextRow({
-  label,
-  target,
-  selected,
-  onSelect,
-  children
-}: {
-  label: string
-  target: string
-  selected: boolean
-  onSelect: SelectTarget
-  children: React.ReactNode
-}): React.JSX.Element {
-  return (
-    <PickRow target={target} selected={selected} onSelect={onSelect}>
-      <td className={`${SLOT} max-sm:hidden`}>{label}</td>
-      <td>
-        <PickButton selected={selected}>
-          <span className="min-w-0 font-semibold">{children}</span>
+          <ItemName
+            name={equipmentSetNameOf(equipmentSet, changes)}
+            rarity={equipmentSet.rarity}
+            weight="normal"
+          />
         </PickButton>
       </td>
       <td />
@@ -259,7 +207,7 @@ function ItemText({
     <>
       <ItemIcon itemId={item.itemId} src={icon} rarity={item.rarity} />
       <span className="flex min-w-0 flex-wrap items-center gap-2">
-        <ItemName name={item.itemName} rarity={item.rarity} />
+        <ItemName name={item.itemName} rarity={item.rarity} weight="normal" />
         {tune !== null && <span className="label">{tune}</span>}
         {/* 캐릭터 상세 화면처럼 정밀도가 다 찬 100%는 보이지 않는다. */}
         {potency !== null && potency !== FULL_POTENCY && (
@@ -371,19 +319,23 @@ export function OathList({
           switch (target.kind) {
             case 'oathSet':
               return (
-                <OathRow
+                <LabelRow
                   key={target.key}
                   label="세트"
                   target={target.key}
                   selected={selected}
                   onSelect={onSelect}
                 >
-                  <ItemName name={oathSetNameOf(target.oath)} rarity={target.oath.rarity} />
-                </OathRow>
+                  <ItemName
+                    name={oathSetNameOf(target.oath)}
+                    rarity={target.oath.rarity}
+                    weight="normal"
+                  />
+                </LabelRow>
               )
             case 'oathBody':
               return (
-                <OathRow
+                <LabelRow
                   key={target.key}
                   label="서약"
                   target={target.key}
@@ -391,31 +343,14 @@ export function OathList({
                   onSelect={onSelect}
                 >
                   <OathBodyText body={target.body} changes={changes} />
-                </OathRow>
+                </LabelRow>
               )
-            case 'oathUpgrade': {
-              const level = upgradeOf(target.upgrade, changes.oath.upgrade).length
-
-              return (
-                <OathRow
-                  key={target.key}
-                  label={target.upgrade.title}
-                  target={target.key}
-                  selected={selected}
-                  onSelect={onSelect}
-                >
-                  <span className="min-w-0 font-semibold">
-                    {level > 0 ? `${level}단계` : MISSING_VALUE}
-                  </span>
-                </OathRow>
-              )
-            }
             case 'crystal': {
               const { crystal } = target
               const { tune } = crystalDraftOf(crystal, changes.oath)
 
               return (
-                <OathRow
+                <LabelRow
                   key={target.key}
                   label={`결정 ${crystal.slotNo + 1}`}
                   target={target.key}
@@ -423,7 +358,7 @@ export function OathList({
                   onSelect={onSelect}
                 >
                   <ItemText item={crystalItemOf(crystal, changes.oath)} tune={tuneNumeral(tune)} />
-                </OathRow>
+                </LabelRow>
               )
             }
             case 'equipmentSet':
@@ -431,6 +366,7 @@ export function OathList({
             case 'slotItem':
             case 'avatar':
             case 'switching':
+            case 'oathUpgrade':
               return null
           }
         })}
@@ -439,7 +375,84 @@ export function OathList({
   )
 }
 
-function OathRow({
+export function EtcList({
+  targets,
+  changes,
+  selectedKey,
+  onSelect
+}: {
+  targets: readonly SimulatorTarget[]
+  changes: SimulatorChanges
+  selectedKey: string | undefined
+  onSelect: SelectTarget
+}): React.JSX.Element {
+  return (
+    <table className="table table-wrap table-fixed">
+      <tbody>
+        {targets.map((target) => {
+          const selected = target.key === selectedKey
+
+          switch (target.kind) {
+            case 'avatar':
+              return (
+                <LabelRow
+                  key={target.key}
+                  label="아바타"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <span className="min-w-0">{avatarPresetNameOf(changes.avatarPreset)}</span>
+                </LabelRow>
+              )
+            case 'switching':
+              return (
+                <LabelRow
+                  key={target.key}
+                  label="스위칭"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <span className="min-w-0">
+                    {switchingTextOf(
+                      target.switching,
+                      changes.buffLevel,
+                      changes.switchingEquipment
+                    )}
+                  </span>
+                </LabelRow>
+              )
+            case 'oathUpgrade': {
+              const level = upgradeOf(target.upgrade, changes.oath.upgrade).length
+
+              return (
+                <LabelRow
+                  key={target.key}
+                  label={target.upgrade.title}
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  <span className="min-w-0">{level > 0 ? `${level}단계` : MISSING_VALUE}</span>
+                </LabelRow>
+              )
+            }
+            case 'equipmentSet':
+            case 'equipment':
+            case 'slotItem':
+            case 'oathSet':
+            case 'oathBody':
+            case 'crystal':
+              return null
+          }
+        })}
+      </tbody>
+    </table>
+  )
+}
+
+function LabelRow({
   label,
   target,
   selected,

@@ -3,15 +3,19 @@ import type { ItemRarity } from '#entities/character/lib/character-detail-displa
 import { rarityTextClasses } from './game-colors'
 import { itemPartClasses } from './item-part-classes'
 
+const WEIGHT_CLASSES = { semibold: itemPartClasses.name, normal: 'font-normal' } as const
+
 export function ItemName({
   name,
-  rarity
+  rarity,
+  weight = 'semibold'
 }: {
   name: string | null
   rarity: ItemRarity | null
+  weight?: keyof typeof WEIGHT_CLASSES
 }): React.JSX.Element {
   return (
-    <b className={`${itemPartClasses.name} ${rarityTextClasses[rarity ?? 'unknown']}`}>
+    <b className={`${WEIGHT_CLASSES[weight]} ${rarityTextClasses[rarity ?? 'unknown']}`}>
       {name ?? MISSING_VALUE}
     </b>
   )
