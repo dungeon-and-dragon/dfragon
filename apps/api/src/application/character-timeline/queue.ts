@@ -130,9 +130,10 @@ export function createJobQueue<Key, Job extends Key>(
 }
 
 // 상한이 없으면 동기화와 백필 수백 개가 함께 돌아 연결 풀이 차고 동기화가 실패했다(2026-11-24 운영 부하 테스트, ADR 0087).
-// 4와 2로 묶자 실패는 없어졌지만 초당 2~6명만 처리해 대기열이 14,619건까지 쌓였고, 전용 연결 풀을 두며 올린 값이다(ADR 0089).
-export const TIMELINE_SYNC_CONCURRENCY = 10
-export const ENHANCEMENT_BACKFILL_CONCURRENCY = 4
+// 10과 4로 올리면 동기화가 API의 event loop를 차지해 동시 400명에서 p95가 0.6초에서 1.9초로 늘었고, 처리량은 초당 2.3명에서
+// 3.1명으로만 올랐다(ADR 0090).
+export const TIMELINE_SYNC_CONCURRENCY = 4
+export const ENHANCEMENT_BACKFILL_CONCURRENCY = 2
 
 export function createTimelineSyncQueue(
   sync: (character: TimelineCharacter) => Promise<void>,
