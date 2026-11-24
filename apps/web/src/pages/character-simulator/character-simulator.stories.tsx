@@ -196,8 +196,8 @@ async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement 
 
 async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement }) {
   await chooseOath(canvasElement, '묵언의 진의')
-  await pick(canvasElement, '여섯 번째 진의', '-')
-  await pick(canvasElement, '첫 번째 진의', '최종 데미지')
+  await press(canvasElement, '여섯 번째 진의')
+  await pick(canvasElement, '두 번째 진의 선택지', '서약 포인트')
 }
 
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
