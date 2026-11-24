@@ -147,7 +147,8 @@ export class EquipmentSimulationService {
       oathUpgrade: oathEdit.upgrade !== null,
       buffLevel: buffLevel !== null,
       switchingEquipment: switchingEquipment !== null,
-      avatar: editsAvatar
+      avatar: editsAvatar,
+      oathWithoutSetInfo: editsOath && oathEdit.setInfoMissing
     }
 
     if (
