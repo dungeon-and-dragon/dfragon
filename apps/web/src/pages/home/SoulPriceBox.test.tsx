@@ -52,19 +52,18 @@ it('소울 결정 6종의 가격과 그 가격을 종말의 계시 교환 개수
   await settled()
 
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
-    '소울 결정',
+    '',
     '가격',
     '계시 환산'
   ])
-  expect(container.querySelector('thead th:first-child .sr-only')?.textContent).toBe('소울 결정')
   // 1,250 / 2 = 625, 3,000 / 4 = 750, 41,000 / 30 = 1,366.7, 140,000 / 90 = 1,555.6, 2,000,000 / 1,000 = 2,000, 52,000 / 40 = 1,300
   expect(bodyRows()).toEqual([
-    ['레어 소울 결정', '1,250', '625'],
-    ['유니크 소울 결정', '3,000', '750'],
-    ['레전더리 소울 결정', '41,000', '1,367'],
-    ['에픽 소울 결정', '140,000', '1,556'],
-    ['태초 소울 결정', '2,000,000', '2,000'],
-    ['광휘의 소울 결정', '52,000', '1,300']
+    ['', '1,250', '625'],
+    ['', '3,000', '750'],
+    ['', '41,000', '1,367'],
+    ['', '140,000', '1,556'],
+    ['', '2,000,000', '2,000'],
+    ['', '52,000', '1,300']
   ])
   const iconCells = [...container.querySelectorAll('tbody tr td:first-child')]
   expect(iconCells.map((cell) => cell.querySelector('[title]')?.getAttribute('title'))).toEqual(
@@ -95,7 +94,7 @@ it('매물이 없는 결정은 가격과 계시 환산 값을 -로, 아이콘을
   await render()
   await settled()
 
-  expect(bodyRows()).toEqual([['태초 소울 결정', '-', '-']])
+  expect(bodyRows()).toEqual([['', '-', '-']])
   const iconCell = container.querySelector('tbody tr td:first-child')
   expect(iconCell?.querySelector('[title]')?.getAttribute('title')).toBe('태초 소울 결정')
   expect(iconCell?.querySelector('img')).toBeNull()

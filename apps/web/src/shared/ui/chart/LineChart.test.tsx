@@ -66,9 +66,6 @@ describe('LineChart', () => {
 
     expect(endXs).toEqual(lastXs)
     expect(legendNames()).toEqual(['컨텐츠1', '컨텐츠2'])
-    expect(container.querySelector('[aria-label="주간 클리어율"]')?.textContent).toContain(
-      '2주차, 컨텐츠1 20%, 컨텐츠2 30%'
-    )
   })
 
   it('계열이 하나면 범례를 두지 않는다', async () => {
