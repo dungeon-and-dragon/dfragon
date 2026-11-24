@@ -300,6 +300,12 @@ if (oathUpgradeSteps.length !== engine.oathUpgrades.maxLevel) {
   throw new Error('묵언의 진의 단계 수가 최대 단계와 다름')
 }
 
+if (engine.switching === undefined) {
+  throw new Error('엔진 파일에 스위칭 구획이 없음')
+}
+
+const { maxEquipment, uniqueEquipmentPrefixes } = engine.switching
+
 const table = {
   version: 1,
   sets,
@@ -310,7 +316,8 @@ const table = {
   weaponMaxTuneLevels,
   weapons,
   oathUpgradeMaxStep: engine.oathUpgrades.maxLevel,
-  oathUpgradeSteps
+  oathUpgradeSteps,
+  switching: { maxEquipment, uniqueEquipmentPrefixes }
 }
 
 writeFileSync(

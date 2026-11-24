@@ -137,6 +137,8 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     onAvatarPresetChange: (preset) => dispatch({ type: 'avatarPreset', preset }),
     onBuffLevelChange: (buffSwitching, level) =>
       dispatch({ type: 'buffLevel', switching: buffSwitching, level }),
+    onSwitchingEquipmentChange: (buffSwitching, count) =>
+      dispatch({ type: 'switchingEquipment', switching: buffSwitching, count }),
     onOathSetChange: (setId) => {
       if (wornOath !== null) {
         dispatch({ type: 'oathSet', oath: wornOath, setId })

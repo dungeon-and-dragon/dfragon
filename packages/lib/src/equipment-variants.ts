@@ -161,6 +161,11 @@ interface OathVariantSet extends OathSet {
 
 type ExaltedSlot = 'RING' | 'SUPPORT' | 'MAGIC_STON' | 'EARRING'
 
+interface SwitchingEquipmentTable {
+  readonly maxEquipment: number
+  readonly uniqueEquipmentPrefixes: readonly string[]
+}
+
 interface EquipmentVariantTable {
   readonly version: 1
   readonly sets: readonly EquipmentVariantSet[]
@@ -172,6 +177,7 @@ interface EquipmentVariantTable {
   readonly weapons: readonly WeaponVariantType[]
   readonly oathUpgradeMaxStep: number
   readonly oathUpgradeSteps: readonly OathUpgradeStep[]
+  readonly switching: SwitchingEquipmentTable
 }
 
 // 생성 스크립트가 만든 파일을 그대로 두므로 모양은 테스트가 확인한다.
@@ -183,6 +189,11 @@ export const PRIMEVAL_OATH_CRYSTAL_LIMIT = 3
 export const OATH_UPGRADE_MAX_STEP: number = variantTable.oathUpgradeMaxStep
 
 export const WEAPON_RELEASE_MAX = 100
+
+export const SWITCHING_EQUIPMENT_MAX: number = variantTable.switching.maxEquipment
+
+export const UNIQUE_SWITCHING_EQUIPMENT_PREFIXES: readonly string[] =
+  variantTable.switching.uniqueEquipmentPrefixes
 
 const ARMOR_SLOTS = ['JACKET', 'SHOULDER', 'PANTS', 'SHOES', 'WAIST'] as const
 const RARITY_ORDER = ['유니크', '레전더리', '에픽', '태초']
