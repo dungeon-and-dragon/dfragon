@@ -59,7 +59,7 @@ const counts = [
   count('michaela-hard', '2026-10-29', null, 7),
   count('diregie-hard', '2026-02-05', null, 4),
   count('diregie-hard', '2026-02-12', null, 6),
-  // 챌린지는 모집단을 저장하지 않은 출시 전 구간에도 기록이 있을 수 있다.
+  // 챌린지는 분모를 저장하지 않은 출시 전 구간에도 기록이 있을 수 있다.
   count('engraved-nightmare-1', '2026-10-29', null, 1),
   count('engraved-nightmare-1', '2026-11-05', null, 5),
   count('engraved-nightmare-1', '2026-11-12', null, 100)
@@ -355,7 +355,7 @@ test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산
   }
 })
 
-test('컨텐츠 상세의 직업별 클리어 수는 모집단에 없는 전직도 넣어 합이 그 주 클리어 수와 같다', async () => {
+test('컨텐츠 상세의 직업별 클리어 수는 분모에 없는 전직도 넣어 합이 그 주 클리어 수와 같다', async () => {
   const noFame = { contentId: 'michaela-hard', characters: 0, quantiles: null, max: null }
   const jobFames: ClearJobFameSample[] = [
     { ...noFame, ...job, jobGrowName: '합성전직', cleared: 12 },
@@ -1148,7 +1148,7 @@ test('주차별 첫 클리어와 다시 클리어의 합은 그 주 클리어 �
   }
 })
 
-test('명성 구간은 그 주 모집단의 분모 기준 명성으로 읽고, 요일과 시간대는 그 컨텐츠와 그 주로 골라 읽는다', async () => {
+test('명성 구간은 그 주 분모의 기준 명성으로 읽고, 요일과 시간대는 그 컨텐츠와 그 주로 골라 읽는다', async () => {
   const bandSelections: [ClearWeekSelection, number][] = []
   const timeSelections: ClearWeekSelection[] = []
   const fameBands = [
@@ -1206,7 +1206,7 @@ test('분모 기준 명성이 저장되지 않은 주의 명성 구간은 지금
   }
 })
 
-test('목록은 레기온을 contents와 따로 주고, 레기온 모집단이 없으면 그 레기온의 weeks가 빈 배열이다', async () => {
+test('목록은 레기온을 contents와 따로 주고, 레기온 분모가 없으면 그 레기온의 weeks가 빈 배열이다', async () => {
   const { app, origin } = await listen(fakeReader())
   try {
     const { body } = await getJson(origin, '/stats/clears')
@@ -1230,7 +1230,7 @@ test('목록은 레기온을 contents와 따로 주고, 레기온 모집단이 �
   }
 })
 
-test('레기온 주는 저장한 레기온 모집단마다 두고 클리어 수는 그 주에 깬 캐릭터 수다', async () => {
+test('레기온 주는 저장한 레기온 분모마다 두고 클리어 수는 그 주에 깬 캐릭터 수다', async () => {
   const { app, origin } = await listen(
     fakeReader({
       readPopulations: async () => [

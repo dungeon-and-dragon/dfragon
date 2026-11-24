@@ -175,7 +175,7 @@ const recordKey = (record: ClearRecordInput) =>
 const compareCharacters = (left: TimelineCharacter, right: TimelineCharacter) =>
   left.serverId.localeCompare(right.serverId) || left.characterId.localeCompare(right.characterId)
 
-// 저장 함수의 규칙(수집 대상은 서버, 캐릭터 순, 레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 모집단은 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
+// 저장 함수의 규칙(수집 대상은 서버, 캐릭터 순, 레이드는 주마다, 챌린지는 캐릭터당 가장 이른 클리어 한 행, 마감한 주의 분모는 바꾸지 않음)을 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다.
 function memoryClearStore(
   population: ClearPopulationCharacter[],
   seeded: StoredClearPopulation[] = [],
@@ -342,7 +342,7 @@ const populationsOf = (state: ReturnType<typeof memoryClearStore>['state'], week
 const everyContent = (population: number, closed: boolean) =>
   CLEAR_CONTENTS.map(({ id }) => `${id}/${population}/${closed}`).sort()
 
-test('한 번 돌면 모집단 캐릭터마다 code 201, 209, 210, 504로 끝난 지난주를 한 번씩 요청하고 집계 대상 기록만 클리어 집계에 저장한다', async () => {
+test('한 번 돌면 수집 대상 캐릭터마다 code 201, 209, 210, 504로 끝난 지난주를 한 번씩 요청하고 집계 대상 기록만 클리어 집계에 저장한다', async () => {
   const { state, store } = memoryClearStore(
     [character('a', 130_000), character('b', 125_000), character('c', 121_000)],
     closedPastWeeks()
@@ -730,7 +730,7 @@ test('주 중간 수집은 진행 중인 주를 받지 않고, 목요일 06:00 �
   ])
 })
 
-test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 그 사이 모든 주를 받아 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 다 마감한 뒤 수집은 요청하지 않고, 마감한 모집단을 빈 주 없이 남긴다', async () => {
+test('출시 첫 주와 마감하지 않은 지난주만 저장한 레이드는 그 사이 모든 주를 받아 마감하고, 마감한 출시 첫 주는 바꾸지 않으며, 다 마감한 뒤 수집은 요청하지 않고, 마감한 분모를 빈 주 없이 남긴다', async () => {
   const seeded = [
     ...raidFirstWeeks(),
     ...raidFirstWeeks().map(({ contentId }) => storedPopulation(contentId, LAST_WEEK, false))
@@ -1430,7 +1430,7 @@ test('수집은 레이드의 모든 단계와 공격대 이름, 모든 레기온
   assert.equal(summary.clears, 4)
 })
 
-// 지난 기록 받기의 진행 위치만 따로 두고, 모집단과 기록은 클리어 수집 fake의 상태를 함께 쓴다.
+// 지난 기록 받기의 진행 위치만 따로 두고, 분모와 기록은 클리어 수집 fake의 상태를 함께 쓴다.
 function memoryBackfillStore(
   memory: ReturnType<typeof memoryClearStore>,
   initialCursors: readonly ClearRecordCursor[] = []

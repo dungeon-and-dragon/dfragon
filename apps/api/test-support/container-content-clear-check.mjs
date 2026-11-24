@@ -38,7 +38,7 @@ import {
 } from '@dfragon/database'
 import { ClearStatsService } from './dist/application/content-clears/service.js'
 
-// 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 모집단의 맨 앞에 온다.
+// 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 수집 대상의 맨 앞에 온다.
 const at = (time) => new Date(`${time}+09:00`)
 const basic = (
   serverId,
@@ -419,7 +419,7 @@ try {
   assert.equal((await service.contentStats('diregie-hard', '2026-02-05')).week.cleared, 1)
   await assert.rejects(service.contentStats('diregie-hard', '2026-02-19'), { kind: 'query' })
 
-  // 마감하지 않은 주는 보이지 않는다. 마감한 모집단을 저장한 뒤의 요청은 새 결과를 미리 계산하는 동안 이전 값을 받고, 계산이 끝나면 새 값을 받는다.
+  // 마감하지 않은 주는 보이지 않는다. 마감한 분모를 저장한 뒤의 요청은 새 결과를 미리 계산하는 동안 이전 값을 받고, 계산이 끝나면 새 값을 받는다.
   await recordContentClears(client, [
     clear(
       'engraved-nightmare-1',
@@ -481,7 +481,7 @@ try {
     )
   ])
   await recordContentClearPopulation(client, population(500, true, 'michaela-normal'))
-  // 위 service는 모집단의 마지막 수집 시각이 그대로라 캐시를 주므로 새 service로 읽는다.
+  // 위 service는 분모의 마지막 수집 시각이 그대로라 캐시를 주므로 새 service로 읽는다.
   const overviewService = new ClearStatsService(reader, reportRefreshFailure)
   const overview = await overviewService.overview('2026-11-05')
   const overviewContent = (id) => overview.contents.find((content) => content.id === id)
@@ -609,7 +609,7 @@ try {
     detail.hours.reduce((total, { cleared }) => total + cleared, 0),
     detail.week.cleared
   )
-  // 앞 단계가 넣은 캐릭터도 모집단에 들어 구간별 캐릭터 수는 합성 캐릭터만으로 정하지 않는다.
+  // 앞 단계가 넣은 캐릭터도 수집 대상에 들어 구간별 캐릭터 수는 합성 캐릭터만으로 정하지 않는다.
   const bandOf = (fame) => detail.fameBands.find((band) => band.fame === fame)
   assert.deepEqual(bandOf(0), { fame: 0, population: 0, cleared: 3 })
   assert.equal(bandOf(124000).cleared, 2)
