@@ -1,15 +1,8 @@
 import type { TimelineCharacter } from '@dfragon/database'
-import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
+import type { FetchCharacterTimeline } from './ports.js'
 import type { EnhancementBackfillRepository } from './repository.js'
-import {
-  ENHANCEMENT_CODES,
-  NEOPLE_TIMELINE_START,
-  splitTimelineRanges
-} from '@dfragon/server-core/domain/character-timeline/index.js'
+import { NEOPLE_TIMELINE_START, splitTimelineRanges } from '#domain/character-timeline/index.js'
 import { TIMELINE_COLLECTION_START } from './sync.js'
-
-// 정기 동기화가 받지 않는 중천 전의 캐릭터명 변경(102), 모험단명 변경(105)도 같은 요청으로 받는다.
-export const ENHANCEMENT_BACKFILL_CODES = [102, 105, ...ENHANCEMENT_CODES]
 
 const MINUTE_MS = 60_000
 // 중천 시작부터는 정기 동기화가 모든 코드를 받으므로 그 직전 분까지만 받는다.

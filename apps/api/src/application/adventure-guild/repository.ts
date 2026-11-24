@@ -8,7 +8,7 @@ import type {
   AdventureWeeklyClears,
   StoredActivitySeason
 } from '#domain/adventure-guild/index.js'
-import type { SeasonBackfillJob } from '#domain/character-timeline/index.js'
+import type { SeasonBackfillJob } from '@dfragon/server-core/domain/character-timeline/index.js'
 
 export type AdventureActivityRead = {
   characters: TimelineCharacter[]
