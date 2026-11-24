@@ -76,20 +76,26 @@ const json = (body: unknown): RequestInit => ({
   body: JSON.stringify(body)
 })
 
-test('운영 queue 경로는 저장된 queue 수를 읽어 주고, 저장된 행이 없으면 빈 목록을 준다', async (t) => {
-  const stored = [{ name: 'season-backfill', waiting: 3, running: 1 }]
-  let rows: typeof stored = []
+test('운영 queue 경로는 요청 종류 sync를 timeline-sync로 바꾸고 종류별 대기, 처리 중 수를 그대로 준다', async (t) => {
   const request = await startOpsApp(t, {
-    readQueueCounts: async () => rows,
+    readQueueCounts: async () => [
+      { kind: 'sync', waiting: 5, running: 2 },
+      { kind: 'enhancement-backfill', waiting: 0, running: 0 },
+      { kind: 'season-backfill', waiting: 3, running: 1 }
+    ],
     collection: unusedCollection
   })
 
-  const empty = await request('/api/queues')
-  rows = stored
-  const written = await request('/api/queues')
+  const response = await request('/api/queues')
 
-  assert.deepEqual([empty.status, await empty.json()], [200, { queues: [] }])
-  assert.deepEqual([written.status, await written.json()], [200, { queues: stored }])
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), {
+    queues: [
+      { name: 'timeline-sync', waiting: 5, running: 2 },
+      { name: 'enhancement-backfill', waiting: 0, running: 0 },
+      { name: 'season-backfill', waiting: 3, running: 1 }
+    ]
+  })
 })
 
 test('수집 대기열 현황 경로는 대기 수, 가장 오래된 대기 시각, 실패 종류별 건수와 마지막 시도 시각을 JSON으로 준다', async (t) => {
