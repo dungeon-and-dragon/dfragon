@@ -10,7 +10,7 @@ import {
   createNeopleFameSearch,
   createNeopleCharacterBasic,
   createNeopleLatestActivity,
-  paceNeopleRequests
+  pacePrioritizedNeopleRequests
 } from '#infrastructure/neople/index.js'
 import {
   createNeopleItemDetails,
@@ -28,6 +28,7 @@ import { importCollectedCharacters, readImportModifiedTime } from '#infrastructu
 import { JobSchedulerService } from '#application/jobs/index.js'
 import { startJobScheduler } from '#infrastructure/jobs/index.js'
 import { createScoreEngineOpener, createScoreSources } from './score-calculation.js'
+import { createTimelineSyncRequests } from './timeline-sync.js'
 import { createWorkerJobs } from './worker-jobs.js'
 import { startWorkerEventRecorder } from './worker-events.js'
 
@@ -46,7 +47,7 @@ function writeReport(code: string, details?: Readonly<Record<string, unknown>>):
   )
 }
 
-// SIGTERM은 Node 기본 동작으로 끝낸다. 저장 전에 끝난 캐릭터는 대기열에 남아 다음 시작 때 다시 부른다.
+// SIGTERM은 Node 기본 동작으로 끝낸다. 저장 전에 끝난 캐릭터와 타임라인 동기화 요청은 대기열에 남아 다음 시작 때 다시 부른다.
 export async function startCharacterCollector(
   configuration: ReturnType<typeof readCollectorConfiguration>
 ): Promise<never> {
@@ -67,7 +68,14 @@ export async function startCharacterCollector(
   const keyRequestsPerSecond = Math.min(KEY_REQUESTS_PER_SECOND, configuration.requestsPerSecond)
   const keyPool = createBatchNeopleKeyPool({
     store: keyRepository,
-    createNeople: (key) => paceNeopleRequests(createNeopleClient(key), keyRequestsPerSecond),
+    createNeople: (key) => {
+      const keyClient = createNeopleClient(key)
+
+      return pacePrioritizedNeopleRequests(
+        { neople: keyClient, priorityNeople: keyClient },
+        keyRequestsPerSecond
+      )
+    },
     concurrencyPerKey: configuration.concurrency,
     report
   })
@@ -85,7 +93,10 @@ export async function startCharacterCollector(
   }, BATCH_KEY_REFRESH_MS)
 
   const { readConcurrency } = keyPool
-  const neople = paceNeopleRequests(keyPool.neople, configuration.requestsPerSecond)
+  const { neople, priorityNeople } = pacePrioritizedNeopleRequests(
+    keyPool,
+    configuration.requestsPerSecond
+  )
   const fetchBasic = createNeopleCharacterBasic(neople)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
   const jobs = createWorkerJobs(client, {
@@ -124,5 +135,12 @@ export async function startCharacterCollector(
     pause: setTimeout
   })
 
-  return collection.run()
+  const timelineSyncRequests = createTimelineSyncRequests(
+    configuration.database,
+    client,
+    priorityNeople,
+    report
+  )
+
+  return Promise.race([collection.run(), timelineSyncRequests.run()])
 }

@@ -4,7 +4,9 @@ import { z } from 'zod'
 import {
   ACQUISITION_CODES,
   type TimelineClear,
-  type TimelineEnhancement
+  type TimelineEnhancement,
+  toSeasonBackfillRange,
+  toSeasonTimelineStart
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import {
   EQUIPMENT_ACQUISITION_CODES,
@@ -12,9 +14,7 @@ import {
 } from '@dfragon/server-core/domain/item-dictionary/index.js'
 import {
   type SeasonBackfillProgress,
-  isSeasonBackfilled,
-  toSeasonBackfillRange,
-  toSeasonTimelineStart
+  isSeasonBackfilled
 } from '#domain/character-timeline/index.js'
 import {
   formatResetDate,
