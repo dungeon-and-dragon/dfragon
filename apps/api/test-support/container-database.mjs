@@ -926,6 +926,14 @@ try {
     "INSERT INTO jobs (name, display_name, args_schema, delay_minutes, paused_at, worker_seen_at) VALUES ('content-clear-collection', 'probe', '{}', 0, now(), now()), ('character-fame-refresh', 'probe', '{}', 0, now(), now()), ('inactive-character-recheck', 'probe', '{}', 0, now(), now()), ('item-dictionary-fill', 'probe', '{}', 0, now(), now()), ('skill-style-collection', 'probe', '{}', 0, now(), now())"
   )
 
+  // 1시간 안에 동기화에 성공한 캐릭터라 Neople을 부르지 않고 끝나는 요청이다. 끝난 worker가 집어 둔 채 남긴 행으로 넣는다.
+  await psql(
+    [
+      "INSERT INTO timeline_sync_state (server_id, character_id, last_succeeded_at) VALUES ('cain', 'timeline-request-recent', now())",
+      "INSERT INTO timeline_sync_requests (kind, server_id, character_id, started_at) VALUES ('sync', 'cain', 'timeline-request-recent', now())"
+    ].join('; ')
+  )
+
   stage = 'character collector waits on the empty queue and stops'
   // 대기열이 비어 있어 Neople을 부르지 않는다.
   const collectorOptions = [...workerOptions, '--network', networkName]
@@ -1038,6 +1046,40 @@ try {
     ).stdout.trim(),
     'failed:INVALID_JOB_ARGS:-,succeeded:-:{"deleted": 0, "deletedEvents": 0}'
   )
+
+  stage = 'character collector processes timeline sync requests'
+  const timelineRequestCount = async (characterId, condition = 'true') =>
+    (
+      await psql(
+        `SELECT count(*) FROM timeline_sync_requests WHERE character_id = '${characterId}' AND ${condition}`
+      )
+    ).stdout.trim()
+
+  await waitFor(async () => (await timelineRequestCount('timeline-request-recent')) === '0')
+  await psql(
+    "INSERT INTO timeline_sync_requests (kind, server_id, character_id) VALUES ('sync', 'cain', 'timeline-request-recent')"
+  )
+  await waitFor(async () => (await timelineRequestCount('timeline-request-recent')) === '0')
+  // 처음 보는 캐릭터라 Neople을 불러야 하는데 batch key가 없어, 실패를 동기화 상태에 남기고 요청 행은 되돌려 남긴다.
+  await psql(
+    "INSERT INTO timeline_sync_requests (kind, server_id, character_id) VALUES ('sync', 'cain', 'timeline-request-no-key')"
+  )
+  await waitFor(
+    async () =>
+      (
+        await psql(
+          "SELECT count(*) FROM timeline_sync_state WHERE character_id = 'timeline-request-no-key' AND last_failure = 'neople-unavailable'"
+        )
+      ).stdout.trim() === '1'
+  )
+  await waitFor(
+    async () =>
+      (await timelineRequestCount('timeline-request-no-key', 'started_at IS NULL')) === '1'
+  )
+  await psql(
+    "DELETE FROM timeline_sync_requests; DELETE FROM timeline_sync_state WHERE character_id IN ('timeline-request-recent', 'timeline-request-no-key')"
+  )
+
   assert.equal(
     (await podman(['inspect', '--format', '{{.State.Running}}', collectorName])).stdout.trim(),
     'true'
@@ -1260,6 +1302,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline sync request table and requests, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline sync request table and requests, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, timeline sync requests, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
