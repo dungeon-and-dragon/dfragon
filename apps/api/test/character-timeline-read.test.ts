@@ -262,8 +262,8 @@ test('끝을 기다리는 요청은 먼저 들어와 기다리던 다른 캐릭�
     () => assert.fail('동기화 실패가 보고되면 안 된다')
   )
 
-  // 함께 처리하는 10명을 채워 뒤의 요청이 기다리게 한다.
-  for (let index = 0; index < 10; index++) {
+  // 함께 처리하는 4명을 채워 뒤의 요청이 기다리게 한다.
+  for (let index = 0; index < 4; index++) {
     queue.request({ serverId: 'siroco', characterId: `running-${index}` })
   }
 
@@ -273,13 +273,13 @@ test('끝을 기다리는 요청은 먼저 들어와 기다리던 다른 캐릭�
   const promoted = settled(queue.requestAndWait({ serverId: 'siroco', characterId: 'queued-2' }))
   await nextTurn()
 
-  assert.equal(synced.length, 10)
-  assert.deepEqual(queue.counts(), { waiting: 3, running: 10 })
+  assert.equal(synced.length, 4)
+  assert.deepEqual(queue.counts(), { waiting: 3, running: 4 })
 
   running.release()
   await nextTurn()
 
-  assert.deepEqual(synced.slice(10), [character.characterId, 'queued-2', 'queued-1'])
+  assert.deepEqual(synced.slice(4), [character.characterId, 'queued-2', 'queued-1'])
   assert.equal(waited(), true)
   assert.equal(promoted(), true)
 })
@@ -311,7 +311,7 @@ test('queue를 닫으면 끝을 기다리며 대기하던 요청은 동기화 �
     () => assert.fail('동기화 실패가 보고되면 안 된다')
   )
 
-  for (let index = 0; index < 10; index++) {
+  for (let index = 0; index < 4; index++) {
     queue.request({ serverId: 'siroco', characterId: `running-${index}` })
   }
 
@@ -324,7 +324,7 @@ test('queue를 닫으면 끝을 기다리며 대기하던 요청은 동기화 �
   await nextTurn()
 
   assert.equal(waited(), true)
-  assert.deepEqual(queue.counts(), { waiting: 0, running: 10 })
+  assert.deepEqual(queue.counts(), { waiting: 0, running: 4 })
 
   running.release()
   await nextTurn()
