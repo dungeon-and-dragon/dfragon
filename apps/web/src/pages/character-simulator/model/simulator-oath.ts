@@ -56,9 +56,13 @@ export type SimulatorOathCrystal = ItemView &
     wornMaxTune: number
   }>
 
-/** setId가 null이면 선택 목록에 없는 서약 세트라 세트를 고르지 않는다. */
+/**
+ * setId가 null이면 선택 목록에 없는 서약 세트라 세트를 고르지 않는다. rarity는 상세 응답이 준 서약 세트의 등급이라
+ * 다른 세트를 골라도 바꾸지 않는다.
+ */
 export type SimulatorOath = Readonly<{
   setId: number | null
+  rarity: ItemView['rarity']
   sets: readonly OathSet[]
   body: SimulatorOathBody | null
   upgrade: SimulatorOathUpgrade | null
@@ -157,6 +161,7 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
   }
 
   const setId = listedSetId(oath.setInfo?.setId)
+  const rarity = itemRarityOfGrade(oath.setInfo?.setRarityName ?? null)
   const crystals = oath.crystal
     .flatMap((crystal) => toOathCrystal(crystal, setId))
     .toSorted((a, b) => a.slotNo - b.slotNo)
@@ -164,7 +169,7 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
   const body = toOathBody(oath.info)
   const upgrade = toSimulatorOathUpgrade(detail)
 
-  return { setId, sets, body, upgrade, crystals }
+  return { setId, rarity, sets, body, upgrade, crystals }
 }
 
 function choiceOf(choices: readonly OathChoice[], id: string | null): OathChoice | undefined {

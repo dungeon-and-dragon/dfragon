@@ -164,18 +164,16 @@ function EquipmentSetRow({
   onSelect: SelectTarget
 }): React.JSX.Element {
   return (
-    <tr aria-selected={selected}>
+    <PickRow target={target} selected={selected} onSelect={onSelect}>
       <td className={`${SLOT} max-sm:hidden`}>세트</td>
       <td>
-        <PickButton target={target} selected={selected} onSelect={onSelect}>
-          <span className="min-w-0 font-semibold">
-            {equipmentSetNameOf(equipmentSet, changes) ?? MISSING_VALUE}
-          </span>
+        <PickButton selected={selected}>
+          <ItemName name={equipmentSetNameOf(equipmentSet, changes)} rarity={equipmentSet.rarity} />
         </PickButton>
       </td>
       <td />
       <td className="max-sm:hidden" />
-    </tr>
+    </PickRow>
   )
 }
 
@@ -193,20 +191,21 @@ function TextRow({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <tr aria-selected={selected}>
+    <PickRow target={target} selected={selected} onSelect={onSelect}>
       <td className={`${SLOT} max-sm:hidden`}>{label}</td>
       <td>
-        <PickButton target={target} selected={selected} onSelect={onSelect}>
+        <PickButton selected={selected}>
           <span className="min-w-0 font-semibold">{children}</span>
         </PickButton>
       </td>
       <td />
       <td className="max-sm:hidden" />
-    </tr>
+    </PickRow>
   )
 }
 
-function PickButton({
+// 줄 어디를 눌러도 고르도록 click은 줄이 받는다. 버튼은 키보드와 보조 기술이 누르는 곳이고, 그 click도 줄로 올라간다.
+function PickRow({
   target,
   selected,
   onSelect,
@@ -222,7 +221,21 @@ function PickButton({
   }
 
   return (
-    <button type="button" aria-pressed={selected} className={PICK} onClick={select}>
+    <tr aria-selected={selected} className="cursor-pointer" onClick={select}>
+      {children}
+    </tr>
+  )
+}
+
+function PickButton({
+  selected,
+  children
+}: {
+  selected: boolean
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <button type="button" aria-pressed={selected} className={PICK}>
       {children}
     </button>
   )
@@ -274,10 +287,10 @@ function EquipmentRow({
   const enhancement = draft.amplified ? 'amplify' : 'enhance'
 
   return (
-    <tr aria-selected={selected}>
+    <PickRow target={target} selected={selected} onSelect={onSelect}>
       <td className={`${SLOT} max-sm:hidden`}>{slot.slotName ?? slot.slotId}</td>
       <td>
-        <PickButton target={target} selected={selected} onSelect={onSelect}>
+        <PickButton selected={selected}>
           <ItemText
             item={shown}
             tune={tuneNumeral(draft.tune)}
@@ -297,7 +310,7 @@ function EquipmentRow({
       <td className="text-xs max-sm:hidden">
         <EnchantText options={enchantLabelsOf(slot, draft.enchantId)} />
       </td>
-    </tr>
+    </PickRow>
   )
 }
 
@@ -322,16 +335,16 @@ function SlotItemRow({
       : slotItem
 
   return (
-    <tr aria-selected={selected}>
+    <PickRow target={target} selected={selected} onSelect={onSelect}>
       <td className={`${SLOT} max-sm:hidden`}>{slotItem.slotName}</td>
       <td>
-        <PickButton target={target} selected={selected} onSelect={onSelect}>
+        <PickButton selected={selected}>
           <ItemText item={item} />
         </PickButton>
       </td>
       <td />
       <td className="max-sm:hidden" />
-    </tr>
+    </PickRow>
   )
 }
 
@@ -362,9 +375,7 @@ export function OathList({
                   selected={selected}
                   onSelect={onSelect}
                 >
-                  <span className="min-w-0 font-semibold">
-                    {oathSetNameOf(target.oath) ?? MISSING_VALUE}
-                  </span>
+                  <ItemName name={oathSetNameOf(target.oath)} rarity={target.oath.rarity} />
                 </OathRow>
               )
             case 'oathBody':
@@ -439,15 +450,13 @@ function OathRow({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <tr aria-selected={selected}>
+    <PickRow target={target} selected={selected} onSelect={onSelect}>
       {/* "묵언의 진의"처럼 칸보다 긴 줄 이름은 말줄임하지 않고 두 줄로 둔다. */}
       <td className="w-[80px] text-xs text-fg-subtle max-sm:hidden">{label}</td>
       <td>
-        <PickButton target={target} selected={selected} onSelect={onSelect}>
-          {children}
-        </PickButton>
+        <PickButton selected={selected}>{children}</PickButton>
       </td>
-    </tr>
+    </PickRow>
   )
 }
 

@@ -937,7 +937,7 @@ it('스위칭 레벨은 고른 레벨만 요청에 싣고, 지금 레벨로 돌�
   )
 })
 
-it('아바타는 끝 스펙을 고르면 프리셋을 요청에 싣고, 지금 그대로로 돌아오면 바꾼 것이 없다', () => {
+it('아바타는 종결 아바타와 엠블렘을 고르면 프리셋을 요청에 싣고, 현재 착용 아바타로 돌아오면 바꾼 것이 없다', () => {
   const changed = apply(NO_CHANGES, { type: 'avatarPreset', preset: 'best' })
 
   expect(simulationBody([], null, changed)).toEqual({ equipment: [], avatarPreset: 'best' })

@@ -60,6 +60,17 @@ async function pick(canvas: HTMLElement, label: string, option: string): Promise
   item.click()
 }
 
+// 장비, 조율, 마법부여는 펼쳐 둔 버튼 묶음이라 묶음 안에서 버튼을 누른다.
+async function toggle(canvas: HTMLElement, label: string, name: string): Promise<void> {
+  const button = await waitForElement(() =>
+    [...canvas.querySelectorAll<HTMLElement>(`:not(aside)[aria-label="${label}"] button`)].find(
+      (candidate) => candidate.textContent?.startsWith(name)
+    )
+  )
+  button.click()
+  await pause(STEP_SETTLE_MS)
+}
+
 async function press(canvas: HTMLElement, label: string, times = 1): Promise<void> {
   const control = await waitForElement(
     () => canvas.querySelector<HTMLElement>(`:not(aside)[aria-label="${label}"]`) ?? undefined
@@ -125,16 +136,16 @@ async function changeDealerEquipment({ canvasElement }: { canvasElement: HTMLEle
   await press(canvasElement, '상의 증폭')
   await press(canvasElement, '상의 수치 올리기', 10)
   await choose(canvasElement, '목걸이')
-  await pick(canvasElement, '목걸이 마법부여', '최종 데미지 증가 +2%')
+  await toggle(canvasElement, '목걸이 마법부여', '최종 데미지 증가 +2%')
 }
 
 async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '칭호')
-  await pick(canvasElement, '칭호 교체', '진정한 각성을 이룬 자')
+  await toggle(canvasElement, '칭호 교체', '진정한 각성을 이룬 자')
   await choose(canvasElement, '크리쳐')
-  await pick(canvasElement, '크리쳐 교체', 'SD 흰 구름 전령 에를리히')
+  await toggle(canvasElement, '크리쳐 교체', 'SD 흰 구름 전령 에를리히')
   await choose(canvasElement, '오라')
-  await pick(canvasElement, '오라 교체', '열대야의 추억')
+  await toggle(canvasElement, '오라 교체', '열대야의 추억')
 }
 
 // 딜러 story 캐릭터가 낀 세트다.
@@ -152,27 +163,27 @@ function variantName(slotId: 'JACKET' | 'EARRING', kind: string): string {
 
 async function changeVariant({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '상의')
-  await pick(canvasElement, '상의 교체', variantName('JACKET', '잠식'))
+  await toggle(canvasElement, '상의 교체', variantName('JACKET', '잠식'))
 }
 
 async function changeTune({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '보조장비')
-  await pick(canvasElement, '보조장비 조율', 'II')
+  await toggle(canvasElement, '보조장비 조율', 'II')
   await choose(canvasElement, '상의')
-  await pick(canvasElement, '상의 조율', 'III')
+  await toggle(canvasElement, '상의 조율', 'III')
 }
 
 async function chooseExalted({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '귀걸이')
-  await pick(canvasElement, '귀걸이 교체', variantName('EARRING', '유일'))
+  await toggle(canvasElement, '귀걸이 교체', variantName('EARRING', '유일'))
   await press(canvasElement, '귀걸이 정밀도 내리기', 5)
 }
 
 async function changeOathTune({ canvasElement }: { canvasElement: HTMLElement }) {
   await chooseCrystal(canvasElement, 6)
-  await pick(canvasElement, '결정 7 조율', 'III')
+  await toggle(canvasElement, '결정 7 조율', 'III')
   await chooseCrystal(canvasElement, 7)
-  await pick(canvasElement, '결정 8 조율', 'II')
+  await toggle(canvasElement, '결정 8 조율', 'II')
 }
 
 async function changeEquipmentSet({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -187,12 +198,12 @@ async function changeOathSet({ canvasElement }: { canvasElement: HTMLElement }) 
 
 async function changeOathGrades({ canvasElement }: { canvasElement: HTMLElement }) {
   await chooseOath(canvasElement, '서약')
-  await pick(canvasElement, '서약 교체', '전장을 태우는 용투 서약')
+  await toggle(canvasElement, '서약 교체', '전장을 태우는 용투 서약')
   // 태초 결정은 3개까지라 결정 9를 내린 뒤 결정 8을 태초로 올린다.
   await chooseCrystal(canvasElement, 8)
-  await pick(canvasElement, '결정 9 교체', '용투 : 완전한 광휘 결정')
+  await toggle(canvasElement, '결정 9 교체', '용투 : 완전한 광휘 결정')
   await chooseCrystal(canvasElement, 7)
-  await pick(canvasElement, '결정 8 교체', '용투 : 태초의 광휘 결정')
+  await toggle(canvasElement, '결정 8 교체', '용투 : 태초의 광휘 결정')
 }
 
 async function changeOathUpgrade({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -208,17 +219,12 @@ async function changeBuffLevel({ canvasElement }: { canvasElement: HTMLElement }
 
 async function chooseBestAvatar({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '아바타')
-  await pick(canvasElement, '아바타', '끝 스펙')
+  await pick(canvasElement, '아바타', '종결 아바타와 엠블렘')
 }
 
 async function changeWeaponTune({ canvasElement }: { canvasElement: HTMLElement }) {
   await choose(canvasElement, '무기')
-  await pick(canvasElement, '무기 조율', 'II')
-}
-
-async function openWeaponChoices({ canvasElement }: { canvasElement: HTMLElement }) {
-  await choose(canvasElement, '무기')
-  await press(canvasElement, '무기 교체')
+  await toggle(canvasElement, '무기 조율', 'II')
 }
 
 async function chooseWeapon({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -287,7 +293,7 @@ export const 스위칭: Story = {
   play: changeBuffLevel
 }
 
-export const 끝스펙아바타: Story = {
+export const 종결아바타: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
   play: chooseBestAvatar
 }
@@ -299,7 +305,7 @@ export const 무기조율: Story = {
 
 export const 무기교체: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated),
-  play: openWeaponChoices
+  play: chooseWeapon
 }
 
 export const 무기해방: Story = {
