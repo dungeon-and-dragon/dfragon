@@ -7,7 +7,7 @@ export {
   needsAvatarMainStat,
   simulatedAvatar
 } from './avatar.js'
-export { editBuffLevel } from './buff.js'
+export { editBuffLevel, editSwitchingEquipment, simulatedBuff } from './buff.js'
 export type { SimulationFeatures } from './engine-version.js'
 export { supportsSimulation } from './engine-version.js'
 export type { EquipmentChange } from './equipment.js'

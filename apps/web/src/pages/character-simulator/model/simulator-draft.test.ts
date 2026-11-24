@@ -937,6 +937,18 @@ it('스위칭 레벨은 고른 레벨만 요청에 싣고, 지금 레벨로 돌�
   )
 })
 
+it('짙편린 부위 수는 고른 수만 요청에 싣고, 지금 등록한 수로 돌아오거나 0~12 밖이면 바꾼 것이 없다', () => {
+  const action = (count: number) =>
+    ({ type: 'switchingEquipment', switching: dealerSwitching, count }) as const
+  const changed = apply(NO_CHANGES, action(12))
+
+  expect(simulationBody([], null, changed)).toEqual({ equipment: [], switchingEquipment: 12 })
+  expect(hasChanges(changed)).toBe(true)
+  expect(apply(changed, action(0))).toEqual(NO_CHANGES)
+  expect(apply(NO_CHANGES, action(13))).toEqual(NO_CHANGES)
+  expect(apply(changed, action(-1))).toEqual(changed)
+})
+
 it('아바타는 종결 아바타와 엠블렘을 고르면 프리셋을 요청에 싣고, 현재 착용 아바타로 돌아오면 바꾼 것이 없다', () => {
   const changed = apply(NO_CHANGES, { type: 'avatarPreset', preset: 'best' })
 

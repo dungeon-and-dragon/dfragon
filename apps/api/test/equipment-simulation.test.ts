@@ -1042,6 +1042,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     oathItems: false,
     oathUpgrade: false,
     buffLevel: false,
+    switchingEquipment: false,
     avatar: false,
     ...features
   })
@@ -2942,6 +2943,7 @@ test('실제 엔진은 묵언의 진의 단계를 올리면 점수를 올리고 
 
 const BUFF_LEVEL_ENGINE = 'dnfscore-native 0.11.0'
 const AVATAR_ENGINE = 'dnfscore-native 0.12.0'
+const SWITCHING_EQUIPMENT_ENGINE = 'dnfscore-native 0.14.0'
 // 엠블렘 Neople 상세 가운데 엔진이 읽는 명성, 스탯 칸만 운영 공개 API 응답에서 옮긴 값이다.
 // 딜러 블레이드, 버퍼 뮤즈, 남성 크루세이더 버퍼 두 갈래의 끝 스펙 엠블렘이다.
 const emblemDetails = JSON.parse(
@@ -3105,6 +3107,80 @@ for (const [name, fixtureName, buffLevel, edit] of invalidBuffLevelCases) {
     const origin = await listen(t, { details, ...engine.options })
 
     const response = await simulate(origin, path, { equipment: [], buffLevel })
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+// 딜러 블레이드의 버프 강화 장비는 모두 짙편린이 아니라 지금 등록한 수가 0이다.
+for (const [name, body, buff] of [
+  ['12부위를 고르면', { switchingEquipment: 12 }, { switchingEquipment: 12 }],
+  [
+    '버프 강화 레벨과 함께 고르면',
+    { buffLevel: 18, switchingEquipment: 3 },
+    { level: 18, switchingEquipment: 3 }
+  ]
+] as const) {
+  test(`짙편린 등록 수: 딜러가 ${name} 엔진의 버프 칸에 넣는다`, async (t) => {
+    const { details, path } = fixture('dealer-blade')
+    const engine = scoring(versionedEngine(SWITCHING_EQUIPMENT_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], ...body })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.simulated.value, 1802)
+    assert.deepEqual(engine.requests[0]!.input.simulation, { equipment: [], buff })
+  })
+}
+
+test('짙편린 등록 수: 딜러가 지금 등록한 수를 보내면 시뮬레이션 입력 없이 원본만 계산한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade')
+  const registered = (payloads.buff_equipment.skill as Item).buff as Item
+  const items = registered.equipment as Item[]
+  items[0] = { ...items[0], itemName: '짙은 심연의 편린 블레이드S : 트레이스' }
+  items[9] = { ...items[9], itemName: '짙은 뒤틀린 심연의 완장 : 트레이스' }
+  const engine = scoring(versionedEngine(SWITCHING_EQUIPMENT_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, { equipment: [], switchingEquipment: 2 })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.simulated.value, 1741)
+  assert.equal(engine.requests.length, 1)
+  assert.equal(engine.requests[0]!.input.simulation, undefined)
+})
+
+const invalidSwitchingEquipmentCases: readonly (readonly [
+  string,
+  FixtureName,
+  unknown,
+  PayloadEdit
+])[] = [
+  ['음수', 'dealer-blade', -1, keepPayloads],
+  ['12부위보다 많은 수', 'dealer-blade', 13, keepPayloads],
+  ['정수가 아닌 수', 'dealer-blade', 1.5, keepPayloads],
+  ['문자열 수', 'dealer-blade', '3', keepPayloads],
+  ['버퍼', 'buffer-muse', 0, keepPayloads],
+  [
+    '버프 강화 스킬을 배우지 않은 딜러',
+    'dealer-blade',
+    3,
+    (payloads) => {
+      buffSkillInfo(payloads).skillId = 'not-learned'
+    }
+  ]
+]
+
+for (const [name, fixtureName, switchingEquipment, edit] of invalidSwitchingEquipmentCases) {
+  test(`짙편린 등록 수 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture(fixtureName)
+    edit(payloads)
+    const engine = scoring(versionedEngine(SWITCHING_EQUIPMENT_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], switchingEquipment })
 
     assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
     assert.equal(engine.requests.length, 0)
@@ -3378,7 +3454,19 @@ for (const [name, package_, body, expected] of [
     null
   ],
   ['0.11.0 엔진은 버프 강화 레벨 변경을 반영한다', BUFF_LEVEL_ENGINE, { buffLevel: 18 }, 1802],
-  ['0.12.0 엔진은 끝 스펙을 반영한다', AVATAR_ENGINE, { avatarPreset: 'best' }, 1802]
+  ['0.12.0 엔진은 끝 스펙을 반영한다', AVATAR_ENGINE, { avatarPreset: 'best' }, 1802],
+  [
+    '0.14.0 전 엔진에 짙편린 등록 수 변경을 보내면 두 점수 모두 null이다',
+    WEAPON_ENGINE,
+    { switchingEquipment: 12 },
+    null
+  ],
+  [
+    '0.14.0 엔진은 짙편린 등록 수 변경을 반영한다',
+    SWITCHING_EQUIPMENT_ENGINE,
+    { switchingEquipment: 12 },
+    1802
+  ]
 ] as const) {
   test(`엔진 버전: ${name}`, async (t) => {
     const { details, path } = fixture('dealer-blade', undefined, emblemDetails)
@@ -3473,6 +3561,7 @@ test('증폭이 없는 남성 크루세이더 버퍼는 원본 계산의 주스�
 
 const REAL_BUFF_LEVEL_ENGINE = realEngineSupports({ buffLevel: true })
 const REAL_AVATAR_ENGINE = realEngineSupports({ buffLevel: true, avatar: true })
+const REAL_SWITCHING_EQUIPMENT_ENGINE = realEngineSupports({ switchingEquipment: true })
 
 async function realScoresOf(t: TestContext, name: FixtureName, body: Item) {
   const { details, path } = fixture(name, undefined, emblemDetails)
@@ -3508,4 +3597,14 @@ test('실제 엔진은 끝 스펙을 고른 요청을 건너뛰지 않고, 딜�
 
   const bufferBest = await realScoresOf(t, 'buffer-muse', { avatarPreset: 'best', buffLevel: 33 })
   assert.ok(bufferBest.simulated.value > bufferBest.baseline.value)
+})
+
+// 딜러 블레이드는 짙편린을 등록하지 않아 12부위로 늘리면 점수가 오른다.
+test('실제 엔진은 짙편린 등록 수를 바꾼 딜러의 요청을 건너뛰지 않고 점수를 올린다', {
+  skip:
+    !REAL_SWITCHING_EQUIPMENT_ENGINE && '짙편린 등록 수 변경을 반영하는 0.14.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const dealerRaised = await realScoresOf(t, 'dealer-blade', { switchingEquipment: 12 })
+  assert.ok(dealerRaised.simulated.value > dealerRaised.baseline.value)
 })
