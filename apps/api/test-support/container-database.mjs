@@ -483,6 +483,48 @@ try {
     '0'
   )
 
+  stage = 'timeline sync request table'
+  assert.equal(
+    (
+      await psql(
+        "SELECT count(*) FROM characters WHERE server_id = 'cain' AND character_id = 'timeline-request-probe'"
+      )
+    ).stdout.trim(),
+    '0'
+  )
+  await psql(
+    "INSERT INTO timeline_sync_requests (kind, server_id, character_id) VALUES ('sync', 'cain', 'timeline-request-probe')"
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT season_id, awaited_at IS NULL, started_at IS NULL FROM timeline_sync_requests WHERE kind = 'sync' AND server_id = 'cain' AND character_id = 'timeline-request-probe'"
+      )
+    ).stdout.trim(),
+    '0|t|t'
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO timeline_sync_requests (kind, server_id, character_id, season_id) VALUES ('sync', 'cain', 'timeline-request-probe', 0)"
+    )
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO timeline_sync_requests (kind, server_id, character_id) VALUES ('unknown', 'cain', 'timeline-request-probe')"
+    )
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT indexdef FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'timeline_sync_requests' AND indexname = 'timeline_sync_requests_pending_idx'"
+      )
+    ).stdout.trim(),
+    'CREATE INDEX timeline_sync_requests_pending_idx ON public.timeline_sync_requests USING btree (kind, ((awaited_at IS NULL)), requested_at) WHERE (started_at IS NULL)'
+  )
+  await psql(
+    "DELETE FROM timeline_sync_requests WHERE server_id = 'cain' AND character_id = 'timeline-request-probe'"
+  )
+
   stage = 'timeline tables'
   assert.equal(
     (
@@ -1214,6 +1256,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline sync request table, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
