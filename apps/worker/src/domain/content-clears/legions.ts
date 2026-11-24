@@ -9,8 +9,8 @@ export type LegionClearMove = {
   copySnapshot: boolean
 }
 
-// 클리어 수집은 그 주 레이드, 레기온 기록을 모두 저장한 뒤 모집단을 마감하므로, 레이드 모집단이 마감한 주는
-// clear_records에 그 주 레기온 기록이 다 있다. 레기온 분모는 그 주 수집 대상 전체, 곧 가장 큰 모집단이다.
+// 클리어 수집은 그 주 레이드, 레기온 기록을 모두 저장한 뒤 분모를 마감하므로, 레이드 분모가 마감한 주는
+// clear_records에 그 주 레기온 기록이 다 있다. 레기온 분모는 그 주 수집 대상 전체, 곧 그 주 레이드 분모 가운데 가장 큰 것이다.
 function collectionWeeks(
   populations: readonly StoredClearPopulation[],
   legionIds: ReadonlySet<string>

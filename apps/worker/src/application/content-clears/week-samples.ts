@@ -25,7 +25,7 @@ const contentWeekKey = (contentId: string, weekStart: Date) => `${contentId}/${w
 
 const newestFirst = (left: Date, right: Date) => right.getTime() - left.getTime()
 
-// 전체 개요는 한 주의 모든 컨텐츠를 함께 보므로 그 주의 모든 모집단이 마감했을 때만 저장한다.
+// 전체 개요는 한 주의 모든 컨텐츠를 함께 보므로 그 주의 모든 분모가 마감했을 때만 저장한다.
 function closedWeekStarts(populations: readonly StoredClearPopulation[]): Date[] {
   const weeks = new Map<number, { weekStart: Date; closed: boolean }>()
 
@@ -38,7 +38,7 @@ function closedWeekStarts(populations: readonly StoredClearPopulation[]): Date[]
   return [...weeks.values()].filter(({ closed }) => closed).map(({ weekStart }) => weekStart)
 }
 
-// 마감한 주의 클리어 기록과 모집단은 다시 바뀌지 않아, 저장한 주는 다시 계산하지 않는다.
+// 마감한 주의 클리어 기록과 분모는 다시 바뀌지 않아, 저장한 주는 다시 계산하지 않는다.
 export class ClearWeekSampleService {
   private readonly samples: ClearSampleLoader
 
@@ -107,7 +107,7 @@ export class ClearWeekSampleService {
     return { legions, contents: contentWeeks.length, overviews: overviewWeeks.length }
   }
 
-  // 레기온 클리어를 먼저 옮기고 모집단을 마감해야 아래 상세 집계가 그 주를 계산한다.
+  // 레기온 클리어를 먼저 옮기고 분모를 마감해야 아래 상세 집계가 그 주를 계산한다.
   private async moveLegionClears(): Promise<number> {
     const populations = await this.repository.readPopulations()
     const moves = planLegionClearMoves(CLEAR_LEGIONS, populations, this.now())
