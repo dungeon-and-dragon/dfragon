@@ -227,25 +227,30 @@ function evolutionNamesOf({ evolution }: CatalogSkill): readonly [string, string
   return [first.name, second.name]
 }
 
-export function skillWindowOf(
+// null인 스킬은 배우지 않은 스킬로 흐리게 그린다.
+export type SkillWindowPick = Readonly<{
+  level: number | null
+  evolution: UpgradeType | null
+  enhancement: UpgradeType | null
+}>
+
+export function skillWindowByPicks(
   catalog: SkillWindowCatalog,
   character: SkillCharacter,
-  style: SkillStyle
+  pickOf: (skillName: string) => SkillWindowPick | null
 ): SkillWindow | null {
   const tree = skillTreeOf(catalog, character)
   if (tree === null) {
     return null
   }
   const { job, advancement } = tree
-  const levelByName = learnedLevelsByName(style)
-  const evolutionByName = pickedTypesByName(style, 'evolution')
-  const enhancementByName = pickedTypesByName(style, 'enhancement')
   const cells = new Map<string, [CellCandidate, ...CellCandidate[]]>()
   for (const { skillId, col, row } of advancement.slots) {
     const skill = job.skills[skillId]
     if (skill === undefined) {
       continue
     }
+    const pick = pickOf(skill.name)
     const icon: SkillWindowIcon = {
       skillId,
       name: skill.name,
@@ -254,11 +259,11 @@ export function skillWindowOf(
       col,
       row,
       requiredLevel: skill.requiredLevel,
-      learned: levelByName.has(skill.name),
-      level: levelByName.get(skill.name) ?? null,
+      learned: pick !== null,
+      level: pick?.level ?? null,
       maxLevel: skill.maxLevel,
-      evolution: evolutionByName.get(skill.name) ?? null,
-      enhancement: enhancementByName.get(skill.name) ?? null,
+      evolution: pick?.evolution ?? null,
+      enhancement: pick?.enhancement ?? null,
       evolutionNames: evolutionNamesOf(skill),
       enhanceable: skill.enhancement !== undefined
     }
@@ -271,6 +276,28 @@ export function skillWindowOf(
   const rows = rowsOf(icons)
 
   return { rows, icons, marks: catalog.marks }
+}
+
+export function skillWindowOf(
+  catalog: SkillWindowCatalog,
+  character: SkillCharacter,
+  style: SkillStyle
+): SkillWindow | null {
+  const levelByName = learnedLevelsByName(style)
+  const evolutionByName = pickedTypesByName(style, 'evolution')
+  const enhancementByName = pickedTypesByName(style, 'enhancement')
+
+  return skillWindowByPicks(catalog, character, (name) => {
+    if (!levelByName.has(name)) {
+      return null
+    }
+
+    const level = levelByName.get(name) ?? null
+    const evolution = evolutionByName.get(name) ?? null
+    const enhancement = enhancementByName.get(name) ?? null
+
+    return { level, evolution, enhancement }
+  })
 }
 
 type UpgradeSkill = Readonly<{
