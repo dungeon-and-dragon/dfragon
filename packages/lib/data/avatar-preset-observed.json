@@ -18,8 +18,8 @@
           "slotColor": "붉은빛"
         }
       ],
-      "count": 14394,
-      "total": 14394
+      "count": 14391,
+      "total": 14391
     },
     "HAIR": {
       "slotName": "머리 아바타",
@@ -34,8 +34,8 @@
           "slotColor": "붉은빛"
         }
       ],
-      "count": 14393,
-      "total": 14393
+      "count": 14390,
+      "total": 14390
     },
     "FACE": {
       "slotName": "얼굴 아바타",
@@ -50,8 +50,8 @@
           "slotColor": "노란빛"
         }
       ],
-      "count": 14395,
-      "total": 14395
+      "count": 14392,
+      "total": 14392
     },
     "BREAST": {
       "slotName": "목가슴 아바타",
@@ -66,8 +66,8 @@
           "slotColor": "노란빛"
         }
       ],
-      "count": 14392,
-      "total": 14392
+      "count": 14389,
+      "total": 14389
     },
     "JACKET": {
       "slotName": "상의 아바타",
@@ -86,8 +86,8 @@
           "slotColor": "녹색빛"
         }
       ],
-      "count": 14394,
-      "total": 14394
+      "count": 14391,
+      "total": 14391
     },
     "PANTS": {
       "slotName": "하의 아바타",
@@ -106,8 +106,8 @@
           "slotColor": "녹색빛"
         }
       ],
-      "count": 14394,
-      "total": 14394
+      "count": 14391,
+      "total": 14391
     },
     "WAIST": {
       "slotName": "허리 아바타",
@@ -122,8 +122,8 @@
           "slotColor": "푸른빛"
         }
       ],
-      "count": 14393,
-      "total": 14393
+      "count": 14390,
+      "total": 14390
     },
     "SHOES": {
       "slotName": "신발 아바타",
@@ -138,8 +138,8 @@
           "slotColor": "푸른빛"
         }
       ],
-      "count": 14393,
-      "total": 14393
+      "count": 14390,
+      "total": 14390
     },
     "WEAPON": {
       "slotName": "무기 아바타",
@@ -154,9 +154,26 @@
           "slotColor": "다색"
         }
       ],
-      "count": 13918,
-      "total": 13922
+      "count": 13915,
+      "total": 13919
     }
+  },
+  "skin": {
+    "slotName": "스킨 아바타",
+    "itemName": "백옥 피부",
+    "itemRarity": "커먼",
+    "sockets": [
+      {
+        "slotNo": 1,
+        "slotColor": "다색"
+      },
+      {
+        "slotNo": 2,
+        "slotColor": "다색"
+      }
+    ],
+    "count": 14299,
+    "total": 14385
   },
   "emblemItems": [
     {
@@ -205,7 +222,7 @@
       "itemIds": [
         {
           "itemId": "bd46a6e5c3d94703e830c890b81eca3a",
-          "count": 4419
+          "count": 4414
         }
       ]
     },
@@ -225,7 +242,7 @@
       "itemIds": [
         {
           "itemId": "8d96a7ecbc126cad8363ee2d6dd1a120",
-          "count": 7468
+          "count": 7466
         }
       ]
     },
@@ -245,7 +262,7 @@
       "itemIds": [
         {
           "itemId": "b187832f68ac1271d2da6bc3814a053a",
-          "count": 12388
+          "count": 12380
         }
       ]
     },
@@ -285,7 +302,7 @@
       "itemIds": [
         {
           "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
-          "count": 1942
+          "count": 1940
         }
       ]
     },
@@ -295,7 +312,7 @@
       "itemIds": [
         {
           "itemId": "adbc4cc9f51a5f2fa103add45c92884f",
-          "count": 16360
+          "count": 16356
         }
       ]
     },
@@ -365,7 +382,7 @@
       "itemIds": [
         {
           "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
-          "count": 13489
+          "count": 13485
         }
       ]
     },
@@ -875,7 +892,7 @@
       "itemIds": [
         {
           "itemId": "2a8f574295422680ce324ee586c956fe",
-          "count": 208
+          "count": 202
         }
       ]
     },
@@ -1097,6 +1114,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "거너(여)",
       "jobGrowName": "眞 패러메딕",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1177,6 +1195,11 @@
         "PANTS": "플래티넘 엠블렘[apius::전장정보();]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+        "count": 400,
+        "total": 400
       }
     },
     {
@@ -1185,6 +1208,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "마법사(여)",
       "jobGrowName": "眞 인챈트리스",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1265,6 +1289,11 @@
         "PANTS": "플래티넘 엠블렘[퍼페티어]",
         "count": 195,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 400,
+        "total": 400
       }
     },
     {
@@ -1273,6 +1302,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "아처",
       "jobGrowName": "眞 뮤즈",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1353,6 +1383,11 @@
         "PANTS": "플래티넘 엠블렘[센세이션]",
         "count": 196,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+        "count": 398,
+        "total": 398
       }
     },
     {
@@ -1361,86 +1396,186 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "프리스트(남)",
       "jobGrowName": "眞 크루세이더",
-      "sample": 200,
+      "mainStat": "체력",
+      "sample": 133,
       "options": {
         "HEADGEAR": {
           "optionAbility": "캐스팅 속도 14.0% 증가",
           "count": 113,
-          "total": 200
+          "total": 133
         },
         "HAIR": {
           "optionAbility": "캐스팅 속도 14.0% 증가",
           "count": 113,
-          "total": 198
+          "total": 133
         },
         "FACE": {
           "optionAbility": "공격 속도 6.0% 증가",
-          "count": 170,
-          "total": 200
+          "count": 115,
+          "total": 133
         },
         "BREAST": {
           "optionAbility": "공격 속도 6.0% 증가",
-          "count": 167,
-          "total": 198
+          "count": 114,
+          "total": 133
         },
         "JACKET": {
           "optionAbility": "아포칼립스 스킬Lv +1",
-          "count": 190,
-          "total": 200
+          "count": 129,
+          "total": 133
         },
         "PANTS": {
           "optionAbility": "HP MAX 400 증가",
-          "count": 187,
-          "total": 200
+          "count": 128,
+          "total": 133
         },
         "WAIST": {
           "optionAbility": "회피율 5.5% 증가",
-          "count": 84,
-          "total": 199
+          "count": 59,
+          "total": 133
         },
         "SHOES": {
           "optionAbility": "체력 55 증가",
-          "count": 134,
-          "total": 199
+          "count": 128,
+          "total": 133
         },
         "WEAPON": {
           "optionAbility": "체력 55 증가",
           "count": 130,
-          "total": 194
+          "total": 130
         }
       },
       "emblems": {
         "붉은빛": {
           "itemName": "찬란한 붉은빛 엠블렘[체력]",
           "count": 528,
-          "total": 800
+          "total": 532
         },
         "노란빛": {
           "itemName": "찬란한 옐로우 엠블렘[체력]",
           "count": 524,
-          "total": 798
+          "total": 532
         },
         "녹색빛": {
           "itemName": "찬란한 그린 엠블렘[체력]",
           "count": 514,
-          "total": 800
+          "total": 532
         },
         "푸른빛": {
           "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
-          "count": 525,
-          "total": 766
+          "count": 357,
+          "total": 509
         },
         "다색": {
           "itemName": "찬란한 붉은빛 엠블렘[체력]",
           "count": 530,
-          "total": 792
+          "total": 530
         }
       },
       "platinum": {
         "JACKET": "플래티넘 엠블렘[수호의 은총]",
         "PANTS": "플래티넘 엠블렘[수호의 은총]",
-        "count": 189,
-        "total": 200
+        "count": 128,
+        "total": 133
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[체력]",
+        "count": 264,
+        "total": 266
+      }
+    },
+    {
+      "role": "buffer",
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "mainStat": "정신력",
+      "sample": 64,
+      "options": {
+        "HEADGEAR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 64,
+          "total": 64
+        },
+        "HAIR": {
+          "optionAbility": "정신력 55 증가",
+          "count": 62,
+          "total": 62
+        },
+        "FACE": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 53,
+          "total": 64
+        },
+        "BREAST": {
+          "optionAbility": "공격 속도 6.0% 증가",
+          "count": 51,
+          "total": 62
+        },
+        "JACKET": {
+          "optionAbility": "아포칼립스 스킬Lv +1",
+          "count": 61,
+          "total": 64
+        },
+        "PANTS": {
+          "optionAbility": "HP MAX 400 증가",
+          "count": 58,
+          "total": 64
+        },
+        "WAIST": {
+          "optionAbility": "회피율 5.5% 증가",
+          "count": 23,
+          "total": 63
+        },
+        "SHOES": {
+          "optionAbility": "이동 속도 6.0% 증가",
+          "count": 57,
+          "total": 63
+        },
+        "WEAPON": {
+          "optionAbility": "정신력 55 증가",
+          "count": 60,
+          "total": 61
+        }
+      },
+      "emblems": {
+        "붉은빛": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 256,
+          "total": 256
+        },
+        "노란빛": {
+          "itemName": "찬란한 옐로우 엠블렘[정신력]",
+          "count": 256,
+          "total": 256
+        },
+        "녹색빛": {
+          "itemName": "찬란한 그린 엠블렘[정신력]",
+          "count": 248,
+          "total": 256
+        },
+        "푸른빛": {
+          "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+          "count": 160,
+          "total": 245
+        },
+        "다색": {
+          "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+          "count": 248,
+          "total": 250
+        }
+      },
+      "platinum": {
+        "JACKET": "플래티넘 엠블렘[수호의 은총]",
+        "PANTS": "플래티넘 엠블렘[수호의 은총]",
+        "count": 61,
+        "total": 64
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+        "count": 126,
+        "total": 128
       }
     },
     {
@@ -1449,6 +1584,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "프리스트(여)",
       "jobGrowName": "眞 크루세이더",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1529,6 +1665,11 @@
         "PANTS": "플래티넘 엠블렘[계시 : 아리아]",
         "count": 196,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 400,
+        "total": 400
       }
     },
     {
@@ -1537,6 +1678,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "거너(남)",
       "jobGrowName": "眞 런처",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1617,6 +1759,11 @@
         "PANTS": "플래티넘 엠블렘[중화기 마스터리](남)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 365,
+        "total": 394
       }
     },
     {
@@ -1625,6 +1772,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "거너(남)",
       "jobGrowName": "眞 레인저",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1705,6 +1853,11 @@
         "PANTS": "플래티넘 엠블렘[스타일리쉬](남)",
         "count": 196,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 381,
+        "total": 393
       }
     },
     {
@@ -1713,6 +1866,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "거너(남)",
       "jobGrowName": "眞 메카닉",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1793,6 +1947,11 @@
         "PANTS": "플래티넘 엠블렘[아크리액터]",
         "count": 199,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 293,
+        "total": 382
       }
     },
     {
@@ -1801,6 +1960,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "거너(남)",
       "jobGrowName": "眞 스핏파이어",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1881,6 +2041,11 @@
         "PANTS": "플래티넘 엠블렘[병기 숙련](남)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 184,
+        "total": 387
       }
     },
     {
@@ -1889,6 +2054,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "거너(남)",
       "jobGrowName": "眞 어썰트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -1969,6 +2135,11 @@
         "PANTS": "플래티넘 엠블렘[센서빌리티]",
         "count": 193,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 312,
+        "total": 374
       }
     },
     {
@@ -1977,6 +2148,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "거너(여)",
       "jobGrowName": "眞 런처",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2057,6 +2229,11 @@
         "PANTS": "플래티넘 엠블렘[중화기 마스터리](여)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 329,
+        "total": 388
       }
     },
     {
@@ -2065,6 +2242,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "거너(여)",
       "jobGrowName": "眞 레인저",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2145,6 +2323,11 @@
         "PANTS": "플래티넘 엠블렘[스타일리쉬](여)",
         "count": 190,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 360,
+        "total": 384
       }
     },
     {
@@ -2153,6 +2336,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "거너(여)",
       "jobGrowName": "眞 메카닉",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2233,6 +2417,11 @@
         "PANTS": "플래티넘 엠블렘[트랜스포메이션]",
         "count": 141,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 289,
+        "total": 388
       }
     },
     {
@@ -2241,6 +2430,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "거너(여)",
       "jobGrowName": "眞 스핏파이어",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2321,6 +2511,11 @@
         "PANTS": "플래티넘 엠블렘[병기 숙련](여)",
         "count": 196,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 181,
+        "total": 392
       }
     },
     {
@@ -2329,6 +2524,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "격투가(남)",
       "jobGrowName": "眞 그래플러",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2409,6 +2605,11 @@
         "PANTS": "플래티넘 엠블렘[강렬한 테이크 다운](남)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 319,
+        "total": 348
       }
     },
     {
@@ -2417,6 +2618,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "격투가(남)",
       "jobGrowName": "眞 넨마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2497,6 +2699,11 @@
         "PANTS": "플래티넘 엠블렘[나선의 넨](남)",
         "count": 193,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 337,
+        "total": 383
       }
     },
     {
@@ -2505,6 +2712,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "격투가(남)",
       "jobGrowName": "眞 스트라이커",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2585,6 +2793,11 @@
         "PANTS": "플래티넘 엠블렘[머슬 시프트](남)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 332,
+        "total": 380
       }
     },
     {
@@ -2593,6 +2806,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "격투가(남)",
       "jobGrowName": "眞 스트리트파이터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2673,6 +2887,11 @@
         "PANTS": "플래티넘 엠블렘[도발](남)",
         "count": 197,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 158,
+        "total": 364
       }
     },
     {
@@ -2681,6 +2900,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "격투가(여)",
       "jobGrowName": "眞 그래플러",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2761,6 +2981,11 @@
         "PANTS": "플래티넘 엠블렘[강렬한 테이크 다운](여)",
         "count": 194,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 355,
+        "total": 382
       }
     },
     {
@@ -2769,6 +2994,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "격투가(여)",
       "jobGrowName": "眞 넨마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2849,6 +3075,11 @@
         "PANTS": "플래티넘 엠블렘[나선의 넨](여)",
         "count": 195,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 380,
+        "total": 398
       }
     },
     {
@@ -2857,6 +3088,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "격투가(여)",
       "jobGrowName": "眞 스트라이커",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -2937,6 +3169,11 @@
         "PANTS": "플래티넘 엠블렘[급소 지정](여)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 374,
+        "total": 386
       }
     },
     {
@@ -2945,6 +3182,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "격투가(여)",
       "jobGrowName": "眞 스트리트파이터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3025,6 +3263,11 @@
         "PANTS": "플래티넘 엠블렘[도발](여)",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 298,
+        "total": 379
       }
     },
     {
@@ -3033,6 +3276,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "귀검사(남)",
       "jobGrowName": "眞 검귀",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3113,6 +3357,11 @@
         "PANTS": "플래티넘 엠블렘[검귀의 도 마스터리]",
         "count": 174,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 341,
+        "total": 381
       }
     },
     {
@@ -3121,6 +3370,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "귀검사(남)",
       "jobGrowName": "眞 버서커",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3201,6 +3451,11 @@
         "PANTS": "플래티넘 엠블렘[혈십자]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 362,
+        "total": 394
       }
     },
     {
@@ -3209,6 +3464,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "귀검사(남)",
       "jobGrowName": "眞 소울브링어",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3289,6 +3545,11 @@
         "PANTS": "플래티넘 엠블렘[달의 커튼]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 325,
+        "total": 382
       }
     },
     {
@@ -3297,6 +3558,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "귀검사(남)",
       "jobGrowName": "眞 아수라",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3377,6 +3639,11 @@
         "PANTS": "플래티넘 엠블렘[정신이 번쩍!]",
         "count": 196,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 337,
+        "total": 379
       }
     },
     {
@@ -3385,6 +3652,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "귀검사(남)",
       "jobGrowName": "眞 웨펀마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3465,6 +3733,11 @@
         "PANTS": "플래티넘 엠블렘[검기상인]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 381,
+        "total": 390
       }
     },
     {
@@ -3473,6 +3746,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "귀검사(여)",
       "jobGrowName": "眞 다크템플러",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3553,6 +3827,11 @@
         "PANTS": "플래티넘 엠블렘[스티그마]",
         "count": 197,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 344,
+        "total": 378
       }
     },
     {
@@ -3561,6 +3840,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "귀검사(여)",
       "jobGrowName": "眞 데몬슬레이어",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3641,6 +3921,11 @@
         "PANTS": "플래티넘 엠블렘[마검 제어]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 352,
+        "total": 390
       }
     },
     {
@@ -3649,6 +3934,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "귀검사(여)",
       "jobGrowName": "眞 베가본드",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3729,6 +4015,11 @@
         "PANTS": "플래티넘 엠블렘[삼화취정]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 353,
+        "total": 393
       }
     },
     {
@@ -3737,6 +4028,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "귀검사(여)",
       "jobGrowName": "眞 블레이드",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3817,6 +4109,11 @@
         "PANTS": "플래티넘 엠블렘[빈티지]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 356,
+        "total": 390
       }
     },
     {
@@ -3825,6 +4122,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "귀검사(여)",
       "jobGrowName": "眞 소드마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3905,6 +4203,11 @@
         "PANTS": "플래티넘 엠블렘[무기 숙련]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 371,
+        "total": 394
       }
     },
     {
@@ -3913,6 +4216,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "나이트",
       "jobGrowName": "眞 드래곤나이트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -3993,6 +4297,11 @@
         "PANTS": "플래티넘 엠블렘[대식가]",
         "count": 194,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 349,
+        "total": 384
       }
     },
     {
@@ -4001,6 +4310,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "나이트",
       "jobGrowName": "眞 엘븐나이트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4081,6 +4391,11 @@
         "PANTS": "플래티넘 엠블렘[강인한 신념]",
         "count": 140,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 345,
+        "total": 392
       }
     },
     {
@@ -4089,6 +4404,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "나이트",
       "jobGrowName": "眞 카오스",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4169,6 +4485,11 @@
         "PANTS": "플래티넘 엠블렘[혼혈]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 339,
+        "total": 386
       }
     },
     {
@@ -4177,6 +4498,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "나이트",
       "jobGrowName": "眞 팔라딘",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4257,6 +4579,11 @@
         "PANTS": "플래티넘 엠블렘[세라픽 페더]",
         "count": 197,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 361,
+        "total": 384
       }
     },
     {
@@ -4265,6 +4592,7 @@
       "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
       "jobName": "다크나이트",
       "jobGrowName": "眞 다크나이트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4345,6 +4673,11 @@
         "PANTS": "플래티넘 엠블렘[어둠의 검사]",
         "count": 199,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 노란빛 엠블렘[공격속도]",
+        "count": 183,
+        "total": 383
       }
     },
     {
@@ -4353,6 +4686,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "도적",
       "jobGrowName": "眞 로그",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4433,6 +4767,11 @@
         "PANTS": "플래티넘 엠블렘[로그의 무기 마스터리]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 358,
+        "total": 382
       }
     },
     {
@@ -4441,6 +4780,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "도적",
       "jobGrowName": "眞 사령술사",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4521,6 +4861,11 @@
         "PANTS": "플래티넘 엠블렘[발라크르의 맹약]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 326,
+        "total": 376
       }
     },
     {
@@ -4529,6 +4874,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "도적",
       "jobGrowName": "眞 섀도우댄서",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4609,6 +4955,11 @@
         "PANTS": "플래티넘 엠블렘[날카로운 단검]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 322,
+        "total": 350
       }
     },
     {
@@ -4617,6 +4968,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "도적",
       "jobGrowName": "眞 쿠노이치",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4697,6 +5049,11 @@
         "PANTS": "플래티넘 엠블렘[인법 : 잔영 남기기]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 320,
+        "total": 372
       }
     },
     {
@@ -4705,6 +5062,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "마법사(남)",
       "jobGrowName": "眞 디멘션워커",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4785,6 +5143,11 @@
         "PANTS": "플래티넘 엠블렘[도그마 디바이스]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 306,
+        "total": 358
       }
     },
     {
@@ -4793,6 +5156,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "마법사(남)",
       "jobGrowName": "眞 블러드 메이지",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4873,6 +5237,11 @@
         "PANTS": "플래티넘 엠블렘[블러드 혼]",
         "count": 128,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 310,
+        "total": 375
       }
     },
     {
@@ -4881,6 +5250,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "마법사(남)",
       "jobGrowName": "眞 빙결사",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -4961,6 +5331,11 @@
         "PANTS": "플래티넘 엠블렘[발현]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 324,
+        "total": 375
       }
     },
     {
@@ -4969,6 +5344,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "마법사(남)",
       "jobGrowName": "眞 스위프트 마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5049,6 +5425,11 @@
         "PANTS": "플래티넘 엠블렘[휘몰아치는 질풍의 봉 마스터리]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 284,
+        "total": 358
       }
     },
     {
@@ -5057,6 +5438,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "마법사(남)",
       "jobGrowName": "眞 엘레멘탈 바머",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5137,6 +5519,11 @@
         "PANTS": "플래티넘 엠블렘[원소의 이해]",
         "count": 197,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 287,
+        "total": 370
       }
     },
     {
@@ -5145,6 +5532,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "마법사(여)",
       "jobGrowName": "眞 마도학자",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5225,6 +5613,11 @@
         "PANTS": "플래티넘 엠블렘[퍼밀리어와 친하게 지내기]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 329,
+        "total": 386
       }
     },
     {
@@ -5233,6 +5626,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "마법사(여)",
       "jobGrowName": "眞 배틀메이지",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5313,6 +5707,11 @@
         "PANTS": "플래티넘 엠블렘[니우의 전투술]",
         "count": 103,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 225,
+        "total": 387
       }
     },
     {
@@ -5321,6 +5720,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "마법사(여)",
       "jobGrowName": "眞 소환사",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5401,6 +5801,11 @@
         "PANTS": "플래티넘 엠블렘[교감]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 329,
+        "total": 369
       }
     },
     {
@@ -5409,6 +5814,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "마법사(여)",
       "jobGrowName": "眞 엘레멘탈마스터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5489,6 +5895,11 @@
         "PANTS": "플래티넘 엠블렘[쇼타임]",
         "count": 182,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 337,
+        "total": 393
       }
     },
     {
@@ -5497,6 +5908,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "마창사",
       "jobGrowName": "眞 다크 랜서",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5577,6 +5989,11 @@
         "PANTS": "플래티넘 엠블렘[어둠의 투창 마스터리]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 283,
+        "total": 370
       }
     },
     {
@@ -5585,6 +6002,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "마창사",
       "jobGrowName": "眞 듀얼리스트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5665,6 +6083,11 @@
         "PANTS": "플래티넘 엠블렘[미라지 부스트]",
         "count": 176,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 275,
+        "total": 356
       }
     },
     {
@@ -5673,6 +6096,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "마창사",
       "jobGrowName": "眞 드래고니안 랜서",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5753,6 +6177,11 @@
         "PANTS": "플래티넘 엠블렘[광창 마스터리]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 291,
+        "total": 368
       }
     },
     {
@@ -5761,6 +6190,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "마창사",
       "jobGrowName": "眞 뱅가드",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5841,6 +6271,11 @@
         "PANTS": "플래티넘 엠블렘[임팩트 스매쉬]",
         "count": 189,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 309,
+        "total": 359
       }
     },
     {
@@ -5849,6 +6284,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "아처",
       "jobGrowName": "眞 비질란테",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -5929,6 +6365,11 @@
         "PANTS": "플래티넘 엠블렘[특이체질]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 340,
+        "total": 375
       }
     },
     {
@@ -5937,6 +6378,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "아처",
       "jobGrowName": "眞 키메라",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6017,6 +6459,11 @@
         "PANTS": "플래티넘 엠블렘[복제의 유산]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 359,
+        "total": 379
       }
     },
     {
@@ -6025,6 +6472,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "아처",
       "jobGrowName": "眞 트래블러",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6105,6 +6553,11 @@
         "PANTS": "플래티넘 엠블렘[여행자의 직감]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 354,
+        "total": 380
       }
     },
     {
@@ -6113,6 +6566,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "아처",
       "jobGrowName": "眞 헌터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6193,6 +6647,11 @@
         "PANTS": "플래티넘 엠블렘[사냥감 식별]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 352,
+        "total": 388
       }
     },
     {
@@ -6201,6 +6660,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "제국기사",
       "jobGrowName": "眞 브레이커",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6281,6 +6741,11 @@
         "PANTS": "플래티넘 엠블렘[노 쿼터]",
         "count": 199,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 336,
+        "total": 354
       }
     },
     {
@@ -6289,6 +6754,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "총검사",
       "jobGrowName": "眞 스페셜리스트",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6369,6 +6835,11 @@
         "PANTS": "플래티넘 엠블렘[코어 블레이드 마스터리]",
         "count": 190,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 256,
+        "total": 310
       }
     },
     {
@@ -6377,6 +6848,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "총검사",
       "jobGrowName": "眞 요원",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6457,6 +6929,11 @@
         "PANTS": "플래티넘 엠블렘[소태도 마스터리]",
         "count": 193,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 344,
+        "total": 378
       }
     },
     {
@@ -6465,6 +6942,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "총검사",
       "jobGrowName": "眞 트러블 슈터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6545,6 +7023,11 @@
         "PANTS": "플래티넘 엠블렘[중검 마스터리]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 313,
+        "total": 382
       }
     },
     {
@@ -6553,6 +7036,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "총검사",
       "jobGrowName": "眞 히트맨",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6633,6 +7117,11 @@
         "PANTS": "플래티넘 엠블렘[장도 마스터리]",
         "count": 131,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 277,
+        "total": 348
       }
     },
     {
@@ -6641,6 +7130,7 @@
       "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
       "jobName": "크리에이터",
       "jobGrowName": "眞 크리에이터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6721,6 +7211,11 @@
         "PANTS": "플래티넘 엠블렘[계열강화]",
         "count": 200,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 271,
+        "total": 348
       }
     },
     {
@@ -6729,6 +7224,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "프리스트(남)",
       "jobGrowName": "眞 어벤저",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6809,6 +7305,11 @@
         "PANTS": "플래티넘 엠블렘[환청]",
         "count": 197,
         "total": 199
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 298,
+        "total": 365
       }
     },
     {
@@ -6817,6 +7318,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "프리스트(남)",
       "jobGrowName": "眞 인파이터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6897,6 +7399,11 @@
         "PANTS": "플래티넘 엠블렘[윌 드라이버]",
         "count": 199,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 356,
+        "total": 392
       }
     },
     {
@@ -6905,6 +7412,7 @@
       "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
       "jobName": "프리스트(남)",
       "jobGrowName": "眞 크루세이더",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -6985,6 +7493,11 @@
         "PANTS": "플래티넘 엠블렘[용기의 은총]",
         "count": 167,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 270,
+        "total": 362
       }
     },
     {
@@ -6993,6 +7506,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "프리스트(남)",
       "jobGrowName": "眞 퇴마사",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -7073,6 +7587,11 @@
         "PANTS": "플래티넘 엠블렘[퇴마의 서]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 266,
+        "total": 367
       }
     },
     {
@@ -7081,6 +7600,7 @@
       "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
       "jobName": "프리스트(여)",
       "jobGrowName": "眞 무녀",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -7161,6 +7681,11 @@
         "PANTS": "플래티넘 엠블렘[법력 강화]",
         "count": 182,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 322,
+        "total": 379
       }
     },
     {
@@ -7169,6 +7694,7 @@
       "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
       "jobName": "프리스트(여)",
       "jobGrowName": "眞 미스트리스",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -7249,6 +7775,11 @@
         "PANTS": "플래티넘 엠블렘[죄업에 짓눌린 육신]",
         "count": 188,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[지능]",
+        "count": 332,
+        "total": 372
       }
     },
     {
@@ -7257,6 +7788,7 @@
       "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
       "jobName": "프리스트(여)",
       "jobGrowName": "眞 이단심판관",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -7337,6 +7869,11 @@
         "PANTS": "플래티넘 엠블렘[성화]",
         "count": 86,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 315,
+        "total": 370
       }
     },
     {
@@ -7345,6 +7882,7 @@
       "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
       "jobName": "프리스트(여)",
       "jobGrowName": "眞 인파이터",
+      "mainStat": null,
       "sample": 200,
       "options": {
         "HEADGEAR": {
@@ -7425,6 +7963,11 @@
         "PANTS": "플래티넘 엠블렘[윌 오브 피스트]",
         "count": 198,
         "total": 200
+      },
+      "skinEmblem": {
+        "itemName": "찬란한 붉은빛 엠블렘[힘]",
+        "count": 316,
+        "total": 333
       }
     }
   ]
