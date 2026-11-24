@@ -49,7 +49,6 @@ API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적�
 - `recordItemDictionary`, `readItemDictionary`, `readUnlistedItemIds`, `readUnlistedAcquisitionItemIds`: 아이템 사전에 itemId의 레벨, 종류, 부위, 등급, 세트를 저장하고 읽으며, 받은 itemId나 타임라인 획득 행 가운데 사전에 없거나 등급을 아직 받지 않은 itemId를 읽습니다.
 - `readBatchNeopleKeys`, `addBatchNeopleKey`, `setBatchNeopleKeyEnabled`, `deleteBatchNeopleKey`: 운영 화면의 batch Neople key를 끝 4자로 읽고, 더하고, 켜고 끄고, 지웁니다.
 - `readUsableBatchNeopleKeys`, `recordBatchNeopleKeyRejected`: worker가 켜졌고 거절되지 않은 batch key의 id와 원문을 읽고, Neople이 거절한 key의 시각을 id로 남깁니다.
-- `writeTimelineQueueCounts`, `readTimelineQueueCounts`: 타임라인 queue의 대기, 처리 중 수를 queue마다 덮어쓰고, 운영 화면의 표 순서로 읽습니다. 지금은 부르는 곳이 없습니다.
 - `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다.
 - 위 함수의 입력, 결과 타입을 함께 export합니다.
 
@@ -104,7 +103,6 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `job_skill_adoption`: worker job이 계산한 전직, 역할별 최신 스킬 채택 수
 - `batch_neople_keys`: worker가 쓰는 batch Neople key와 켜짐 여부, 거절 시각
 - `worker_events`: worker가 남긴 이벤트(Neople 실패, 잡 시작과 끝 등) 한 번이 한 행
-- `timeline_queue_counts`: 예전 API 타임라인 queue마다 대기, 처리 중 수 한 행. 지금은 쓰거나 읽는 곳이 없습니다
 
 ## 검증
 
