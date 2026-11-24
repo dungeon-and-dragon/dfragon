@@ -1,5 +1,12 @@
-export type { AvatarEdit, AvatarPresetChoice } from './avatar.js'
-export { avatarItemIds, editAvatar, hasAvatarEdit, simulatedAvatar } from './avatar.js'
+export type { AvatarEdit, AvatarPresetChoice, AvatarPresetJob } from './avatar.js'
+export {
+  avatarItemIds,
+  avatarPresetJobOf,
+  editAvatar,
+  hasAvatarEdit,
+  needsAvatarMainStat,
+  simulatedAvatar
+} from './avatar.js'
 export { editBuffLevel } from './buff.js'
 export type { SimulationFeatures } from './engine-version.js'
 export { supportsSimulation } from './engine-version.js'

@@ -24,6 +24,7 @@ import {
   type SimulationFeatures,
   type SlotItemChanges,
   avatarItemIds,
+  avatarPresetJobOf,
   editAvatar,
   editBuffLevel,
   editEquipment,
@@ -35,6 +36,7 @@ import {
   hasAvatarEdit,
   hasOathEdit,
   hasSlotItemEdits,
+  needsAvatarMainStat,
   needsMainStat,
   simulatedAvatar,
   simulatedEquipment,
@@ -109,7 +111,20 @@ export class EquipmentSimulationService {
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)
-    const avatarEdit = editAvatar(payloads, role, request.avatarPreset)
+    const presetJob = avatarPresetJobOf(payloads, role, request.avatarPreset)
+    const calculator = cardScoreCalculator(role)
+    const input = toScoreEngineInput(payloads, items)
+    let avatarMainStat: ScoreMainStat | null = null
+
+    if (needsAvatarMainStat(presetJob)) {
+      avatarMainStat = await this.characterMainStat(payloads, input, calculator, signal)
+
+      if (avatarMainStat === null) {
+        return noScores
+      }
+    }
+
+    const avatarEdit = editAvatar(payloads, presetJob, avatarMainStat)
     const editsSlotItems = hasSlotItemEdits(slotEdits)
     const editsOath = hasOathEdit(oathEdit)
     const editsAvatar = hasAvatarEdit(avatarEdit)
@@ -124,8 +139,6 @@ export class EquipmentSimulationService {
       buffLevel: buffLevel !== null,
       avatar: editsAvatar
     }
-    const calculator = cardScoreCalculator(role)
-    const input = toScoreEngineInput(payloads, items)
 
     if (
       edits.length === 0 &&
@@ -159,9 +172,7 @@ export class EquipmentSimulationService {
     let mainStat: ScoreMainStat | null = null
 
     if (needsMainStat(edits)) {
-      mainStat =
-        wornMainStat(payloads.equipment) ??
-        (await this.mainStatOf(payloads, input, calculator, signal))
+      mainStat = await this.characterMainStat(payloads, input, calculator, signal)
 
       if (mainStat === null) {
         return noScores
@@ -247,6 +258,21 @@ export class EquipmentSimulationService {
     }
 
     return result
+  }
+
+  private async characterMainStat(
+    payloads: CharacterPayloads,
+    input: ScoreEngineInput,
+    calculator: ScoreCalculator,
+    signal: AbortSignal
+  ): Promise<ScoreMainStat | null> {
+    const worn = wornMainStat(payloads.equipment)
+
+    if (worn !== null) {
+      return worn
+    }
+
+    return await this.mainStatOf(payloads, input, calculator, signal)
   }
 
   private async mainStatOf(
