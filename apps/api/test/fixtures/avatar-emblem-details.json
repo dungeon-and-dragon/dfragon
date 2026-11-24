@@ -1,0 +1,197 @@
+{
+  "279782ac7c319218fb7d4de89a54f7af": {
+    "itemId": "279782ac7c319218fb7d4de89a54f7af",
+    "itemName": "플래티넘 엠블렘[센세이션]",
+    "itemRarity": "레전더리",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 232,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 232
+      },
+      {
+        "name": "힘",
+        "value": 8
+      },
+      {
+        "name": "체력",
+        "value": 8
+      },
+      {
+        "name": "지능",
+        "value": 8
+      },
+      {
+        "name": "정신력",
+        "value": 8
+      }
+    ]
+  },
+  "28dc69272fa7ee91bfdc62cf53f2c3d1": {
+    "itemId": "28dc69272fa7ee91bfdc62cf53f2c3d1",
+    "itemName": "찬란한 푸른빛 엠블렘[이동속도]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "이동속도",
+        "value": "1.5%"
+      }
+    ]
+  },
+  "2b59d0a1dd5e577230bca0d05ca92f24": {
+    "itemId": "2b59d0a1dd5e577230bca0d05ca92f24",
+    "itemName": "찬란한 옐로우 엠블렘[정신력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "정신력",
+        "value": 15
+      }
+    ]
+  },
+  "4ab629eb803d2f8edb37aec13e62432c": {
+    "itemId": "4ab629eb803d2f8edb37aec13e62432c",
+    "itemName": "찬란한 옐로우 엠블렘[힘]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "힘",
+        "value": 15
+      }
+    ]
+  },
+  "5d45377b59fef23c3c77e7bc9c65d5e6": {
+    "itemId": "5d45377b59fef23c3c77e7bc9c65d5e6",
+    "itemName": "찬란한 붉은빛 엠블렘[힘]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "힘",
+        "value": 25
+      }
+    ]
+  },
+  "73a64ed9d2d90cfc5167e091c5ca53a1": {
+    "itemId": "73a64ed9d2d90cfc5167e091c5ca53a1",
+    "itemName": "플래티넘 엠블렘[빈티지]",
+    "itemRarity": "레전더리",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 232,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 232
+      },
+      {
+        "name": "힘",
+        "value": 8
+      },
+      {
+        "name": "체력",
+        "value": 8
+      },
+      {
+        "name": "지능",
+        "value": 8
+      },
+      {
+        "name": "정신력",
+        "value": 8
+      }
+    ]
+  },
+  "b48e55e72a590c64b0066b58ba007d6a": {
+    "itemId": "b48e55e72a590c64b0066b58ba007d6a",
+    "itemName": "찬란한 녹색빛 엠블렘[물리크리티컬]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "물리 크리티컬 히트",
+        "value": "3%"
+      }
+    ]
+  },
+  "cf59f2a61cd81b2cdf2a929f4c4c6e13": {
+    "itemId": "cf59f2a61cd81b2cdf2a929f4c4c6e13",
+    "itemName": "찬란한 붉은빛 엠블렘[정신력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "정신력",
+        "value": 25
+      }
+    ]
+  },
+  "f6a59d1b221a1cde3bb14e7e5ad8c35b": {
+    "itemId": "f6a59d1b221a1cde3bb14e7e5ad8c35b",
+    "itemName": "찬란한 그린 엠블렘[정신력]",
+    "itemRarity": "유니크",
+    "itemType": "스태커블",
+    "itemTypeDetail": "엠블렘",
+    "itemAvailableLevel": 1,
+    "fame": 36,
+    "itemStatus": [
+      {
+        "name": "모험가 명성",
+        "value": 36
+      },
+      {
+        "name": "정신력",
+        "value": 15
+      }
+    ]
+  }
+}
