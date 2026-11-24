@@ -9,6 +9,7 @@ import {
   type ClearJobFameSample,
   type ClearJobScoreSample,
   type ClearOverviewWeekSamples,
+  type ClearPopulationJob,
   type ClearRecordRaidMode,
   type ClearRecordRaidSelection,
   type ClearRecordRaidStage,
@@ -27,6 +28,7 @@ import {
   type DatabaseClient,
   type LegionClearWeek,
   type StoredClearPopulation,
+  readClearPopulationJobs,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
   readContentClearAdventureSizes,
@@ -168,6 +170,10 @@ export class DatabaseClearStatsRepository
 
   readOverviewSampleWeeks(): Promise<Date[]> {
     return readContentClearOverviewSampleWeeks(this.client)
+  }
+
+  readPopulationJobs(minMaxFame: number): Promise<ClearPopulationJob[]> {
+    return readClearPopulationJobs(this.client, minMaxFame)
   }
 
   recordLegionClears(week: LegionClearWeek): Promise<void> {

@@ -63,6 +63,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
       { contentId: 'michaela-hard', weekStart: week('2026-10-29') }
     ],
     readOverviewSampleWeeks: async () => [week('2026-10-29')],
+    readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
     recordPopulation: async () => undefined,
     readContentJobFames: async ({ contentId, weekStart }) => [
@@ -104,26 +105,21 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
   assert.equal(recordedSamples.get('engraved-nightmare-1/2026-11-05')?.streaks, null)
 })
 
-test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 그 주 가장 큰 레이드 분모를 복사한 뒤 상세 집계를 계산한다', async () => {
-  const largest: StoredClearPopulation = {
-    ...population('nabel-normal', '2026-11-05', true),
-    population: 1500,
-    minFame: 104292,
-    jobs: [
-      {
-        jobId: 'synthetic-job',
-        jobGrowId: 'synthetic-grow',
-        jobName: '합성직업',
-        jobGrowName: '합성전직',
-        count: 1500
-      }
-    ]
-  }
+test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 입장 명성과 수집 하한 가운데 높은 명성부터 센 뒤 상세 집계를 계산한다', async () => {
+  const jobsFrom = (minFame: number) => [
+    {
+      jobId: 'synthetic-job',
+      jobGrowId: 'synthetic-grow',
+      jobName: '합성직업',
+      jobGrowName: '합성전직',
+      count: 200_000 - minFame
+    }
+  ]
   const populations: StoredClearPopulation[] = [
     population('michaela-hard', '2026-04-16', true),
     population('michaela-hard', '2026-10-29', true),
     population('michaela-hard', '2026-11-05', true),
-    largest,
+    population('nabel-normal', '2026-11-05', true),
     population('michaela-hard', '2026-11-12', false),
     population('legion-venus', '2026-04-16', true)
   ]
@@ -146,6 +142,7 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
         week('2026-10-29'),
         week('2026-11-05')
       ],
+      readPopulationJobs: async (minFame) => jobsFrom(minFame),
       recordLegionClears: async ({ contentId, name, weekStart, copySnapshot }: LegionClearWeek) => {
         moved.push(`${contentId}/${name}/${formatResetDate(weekStart)}/${copySnapshot}`)
       },
@@ -183,20 +180,33 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
       }))
       .toSorted((left, right) => left.week.localeCompare(right.week)),
     [
-      { week: 'legion-apocalypse/2026-10-29', size: 1000, minFame: 126000, jobs: [], closed: true },
       {
-        week: 'legion-apocalypse/2026-11-05',
-        size: 1500,
-        minFame: 104292,
-        jobs: largest.jobs,
+        week: 'legion-apocalypse/2026-10-29',
+        size: 126_007,
+        minFame: 73_993,
+        jobs: jobsFrom(73_993),
         closed: true
       },
-      { week: 'legion-venus/2026-10-29', size: 1000, minFame: 126000, jobs: [], closed: true },
+      {
+        week: 'legion-apocalypse/2026-11-05',
+        size: 126_007,
+        minFame: 73_993,
+        jobs: jobsFrom(73_993),
+        closed: true
+      },
+      // 베누스 입장 명성 41,929는 수집 하한 47,684보다 낮다.
+      {
+        week: 'legion-venus/2026-10-29',
+        size: 152_316,
+        minFame: 47_684,
+        jobs: jobsFrom(47_684),
+        closed: true
+      },
       {
         week: 'legion-venus/2026-11-05',
-        size: 1500,
-        minFame: 104292,
-        jobs: largest.jobs,
+        size: 152_316,
+        minFame: 47_684,
+        jobs: jobsFrom(47_684),
         closed: true
       }
     ]
@@ -227,6 +237,7 @@ test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개�
     ],
     readContentWeekSampleWeeks: async () => [],
     readOverviewSampleWeeks: async () => [],
+    readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
     recordPopulation: async () => undefined,
     readScoreBands: async () => [scoreBand],
@@ -272,6 +283,7 @@ test('지난주 행의 점수를 쓰는 지난주 대비 그룹 점수는 지난
     ],
     readContentWeekSampleWeeks: async () => [],
     readOverviewSampleWeeks: async () => [],
+    readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
     recordPopulation: async () => undefined,
     readWeekGroupScores: async () => [groupScore],

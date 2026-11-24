@@ -5,28 +5,21 @@ import { subWeeks } from 'date-fns'
 
 export type LegionClearMove = {
   legion: ClearContent
-  collection: StoredClearPopulation
+  weekStart: Date
   copySnapshot: boolean
 }
 
 // 클리어 수집은 그 주 레이드, 레기온 기록을 모두 저장한 뒤 분모를 마감하므로, 레이드 분모가 마감한 주는
-// clear_records에 그 주 레기온 기록이 다 있다. 레기온 분모는 그 주 수집 대상 전체, 곧 그 주 레이드 분모 가운데 가장 큰 것이다.
-function collectionWeeks(
+// clear_records에 그 주 레기온 기록이 다 있다.
+function collectedWeekStarts(
   populations: readonly StoredClearPopulation[],
   legionIds: ReadonlySet<string>
-): StoredClearPopulation[] {
-  const weeks = new Map<number, StoredClearPopulation>()
+): Date[] {
+  const weeks = new Map<number, Date>()
 
-  for (const population of populations) {
-    if (!population.closed || legionIds.has(population.contentId)) {
-      continue
-    }
-
-    const key = population.weekStart.getTime()
-    const current = weeks.get(key)
-
-    if (current === undefined || population.population > current.population) {
-      weeks.set(key, population)
+  for (const { contentId, weekStart, closed } of populations) {
+    if (closed && !legionIds.has(contentId)) {
+      weeks.set(weekStart.getTime(), weekStart)
     }
   }
 
@@ -45,19 +38,19 @@ export function planLegionClearMoves(
       .filter(({ contentId, closed }) => legionIds.has(contentId) && closed)
       .map(({ contentId, weekStart }) => `${contentId}/${weekStart.getTime()}`)
   )
-  const weeks = collectionWeeks(populations, legionIds)
+  const weekStarts = collectedWeekStarts(populations, legionIds)
   const justClosedWeek = subWeeks(startOfResetWeek(now), 1).getTime()
 
   return legions.flatMap((legion) => {
     const releaseWeek = startOfResetWeek(legion.releasedAt).getTime()
 
-    return weeks
-      .filter(({ weekStart }) => weekStart.getTime() >= releaseWeek)
-      .filter(({ weekStart }) => !closedLegionWeeks.has(`${legion.id}/${weekStart.getTime()}`))
-      .map((collection) => {
-        const copySnapshot = collection.weekStart.getTime() === justClosedWeek
+    return weekStarts
+      .filter((weekStart) => weekStart.getTime() >= releaseWeek)
+      .filter((weekStart) => !closedLegionWeeks.has(`${legion.id}/${weekStart.getTime()}`))
+      .map((weekStart) => {
+        const copySnapshot = weekStart.getTime() === justClosedWeek
 
-        return { legion, collection, copySnapshot }
+        return { legion, weekStart, copySnapshot }
       })
   })
 }
