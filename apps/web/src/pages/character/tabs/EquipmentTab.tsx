@@ -17,7 +17,7 @@ import { SetPoint } from './equipment/item-parts'
 export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   const view = toEquipmentView(detail)
   const oathSet = detail.oath !== null ? toOathView(detail.oath).set : null
-  const hasEquipmentStrip = view.sets.length > 0 || view.mistLevel !== null
+  const hasEquipmentStrip = view.set !== null || view.mistLevel !== null
 
   return (
     <div className={itemTableClasses.root}>
@@ -32,11 +32,11 @@ export function EquipmentTab({ detail }: CharacterTabProps): React.JSX.Element {
   )
 }
 
-function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }): React.JSX.Element {
+function EquipmentStrip({ view: { set, mistLevel } }: { view: EquipmentView }): React.JSX.Element {
   return (
     <div className={`${itemClasses.stripRow} max-sm:contents`}>
-      {sets.map((set, index) => (
-        <span key={`${set.name}-${index}`} className={itemClasses.itemText}>
+      {set !== null && (
+        <span className={itemClasses.itemText}>
           <span className="label">장비</span>
           <ItemName name={set.name} rarity={set.rarity} />
           {set.rarityName !== null && (
@@ -44,7 +44,7 @@ function EquipmentStrip({ view: { sets, mistLevel } }: { view: EquipmentView }):
           )}
           {set.point !== null && <SetPoint point={set.point} rule={EQUIPMENT_SET_POINT_BONUS} />}
         </span>
-      ))}
+      )}
       <span className={`${itemClasses.spacer} max-sm:hidden`} />
       {mistLevel !== null && (
         <span className={`${itemClasses.itemText} max-sm:order-last max-sm:self-end`}>
