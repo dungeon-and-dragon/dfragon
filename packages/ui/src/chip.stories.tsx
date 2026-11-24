@@ -30,6 +30,19 @@ export const States: Story = {
   )
 }
 
+export const List: Story = {
+  render: () => (
+    <div className="chip-list w-[288px]" role="group" aria-label="마법부여">
+      <Chip defaultPressed>현재 마법부여</Chip>
+      <span className="chip-list-label">종결</span>
+      <Chip>최종 데미지 증가 +2%</Chip>
+      <Chip>화속성 강화 +15, 명속성 강화 +15, 수속성 강화 +15, 암속성 강화 +15</Chip>
+      <span className="chip-list-label">준종결</span>
+      <Chip>스킬 공격력 증가 +1%</Chip>
+    </div>
+  )
+}
+
 export const Focus: Story = {
   play: ({ canvasElement }) => {
     canvasElement.querySelector<HTMLElement>('button')?.focus()
