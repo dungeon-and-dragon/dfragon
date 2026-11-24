@@ -59,6 +59,45 @@
   color: var(--color-on-signal);
 }
 
+/*
+ * 세로로 나열해 고르는 목록은 <div class="chip-list" role="group" aria-label="상의 교체">에 칩을 두고, 묶음 이름은
+ * <span class="chip-list-label">로 그 묶음의 칩 앞에 둔다. 칩 글자 색이 등급 같은 정보라 켜짐은 글자 색을 그대로 두고
+ * 테두리와 표의 선택 줄과 같은 면으로 그린다.
+ */
+.chip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chip-list > .chip {
+  box-sizing: border-box;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  height: auto;
+  min-height: var(--height-control-sm);
+  padding-block: 4px;
+  text-align: left;
+  white-space: normal;
+}
+
+.chip-list > .chip[data-pressed],
+.chip-list > .chip[data-pressed]:hover:not(:disabled) {
+  border-color: var(--color-signal);
+  background-color: var(--color-surface);
+  color: var(--color-fg-muted);
+  font-weight: var(--font-weight-normal);
+}
+
+.chip-list-label {
+  padding-top: 8px;
+  color: var(--color-fg-subtle);
+  font-size: var(--text-xs);
+  line-height: var(--text-xs--line-height);
+  font-weight: var(--font-weight-medium);
+}
+
 .chip:disabled {
   border-color: var(--color-line);
   background-color: var(--color-canvas);
