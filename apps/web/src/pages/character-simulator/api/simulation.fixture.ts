@@ -2,6 +2,7 @@ import { findWeaponVariant, oathUpgradeSteps } from '@dfragon/lib/equipment-vari
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
 import type { CharacterCardScore, CharacterDetailView } from '#entities/character'
 import type { SimulationBody } from '#pages/character-simulator/model/simulator-draft'
+import { toSimulatorSwitching } from '#pages/character-simulator/model/simulator-switching'
 import type { EquipmentSimulation } from './useEquipmentSimulation'
 
 // 엔진을 열지 않고 바꾼 부위마다 점수를 정해진 만큼 더하는 합성 결과다. 실제 점수 계산과 관계없다.
@@ -22,6 +23,7 @@ const POINTS_PER_UPGRADE_STEP = 9_100
 const POINTS_PER_UPGRADE_OATHPOINT = 5_200
 const AVATAR_PRESET_POINTS = 33_800
 const POINTS_PER_BUFF_LEVEL = 7_400
+const POINTS_PER_SWITCHING_EQUIPMENT = 4_100
 
 type Calculator = CharacterCardScore['calculator']
 
@@ -121,6 +123,19 @@ function buffLevelPointsOf(detail: CharacterDetailView, buffLevel: number | unde
   return (buffLevel - worn) * POINTS_PER_BUFF_LEVEL
 }
 
+function switchingEquipmentPointsOf(
+  detail: CharacterDetailView,
+  switchingEquipment: number | undefined
+): number {
+  if (switchingEquipment === undefined) {
+    return 0
+  }
+
+  const worn = toSimulatorSwitching(detail, 'dealer')?.equipment?.count ?? switchingEquipment
+
+  return (switchingEquipment - worn) * POINTS_PER_SWITCHING_EQUIPMENT
+}
+
 function setPointsOf(
   detail: CharacterDetailView,
   { equipmentSet, oathSet, oathBody, oathUpgrade }: SimulationBody
@@ -142,12 +157,16 @@ function pointsOf(detail: CharacterDetailView, body: SimulationBody): number {
     oathUpgrade: _upgrade,
     avatarPreset,
     buffLevel,
+    switchingEquipment,
     ...slotItems
   } = body
   const items = detail.equipment.equipment
   const slotItemPoints = Object.keys(slotItems).length * SLOT_ITEM_POINTS
   const avatarPoints = avatarPreset !== undefined ? AVATAR_PRESET_POINTS : 0
-  const characterPoints = avatarPoints + buffLevelPointsOf(detail, buffLevel)
+  const characterPoints =
+    avatarPoints +
+    buffLevelPointsOf(detail, buffLevel) +
+    switchingEquipmentPointsOf(detail, switchingEquipment)
 
   return equipment.reduce(
     (sum, change) => {
@@ -201,4 +220,28 @@ export function withPendingReleaseWeapon(
   })
 
   return { ...detail, equipment: { ...detail.equipment, equipment } }
+}
+
+const TWISTED_SWITCHING_SLOTS = ['SUPPORT', 'MAGIC_STON', 'EARRING']
+
+export function withSwitchingEquipment(
+  detail: CharacterDetailView,
+  count: number
+): CharacterDetailView {
+  const buff = detail.buff.equipment
+
+  if (buff === null) {
+    return detail
+  }
+
+  const skillName = buff.skillInfo?.name
+  const slots = detail.equipment.equipment.filter(({ slotId }) => slotId !== 'TITLE')
+  const equipment = slots.slice(0, count).map((item) => {
+    const twisted = TWISTED_SWITCHING_SLOTS.includes(item.slotId ?? '')
+    const prefix = twisted ? '짙은 뒤틀린 심연의' : '짙은 심연의 편린'
+
+    return { ...item, itemName: `${prefix} ${item.slotName} : ${skillName}` }
+  })
+
+  return { ...detail, buff: { ...detail.buff, equipment: { ...buff, equipment } } }
 }

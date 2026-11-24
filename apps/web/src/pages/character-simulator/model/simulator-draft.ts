@@ -53,7 +53,12 @@ import {
   type SimulatorOathBody,
   type SimulatorOathCrystal
 } from './simulator-oath'
-import { type BuffLevelChange, changeBuffLevel } from './simulator-switching'
+import {
+  type BuffLevelChange,
+  changeBuffLevel,
+  changeSwitchingEquipment,
+  type SwitchingEquipmentChange
+} from './simulator-switching'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 type SetItem = CharacterDetailView['equipment']['setItemInfo'][number]
@@ -175,8 +180,8 @@ export type SlotDraft = Readonly<{
 }>
 
 /**
- * 고른 장비 세트, 기준과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id, 아바타 프리셋, 버프 강화 스킬 레벨과
- * 서약의 바꾼 것만 담는다.
+ * 고른 장비 세트, 기준과 다른 장비 부위, 바꾸려고 고른 칭호, 크리쳐, 오라 묶음 id, 아바타 프리셋, 버프 강화 스킬 레벨,
+ * 짙편린 등록 수와 서약의 바꾼 것만 담는다.
  */
 export type SimulatorChanges = Readonly<{
   equipmentSet: string | null
@@ -184,6 +189,7 @@ export type SimulatorChanges = Readonly<{
   slotItems: Readonly<Partial<Record<SlotItemCategory, string>>>
   avatarPreset: AvatarPresetChange
   buffLevel: BuffLevelChange
+  switchingEquipment: SwitchingEquipmentChange
   oath: OathChanges
 }>
 
@@ -193,6 +199,7 @@ export const NO_CHANGES: SimulatorChanges = {
   slotItems: {},
   avatarPreset: null,
   buffLevel: null,
+  switchingEquipment: null,
   oath: NO_OATH_CHANGES
 }
 
@@ -218,6 +225,7 @@ export type SimulationBody = Readonly<
     oath?: OathCrystalChange[]
     avatarPreset?: NonNullable<AvatarPresetChange>
     buffLevel?: number
+    switchingEquipment?: number
   } & Partial<Record<SlotItemCategory, string>>
 >
 
@@ -233,6 +241,7 @@ export type SimulatorAction =
   | Readonly<{ type: 'slotItem'; slotItem: SimulatorSlotItem; id: string | null }>
   | Readonly<{ type: 'avatarPreset'; preset: AvatarPresetChange }>
   | Readonly<{ type: 'buffLevel'; switching: BuffSwitching; level: number }>
+  | Readonly<{ type: 'switchingEquipment'; switching: BuffSwitching; count: number }>
   | Readonly<{ type: 'oathSet'; oath: SimulatorOath; setId: number }>
   | Readonly<{ type: 'oathBody'; body: SimulatorOathBody; id: string }>
   | Readonly<{
@@ -936,6 +945,15 @@ export function simulatorReducer(
 
       return { ...changes, buffLevel }
     }
+    case 'switchingEquipment': {
+      const switchingEquipment = changeSwitchingEquipment(
+        action.switching,
+        changes.switchingEquipment,
+        action.count
+      )
+
+      return { ...changes, switchingEquipment }
+    }
     case 'oathSet': {
       const oath = changeOathSet(changes.oath, action.oath, action.setId)
 
@@ -1081,6 +1099,8 @@ export function simulationBody(
   const crystalChanges = crystals.length > 0 ? { oath: crystals } : {}
   const avatarPreset = changes.avatarPreset !== null ? { avatarPreset: changes.avatarPreset } : {}
   const buffLevel = changes.buffLevel !== null ? { buffLevel: changes.buffLevel } : {}
+  const switchingEquipment =
+    changes.switchingEquipment !== null ? { switchingEquipment: changes.switchingEquipment } : {}
 
   return {
     ...equipmentSet,
@@ -1088,6 +1108,7 @@ export function simulationBody(
     ...changes.slotItems,
     ...avatarPreset,
     ...buffLevel,
+    ...switchingEquipment,
     ...oathSet,
     ...oathBody,
     ...oathUpgrade,
@@ -1101,6 +1122,7 @@ export function hasChanges(changes: SimulatorChanges): boolean {
   const changedSet = changes.equipmentSet !== null
   const changedAvatar = changes.avatarPreset !== null
   const changedBuffLevel = changes.buffLevel !== null
+  const changedSwitchingEquipment = changes.switchingEquipment !== null
 
   return (
     changedSet ||
@@ -1108,6 +1130,7 @@ export function hasChanges(changes: SimulatorChanges): boolean {
     changedSlotItems ||
     changedAvatar ||
     changedBuffLevel ||
+    changedSwitchingEquipment ||
     hasOathChanges(changes.oath)
   )
 }

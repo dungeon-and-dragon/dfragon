@@ -22,7 +22,7 @@ import {
 } from '#pages/character-simulator/model/simulator-draft'
 import { avatarPresetNameOf } from '#pages/character-simulator/model/simulator-avatar'
 import { upgradeOf } from '#pages/character-simulator/model/simulator-oath-upgrade'
-import { buffLevelOf } from '#pages/character-simulator/model/simulator-switching'
+import { switchingTextOf } from '#pages/character-simulator/model/simulator-switching'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
   crystalDraftOf,
@@ -123,8 +123,11 @@ export function EquipmentList({
                 </TextRow>
               )
             case 'switching': {
-              const { switching } = target
-              const level = buffLevelOf(switching, changes.buffLevel)
+              const text = switchingTextOf(
+                target.switching,
+                changes.buffLevel,
+                changes.switchingEquipment
+              )
 
               return (
                 <TextRow
@@ -134,7 +137,7 @@ export function EquipmentList({
                   selected={selected}
                   onSelect={onSelect}
                 >
-                  {`${switching.skillName} ${level}레벨`}
+                  {text}
                 </TextRow>
               )
             }

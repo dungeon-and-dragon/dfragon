@@ -1,5 +1,5 @@
 import { type BuffSwitching, selectableBuffLevels } from '@dfragon/lib/buff-switching'
-import { Checkbox } from '@dfragon/ui'
+import { Checkbox, NumberField } from '@dfragon/ui'
 import {
   type AvatarPresetChange,
   avatarPresetNameOf,
@@ -33,7 +33,11 @@ import {
   type SimulatorOathUpgrade,
   upgradeOf
 } from '#pages/character-simulator/model/simulator-oath-upgrade'
-import { buffLevelOf } from '#pages/character-simulator/model/simulator-switching'
+import {
+  buffLevelOf,
+  SWITCHING_EQUIPMENT_COPY,
+  switchingEquipmentOf
+} from '#pages/character-simulator/model/simulator-switching'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
@@ -55,6 +59,7 @@ export type SlotEditorActions = Readonly<{
   onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) => void
   onAvatarPresetChange: (preset: AvatarPresetChange) => void
   onBuffLevelChange: (switching: BuffSwitching, level: number) => void
+  onSwitchingEquipmentChange: (switching: BuffSwitching, count: number) => void
   onOathSetChange: (setId: number) => void
   onOathBodyChange: (body: SimulatorOathBody, id: string) => void
   onOathUpgradeUnlockChange: (
@@ -284,6 +289,10 @@ function SwitchingEditor({
     actions.onBuffLevelChange(switching, Number(id))
   }
 
+  function changeEquipment(count: number): void {
+    actions.onSwitchingEquipmentChange(switching, count)
+  }
+
   return (
     <Fields>
       <Field label={switching.skillName}>
@@ -294,6 +303,19 @@ function SwitchingEditor({
           onChange={changeLevel}
         />
       </Field>
+      {switching.equipment !== null && (
+        <Field label={SWITCHING_EQUIPMENT_COPY.label}>
+          <div className="self-start">
+            <NumberField
+              aria-label={SWITCHING_EQUIPMENT_COPY.inputLabel}
+              value={switchingEquipmentOf(switching.equipment, changes.switchingEquipment)}
+              onValueChange={changeEquipment}
+              min={0}
+              max={switching.equipment.max}
+            />
+          </div>
+        </Field>
+      )}
     </Fields>
   )
 }
