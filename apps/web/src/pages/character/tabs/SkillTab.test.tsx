@@ -493,7 +493,9 @@ const DEALER_STATS: SkillStats = {
     { name: '용기의 은총', learned: 408, levels: [[15, 408]] }
   ],
   evolutions: [],
-  enhancements: []
+  enhancements: [],
+  chainSampleSize: 0,
+  chains: []
 }
 
 // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
@@ -587,7 +589,9 @@ const UPGRADE_STATS: SkillStats = {
     { name: '참수', type1: 5, type2: 15 },
     { name: '세례의 불길', type1: 40, type2: 0 }
   ],
-  enhancements: [{ name: '참수', type1: 10, type2: 10 }]
+  enhancements: [{ name: '참수', type1: 10, type2: 10 }],
+  chainSampleSize: 0,
+  chains: []
 }
 
 it('개화, 강화 행의 스킬 아이콘과 이름은 스킬 창 아이콘과 같은 채택률 Tooltip을 보이고 채택률은 한 번만 받는다', async () => {
