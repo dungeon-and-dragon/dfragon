@@ -57,10 +57,55 @@ export type EquipmentVariantItems = Readonly<
   Partial<Record<EquipmentVariantSlot, EquipmentVariantItem>>
 >
 
-interface EquipmentVariantSet {
+/** null은 선택지에 없는 착용 아이템이다. switchEquipmentSet의 결과에서는 착용 아이템을 그대로 둔다는 뜻이다. */
+export type EquipmentSetSelection = Readonly<
+  Partial<Record<EquipmentVariantSlot, EquipmentVariant | null>>
+>
+
+export interface EquipmentSet {
   readonly setItemId: string
   readonly setItemName: string
+}
+
+export interface OathSet {
+  readonly setId: number
+  readonly name: string
+}
+
+export interface OathVariant {
+  readonly id: string
+  readonly rarity: string
+  readonly item: EquipmentVariantItem
+  readonly setPoint: number
+  readonly otherItemIds?: readonly string[]
+}
+
+/** setId가 null이면 세트에 속하지 않는 영겁의 안개 서약이다. */
+export interface OathVariantMatch {
+  readonly setId: number | null
+  readonly variant: OathVariant
+}
+
+export interface OathCrystalVariant {
+  readonly id: string
+  readonly rarity: string
+  readonly item: EquipmentVariantItem
+  readonly tuneSetPoints: readonly number[]
+  readonly otherItemIds?: readonly string[]
+}
+
+export interface OathCrystalVariantMatch {
+  readonly setId: number
+  readonly variant: OathCrystalVariant
+}
+
+interface EquipmentVariantSet extends EquipmentSet {
   readonly slots: Readonly<Record<EquipmentVariantSlot, readonly EquipmentVariant[]>>
+}
+
+interface OathVariantSet extends OathSet {
+  readonly oaths: readonly OathVariant[]
+  readonly crystals: readonly OathCrystalVariant[]
 }
 
 type ExaltedSlot = 'RING' | 'SUPPORT' | 'MAGIC_STON' | 'EARRING'
@@ -70,12 +115,19 @@ interface EquipmentVariantTable {
   readonly sets: readonly EquipmentVariantSet[]
   readonly exalted: Readonly<Record<ExaltedSlot, EquipmentVariant>>
   readonly oathCrystals: readonly OathCrystal[]
+  readonly oathSets: readonly OathVariantSet[]
+  readonly mistOaths: readonly OathVariant[]
+  readonly weaponMaxTuneLevels: Readonly<Record<string, number>>
 }
 
 // 생성 스크립트가 만든 파일을 그대로 두므로 모양은 테스트가 확인한다.
 const variantTable = table as EquipmentVariantTable
 
+// 게임에서 태초 서약 결정은 캐릭터당 3개까지만 낄 수 있다(저장소 소유자 규칙).
+export const PRIMEVAL_OATH_CRYSTAL_LIMIT = 3
+
 const ARMOR_SLOTS = ['JACKET', 'SHOULDER', 'PANTS', 'SHOES', 'WAIST'] as const
+const RARITY_ORDER = ['유니크', '레전더리', '에픽', '태초']
 
 function exaltedOf(slotId: EquipmentVariantSlot): EquipmentVariant[] {
   const exalted: Partial<Record<EquipmentVariantSlot, EquipmentVariant>> = variantTable.exalted
@@ -121,6 +173,40 @@ const exaltedMatches = EQUIPMENT_VARIANT_SLOTS.flatMap((slotId) =>
 const matchesByItemId = new Map([...variantTable.sets.flatMap(matchesOf), ...exaltedMatches])
 const oathCrystalsByName = new Map(
   variantTable.oathCrystals.map((crystal) => [crystal.name, crystal])
+)
+const equipmentSetList: readonly EquipmentSet[] = variantTable.sets.map(
+  ({ setItemId, setItemName }) => ({ setItemId, setItemName })
+)
+const oathSetList: readonly OathSet[] = variantTable.oathSets.map(({ setId, name }) => ({
+  setId,
+  name
+}))
+const weaponMaxTuneLevels = new Map(Object.entries(variantTable.weaponMaxTuneLevels))
+const oathSetsById = new Map(variantTable.oathSets.map((oathSet) => [oathSet.setId, oathSet]))
+
+function itemIdsOf(variant: OathVariant | OathCrystalVariant): string[] {
+  return [variant.item.itemId, ...(variant.otherItemIds ?? [])]
+}
+
+function oathMatchesOf(setId: number | null, oaths: readonly OathVariant[]) {
+  return oaths.flatMap((variant) =>
+    itemIdsOf(variant).map((itemId): [string, OathVariantMatch] => [itemId, { setId, variant }])
+  )
+}
+
+const oathMatchesByItemId = new Map([
+  ...variantTable.oathSets.flatMap(({ setId, oaths }) => oathMatchesOf(setId, oaths)),
+  ...oathMatchesOf(null, variantTable.mistOaths)
+])
+const oathCrystalMatchesByItemId = new Map(
+  variantTable.oathSets.flatMap(({ setId, crystals }) =>
+    crystals.flatMap((variant) =>
+      itemIdsOf(variant).map((itemId): [string, OathCrystalVariantMatch] => [
+        itemId,
+        { setId, variant }
+      ])
+    )
+  )
 )
 
 export function equipmentVariantsOf(
@@ -172,4 +258,157 @@ export function findOathCrystal(itemName: string): OathCrystal | null {
   }
 
   return crystal
+}
+
+export function equipmentSets(): readonly EquipmentSet[] {
+  return equipmentSetList
+}
+
+function rarityRankOf(rarity: string): number {
+  return RARITY_ORDER.indexOf(rarity)
+}
+
+function highestVariantOf(variants: readonly EquipmentVariant[]): EquipmentVariant | null {
+  const normal = variants.filter(({ kind }) => kind === '일반')
+  const [highest] = normal.sort((a, b) => rarityRankOf(b.rarity) - rarityRankOf(a.rarity))
+
+  if (highest === undefined) {
+    return null
+  }
+
+  return highest
+}
+
+function switchedVariantOf(
+  variant: EquipmentVariant | null,
+  variants: readonly EquipmentVariant[]
+): EquipmentVariant | null {
+  if (variant === null || variant.kind === '유일') {
+    return null
+  }
+
+  const same = variants.find(
+    ({ rarity, kind }) => rarity === variant.rarity && kind === variant.kind
+  )
+
+  if (same !== undefined) {
+    return same
+  }
+
+  return highestVariantOf(variants)
+}
+
+export function switchEquipmentSet(
+  selection: EquipmentSetSelection,
+  setItemId: string
+): EquipmentSetSelection {
+  const slots = variantsBySet.get(setItemId)
+
+  if (slots === undefined) {
+    throw new Error(`Unknown equipment set: ${setItemId}`)
+  }
+
+  return Object.fromEntries(
+    EQUIPMENT_VARIANT_SLOTS.flatMap((slotId) => {
+      const variant = selection[slotId]
+
+      if (variant === undefined) {
+        return []
+      }
+
+      return [[slotId, switchedVariantOf(variant, slots.get(slotId) ?? [])]]
+    })
+  )
+}
+
+export function oathSets(): readonly OathSet[] {
+  return oathSetList
+}
+
+export function oathVariantsOf(setId: number | null): readonly OathVariant[] {
+  if (setId === null) {
+    return variantTable.mistOaths
+  }
+
+  const oathSet = oathSetsById.get(setId)
+
+  if (oathSet === undefined) {
+    return []
+  }
+
+  return oathSet.oaths
+}
+
+export function oathVariantOf(setId: number | null, rarity: string): OathVariant | null {
+  const variant = oathVariantsOf(setId).find((oath) => oath.rarity === rarity)
+
+  if (variant === undefined) {
+    return null
+  }
+
+  return variant
+}
+
+export function findOathVariant(itemId: string): OathVariantMatch | null {
+  const match = oathMatchesByItemId.get(itemId)
+
+  if (match === undefined) {
+    return null
+  }
+
+  return match
+}
+
+export function oathCrystalVariantsOf(setId: number): readonly OathCrystalVariant[] {
+  const oathSet = oathSetsById.get(setId)
+
+  if (oathSet === undefined) {
+    return []
+  }
+
+  return oathSet.crystals
+}
+
+export function findOathCrystalVariant(itemId: string): OathCrystalVariantMatch | null {
+  const match = oathCrystalMatchesByItemId.get(itemId)
+
+  if (match === undefined) {
+    return null
+  }
+
+  return match
+}
+
+/** 광휘 결정이 아니면 바꿔 넣을 짝이 없어 null을 돌려준다. */
+export function moveOathCrystalToSet(itemId: string, setId: number): OathCrystalVariant | null {
+  const crystals = oathCrystalVariantsOf(setId)
+
+  if (crystals.length === 0) {
+    throw new Error(`Unknown oath set: ${setId}`)
+  }
+
+  const match = findOathCrystalVariant(itemId)
+
+  if (match === null) {
+    return null
+  }
+
+  const moved = crystals.find(({ rarity }) => rarity === match.variant.rarity)
+
+  if (moved === undefined) {
+    return null
+  }
+
+  return moved
+}
+
+/** 목록에 없는 무기는 조율할 수 없어 0이다. */
+export function weaponMaxTuneLevelOf(itemName: string): number {
+  const level = weaponMaxTuneLevels.get(itemName)
+
+  if (level === undefined) {
+    return 0
+  }
+
+  return level
 }

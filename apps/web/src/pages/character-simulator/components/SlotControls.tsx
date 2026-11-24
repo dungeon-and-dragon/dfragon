@@ -24,12 +24,18 @@ const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결']
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
 const CONTROL_LINE = 'flex h-control-sm items-center'
 
-type ItemFace = Readonly<{ itemId: string | null; name: string | null; rarity: ItemView['rarity'] }>
+// icon이 있으면 Neople 아이템 그림 대신 그 그림을 쓴다(서약 본체).
+type ItemFace = Readonly<{
+  itemId: string | null
+  name: string | null
+  rarity: ItemView['rarity']
+  icon?: string | null
+}>
 
 function ItemFaceText({ item }: { item: ItemFace }): React.JSX.Element {
   return (
     <span className="flex min-w-0 items-center gap-3">
-      <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+      <ItemIcon itemId={item.itemId} src={item.icon} rarity={item.rarity} />
       <span className="min-w-0 truncate">
         <ItemName name={item.name} rarity={item.rarity} />
       </span>
@@ -39,7 +45,7 @@ function ItemFaceText({ item }: { item: ItemFace }): React.JSX.Element {
 
 // 목록 항목의 아이콘에만 아이템 정보 tooltip을 걸고, 이름은 항목 글자로 둔다.
 function SlotItemOption({ value, item }: { value: string; item: ItemFace }): React.JSX.Element {
-  const icon = <ItemIcon itemId={item.itemId} rarity={item.rarity} />
+  const icon = <ItemIcon itemId={item.itemId} src={item.icon} rarity={item.rarity} />
   const described =
     item.itemId !== null ? (
       <ItemTooltip itemId={item.itemId}>
@@ -335,6 +341,137 @@ export function EnchantControl({
                 ))}
               </Select.Group>
             )
+          })}
+        </Select.Popup>
+      </Select.Root>
+    </div>
+  )
+}
+
+export type SetOption = Readonly<{ id: string; name: string }>
+
+export function SetControl({
+  label,
+  value,
+  options,
+  onChange
+}: {
+  label: string
+  value: string
+  options: readonly SetOption[]
+  onChange: (id: string) => void
+}): React.JSX.Element {
+  function nameOf(id: string): string {
+    const option = options.find((candidate) => candidate.id === id)
+
+    if (option === undefined) {
+      return MISSING_VALUE
+    }
+
+    return option.name
+  }
+
+  function changeSet(next: string | null): void {
+    if (next != null) {
+      onChange(next)
+    }
+  }
+
+  return (
+    <div className="grid min-w-0">
+      <Select.Root value={value} onValueChange={changeSet}>
+        <Select.Trigger size="sm" aria-label={label}>
+          <Select.Value>
+            {(id: string) => <span className="min-w-0 truncate">{nameOf(id)}</span>}
+          </Select.Value>
+        </Select.Trigger>
+        <Select.Popup aria-label={label}>
+          {options.map((option) => (
+            <Select.Item key={option.id} value={option.id}>
+              <Select.ItemText>{option.name}</Select.ItemText>
+            </Select.Item>
+          ))}
+        </Select.Popup>
+      </Select.Root>
+    </div>
+  )
+}
+
+/**
+ * 서약 본체와 결정처럼 아이콘과 이름으로 고르는 선택이다. 착용 아이템이 선택지에 없으면 착용 중 항목을 첫 항목으로 두고,
+ * 선택지가 없으면 착용 아이템을 고정해 보인다.
+ */
+export function OathItemControl({
+  label,
+  worn,
+  wornListed,
+  shown,
+  choices,
+  value,
+  iconOf = () => null,
+  onChange
+}: {
+  label: string
+  worn: ItemView
+  wornListed: boolean
+  shown: ItemView
+  choices: readonly Readonly<{
+    id: string
+    itemId: string
+    name: string
+    rarity: ItemView['rarity']
+  }>[]
+  value: string | null
+  iconOf?: (item: ItemView) => string | null
+  onChange: (id: string | null) => void
+}): React.JSX.Element {
+  const shownIcon = iconOf(shown)
+  const face: ItemFace = {
+    itemId: shown.itemId,
+    name: shown.itemName,
+    rarity: shown.rarity,
+    icon: shownIcon
+  }
+  const wornIcon = iconOf(worn)
+  const wornFace: ItemFace = {
+    itemId: worn.itemId,
+    name: worn.itemName,
+    rarity: worn.rarity,
+    icon: wornIcon
+  }
+
+  if (choices.length === 0) {
+    return (
+      <div className={`${CONTROL_LINE} min-w-0 gap-3`}>
+        <ItemIcon itemId={worn.itemId} src={wornIcon} rarity={worn.rarity} />
+        <ItemName name={worn.itemName} rarity={worn.rarity} />
+      </div>
+    )
+  }
+
+  function changeItem(next: string | null): void {
+    if (next != null) {
+      const id = next === CURRENT ? null : next
+      onChange(id)
+    }
+  }
+
+  return (
+    <div className="grid w-full min-w-0">
+      <Select.Root value={value ?? CURRENT} onValueChange={changeItem}>
+        <Select.Trigger size="sm" aria-label={label}>
+          <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
+        </Select.Trigger>
+        <Select.Popup aria-label={label}>
+          {!wornListed && <SlotItemOption value={CURRENT} item={wornFace} />}
+          {choices.map((choice) => {
+            const icon = iconOf({
+              itemId: choice.itemId,
+              itemName: choice.name,
+              rarity: choice.rarity
+            })
+
+            return <SlotItemOption key={choice.id} value={choice.id} item={{ ...choice, icon }} />
           })}
         </Select.Popup>
       </Select.Root>

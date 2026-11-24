@@ -3,7 +3,7 @@ import type { CharacterDetailView } from '#entities/character'
 import { useCharacterDetail } from '#entities/character-detail'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useEquipmentSimulation } from './api/useEquipmentSimulation'
-import { EquipmentList, OathCrystalList } from './components/EquipmentList'
+import { EquipmentList, OathList } from './components/EquipmentList'
 import { SectionNav } from './components/SectionNav'
 import { SimulatorHeader } from './components/SimulatorHeader'
 import { SimulatorSummaryBar } from './components/SimulatorSummaryBar'
@@ -12,16 +12,19 @@ import { SlotEditorSheet } from './components/SlotEditorSheet'
 import {
   hasChanges,
   NO_CHANGES,
-  type SimulatorOathCrystal,
-  type SimulatorSlot,
-  type SimulatorSlotItem,
-  type SlotDraft,
+  rowsInEquipmentSet,
   simulationBody,
   simulatorReducer,
-  toOathCrystals,
+  toEquipmentSet,
   toSimulatorRows
 } from './model/simulator-draft'
-import { selectedTargetOf, targetTitleOf, toSimulatorTargets } from './model/simulator-target'
+import { oathInSet, toSimulatorOath } from './model/simulator-oath'
+import {
+  isOathTarget,
+  selectedTargetOf,
+  targetTitleOf,
+  toSimulatorTargets
+} from './model/simulator-target'
 
 const TITLE = '장비 시뮬레이터'
 // 이 폭보다 좁으면 조작 패널을 숨기고 줄을 누를 때 시트로 연다. 디자인 토큰의 md 경계와 같다.
@@ -92,13 +95,25 @@ function useInView(): [(node: HTMLElement | null) => (() => void) | undefined, b
 function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
   const identity = { serverId: character.serverId, characterId: character.characterId }
-  const rows = useMemo(() => toSimulatorRows(detail), [detail])
-  const crystals = useMemo(() => toOathCrystals(detail), [detail])
-  const targets = useMemo(() => toSimulatorTargets(rows, crystals), [rows, crystals])
+  const wornRows = useMemo(() => toSimulatorRows(detail), [detail])
+  const equipmentSet = useMemo(() => toEquipmentSet(detail), [detail])
+  const wornOath = useMemo(() => toSimulatorOath(detail), [detail])
   const [changes, dispatch] = useReducer(simulatorReducer, NO_CHANGES)
+  const rows = useMemo(
+    () => rowsInEquipmentSet(wornRows, changes.equipmentSet),
+    [wornRows, changes.equipmentSet]
+  )
+  const oath = useMemo(
+    () => (wornOath !== null ? oathInSet(wornOath, changes.oath.set) : null),
+    [wornOath, changes.oath.set]
+  )
+  const targets = useMemo(
+    () => toSimulatorTargets(equipmentSet, rows, oath),
+    [equipmentSet, rows, oath]
+  )
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
-  const body = useMemo(() => simulationBody(rows, changes), [rows, changes])
+  const body = useMemo(() => simulationBody(rows, oath, changes), [rows, oath, changes])
   const simulation = useEquipmentSimulation(identity, body)
   const equipmentHeadingId = useId()
   const oathHeadingId = useId()
@@ -107,12 +122,21 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   const selected = selectedTargetOf(targets, selectedKey)
   const [watchHeader, headerInView] = useInView()
   const actions: SlotEditorActions = {
-    onChange: (slot: SimulatorSlot, draft: Partial<SlotDraft>) =>
-      dispatch({ type: 'change', slot, draft }),
-    onSlotItemChange: (slotItem: SimulatorSlotItem, id: string | null) =>
-      dispatch({ type: 'slotItem', slotItem, id }),
-    onOathTuneChange: (crystal: SimulatorOathCrystal, tune: number) =>
-      dispatch({ type: 'oathTune', crystal, tune })
+    onEquipmentSetChange: (set, setItemId) =>
+      dispatch({ type: 'equipmentSet', rows: wornRows, equipmentSet: set, setItemId }),
+    onChange: (slot, draft) => dispatch({ type: 'change', slot, draft }),
+    onSlotItemChange: (slotItem, id) => dispatch({ type: 'slotItem', slotItem, id }),
+    onOathSetChange: (setId) => {
+      if (wornOath !== null) {
+        dispatch({ type: 'oathSet', oath: wornOath, setId })
+      }
+    },
+    onOathBodyChange: (oathBody, id) => dispatch({ type: 'oathBody', body: oathBody, id }),
+    onCrystalChange: (crystal, draft) => {
+      if (oath !== null) {
+        dispatch({ type: 'crystal', oath, crystal, draft })
+      }
+    }
   }
 
   function select(key: string): void {
@@ -124,14 +148,15 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     dispatch({ type: 'reset' })
   }
 
+  const hasOathRows = targets.some(isOathTarget)
   const sectionLinks = [
     { id: equipmentSectionId, label: '장비' },
-    ...(crystals.length > 0 ? [{ id: oathSectionId, label: '서약 결정' }] : [])
+    ...(hasOathRows ? [{ id: oathSectionId, label: '서약' }] : [])
   ]
 
   const hasNav = sectionLinks.length > 1
   const editor = selected !== undefined && (
-    <SlotEditor target={selected} rows={rows} changes={changes} actions={actions} />
+    <SlotEditor target={selected} rows={rows} oath={oath} changes={changes} actions={actions} />
   )
 
   return (
@@ -181,16 +206,16 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
               onSelect={select}
             />
           </section>
-          {crystals.length > 0 && (
+          {hasOathRows && (
             <section
               id={oathSectionId}
               aria-labelledby={oathHeadingId}
               className="scroll-mt-[var(--summary-height)] border-t border-line"
             >
               <div className="section-title">
-                <h2 id={oathHeadingId}>서약 결정</h2>
+                <h2 id={oathHeadingId}>서약</h2>
               </div>
-              <OathCrystalList
+              <OathList
                 targets={targets}
                 changes={changes}
                 selectedKey={selected?.key}

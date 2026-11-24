@@ -19,23 +19,27 @@ const equipmentChange = z.strictObject({
   potency: z.int().min(0).max(POTENCY_LIMIT).nullable().default(null)
 })
 
-const oathTuneChange = z.strictObject({
+const oathCrystalChange = z.strictObject({
   slotNo: z.int().min(0),
-  tune: z.int().min(0)
+  tune: z.int().min(0).nullable().default(null),
+  variantId: z.string().nullable().default(null)
 })
 
 // 생략과 null은 착용한 아이템을 그대로 둔다.
 const slotItemId = z.string().nullable().default(null)
 
 const simulationRequest = z.strictObject({
+  equipmentSet: z.string().nullable().default(null),
   equipment: z
     .array(equipmentChange)
     .refine((changes) => new Set(changes.map(({ slotId }) => slotId)).size === changes.length),
   title: slotItemId,
   creature: slotItemId,
   aura: slotItemId,
+  oathSet: z.int().nullable().default(null),
+  oathBody: z.string().nullable().default(null),
   oath: z
-    .array(oathTuneChange)
+    .array(oathCrystalChange)
     .refine((changes) => new Set(changes.map(({ slotNo }) => slotNo)).size === changes.length)
     .default([])
 })
@@ -57,8 +61,13 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     throw new EquipmentSimulationFailure('request')
   }
 
-  const { equipment, title, creature, aura, oath } = parsed.data
+  const { equipmentSet, equipment, title, creature, aura, oathSet, oathBody, oath } = parsed.data
   const slotItems = { title, creature, aura }
 
-  return { equipment, slotItems, oath }
+  return {
+    equipmentSet,
+    equipment,
+    slotItems,
+    oath: { set: oathSet, body: oathBody, crystals: oath }
+  }
 }
