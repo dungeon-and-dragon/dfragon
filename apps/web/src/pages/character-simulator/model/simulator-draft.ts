@@ -34,11 +34,7 @@ import {
 } from '#entities/character'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 import type { AvatarPresetChange } from './simulator-avatar'
-import {
-  changeUpgradeOathpoint,
-  changeUpgradeUnlock,
-  type SimulatorOathUpgrade
-} from './simulator-oath-upgrade'
+import { changeUpgradeUnlock, type SimulatorOathUpgrade } from './simulator-oath-upgrade'
 import {
   type CrystalDraft,
   changeCrystal,
@@ -249,12 +245,6 @@ export type SimulatorAction =
       upgrade: SimulatorOathUpgrade
       step: number
       unlocked: boolean
-    }>
-  | Readonly<{
-      type: 'oathUpgradeOathpoint'
-      upgrade: SimulatorOathUpgrade
-      step: number
-      oathpoint: boolean
     }>
   | Readonly<{
       type: 'crystal'
@@ -970,16 +960,6 @@ export function simulatorReducer(
         changes.oath.upgrade,
         action.step,
         action.unlocked
-      )
-
-      return { ...changes, oath: { ...changes.oath, upgrade } }
-    }
-    case 'oathUpgradeOathpoint': {
-      const upgrade = changeUpgradeOathpoint(
-        action.upgrade,
-        changes.oath.upgrade,
-        action.step,
-        action.oathpoint
       )
 
       return { ...changes, oath: { ...changes.oath, upgrade } }
