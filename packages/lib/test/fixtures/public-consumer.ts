@@ -84,10 +84,12 @@ import {
   type SlotItemCategory
 } from '@dfragon/lib/slot-items'
 import {
+  avatarPresetNeedsMainStat,
   findAvatarPreset,
   type AvatarEmblem,
   type AvatarPreset,
-  type AvatarPresetRole
+  type AvatarPresetRole,
+  type AvatarPresetSkinSpec
 } from '@dfragon/lib/avatar-presets'
 import {
   buffSwitchingOf,
@@ -288,16 +290,25 @@ export function oathUpgradeChoices(upgrades: readonly OathUpgradeSelection[]) {
   return { steps, first, valid, maxStep }
 }
 
-export function avatarPresetEmblems(jobId: string, jobGrowId: string, role: AvatarPresetRole) {
-  const preset: AvatarPreset | null = findAvatarPreset({ jobId, jobGrowId }, role)
+export function avatarPresetEmblems(
+  jobId: string,
+  jobGrowId: string,
+  role: AvatarPresetRole,
+  mainStat: string | null
+) {
+  const job = { jobId, jobGrowId }
+  const needsMainStat: boolean = avatarPresetNeedsMainStat(job, role)
+  const preset: AvatarPreset | null = findAvatarPreset(job, role, mainStat)
 
   if (preset === null) {
     return null
   }
 
   const emblems: readonly AvatarEmblem[] = preset.parts.JACKET.emblems
+  const skin: AvatarPresetSkinSpec = preset.skin
+  const names = emblems.map((emblem) => emblem.itemName)
 
-  return emblems.map((emblem) => emblem.itemName)
+  return { needsMainStat, names, skinRarity: skin.itemRarity }
 }
 
 export function buffLevelChoices(source: BuffSwitchingSource, level: number) {
