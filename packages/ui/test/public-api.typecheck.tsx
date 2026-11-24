@@ -2,6 +2,7 @@ import { createRef, type ChangeEvent, type MouseEvent, type Ref } from 'react'
 import { expectTypeOf } from 'vitest'
 import {
   Button,
+  Checkbox,
   Chip,
   ChipGroup,
   IconButton,
@@ -18,6 +19,7 @@ import {
   TextFieldLabel,
   Tooltip,
   type ButtonProps,
+  type CheckboxProps,
   type ChipGroupProps,
   type ChipProps,
   type IconButtonProps,
@@ -55,6 +57,7 @@ type PublicPropKeys =
   | keyof TabsListProps
   | keyof TabsTabProps
   | keyof SwitchProps
+  | keyof CheckboxProps
   | keyof ChipProps
   | keyof ChipGroupProps<string>
   | keyof TooltipPopupProps
@@ -188,6 +191,7 @@ export const behaviorExamples = (
       <Tabs.Panel value="collection">수집 패널</Tabs.Panel>
     </Tabs.Root>
     <Switch aria-label="자동 캡처" defaultChecked />
+    <Checkbox aria-label="첫 번째 진의" defaultChecked />
     <Chip defaultPressed>원본</Chip>
     <ChipGroup
       aria-label="기간"
