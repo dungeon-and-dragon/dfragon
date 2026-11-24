@@ -16,7 +16,7 @@ import {
 } from '#entities/ranking'
 import { type SkillMarks, skillMarkOf, type UpgradeType } from '#entities/catalog'
 import { PIXELATED, SKILL_TOOLTIP } from './skill-classes'
-import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from './upgrade-labels'
+import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from '#widgets/skill-window/lib/upgrade-labels'
 
 const UPGRADE_TYPES = [1, 2] as const satisfies readonly UpgradeType[]
 

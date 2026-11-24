@@ -6,10 +6,10 @@ import {
   SkillSprite,
   useSkillWindowCatalog
 } from '#entities/catalog'
+import { SKILL_TOOLTIP } from '#widgets/skill-window'
 import { BuffGearTable } from './buff/BuffGearTable'
 import type { CharacterTabProps } from './character-tab-props'
 import { itemClasses, itemTableClasses } from './equipment/item-classes'
-import { SKILL_TOOLTIP } from './skill/skill-classes'
 
 const SKILL_NAME = 'm-0 text-sm font-semibold'
 
