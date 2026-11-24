@@ -26,6 +26,7 @@ Neople 명성 검색으로 새 캐릭터를 찾아 같은 대기열에 넣는 jo
 명성 갱신 job과 월말 비활성 캐릭터 재확인 job은 `src/application/character-activity/activity-jobs.ts`, 비활성 판정 기준은 `src/domain/character-activity/activity.ts`, 최근 활동을 읽는 Neople adapter는 `src/infrastructure/neople/character-activity.ts`에 있습니다.
 Worker 설정과 연결은 `src/runtime/collector-configuration.ts`, `src/runtime/character-collector.ts`에 있고, 시작 함수 `runCharacterCollector`는 `src/runtime/run-character-collector.ts`에 있습니다.
 Worker가 batch Neople key마다 요청을 나눠 보내는 코드는 `src/infrastructure/neople/batch-key-pool.ts`, worker 전체와 key별 요청 속도 제한, 타임라인 동기화 요청을 먼저 내보내는 우선순위는 `src/infrastructure/neople/request-priority.ts`에 있습니다.
+요청 테이블의 타임라인 동기화 요청을 집어 처리하는 Service는 `src/application/timeline-sync/`, DB adapter는 `src/infrastructure/database/timeline-sync-request.ts`, 연결은 `src/runtime/timeline-sync.ts`에 있습니다.
 
 ## 입력
 
