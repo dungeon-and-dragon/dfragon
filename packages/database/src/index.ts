@@ -21,8 +21,6 @@ export {
   recordItemDictionary
 } from './item-dictionary.js'
 export type { ItemDictionaryEntry, UnlistedAcquisitionQuery } from './item-dictionary.js'
-export { readTimelineQueueCounts, writeTimelineQueueCounts } from './timeline-queue-count.js'
-export type { TimelineQueueCount } from './timeline-queue-count.js'
 export {
   TIMELINE_SYNC_REQUEST_KINDS,
   claimTimelineSyncRequests,
