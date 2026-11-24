@@ -1,3 +1,3 @@
-export { EnhancementBackfillService } from './backfill.js'
+export { EnhancementBackfillService, isEnhancementBackfilled } from './backfill.js'
 export { SeasonBackfillService } from './season-backfill.js'
-export { TimelineSyncService } from './sync.js'
+export { TimelineSyncService, isSyncedRecently } from './sync.js'
