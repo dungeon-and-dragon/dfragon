@@ -51,7 +51,7 @@ function SiteLayout(): React.JSX.Element {
   return (
     <div className="flex grow flex-col overflow-x-clip font-sans text-fg">
       <GlobalBar />
-      {/* 900px 미만에서는 페이지 대신 화면 상자 안에서 가로로 스크롤한다. 안의 보조 기술용 absolute 요소가 상자 밖 페이지를
+      {/* 900px 미만에서는 페이지 대신 화면 상자 안에서 가로로 스크롤한다. 안의 absolute 요소가 상자 밖 페이지를
           기준으로 놓이면 overflow에 잘리지 않고 페이지를 넓히므로 상자를 기준으로 삼는다. 넓은 창에서는 구획의 가로 선이
           상자 밖 창 끝까지 그어져야 하므로 상자에 스크롤을 두지 않는다. */}
       <div className="page screen bg-canvas">
@@ -78,7 +78,6 @@ export function RootLayout(): React.JSX.Element {
       </PageNoteTarget>
       <div ref={setNoteTarget} className="absolute bottom-8 left-4 text-2xs text-fg-subtle" />
       <span className="absolute bottom-4 left-4 num text-2xs text-fg-subtle">
-        <span className="sr-only">빌드 </span>
         {__BUILD_COMMIT__}
       </span>
     </div>

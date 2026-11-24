@@ -248,9 +248,6 @@ function BoxPlotChartPlot({
               scale={scale}
               width={width}
               columns={columns}
-              description={tooltipRows(row)
-                .map(({ name, value }) => `${name} ${value}`)
-                .join(', ')}
               onHover={show}
               anchorsRef={anchorsRef}
             />
@@ -274,7 +271,6 @@ function BoxPlotChartRow({
   scale,
   width,
   columns,
-  description,
   onHover,
   anchorsRef
 }: {
@@ -282,7 +278,6 @@ function BoxPlotChartRow({
   scale: Scale
   width: number
   columns: React.CSSProperties
-  description: string
   onHover: (key: string) => void
   anchorsRef: React.RefObject<Map<string, HTMLElement>>
 }): React.JSX.Element {
@@ -308,7 +303,6 @@ function BoxPlotChartRow({
       <span className="truncate text-xs text-fg-muted">
         {name}
         {sub != null && <small className="text-xs text-fg-subtle"> {sub}</small>}
-        <span className="sr-only">{description}</span>
       </span>
       <div ref={plotRef} className="min-w-0">
         {stats !== null ? (

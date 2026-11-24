@@ -7,7 +7,7 @@ import { StatsTabs } from '#widgets/stats-tabs'
 
 type SampledStats = Readonly<{ computedAt: string | null; sampleSize: number }>
 
-type StatsMessages = Readonly<{ empty: string; failed: string; loading: string }>
+type StatsMessages = Readonly<{ empty: string; failed: string }>
 
 export function StatsScreenFrame<Stats extends SampledStats>({
   result,
@@ -53,9 +53,6 @@ function StatsBody<Stats extends SampledStats>({
     case 'loading':
       return (
         <div aria-busy="true">
-          <span role="status" className="sr-only">
-            {messages.loading}
-          </span>
           {filterBox}
           <div aria-hidden="true">{skeleton}</div>
         </div>

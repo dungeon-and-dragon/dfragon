@@ -85,9 +85,6 @@ function WeeklyClearList({ adventureName }: { adventureName: string }): React.JS
       return (
         <WeeklyClearBox>
           <div aria-busy="true">
-            <span role="status" className="sr-only">
-              주간 던파를 받는 중입니다.
-            </span>
             <WeeklyClearTable
               clearNames={[]}
               rows={[]}

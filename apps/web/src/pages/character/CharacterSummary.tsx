@@ -201,7 +201,6 @@ function FameStat({ fame }: { fame: number | null }): React.JSX.Element {
 
 function ScoreStat({ card }: { card: CharacterDetailView['card'] }): React.JSX.Element {
   const { label, tone, value, approximate, description } = toScoreView(card)
-  const note = description !== undefined && <span className="sr-only">{description}</span>
   const toneClass = tone !== null ? SCORE_TONES[tone] : ''
   const approximateClass = approximate ? 'border-b border-dotted border-fg-subtle' : ''
 
@@ -211,12 +210,10 @@ function ScoreStat({ card }: { card: CharacterDetailView['card'] }): React.JSX.E
       {value != null ? (
         <span title={description} className={`stat-value ${toneClass} ${approximateClass}`}>
           {approximate ? formatApproximateScore(value) : integer.format(value)}
-          {note}
         </span>
       ) : (
-        <span className="stat-value text-fg-subtle">
+        <span title={description} className="stat-value text-fg-subtle">
           {MISSING_VALUE}
-          {note}
         </span>
       )}
     </div>

@@ -32,14 +32,12 @@ export function ChartTooltip({
 export function HitList({
   x,
   places,
-  describe,
   onHover,
   areaProps,
   register
 }: {
   x: readonly ChartX[]
   places: readonly Readonly<{ left: number; width: number }>[]
-  describe: (index: number) => string
   onHover: (key: string) => void
   areaProps: ChartHoverAreaProps
   register: (key: string, element: HTMLLIElement) => () => void
@@ -51,7 +49,6 @@ export function HitList({
           key={key}
           hitKey={key}
           place={places[index] ?? { left: 0, width: 0 }}
-          text={describe(index)}
           onHover={onHover}
           register={register}
         />
@@ -63,13 +60,11 @@ export function HitList({
 function HitArea({
   hitKey,
   place: { left, width },
-  text,
   onHover,
   register
 }: {
   hitKey: string
   place: Readonly<{ left: number; width: number }>
-  text: string
   onHover: (key: string) => void
   register: (key: string, element: HTMLLIElement) => () => void
 }): React.JSX.Element {
@@ -87,8 +82,6 @@ function HitArea({
       onMouseEnter={handleMouseEnter}
       className="absolute top-0 bottom-0"
       style={{ left, width }}
-    >
-      <span className="sr-only">{text}</span>
-    </li>
+    />
   )
 }

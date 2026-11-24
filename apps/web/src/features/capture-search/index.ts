@@ -28,7 +28,6 @@ export { sliceRaidValueGlyphs } from './lib/capture/raid/raid-value-glyphs'
 export type { SearchMode } from './lib/capture/search-mode'
 export {
   createSeatOrder,
-  seatDirections,
   seatValuesToSlotOrder,
   swapSeats
 } from './lib/capture/seats'
@@ -75,7 +74,7 @@ export type { RaidCapture } from './model/useRaidCapture'
 export { useScreenCaptureContext } from './model/useScreenCaptureContext'
 export { useIsPartyMode, useIsRaidMode, useSearchModeStore } from './model/useSearchModeStore'
 export { useSeatMove } from './model/useSeatMove'
-export type { SeatMove, SeatMoveNotice } from './model/useSeatMove'
+export type { SeatMove } from './model/useSeatMove'
 export type { SeatArrangement } from './model/useSeatOrder'
 export type { SlotCardKey } from './model/useSlotCardStore'
 export { ScreenCaptureProvider } from './ui/ScreenCaptureProvider'

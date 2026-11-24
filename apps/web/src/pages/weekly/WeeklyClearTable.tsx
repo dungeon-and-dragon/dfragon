@@ -129,17 +129,14 @@ export function WeeklyClearTable({
 }
 
 function ClearMark({ cleared }: { cleared: boolean }): React.JSX.Element {
+  if (cleared) {
+    return <CheckIcon className="inline-block size-icon-sm align-middle text-fg-success" />
+  }
+
   return (
-    <>
-      {cleared ? (
-        <CheckIcon className="inline-block size-icon-sm align-middle text-fg-success" />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="box-border inline-block size-4 rounded-control border border-dashed border-line-input align-middle"
-        />
-      )}
-      <span className="sr-only">{cleared ? '클리어' : '클리어 안 함'}</span>
-    </>
+    <span
+      aria-hidden="true"
+      className="box-border inline-block size-4 rounded-control border border-dashed border-line-input align-middle"
+    />
   )
 }
