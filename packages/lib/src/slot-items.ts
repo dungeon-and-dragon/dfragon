@@ -31,7 +31,10 @@ export interface SlotItem {
   }
 }
 
-type EngineSlotItem = Omit<SlotItem, 'item'>
+interface EngineSlotItem extends Omit<SlotItem, 'item'> {
+  readonly members: readonly string[]
+  readonly ambiguousMembers: readonly string[]
+}
 
 interface EngineSlotItemTable {
   readonly version: 1
@@ -76,12 +79,40 @@ const slotItems: Readonly<Record<SlotItemCategory, readonly SlotItem[]>> = {
   aura: auras
 }
 
+// ambiguousMembers는 효과가 다른 묶음에도 같은 이름이 있는 아이템이라 이름으로는 묶음을 정할 수 없다.
+const memberNames: ReadonlyMap<string, ReadonlySet<string>> = new Map(
+  SLOT_ITEM_CATEGORIES.flatMap((category) => engineSlotItems.categories[category]).map(
+    ({ id, members, ambiguousMembers }) => [
+      id,
+      new Set(members.filter((name) => !ambiguousMembers.includes(name)))
+    ]
+  )
+)
+
 export function slotItemsOf(category: SlotItemCategory): readonly SlotItem[] {
   return slotItems[category]
 }
 
 export function findSlotItem(category: SlotItemCategory, id: string): SlotItem | null {
   const found = slotItems[category].find((slotItem) => slotItem.id === id)
+
+  if (found === undefined) {
+    return null
+  }
+
+  return found
+}
+
+export function findWornSlotItem(
+  category: SlotItemCategory,
+  worn: { readonly itemId: string; readonly itemName: string | null }
+): SlotItem | null {
+  const { itemId, itemName } = worn
+  const found = slotItems[category].find(
+    (slotItem) =>
+      slotItem.item.itemId === itemId ||
+      (itemName !== null && memberNames.get(slotItem.id)?.has(itemName) === true)
+  )
 
   if (found === undefined) {
     return null
