@@ -6,6 +6,7 @@ import type {
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   type ClearContent,
+  toCollectionMinFame,
   toLatestContents
 } from '@dfragon/server-core/domain/content-clears/index.js'
 
@@ -54,6 +55,19 @@ function toRatios(counts: readonly ClearWeekRatioCount[]): ClearRatioCount[] {
     .sort((left, right) => (left.ratio ?? -1) - (right.ratio ?? -1))
 }
 
+// 입장 명성이 수집 하한보다 낮은 컨텐츠는 분모를 하한부터 세지만 기준 명성은 입장 명성으로 보인다.
+function toShownMinFame(content: ClearContent, population: StoredClearPopulation): number | null {
+  if (population.minFame === null) {
+    return null
+  }
+
+  if (content.entryFame < toCollectionMinFame()) {
+    return content.entryFame
+  }
+
+  return population.minFame
+}
+
 // 레이드는 그 주에 깬 수, 챌린지는 출시부터 그 주 끝까지 깬 누적 수와 그 주에 새로 깬 수다.
 function toClearWeek(
   content: ClearContent,
@@ -74,7 +88,7 @@ function toClearWeek(
   const closed = population.closed
   const collectedAt = population.collectedAt.toISOString()
   const populationSize = population.population
-  const minFame = population.minFame
+  const minFame = toShownMinFame(content, population)
 
   return {
     weekStart: formattedWeekStart,
