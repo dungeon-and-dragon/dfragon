@@ -51,8 +51,9 @@ const simulationRequest = z.strictObject({
     .default([]),
   // 생략과 null은 착용한 진의를 그대로 둔다.
   oathUpgrade: z.array(oathUpgradeSelection).nullable().default(null),
-  // 생략과 null은 버프 강화 스킬 레벨과 착용 아바타를 그대로 둔다.
+  // 생략과 null은 버프 강화 스킬 레벨, 짙편린 등록 수와 착용 아바타를 그대로 둔다.
   buffLevel: z.int().nullable().default(null),
+  switchingEquipment: z.int().nullable().default(null),
   avatarPreset: z.literal('best').nullable().default(null)
 })
 
@@ -84,6 +85,7 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     oath,
     oathUpgrade,
     buffLevel,
+    switchingEquipment,
     avatarPreset
   } = parsed.data
   const slotItems = { title, creature, aura }
@@ -94,6 +96,7 @@ export function parseSimulationRequest(text: string): EquipmentSimulationRequest
     slotItems,
     oath: { set: oathSet, body: oathBody, crystals: oath, upgrade: oathUpgrade },
     buffLevel,
+    switchingEquipment,
     avatarPreset
   }
 }
