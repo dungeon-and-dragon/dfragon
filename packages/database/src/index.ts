@@ -28,6 +28,8 @@ export {
   claimTimelineSyncRequests,
   countTimelineSyncRequests,
   deleteTimelineSyncRequest,
+  hasTimelineSyncRequest,
+  readSeasonBackfillRequestSeasons,
   releaseStartedTimelineSyncRequests,
   releaseTimelineSyncRequest,
   requestTimelineSync
@@ -289,6 +291,7 @@ export {
   readSeasons,
   readTimelineEvents,
   readTimelineSyncState,
+  readTimelineSyncStates,
   recordSeasonBackfillCompleted,
   recordTimelineSyncFailure,
   recordTimelineSyncSuccess,
@@ -311,7 +314,8 @@ export type {
   TimelineItemCursor,
   TimelineItemRow,
   TimelineRange,
-  TimelineSyncState
+  TimelineSyncState,
+  TimelineSyncStateRow
 } from './timeline.js'
 export {
   readAdventureSetCharacters,

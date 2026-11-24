@@ -298,6 +298,26 @@ export async function readEnhancementBackfilledUntil(
   return state.enhancementBackfilledUntil
 }
 
+export type TimelineSyncStateRow = TimelineCharacter & {
+  lastSucceededAt: Date | null
+  enhancementBackfilledUntil: Date | null
+}
+
+export function readTimelineSyncStates(
+  client: DatabaseClient,
+  characters: readonly TimelineCharacter[]
+): Promise<TimelineSyncStateRow[]> {
+  return client.timelineSyncState.findMany({
+    where: { OR: characters.map(({ serverId, characterId }) => ({ serverId, characterId })) },
+    select: {
+      serverId: true,
+      characterId: true,
+      lastSucceededAt: true,
+      enhancementBackfilledUntil: true
+    }
+  })
+}
+
 export async function readTimelineSyncState(
   client: DatabaseClient,
   character: TimelineCharacter
