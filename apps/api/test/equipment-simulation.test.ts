@@ -2646,9 +2646,10 @@ test('실제 엔진은 묵언의 진의 단계를 올리면 점수를 올리고 
   assert.ok(bufferLowered.simulated.value < bufferLowered.baseline.value)
 })
 
-const BUFF_AVATAR_ENGINE = 'dnfscore-native 0.11.0'
+const BUFF_LEVEL_ENGINE = 'dnfscore-native 0.11.0'
+const AVATAR_ENGINE = 'dnfscore-native 0.12.0'
 // 엠블렘 Neople 상세 가운데 엔진이 읽는 명성, 스탯 칸만 운영 공개 API 응답에서 옮긴 값이다.
-// 딜러 블레이드와 버퍼 뮤즈의 끝 스펙 엠블렘이다.
+// 딜러 블레이드, 버퍼 뮤즈, 남성 크루세이더 버퍼 두 갈래의 끝 스펙 엠블렘이다.
 const emblemDetails = JSON.parse(
   readFileSync(new URL('../../test/fixtures/avatar-emblem-details.json', import.meta.url), 'utf8')
 ) as Record<string, Item>
@@ -2656,6 +2657,19 @@ const emblemDetails = JSON.parse(
 const BLADE_PLATINUM = '플래티넘 엠블렘[빈티지]'
 const BLADE_GREEN = '찬란한 녹색빛 엠블렘[물리크리티컬]'
 const BLADE_RED = '찬란한 붉은빛 엠블렘[힘]'
+const SPIRIT_RED = {
+  itemId: 'cf59f2a61cd81b2cdf2a929f4c4c6e13',
+  itemName: '찬란한 붉은빛 엠블렘[정신력]',
+  itemRarity: '유니크'
+}
+const VITALITY_RED = '찬란한 붉은빛 엠블렘[체력]'
+const CRUSADER_PLATINUM = '플래티넘 엠블렘[수호의 은총]'
+const MALE_CRUSADER_JOB = {
+  jobId: 'f6a4ad30555b99b499c07835f87ce522',
+  jobGrowId: '37495b941da3b1661bc900e68ef3b2c6',
+  jobName: '프리스트(남)',
+  jobGrowName: '眞 크루세이더'
+}
 const BLUE_SPEED = {
   itemId: '28dc69272fa7ee91bfdc62cf53f2c3d1',
   itemName: '찬란한 푸른빛 엠블렘[이동속도]'
@@ -2684,6 +2698,24 @@ function emblemNames(item: Item): unknown[] {
   ])
 }
 
+function skinEmblems(emblem: Item): Item[] {
+  return [1, 2].map((slotNo) => ({ slotNo, slotColor: '다색', ...emblem }))
+}
+
+// 남성 크루세이더 버퍼 fixture가 없어 뮤즈 fixture의 직업과 증폭만 바꾼 합성 데이터다.
+function asMaleCrusaderBuffer(payloads: CharacterPayloads, amplified: string | null): void {
+  const amplificationName = amplified === null ? null : `차원의 ${amplified}`
+
+  payloads.basic = { ...payloads.basic, ...MALE_CRUSADER_JOB }
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).map((item) => {
+    if (item.slotId === 'TITLE') {
+      return item
+    }
+
+    return { ...item, amplificationName }
+  })
+}
+
 function buffSkillInfo(payloads: CharacterPayloads): Item {
   return ((payloads.buff_equipment.skill as Item).buff as Item).skillInfo as Item
 }
@@ -2697,7 +2729,7 @@ for (const [name, fixtureName, buffLevel] of [
 ] as const) {
   test(`버프 강화 스킬 레벨: ${name} 그 절대 레벨을 엔진에 넣는다`, async (t) => {
     const { details, path } = fixture(fixtureName)
-    const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+    const engine = scoring(versionedEngine(BUFF_LEVEL_ENGINE))
     const origin = await listen(t, { details, ...engine.options })
 
     const response = await simulate(origin, path, { equipment: [], buffLevel })
@@ -2726,7 +2758,7 @@ for (const [name, fixtureName, buffLevel, edit] of [
   test(`버프 강화 스킬 레벨: ${name} 시뮬레이션 입력 없이 원본만 계산한다`, async (t) => {
     const { payloads, details, path } = fixture(fixtureName)
     edit(payloads)
-    const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+    const engine = scoring(versionedEngine(BUFF_LEVEL_ENGINE))
     const origin = await listen(t, { details, ...engine.options })
 
     const response = await simulate(origin, path, { equipment: [], buffLevel })
@@ -2775,7 +2807,7 @@ for (const [name, fixtureName, buffLevel, edit] of invalidBuffLevelCases) {
   test(`버프 강화 스킬 레벨 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
     const { payloads, details, path } = fixture(fixtureName)
     edit(payloads)
-    const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+    const engine = scoring(versionedEngine(BUFF_LEVEL_ENGINE))
     const origin = await listen(t, { details, ...engine.options })
 
     const response = await simulate(origin, path, { equipment: [], buffLevel })
@@ -2785,10 +2817,10 @@ for (const [name, fixtureName, buffLevel, edit] of invalidBuffLevelCases) {
   })
 }
 
-test('끝 스펙은 커먼 9부위를 레어로 바꿔 소켓을 새로 짜고 원본의 나머지 칸과 피부는 그대로 둔다', async (t) => {
+test('끝 스펙은 커먼 9부위를 레어로 바꿔 소켓을 새로 짜고, 소켓 없는 피부에 엠블렘만 넣으며 나머지 칸은 원본대로 둔다', async (t) => {
   const { original, payloads, details, path } = fixture('dealer-blade', undefined, emblemDetails)
   const before = structuredClone(payloads)
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
@@ -2797,7 +2829,7 @@ test('끝 스펙은 커먼 9부위를 레어로 바꿔 소켓을 새로 짜고 �
   assert.equal(response.body.simulated.value, 1802)
   const { input } = engine.requests[0]!
   const simulated = bySlot(input.simulation!.avatar!)
-  assert.deepEqual(Object.keys(simulated).sort(), [...PRESET_PARTS, 'AURORA'].sort())
+  assert.deepEqual(Object.keys(simulated).sort(), [...PRESET_PARTS, 'AURORA', 'SKIN'].sort())
   for (const slotId of PRESET_PARTS) {
     const worn = itemOf(avatarOf(original), slotId)
     const part = simulated[slotId]!
@@ -2826,6 +2858,17 @@ test('끝 스펙은 커먼 9부위를 레어로 바꿔 소켓을 새로 짜고 �
     withoutKeys(simulated.AURORA!, ['emblems']),
     withoutKeys(itemOf(avatarOf(original), 'AURORA'), ['emblems'])
   )
+  // 원본 피부는 emblems가 null인 소켓 없는 커먼 피부다.
+  const wornSkin = itemOf(avatarOf(original), 'SKIN')
+  const skinEmblemNames = emblemNames(simulated.SKIN!)
+  const skinFields = withoutKeys(simulated.SKIN!, ['emblems'])
+  const wornSkinFields = withoutKeys(wornSkin, ['emblems'])
+  assert.equal(wornSkin.emblems, null)
+  assert.deepEqual(skinEmblemNames, [
+    [1, '다색', BLADE_RED],
+    [2, '다색', BLADE_RED]
+  ])
+  assert.deepEqual(skinFields, wornSkinFields)
   // 원본은 끝 스펙 엠블렘을 하나도 끼지 않아 넣은 엠블렘의 상세가 모두 새로 받은 값이다.
   const emblems = input.simulation!.avatar!.flatMap((part) => part.emblems as Item[])
   for (const { itemId } of emblems) {
@@ -2838,15 +2881,21 @@ test('끝 스펙은 커먼 9부위를 레어로 바꿔 소켓을 새로 짜고 �
   assert.deepEqual(payloads, before)
 })
 
-test('끝 스펙은 이미 같은 부위를 넣지 않고 다른 엠블렘만 바꾸며 그 엠블렘의 상세를 items에 더한다', async (t) => {
+test('끝 스펙은 이미 찬란한 엠블렘을 낀 피부와 같은 부위를 넣지 않고 다른 엠블렘만 바꾸며 그 엠블렘의 상세를 items에 더한다', async (t) => {
   const { original, details, path } = fixture('buffer-muse', undefined, emblemDetails)
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
 
   assert.equal(response.status, 200)
   const { input } = engine.requests[0]!
+  const wornSkin = itemOf(avatarOf(original), 'SKIN')
+  const wornSkinEmblems = emblemNames(wornSkin)
+  assert.deepEqual(wornSkinEmblems, [
+    [1, '다색', SPIRIT_RED.itemName],
+    [2, '다색', SPIRIT_RED.itemName]
+  ])
   const blue = [
     [1, '푸른빛', BLUE_SPEED.itemName],
     [2, '푸른빛', BLUE_SPEED.itemName]
@@ -2872,7 +2921,7 @@ test('모든 부위가 이미 끝 스펙이면 시뮬레이션 입력 없이 원
       }))
     }
   }
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
@@ -2883,7 +2932,7 @@ test('모든 부위가 이미 끝 스펙이면 시뮬레이션 입력 없이 원
   assert.equal(engine.requests[0]!.input.simulation, undefined)
 })
 
-test('끼지 않은 부위는 끝 스펙 항목을 새로 더하고, 바꾼 플래티넘은 원본 플래티넘의 상세도 넣는다', async (t) => {
+test('끼지 않은 무기와 피부는 끝 스펙 항목을 새로 더하고, 바꾼 플래티넘은 원본 플래티넘의 상세도 넣는다', async (t) => {
   const wornPlatinum = {
     itemId: 'f0000000000000000000000000000001',
     itemName: '플래티넘 엠블렘[퍼페티어]'
@@ -2898,7 +2947,7 @@ test('끼지 않은 부위는 끝 스펙 항목을 새로 더하고, 바꾼 플�
     [wornPlatinum.itemId]: platinumDetail
   })
   payloads.avatar.avatar = avatarOf(payloads).flatMap((part) => {
-    if (part.slotId === 'WEAPON') {
+    if (part.slotId === 'WEAPON' || part.slotId === 'SKIN') {
       return []
     }
 
@@ -2910,7 +2959,7 @@ test('끼지 않은 부위는 끝 스펙 항목을 새로 더하고, 바꾼 플�
 
     return [{ ...part, emblems: [{ ...platinum, ...wornPlatinum }, ...rest] }]
   })
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
@@ -2918,19 +2967,21 @@ test('끼지 않은 부위는 끝 스펙 항목을 새로 더하고, 바꾼 플�
   assert.equal(response.status, 200)
   const { input } = engine.requests[0]!
   const simulated = bySlot(input.simulation!.avatar!)
+  const spiritEmblems = skinEmblems(SPIRIT_RED)
   assert.deepEqual(simulated.WEAPON, {
     slotId: 'WEAPON',
     slotName: '무기 아바타',
     itemName: '레어 무기 클론 아바타[75Lv]',
     itemRarity: '레어',
     optionAbility: '정신력 55 증가',
-    emblems: [1, 2].map((slotNo) => ({
-      slotNo,
-      slotColor: '다색',
-      itemId: 'cf59f2a61cd81b2cdf2a929f4c4c6e13',
-      itemName: '찬란한 붉은빛 엠블렘[정신력]',
-      itemRarity: '유니크'
-    }))
+    emblems: spiritEmblems
+  })
+  assert.deepEqual(simulated.SKIN, {
+    slotId: 'SKIN',
+    slotName: '스킨 아바타',
+    itemName: '백옥 피부',
+    itemRarity: '커먼',
+    emblems: spiritEmblems
   })
   assert.equal((simulated.JACKET!.emblems as Item[])[0]!.itemName, '플래티넘 엠블렘[센세이션]')
   assert.deepEqual(input.items[wornPlatinum.itemId], platinumDetail)
@@ -2944,7 +2995,7 @@ test('끝 스펙과 오라 교체를 함께 보내면 오라 아이템은 교체
     ...slotItemDetails,
     ...emblemDetails
   })
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, {
@@ -2968,7 +3019,7 @@ test('끝 스펙과 오라 교체를 함께 보내면 오라 아이템은 교체
 
 test('버프 강화 스킬 레벨과 끝 스펙은 장비 변경과 함께 보낼 수 있다', async (t) => {
   const { details, path } = fixture('dealer-blade', undefined, emblemDetails)
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, {
@@ -2981,12 +3032,13 @@ test('버프 강화 스킬 레벨과 끝 스펙은 장비 변경과 함께 보�
   const simulation = engine.requests[0]!.input.simulation!
   assert.deepEqual(simulation.buff, { level: 18 })
   assert.equal(simulation.equipment[0]!.reinforce, 12)
-  assert.equal(simulation.avatar!.length, PRESET_PARTS.length + 1)
+  const slotIds = simulation.avatar!.map(({ slotId }) => slotId)
+  assert.deepEqual(slotIds.sort(), [...PRESET_PARTS, 'AURORA', 'SKIN'].sort())
 })
 
 test('끝 스펙 엠블렘의 상세를 받지 못하면 엔진을 부르지 않고 두 점수 모두 null이다', async (t) => {
   const { details, path } = fixture('dealer-blade')
-  const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+  const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
   const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
@@ -3008,7 +3060,7 @@ for (const [name, body, edit] of [
   test(`아바타 프리셋 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
     const { payloads, details, path } = fixture('dealer-blade', undefined, emblemDetails)
     edit(payloads)
-    const engine = scoring(versionedEngine(BUFF_AVATAR_ENGINE))
+    const engine = scoring(versionedEngine(AVATAR_ENGINE))
     const origin = await listen(t, { details, ...engine.options })
 
     const response = await simulate(origin, path, { equipment: [], ...body })
@@ -3026,13 +3078,13 @@ for (const [name, package_, body, expected] of [
     null
   ],
   [
-    '0.11.0 전 엔진에 끝 스펙을 보내면 두 점수 모두 null이다',
-    UPGRADE_ENGINE,
+    '피부 엠블렘을 바꾸지 못하는 0.11.0 엔진에 끝 스펙을 보내면 두 점수 모두 null이다',
+    BUFF_LEVEL_ENGINE,
     { avatarPreset: 'best' },
     null
   ],
-  ['0.11.0 엔진은 버프 강화 레벨 변경을 반영한다', BUFF_AVATAR_ENGINE, { buffLevel: 18 }, 1802],
-  ['0.11.0 엔진은 끝 스펙을 반영한다', BUFF_AVATAR_ENGINE, { avatarPreset: 'best' }, 1802]
+  ['0.11.0 엔진은 버프 강화 레벨 변경을 반영한다', BUFF_LEVEL_ENGINE, { buffLevel: 18 }, 1802],
+  ['0.12.0 엔진은 끝 스펙을 반영한다', AVATAR_ENGINE, { avatarPreset: 'best' }, 1802]
 ] as const) {
   test(`엔진 버전: ${name}`, async (t) => {
     const { details, path } = fixture('dealer-blade', undefined, emblemDetails)
@@ -3047,35 +3099,119 @@ for (const [name, package_, body, expected] of [
   })
 }
 
-const REAL_BUFF_AVATAR_ENGINE = realEngineSupports({ buffLevel: true, avatar: true })
+const CASTING_SPEED = '캐스팅 속도 14.0% 증가'
 
-// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
-test('실제 엔진은 버프 강화 스킬 레벨과 끝 스펙을 바꾼 요청을 건너뛰지 않고 계산한다', {
-  skip:
-    !REAL_BUFF_AVATAR_ENGINE && '버프 강화 레벨과 아바타 변경을 반영하는 0.11.0 이상 엔진이 없음',
-  timeout: 60_000
-}, async (t) => {
-  const scoresOf = async (name: FixtureName, body: Item) => {
-    const { details, path } = fixture(name, undefined, emblemDetails)
-    const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
-    const response = await simulate(origin, path, { equipment: [], ...body })
+for (const [amplified, expected] of [
+  ['체력', { headgear: CASTING_SPEED, red: VITALITY_RED }],
+  ['정신력', null]
+] as const) {
+  test(`남성 크루세이더 버퍼는 증폭 스탯이 ${amplified}이면 ${amplified} 갈래의 끝 스펙을 쓴다`, async (t) => {
+    const { payloads, details, path } = fixture('buffer-muse', undefined, emblemDetails)
+    asMaleCrusaderBuffer(payloads, amplified)
+    const engine = scoring(versionedEngine(AVATAR_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
 
     assert.equal(response.status, 200)
-    assert.equal(response.body.baseline.skipped, null, JSON.stringify(body))
-    assert.equal(response.body.simulated.skipped, null, JSON.stringify(body))
+    assert.equal(engine.requests.length, 1)
+    const simulated = bySlot(engine.requests[0]!.input.simulation!.avatar!)
+    const [jacketPlatinum] = simulated.JACKET!.emblems as Item[]
+    assert.equal(simulated.JACKET!.optionAbility, '아포칼립스 스킬Lv +1')
+    assert.equal(jacketPlatinum!.itemName, CRUSADER_PLATINUM)
 
-    return response.body as { baseline: { value: number }; simulated: { value: number } }
+    if (expected === null) {
+      // 뮤즈 원본은 정신력 옵션과 정신력 엠블렘이라 정신력 갈래와 같은 부위는 넣지 않는다.
+      assert.equal(simulated.HEADGEAR, undefined)
+      assert.equal(simulated.SKIN, undefined)
+
+      return
+    }
+
+    const headgearEmblems = emblemNames(simulated.HEADGEAR!)
+    const skinEmblemNames = emblemNames(simulated.SKIN!)
+    assert.equal(simulated.HEADGEAR!.optionAbility, expected.headgear)
+    assert.equal(simulated.HAIR!.optionAbility, expected.headgear)
+    assert.deepEqual(headgearEmblems, [
+      [1, '붉은빛', expected.red],
+      [2, '붉은빛', expected.red]
+    ])
+    assert.deepEqual(skinEmblemNames, [
+      [1, '다색', expected.red],
+      [2, '다색', expected.red]
+    ])
+  })
+}
+
+// 주스탯을 모를 때의 기본 갈래가 체력이라, 엔진의 주스탯이 전달되는지 보려고 정신력을 돌려준다.
+// 원본 모자 옵션을 캐스팅 속도로 바꿔 두면 정신력 갈래만 그 옵션을 정신력으로 바꾼다.
+test('증폭이 없는 남성 크루세이더 버퍼는 원본 계산의 주스탯으로 갈래를 고른다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse', undefined, emblemDetails)
+  asMaleCrusaderBuffer(payloads, null)
+  const headgear = itemOf(avatarOf(payloads), 'HEADGEAR')
+  headgear.optionAbility = CASTING_SPEED
+  const avatarEngine = versionedEngine(AVATAR_ENGINE)
+  const spiritEngine: Reply = (request) => {
+    const result = avatarEngine(request)!
+    const display = { ...result.display, mainStat: '정신력' as const }
+
+    return { ...result, display }
   }
+  const engine = scoring(spiritEngine)
+  const origin = await listen(t, { details, ...engine.options })
 
-  const dealerRaised = await scoresOf('dealer-blade', { buffLevel: 20 })
+  const response = await simulate(origin, path, { equipment: [], avatarPreset: 'best' })
+
+  assert.equal(response.status, 200)
+  assert.equal(engine.requests.length, 2)
+  assert.equal(engine.requests[0]!.input.simulation, undefined)
+  const simulated = bySlot(engine.requests[1]!.input.simulation!.avatar!)
+  const headgearEmblems = emblemNames(simulated.HEADGEAR!)
+  assert.equal(simulated.HEADGEAR!.optionAbility, '정신력 55 증가')
+  assert.deepEqual(headgearEmblems, [
+    [1, '붉은빛', SPIRIT_RED.itemName],
+    [2, '붉은빛', SPIRIT_RED.itemName]
+  ])
+  // 체력 갈래라면 정신력 옵션인 머리와 정신력 엠블렘인 피부도 바꿔 넣는다.
+  assert.equal(simulated.HAIR, undefined)
+  assert.equal(simulated.SKIN, undefined)
+})
+
+const REAL_BUFF_LEVEL_ENGINE = realEngineSupports({ buffLevel: true })
+const REAL_AVATAR_ENGINE = realEngineSupports({ buffLevel: true, avatar: true })
+
+async function realScoresOf(t: TestContext, name: FixtureName, body: Item) {
+  const { details, path } = fixture(name, undefined, emblemDetails)
+  const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+  const response = await simulate(origin, path, { equipment: [], ...body })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.baseline.skipped, null, JSON.stringify(body))
+  assert.equal(response.body.simulated.skipped, null, JSON.stringify(body))
+
+  return response.body as { baseline: { value: number }; simulated: { value: number } }
+}
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 버프 강화 스킬 레벨을 바꾼 요청을 건너뛰지 않고, 딜러는 레벨을 올리면 오르고 버퍼는 내리면 내린다', {
+  skip: !REAL_BUFF_LEVEL_ENGINE && '버프 강화 레벨 변경을 반영하는 0.11.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const dealerRaised = await realScoresOf(t, 'dealer-blade', { buffLevel: 20 })
   assert.ok(dealerRaised.simulated.value > dealerRaised.baseline.value)
 
-  const bufferLowered = await scoresOf('buffer-muse', { buffLevel: 20 })
+  const bufferLowered = await realScoresOf(t, 'buffer-muse', { buffLevel: 20 })
   assert.ok(bufferLowered.simulated.value < bufferLowered.baseline.value)
+})
 
-  const dealerBest = await scoresOf('dealer-blade', { avatarPreset: 'best' })
+// 버퍼 뮤즈는 이미 거의 끝 스펙이라 레벨을 함께 올려 점수가 오르는지 본다.
+test('실제 엔진은 끝 스펙을 고른 요청을 건너뛰지 않고, 딜러는 끝 스펙만으로, 버퍼는 레벨 33과 함께 점수가 오른다', {
+  skip: !REAL_AVATAR_ENGINE && '피부 엠블렘까지 바꾸는 0.12.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const dealerBest = await realScoresOf(t, 'dealer-blade', { avatarPreset: 'best' })
   assert.ok(dealerBest.simulated.value > dealerBest.baseline.value)
 
-  const bufferBest = await scoresOf('buffer-muse', { avatarPreset: 'best', buffLevel: 33 })
+  const bufferBest = await realScoresOf(t, 'buffer-muse', { avatarPreset: 'best', buffLevel: 33 })
   assert.ok(bufferBest.simulated.value > bufferBest.baseline.value)
 })
