@@ -20,7 +20,9 @@ import {
   slotItemChoiceOf,
   variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
+import { avatarPresetNameOf } from '#pages/character-simulator/model/simulator-avatar'
 import { upgradeOf } from '#pages/character-simulator/model/simulator-oath-upgrade'
+import { buffLevelOf } from '#pages/character-simulator/model/simulator-switching'
 import { useOathIconOf } from '#pages/character-simulator/model/useOathIconOf'
 import {
   crystalDraftOf,
@@ -108,6 +110,34 @@ export function EquipmentList({
                   onSelect={onSelect}
                 />
               )
+            case 'avatar':
+              return (
+                <TextRow
+                  key={target.key}
+                  label="아바타"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  {avatarPresetNameOf(changes.avatarPreset)}
+                </TextRow>
+              )
+            case 'switching': {
+              const { switching } = target
+              const level = buffLevelOf(switching, changes.buffLevel)
+
+              return (
+                <TextRow
+                  key={target.key}
+                  label="스위칭"
+                  target={target.key}
+                  selected={selected}
+                  onSelect={onSelect}
+                >
+                  {`${switching.skillName} ${level}레벨`}
+                </TextRow>
+              )
+            }
             case 'oathSet':
             case 'oathBody':
             case 'oathUpgrade':
@@ -141,6 +171,33 @@ function EquipmentSetRow({
           <span className="min-w-0 font-semibold">
             {equipmentSetNameOf(equipmentSet, changes) ?? MISSING_VALUE}
           </span>
+        </PickButton>
+      </td>
+      <td />
+      <td className="max-sm:hidden" />
+    </tr>
+  )
+}
+
+function TextRow({
+  label,
+  target,
+  selected,
+  onSelect,
+  children
+}: {
+  label: string
+  target: string
+  selected: boolean
+  onSelect: SelectTarget
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <tr aria-selected={selected}>
+      <td className={`${SLOT} max-sm:hidden`}>{label}</td>
+      <td>
+        <PickButton target={target} selected={selected} onSelect={onSelect}>
+          <span className="min-w-0 font-semibold">{children}</span>
         </PickButton>
       </td>
       <td />
@@ -358,6 +415,8 @@ export function OathList({
             case 'equipmentSet':
             case 'equipment':
             case 'slotItem':
+            case 'avatar':
+            case 'switching':
               return null
           }
         })}
