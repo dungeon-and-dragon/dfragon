@@ -1,18 +1,9 @@
-import { Select } from '@dfragon/ui'
+import { Chip } from '@dfragon/ui'
 import { tuneNumeral } from '#entities/character'
-import { MISSING_VALUE } from '#shared/lib/missing-value'
 
-// 캐릭터 상세 화면처럼 조율하지 않은 0단계는 단계 숫자 없이 빈 값으로 보인다.
-function tuneLabel(level: number): string {
-  const numeral = tuneNumeral(level)
+const NO_TUNE = 0
 
-  if (numeral === null) {
-    return MISSING_VALUE
-  }
-
-  return numeral
-}
-
+// 켜진 단계를 다시 누르면 조율하지 않은 0단계로 돌아가므로, 빈 선택을 막는 ChipGroup 대신 Chip을 직접 묶는다.
 export function TuneSelect({
   label,
   tune,
@@ -24,28 +15,22 @@ export function TuneSelect({
   maxTune: number
   onChange: (tune: number) => void
 }): React.JSX.Element {
-  const levels = Array.from({ length: maxTune + 1 }, (_, level) => level)
-
-  function changeTune(value: number | null): void {
-    if (value !== null) {
-      onChange(value)
-    }
-  }
+  const levels = Array.from({ length: maxTune }, (_, index) => index + 1)
 
   return (
-    <div className="grid w-[64px] shrink-0">
-      <Select.Root value={tune} onValueChange={changeTune}>
-        <Select.Trigger size="sm" aria-label={label}>
-          <Select.Value>{(value: number) => tuneLabel(value)}</Select.Value>
-        </Select.Trigger>
-        <Select.Popup aria-label={label}>
-          {levels.map((level) => (
-            <Select.Item key={level} value={level}>
-              <Select.ItemText>{tuneLabel(level)}</Select.ItemText>
-            </Select.Item>
-          ))}
-        </Select.Popup>
-      </Select.Root>
+    <div className="chip-group" role="group" aria-label={label}>
+      {levels.map((level) => {
+        function changePressed(pressed: boolean): void {
+          const next = pressed ? level : NO_TUNE
+          onChange(next)
+        }
+
+        return (
+          <Chip key={level} pressed={tune === level} onPressedChange={changePressed}>
+            {tuneNumeral(level)}
+          </Chip>
+        )
+      })}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { WEAPON_RELEASE_MAX } from '@dfragon/lib/equipment-variants'
-import { NumberField, Select, Switch } from '@dfragon/ui'
+import { Chip, NumberField, Select, Switch } from '@dfragon/ui'
+import { Fragment } from 'react'
 import {
   type EnchantOption,
   enhancementTextClasses,
@@ -11,7 +12,6 @@ import { ItemTooltip } from '#widgets/item-tooltip'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   type EnchantChoice,
-  enchantLabelsOf,
   FULL_POTENCY,
   type SimulatorSlot,
   type SimulatorSlotItem,
@@ -33,19 +33,43 @@ type ItemFace = Readonly<{
   icon?: string | null
 }>
 
-function ItemFaceText({ item }: { item: ItemFace }): React.JSX.Element {
+// 하나는 늘 켜져 있는 목록이라 켜진 버튼을 다시 눌러 꺼지는 변화는 버린다.
+function ChoiceChip({
+  value,
+  chosen,
+  onChoose,
+  children
+}: {
+  value: string
+  chosen: string
+  onChoose: (value: string) => void
+  children: React.ReactNode
+}): React.JSX.Element {
+  function changePressed(pressed: boolean): void {
+    if (pressed) {
+      onChoose(value)
+    }
+  }
+
   return (
-    <span className="flex min-w-0 items-center gap-3">
-      <ItemIcon itemId={item.itemId} src={item.icon} rarity={item.rarity} />
-      <span className="min-w-0 truncate">
-        <ItemName name={item.name} rarity={item.rarity} />
-      </span>
-    </span>
+    <Chip pressed={value === chosen} onPressedChange={changePressed}>
+      {children}
+    </Chip>
   )
 }
 
-// 목록 항목의 아이콘에만 아이템 정보 tooltip을 걸고, 이름은 항목 글자로 둔다.
-function SlotItemOption({ value, item }: { value: string; item: ItemFace }): React.JSX.Element {
+// 버튼의 아이콘에만 아이템 정보 tooltip을 걸고, 이름은 버튼 글자로 둔다.
+function ItemChoiceChip({
+  value,
+  item,
+  chosen,
+  onChoose
+}: {
+  value: string
+  item: ItemFace
+  chosen: string
+  onChoose: (value: string) => void
+}): React.JSX.Element {
   const icon = <ItemIcon itemId={item.itemId} src={item.icon} rarity={item.rarity} />
   const described =
     item.itemId !== null ? (
@@ -57,30 +81,26 @@ function SlotItemOption({ value, item }: { value: string; item: ItemFace }): Rea
     )
 
   return (
-    <Select.Item value={value}>
+    <ChoiceChip value={value} chosen={chosen} onChoose={onChoose}>
       {described}
-      <Select.ItemText>
-        <ItemName name={item.name} rarity={item.rarity} />
-      </Select.ItemText>
-    </Select.Item>
+      <ItemName name={item.name} rarity={item.rarity} />
+    </ChoiceChip>
   )
 }
 
 export function ItemControl({
   slot,
   slotLabel,
-  shown,
   draft,
   onChange
 }: {
   slot: SimulatorSlot
   slotLabel: string
-  shown: ItemView
   draft: SlotDraft
   onChange: (draft: Partial<SlotDraft>) => void
 }): React.JSX.Element {
   const label = `${slotLabel} 교체`
-  const face: ItemFace = { itemId: shown.itemId, name: shown.itemName, rarity: shown.rarity }
+  const chosen = draft.variantId ?? CURRENT
   const worn: ItemFace = { itemId: slot.itemId, name: slot.itemName, rarity: slot.rarity }
 
   if (slot.variants.length === 0) {
@@ -92,26 +112,25 @@ export function ItemControl({
     )
   }
 
-  function changeItem(value: string | null): void {
-    if (value != null) {
-      const variantId = value === CURRENT ? null : value
-      onChange({ variantId })
-    }
+  function changeItem(value: string): void {
+    const variantId = value === CURRENT ? null : value
+    onChange({ variantId })
   }
 
   return (
-    <div className="grid w-full min-w-0">
-      <Select.Root value={draft.variantId ?? CURRENT} onValueChange={changeItem}>
-        <Select.Trigger size="sm" aria-label={label}>
-          <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
-        </Select.Trigger>
-        <Select.Popup aria-label={label}>
-          {slot.wornVariantId === null && <SlotItemOption value={CURRENT} item={worn} />}
-          {slot.variants.map((variant) => (
-            <SlotItemOption key={variant.id} value={variant.id} item={variant} />
-          ))}
-        </Select.Popup>
-      </Select.Root>
+    <div className="chip-list" role="group" aria-label={label}>
+      {slot.wornVariantId === null && (
+        <ItemChoiceChip value={CURRENT} item={worn} chosen={chosen} onChoose={changeItem} />
+      )}
+      {slot.variants.map((variant) => (
+        <ItemChoiceChip
+          key={variant.id}
+          value={variant.id}
+          item={variant}
+          chosen={chosen}
+          onChoose={changeItem}
+        />
+      ))}
     </div>
   )
 }
@@ -203,42 +222,30 @@ export function SlotItemControl({
   onChange: (slotItem: SimulatorSlotItem, id: string | null) => void
 }): React.JSX.Element {
   const label = `${slotItem.slotName} 교체`
+  const value = chosen ?? CURRENT
   const worn: ItemFace = {
     itemId: slotItem.itemId,
     name: slotItem.itemName,
     rarity: slotItem.rarity
   }
 
-  function faceOf(value: string): ItemFace {
-    const choice = slotItem.choices.find(({ id }) => id === value)
-
-    if (choice === undefined) {
-      return worn
-    }
-
-    return choice
-  }
-
-  function changeItem(value: string | null): void {
-    if (value != null) {
-      const id = value === CURRENT ? null : value
-      onChange(slotItem, id)
-    }
+  function changeItem(next: string): void {
+    const id = next === CURRENT ? null : next
+    onChange(slotItem, id)
   }
 
   return (
-    <div className="grid min-w-0">
-      <Select.Root value={chosen ?? CURRENT} onValueChange={changeItem}>
-        <Select.Trigger size="sm" aria-label={label}>
-          <Select.Value>{(value: string) => <ItemFaceText item={faceOf(value)} />}</Select.Value>
-        </Select.Trigger>
-        <Select.Popup aria-label={label}>
-          <SlotItemOption value={CURRENT} item={worn} />
-          {slotItem.choices.map((choice) => (
-            <SlotItemOption key={choice.id} value={choice.id} item={choice} />
-          ))}
-        </Select.Popup>
-      </Select.Root>
+    <div className="chip-list" role="group" aria-label={label}>
+      <ItemChoiceChip value={CURRENT} item={worn} chosen={value} onChoose={changeItem} />
+      {slotItem.choices.map((choice) => (
+        <ItemChoiceChip
+          key={choice.id}
+          value={choice.id}
+          item={choice}
+          chosen={value}
+          onChoose={changeItem}
+        />
+      ))}
     </div>
   )
 }
@@ -326,51 +333,46 @@ export function EnchantControl({
   onChange: (draft: Partial<SlotDraft>) => void
 }): React.JSX.Element {
   const label = `${slotLabel} 마법부여`
+  const chosen = draft.enchantId ?? CURRENT
 
-  function changeEnchant(value: string | null): void {
-    if (value != null) {
-      const enchantId = value === CURRENT ? null : value
-      onChange({ enchantId })
-    }
+  function changeEnchant(value: string): void {
+    const enchantId = value === CURRENT ? null : value
+    onChange({ enchantId })
   }
 
   return (
-    <div className="grid h-control-sm min-w-0 items-center">
-      <Select.Root value={draft.enchantId ?? CURRENT} onValueChange={changeEnchant}>
-        <Select.Trigger size="xs" aria-label={label}>
-          <Select.Value>
-            {(value: string) => <EnchantText options={enchantLabelsOf(slot, value)} />}
-          </Select.Value>
-        </Select.Trigger>
-        <Select.Popup aria-label={label}>
-          <Select.Item value={CURRENT}>
-            <Select.ItemText>현재 마법부여</Select.ItemText>
-            {slot.enchants.length > 0 && (
-              <span className="text-xs text-fg-subtle">{joinLabels(slot.enchants)}</span>
-            )}
-          </Select.Item>
-          {ENCHANT_TIERS.map((tier) => {
-            const choices = slot.enchantChoices.filter((choice) => choice.tier === tier)
+    <div className="chip-list" role="group" aria-label={label}>
+      <ChoiceChip value={CURRENT} chosen={chosen} onChoose={changeEnchant}>
+        <span className="shrink-0">현재 마법부여</span>
+        {slot.enchants.length > 0 && (
+          <span className="text-xs text-fg-subtle">{joinLabels(slot.enchants)}</span>
+        )}
+      </ChoiceChip>
+      {ENCHANT_TIERS.map((tier) => {
+        const choices = slot.enchantChoices.filter((choice) => choice.tier === tier)
 
-            if (choices.length === 0) {
-              return null
-            }
+        if (choices.length === 0) {
+          return null
+        }
 
-            return (
-              <Select.Group key={tier}>
-                <Select.GroupLabel>{tier}</Select.GroupLabel>
-                {choices.map((choice) => (
-                  <Select.Item key={choice.id} value={choice.id}>
-                    <Select.ItemText>
-                      <EnchantText options={choice.options} />
-                    </Select.ItemText>
-                  </Select.Item>
-                ))}
-              </Select.Group>
-            )
-          })}
-        </Select.Popup>
-      </Select.Root>
+        return (
+          <Fragment key={tier}>
+            <span className="chip-list-label">{tier}</span>
+            {choices.map((choice) => (
+              <ChoiceChip
+                key={choice.id}
+                value={choice.id}
+                chosen={chosen}
+                onChoose={changeEnchant}
+              >
+                <span>
+                  <EnchantText options={choice.options} />
+                </span>
+              </ChoiceChip>
+            ))}
+          </Fragment>
+        )
+      })}
     </div>
   )
 }
@@ -432,7 +434,6 @@ export function OathItemControl({
   label,
   worn,
   wornListed,
-  shown,
   choices,
   value,
   iconOf = () => null,
@@ -441,7 +442,6 @@ export function OathItemControl({
   label: string
   worn: ItemView
   wornListed: boolean
-  shown: ItemView
   choices: readonly Readonly<{
     id: string
     itemId: string
@@ -452,13 +452,7 @@ export function OathItemControl({
   iconOf?: (item: ItemView) => string | null
   onChange: (id: string | null) => void
 }): React.JSX.Element {
-  const shownIcon = iconOf(shown)
-  const face: ItemFace = {
-    itemId: shown.itemId,
-    name: shown.itemName,
-    rarity: shown.rarity,
-    icon: shownIcon
-  }
+  const chosen = value ?? CURRENT
   const wornIcon = iconOf(worn)
   const wornFace: ItemFace = {
     itemId: worn.itemId,
@@ -476,32 +470,33 @@ export function OathItemControl({
     )
   }
 
-  function changeItem(next: string | null): void {
-    if (next != null) {
-      const id = next === CURRENT ? null : next
-      onChange(id)
-    }
+  function changeItem(next: string): void {
+    const id = next === CURRENT ? null : next
+    onChange(id)
   }
 
   return (
-    <div className="grid w-full min-w-0">
-      <Select.Root value={value ?? CURRENT} onValueChange={changeItem}>
-        <Select.Trigger size="sm" aria-label={label}>
-          <Select.Value>{() => <ItemFaceText item={face} />}</Select.Value>
-        </Select.Trigger>
-        <Select.Popup aria-label={label}>
-          {!wornListed && <SlotItemOption value={CURRENT} item={wornFace} />}
-          {choices.map((choice) => {
-            const icon = iconOf({
-              itemId: choice.itemId,
-              itemName: choice.name,
-              rarity: choice.rarity
-            })
+    <div className="chip-list" role="group" aria-label={label}>
+      {!wornListed && (
+        <ItemChoiceChip value={CURRENT} item={wornFace} chosen={chosen} onChoose={changeItem} />
+      )}
+      {choices.map((choice) => {
+        const icon = iconOf({
+          itemId: choice.itemId,
+          itemName: choice.name,
+          rarity: choice.rarity
+        })
 
-            return <SlotItemOption key={choice.id} value={choice.id} item={{ ...choice, icon }} />
-          })}
-        </Select.Popup>
-      </Select.Root>
+        return (
+          <ItemChoiceChip
+            key={choice.id}
+            value={choice.id}
+            item={{ ...choice, icon }}
+            chosen={chosen}
+            onChoose={changeItem}
+          />
+        )
+      })}
     </div>
   )
 }

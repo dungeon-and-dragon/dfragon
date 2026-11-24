@@ -4,7 +4,6 @@ import { useCharacterDetail } from '#entities/character-detail'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useEquipmentSimulation } from './api/useEquipmentSimulation'
 import { EquipmentList, OathList } from './components/EquipmentList'
-import { SectionNav } from './components/SectionNav'
 import { SimulatorHeader } from './components/SimulatorHeader'
 import { SimulatorSummaryBar } from './components/SimulatorSummaryBar'
 import { SlotEditor, type SlotEditorActions } from './components/SlotEditor'
@@ -128,8 +127,6 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   const simulation = useEquipmentSimulation(identity, body)
   const equipmentHeadingId = useId()
   const oathHeadingId = useId()
-  const equipmentSectionId = useId()
-  const oathSectionId = useId()
   const selected = selectedTargetOf(targets, selectedKey)
   const [watchHeader, headerInView] = useInView()
   const actions: SlotEditorActions = {
@@ -167,18 +164,12 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   }
 
   const hasOathRows = targets.some(isOathTarget)
-  const sectionLinks = [
-    { id: equipmentSectionId, label: '장비' },
-    ...(hasOathRows ? [{ id: oathSectionId, label: '서약' }] : [])
-  ]
-
-  const hasNav = sectionLinks.length > 1
   const editor = selected !== undefined && (
-    <SlotEditor target={selected} rows={rows} oath={oath} changes={changes} actions={actions} />
+    <SlotEditor target={selected} oath={oath} changes={changes} actions={actions} />
   )
 
   return (
-    // 위에 붙는 요약 줄의 높이다. 조작 패널과 목차는 요약 줄 아래에 붙고, 목차로 옮겨 간 구획의 제목도 요약 줄에 가려지지 않는다.
+    // 위에 붙는 요약 줄의 높이다. 조작 패널은 요약 줄 아래에 붙고, 선택 버튼이 길면 창 높이 안에서 따로 스크롤한다.
     // 900px 미만에서는 요약 줄이 서버와 이름, 점수의 두 줄이다.
     <div className="flex flex-col [--summary-height:var(--height-row)] max-md:[--summary-height:calc(var(--height-row)+var(--spacing-6))]">
       <div ref={watchHeader}>
@@ -191,12 +182,10 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
         />
       </div>
       <SimulatorSummaryBar shown={!headerInView} detail={detail} simulation={simulation} />
-      <div
-        className={`section grid items-start py-0 max-md:grid-cols-1 ${hasNav ? 'grid-cols-[320px_minmax(0,1fr)_96px]' : 'grid-cols-[320px_minmax(0,1fr)]'}`}
-      >
+      <div className="section grid grid-cols-[320px_minmax(0,1fr)] items-start py-0 max-md:grid-cols-1">
         <aside
           aria-label={selected !== undefined ? targetTitleOf(selected) : undefined}
-          className="min-w-0 md:sticky md:top-[var(--summary-height)] max-md:hidden"
+          className="min-w-0 md:sticky md:top-[var(--summary-height)] md:max-h-[calc(100dvh-var(--summary-height))] md:overflow-y-auto max-md:hidden"
         >
           {selected !== undefined && (
             <div className="section-title">
@@ -205,14 +194,8 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
           )}
           {editor}
         </aside>
-        <div
-          className={`min-w-0 border-l border-line max-md:border-l-0 ${hasNav ? 'md:border-r' : ''}`}
-        >
-          <section
-            id={equipmentSectionId}
-            aria-labelledby={equipmentHeadingId}
-            className="scroll-mt-[var(--summary-height)]"
-          >
+        <div className="min-w-0 border-l border-line max-md:border-l-0">
+          <section aria-labelledby={equipmentHeadingId}>
             <div className="section-title">
               <h2 id={equipmentHeadingId}>장비</h2>
             </div>
@@ -225,11 +208,7 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
             />
           </section>
           {hasOathRows && (
-            <section
-              id={oathSectionId}
-              aria-labelledby={oathHeadingId}
-              className="scroll-mt-[var(--summary-height)] border-t border-line"
-            >
+            <section aria-labelledby={oathHeadingId} className="border-t border-line">
               <div className="section-title">
                 <h2 id={oathHeadingId}>서약</h2>
               </div>
@@ -242,7 +221,6 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
             </section>
           )}
         </div>
-        {hasNav && <SectionNav links={sectionLinks} />}
       </div>
       <SlotEditorSheet
         open={sheetOpen}
