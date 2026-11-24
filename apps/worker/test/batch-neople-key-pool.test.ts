@@ -29,6 +29,10 @@ const basic: NeopleCharacterBasic = {
   guildName: null
 }
 
+const unexpectedRequest = async (): Promise<never> => {
+  throw new Error('이 테스트는 기본 정보만 부른다')
+}
+
 const upstreamFailure = (status: number, code: string) =>
   new NeopleRequestFailure('unavailable', { upstream: { status, code } })
 
@@ -48,7 +52,7 @@ function fakeKeys(
       rejected.push(id)
     }
   }
-  const createNeople = (key: string): WorkerNeople => ({
+  const createKeyNeople = (key: string): WorkerNeople => ({
     character: async () => {
       throw new Error('이 테스트는 상세 섹션을 부르지 않는다')
     },
@@ -76,6 +80,11 @@ function fakeKeys(
       throw new Error('이 테스트는 타임라인을 부르지 않는다')
     }
   })
+  const createNeople = (key: string) => {
+    const neople = createKeyNeople(key)
+
+    return { neople, priorityNeople: neople }
+  }
   const pool = createBatchNeopleKeyPool({
     store,
     createNeople,
@@ -240,4 +249,76 @@ test('key로 보낸 요청의 Neople 실패를 이유별로 세고, 꺼낸 뒤�
 
   assert.equal(pool.drainFailures(), '429/API002=1,503/API999=1,timeout=2')
   assert.equal(pool.drainFailures(), '')
+})
+
+test('key의 동시 요청 수가 차 있으면 먼저 내보낼 요청이 먼저 기다리던 요청보다 먼저 빈 슬롯을 받는다', async () => {
+  const pending: (() => void)[] = []
+  const sent: string[] = []
+  const { pool } = fakeKeys(
+    [1],
+    () =>
+      new Promise((resolve) => {
+        pending.push(() => {
+          resolve(basic)
+        })
+      })
+  )
+
+  const send = (name: string, neople: WorkerNeople) =>
+    neople.characterBasic(identity).then(() => {
+      sent.push(name)
+    })
+
+  await pool.refresh()
+
+  const running = send('running', pool.neople)
+  const batch = send('batch', pool.neople)
+  const priority = send('priority', pool.priorityNeople)
+  await setImmediate()
+
+  pending[0]?.()
+  await running
+  await setImmediate()
+  pending[1]?.()
+  await setImmediate()
+  pending[2]?.()
+  await Promise.all([batch, priority])
+
+  assert.deepEqual(sent, ['running', 'priority', 'batch'])
+})
+
+test('먼저 내보낼 요청은 key의 속도 제한에서도 먼저 내보내는 쪽으로 보낸다', async () => {
+  const lanes: string[] = []
+  const laneNeople = (lane: string): WorkerNeople => ({
+    character: unexpectedRequest,
+    multiItems: unexpectedRequest,
+    servers: unexpectedRequest,
+    jobs: unexpectedRequest,
+    charactersFame: unexpectedRequest,
+    characterBasic: async () => {
+      lanes.push(lane)
+
+      return basic
+    },
+    characterSkillStyle: unexpectedRequest,
+    characterTimeline: unexpectedRequest
+  })
+  const pool = createBatchNeopleKeyPool({
+    store: { readUsableKeys: async () => [syntheticKey(1)], recordRejected: async () => {} },
+    createNeople: () => {
+      const neople = laneNeople('normal')
+      const priorityNeople = laneNeople('priority')
+
+      return { neople, priorityNeople }
+    },
+    concurrencyPerKey: 1,
+    report: () => {}
+  })
+
+  await pool.refresh()
+
+  await pool.priorityNeople.characterBasic(identity)
+  await pool.neople.characterBasic(identity)
+
+  assert.deepEqual(lanes, ['priority', 'normal'])
 })
