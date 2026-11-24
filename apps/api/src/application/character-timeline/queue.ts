@@ -130,8 +130,8 @@ export function createJobQueue<Key, Job extends Key>(
 }
 
 // 상한이 없으면 동기화와 백필 수백 개가 함께 돌아 연결 풀이 차고 동기화가 실패했다(2026-11-24 운영 부하 테스트, ADR 0087).
-// 10과 4로 올리면 동기화가 API의 event loop를 차지해 동시 400명에서 p95가 0.6초에서 1.9초로 늘었고, 처리량은 초당 2.3명에서
-// 3.1명으로만 올랐다(ADR 0090).
+// 10과 4로 올리면 동기화가 API의 event loop를 차지해 동시 400명에서 p95가 0.6초에서 1.9초로 늘었고, 초당 20명 조회 뒤
+// 기다리던 동기화는 1,518건에서 1,236건으로만 줄었다(ADR 0090).
 export const TIMELINE_SYNC_CONCURRENCY = 4
 export const ENHANCEMENT_BACKFILL_CONCURRENCY = 2
 
