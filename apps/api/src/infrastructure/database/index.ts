@@ -4,6 +4,6 @@ export { DatabaseCharacterHistoryRepository } from './character-history.js'
 export { DatabaseCharacterSearchRepository } from './character-search.js'
 export {
   DatabaseCharacterTimelineRepository,
-  DatabaseTimelineQueueCountRepository
+  DatabaseTimelineSyncRequestRepository
 } from './character-timeline.js'
 export { DatabaseRankingStatsRepository } from './ranking-stats.js'

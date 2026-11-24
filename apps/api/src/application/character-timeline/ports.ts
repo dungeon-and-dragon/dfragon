@@ -1,3 +1,1 @@
-import type { TimelineSyncQueue } from './queue.js'
-
-export type TimelineSyncWaiter = Pick<TimelineSyncQueue, 'requestAndWait'>
+export type Pause = (milliseconds: number) => Promise<void>
