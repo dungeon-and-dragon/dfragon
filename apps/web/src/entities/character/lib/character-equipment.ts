@@ -3,6 +3,7 @@ import type { CharacterDetailView } from '#entities/character/model/character-de
 import { type ItemView, itemRarityOfGrade, toItemView, tuneNumeral } from './character-item'
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
+type SetItem = CharacterDetailView['equipment']['setItemInfo'][number]
 type StatValue = number | string
 
 export type EnchantStats = Readonly<{
@@ -75,7 +76,7 @@ export type EquipmentSet = Readonly<{
 }>
 
 export type EquipmentView = Readonly<{
-  sets: EquipmentSet[]
+  set: EquipmentSet | null
   mistLevel: number | null
   items: EquipmentRow[]
   creature: ItemView | null
@@ -276,6 +277,46 @@ function subWeaponAfterWeapon(items: EquipmentItem[]): EquipmentItem[] {
   })
 }
 
+function hasMorePoint(set: EquipmentSet, than: EquipmentSet): boolean {
+  if (set.point === null) {
+    return false
+  }
+
+  if (than.point === null) {
+    return true
+  }
+
+  return set.point > than.point
+}
+
+function toEquipmentSet(set: SetItem): EquipmentSet {
+  const point = set.active?.setPoint?.current ?? null
+
+  return {
+    name: set.setItemName,
+    rarityName: set.setItemRarityName,
+    rarity: itemRarityOfGrade(set.setItemRarityName),
+    point
+  }
+}
+
+// Neople이 세트를 둘 이상 줄 때가 있어 세트 포인트가 가장 큰 세트 하나만 보이고, 같은 포인트면 앞 세트를 쓴다.
+function toMainEquipmentSet(setItemInfo: readonly SetItem[]): EquipmentSet | null {
+  const [first, ...rest] = setItemInfo.map(toEquipmentSet)
+
+  if (first === undefined) {
+    return null
+  }
+
+  return rest.reduce((main, set) => {
+    if (hasMorePoint(set, main)) {
+      return set
+    }
+
+    return main
+  }, first)
+}
+
 export function toEquipmentView(
   detail: Pick<
     CharacterDetailView,
@@ -287,18 +328,10 @@ export function toEquipmentView(
   const mistLevel = detail.mistAssimilation?.level ?? null
   const auraAvatar = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
   const aura = auraAvatar !== undefined ? toItemView(auraAvatar) : null
+  const set = toMainEquipmentSet(detail.equipment.setItemInfo)
 
   return {
-    sets: detail.equipment.setItemInfo.map((set) => {
-      const point = set.active?.setPoint?.current ?? null
-
-      return {
-        name: set.setItemName,
-        rarityName: set.setItemRarityName,
-        rarity: itemRarityOfGrade(set.setItemRarityName),
-        point
-      }
-    }),
+    set,
     mistLevel,
     items: subWeaponAfterWeapon(detail.equipment.equipment).map((item) =>
       toEquipmentRow(item, role)
