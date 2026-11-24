@@ -23,9 +23,9 @@ import {
 } from '../src/infrastructure/neople/content-clear-collection.js'
 import {
   type WorkerNeople,
-  createNeopleCharacterBasic,
-  paceNeopleRequests
+  createNeopleCharacterBasic
 } from '../src/infrastructure/neople/character-collection.js'
+import { pacePrioritizedNeopleRequests } from '../src/infrastructure/neople/request-priority.js'
 import {
   type BatchNeopleKeyPool,
   createBatchNeopleKeyPool
@@ -1014,53 +1014,54 @@ test('다시 받을 때 묶음 크기, 받지 못한 캐릭터 수, 쉬었는지
 })
 
 test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청이 함께 나가고, 두 작업의 요청을 합쳐도 초당 상한을 넘지 않는다', async (t) => {
-  t.mock.timers.enable({ apis: ['setTimeout', 'Date'], now: 0 })
+  t.mock.timers.enable({ apis: ['setTimeout', 'setInterval', 'Date'], now: 0 })
   const requestsPerSecond = 5
   const calls: { kind: 'basic' | 'timeline'; at: number }[] = []
-  const neople = paceNeopleRequests(
-    {
-      character: async () => {
-        throw new Error('이 테스트는 상세 섹션을 부르지 않는다')
-      },
-      multiItems: async () => {
-        throw new Error('이 테스트는 아이템 상세를 부르지 않는다')
-      },
-      servers: async () => {
-        throw new Error('이 테스트는 서버 목록을 부르지 않는다')
-      },
-      jobs: async () => {
-        throw new Error('이 테스트는 직업 목록을 부르지 않는다')
-      },
-      charactersFame: async () => {
-        throw new Error('이 테스트는 명성 검색을 부르지 않는다')
-      },
-      characterBasic: async ({ serverId, characterId }) => {
-        calls.push({ kind: 'basic', at: Date.now() })
+  const client: WorkerNeople = {
+    character: async () => {
+      throw new Error('이 테스트는 상세 섹션을 부르지 않는다')
+    },
+    multiItems: async () => {
+      throw new Error('이 테스트는 아이템 상세를 부르지 않는다')
+    },
+    servers: async () => {
+      throw new Error('이 테스트는 서버 목록을 부르지 않는다')
+    },
+    jobs: async () => {
+      throw new Error('이 테스트는 직업 목록을 부르지 않는다')
+    },
+    charactersFame: async () => {
+      throw new Error('이 테스트는 명성 검색을 부르지 않는다')
+    },
+    characterBasic: async ({ serverId, characterId }) => {
+      calls.push({ kind: 'basic', at: Date.now() })
 
-        return {
-          serverId,
-          characterId,
-          characterName: `이름-${characterId}`,
-          adventureName: '모험단',
-          level: 115,
-          jobId: 'job',
-          jobGrowId: 'grow',
-          jobName: '귀검사(남)',
-          jobGrowName: '眞 웨펀마스터',
-          fame: 60_000,
-          guildId: null,
-          guildName: null
-        }
-      },
-      characterSkillStyle: async () => {
-        throw new Error('이 테스트는 스킬 스타일을 부르지 않는다')
-      },
-      characterTimeline: async () => {
-        calls.push({ kind: 'timeline', at: Date.now() })
-
-        return { timeline: { rows: [], next: null } }
+      return {
+        serverId,
+        characterId,
+        characterName: `이름-${characterId}`,
+        adventureName: '모험단',
+        level: 115,
+        jobId: 'job',
+        jobGrowId: 'grow',
+        jobName: '귀검사(남)',
+        jobGrowName: '眞 웨펀마스터',
+        fame: 60_000,
+        guildId: null,
+        guildName: null
       }
     },
+    characterSkillStyle: async () => {
+      throw new Error('이 테스트는 스킬 스타일을 부르지 않는다')
+    },
+    characterTimeline: async () => {
+      calls.push({ kind: 'timeline', at: Date.now() })
+
+      return { timeline: { rows: [], next: null } }
+    }
+  }
+  const { neople } = pacePrioritizedNeopleRequests(
+    { neople: client, priorityNeople: client },
     requestsPerSecond
   )
   let queueOpen = true
@@ -1129,7 +1130,7 @@ function fakeBatchKeys(
   const requests: { key: string; characterId: string }[] = []
   const active = new Map<string, number>()
   const maxActive = new Map<string, number>()
-  const createNeople = (key: string): WorkerNeople => ({
+  const createKeyNeople = (key: string): WorkerNeople => ({
     character: async () => {
       throw new Error('이 테스트는 상세 섹션을 부르지 않는다')
     },
@@ -1171,6 +1172,11 @@ function fakeBatchKeys(
       }
     }
   })
+  const createNeople = (key: string) => {
+    const neople = createKeyNeople(key)
+
+    return { neople, priorityNeople: neople }
+  }
   const pool = createBatchNeopleKeyPool({
     store: {
       readUsableKeys: async () => [...keys],
