@@ -14878,5 +14878,9 @@
         }
       ]
     }
-  ]
+  ],
+  "switching": {
+    "maxEquipment": 12,
+    "uniqueEquipmentPrefixes": ["짙은 심연의 편린 ", "짙은 뒤틀린 심연의 "]
+  }
 }
