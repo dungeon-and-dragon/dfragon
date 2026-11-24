@@ -233,6 +233,19 @@ model TimelineSyncState {
   @@map("timeline_sync_state")
 }
 
+model TimelineSyncRequest {
+  kind        String
+  serverId    String    @map("server_id")
+  characterId String    @map("character_id")
+  seasonId    Int       @default(0) @map("season_id")
+  requestedAt DateTime  @default(now()) @map("requested_at") @db.Timestamptz(3)
+  awaitedAt   DateTime? @map("awaited_at") @db.Timestamptz(3)
+  startedAt   DateTime? @map("started_at") @db.Timestamptz(3)
+
+  @@id([kind, serverId, characterId, seasonId])
+  @@map("timeline_sync_requests")
+}
+
 model TimelineSeasonBackfill {
   serverId        String    @map("server_id")
   characterId     String    @map("character_id")
