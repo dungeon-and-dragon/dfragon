@@ -3,7 +3,7 @@ import type { CharacterDetailView } from '#entities/character'
 import { useCharacterDetail } from '#entities/character-detail'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { useEquipmentSimulation } from './api/useEquipmentSimulation'
-import { EquipmentList, OathList } from './components/EquipmentList'
+import { EquipmentList, EtcList, OathList } from './components/EquipmentList'
 import { SimulatorHeader } from './components/SimulatorHeader'
 import { SimulatorSummaryBar } from './components/SimulatorSummaryBar'
 import { SlotEditor, type SlotEditorActions } from './components/SlotEditor'
@@ -21,7 +21,7 @@ import {
 import { hasAvatarPreset } from './model/simulator-avatar'
 import { oathInSet, toSimulatorOath } from './model/simulator-oath'
 import {
-  isOathTarget,
+  sectionOf,
   selectedTargetOf,
   targetTitleOf,
   toSimulatorTargets
@@ -31,6 +31,7 @@ import { toSimulatorSwitching } from './model/simulator-switching'
 const TITLE = '장비 시뮬레이터'
 // 이 폭보다 좁으면 조작 패널을 숨기고 줄을 누를 때 시트로 연다. 디자인 토큰의 md 경계와 같다.
 const NARROW_QUERY = '(width < 900px)'
+const SECTION_TITLE = 'section-title bg-surface'
 
 export function CharacterSimulatorScreen({
   serverId,
@@ -127,6 +128,7 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
   const simulation = useEquipmentSimulation(identity, body)
   const equipmentHeadingId = useId()
   const oathHeadingId = useId()
+  const etcHeadingId = useId()
   const selected = selectedTargetOf(targets, selectedKey)
   const [watchHeader, headerInView] = useInView()
   const actions: SlotEditorActions = {
@@ -147,8 +149,6 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     onOathBodyChange: (oathBody, id) => dispatch({ type: 'oathBody', body: oathBody, id }),
     onOathUpgradeUnlockChange: (upgrade, step, unlocked) =>
       dispatch({ type: 'oathUpgradeUnlock', upgrade, step, unlocked }),
-    onOathUpgradeOathpointChange: (upgrade, step, oathpoint) =>
-      dispatch({ type: 'oathUpgradeOathpoint', upgrade, step, oathpoint }),
     onCrystalChange: (crystal, draft) => {
       if (oath !== null) {
         dispatch({ type: 'crystal', oath, crystal, draft })
@@ -165,7 +165,8 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     dispatch({ type: 'reset' })
   }
 
-  const hasOathRows = targets.some(isOathTarget)
+  const hasOathRows = targets.some((target) => sectionOf(target) === 'oath')
+  const hasEtcRows = targets.some((target) => sectionOf(target) === 'etc')
   const editor = selected !== undefined && (
     <SlotEditor target={selected} oath={oath} changes={changes} actions={actions} />
   )
@@ -196,9 +197,9 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
           )}
           {editor}
         </aside>
-        <div className="min-w-0 border-l border-line max-md:border-l-0">
+        <div className="flex min-w-0 flex-col gap-4 border-l border-line max-md:border-l-0">
           <section aria-labelledby={equipmentHeadingId}>
-            <div className="section-title">
+            <div className={SECTION_TITLE}>
               <h2 id={equipmentHeadingId}>장비</h2>
             </div>
             <EquipmentList
@@ -211,10 +212,23 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
           </section>
           {hasOathRows && (
             <section aria-labelledby={oathHeadingId} className="border-t border-line">
-              <div className="section-title">
+              <div className={SECTION_TITLE}>
                 <h2 id={oathHeadingId}>서약</h2>
               </div>
               <OathList
+                targets={targets}
+                changes={changes}
+                selectedKey={selected?.key}
+                onSelect={select}
+              />
+            </section>
+          )}
+          {hasEtcRows && (
+            <section aria-labelledby={etcHeadingId} className="border-t border-line">
+              <div className={SECTION_TITLE}>
+                <h2 id={etcHeadingId}>기타</h2>
+              </div>
+              <EtcList
                 targets={targets}
                 changes={changes}
                 selectedKey={selected?.key}
