@@ -75,13 +75,19 @@ function crystalAt(oath: SimulatorOath, slotNo: number) {
   return found!
 }
 
-it('서약은 착용한 세트, 같은 계열 4등급의 본체 선택지와 그 세트 광휘 결정 4등급의 결정 선택지를 둔다', () => {
+function bodyChoiceIds(setId: number): string[] {
+  return idsOf([...oathVariantsOf(setId), ...oathVariantsOf(null)])
+}
+
+it('서약은 착용한 세트, 그 세트 전용 서약과 영겁의 안개 서약 4등급씩의 본체 선택지와 그 세트 광휘 결정 4등급의 결정 선택지를 둔다', () => {
   const [first] = dealerOath.crystals
 
   expect(dealerOath.setId).toBe(DRAGON_SET)
   expect(dealerOath.sets).toHaveLength(12)
-  expect(idsOf(dealerOath.body!.choices)).toEqual(idsOf(oathVariantsOf(DRAGON_SET)))
+  expect(idsOf(dealerOath.body!.choices)).toEqual(bodyChoiceIds(DRAGON_SET))
   expect(dealerOath.body!.wornVariantId).toBe(oathVariantOf(DRAGON_SET, '태초')?.id)
+  expect(idsOf(bufferOath.body!.choices)).toEqual(bodyChoiceIds(DRAGON_SET))
+  expect(bufferOath.body!.wornVariantId).toBe(oathVariantOf(null, '에픽')?.id)
   expect(dealerOath.crystals.map(({ slotNo }) => slotNo)).toEqual([
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
   ])
@@ -121,15 +127,19 @@ it('서약 세트를 바꿔도 영겁의 안개 서약과 광휘 결정이 아�
   const view = viewOf(oath, changed)
   const mistCrystal = crystalAt(view, 3)
 
-  expect(view.body).toEqual(oath.body)
-  expect(view.body!.wornVariantId).toBe(oathVariantsOf(null)[2]?.id)
+  expect(idsOf(view.body!.choices)).toEqual(bodyChoiceIds(SHADOW_SET))
+  expect(view.body!.wornVariantId).toBe(oathVariantOf(null, '에픽')?.id)
+  expect(oathBodyItemOf(view.body!, changed.oath)).toMatchObject({
+    itemName: '영겁의 안개 서약',
+    rarity: 'epic'
+  })
   expect(mistCrystal.wornVariantId).toBeNull()
   expect(crystalItemOf(mistCrystal, changed.oath).itemName).toBe('희미한 안개 결정')
   expect(idsOf(mistCrystal.choices)).toEqual(idsOf(oathCrystalVariantsOf(SHADOW_SET)))
   expect(bufferOath.body!.setBound).toBe(false)
 })
 
-it('서약 본체는 같은 계열 4등급 가운데 고르고, 착용한 등급을 다시 고르면 지운다', () => {
+it('서약 본체는 본체 선택지 가운데 고르고, 착용한 등급을 다시 고르면 지운다', () => {
   const epic = oathVariantOf(DRAGON_SET, '에픽')!
   const changed = apply(NO_CHANGES, { type: 'oathBody', body: dealerOath.body!, id: epic.id })
 
@@ -150,6 +160,54 @@ it('서약 본체는 같은 계열 4등급 가운데 고르고, 착용한 등급
       id: crystalId(DRAGON_SET, '에픽')
     })
   ).toEqual(NO_CHANGES)
+})
+
+it('서약 본체는 세트 전용 서약과 영겁의 안개 서약 사이에서 바꿀 수 있고 고른 선택지 id를 요청한다', () => {
+  const dragonPrimeval = oathVariantOf(DRAGON_SET, '태초')!
+  const mistPrimeval = oathVariantOf(null, '태초')!
+  const toSet = apply(NO_CHANGES, {
+    type: 'oathBody',
+    body: bufferOath.body!,
+    id: dragonPrimeval.id
+  })
+  const toMist = apply(NO_CHANGES, {
+    type: 'oathBody',
+    body: dealerOath.body!,
+    id: mistPrimeval.id
+  })
+
+  expect(oathBodyItemOf(bufferOath.body!, toSet.oath).itemName).toBe('세계를 태우는 용투 서약')
+  expect(simulationBody([], bufferOath, toSet)).toEqual({
+    equipment: [],
+    oathBody: dragonPrimeval.id
+  })
+  expect(oathBodyItemOf(dealerOath.body!, toMist.oath)).toMatchObject({
+    itemName: '영겁의 안개 서약',
+    rarity: 'primordial'
+  })
+  expect(simulationBody([], dealerOath, toMist)).toEqual({
+    equipment: [],
+    oathBody: mistPrimeval.id
+  })
+})
+
+it('서약 세트를 바꾸면 고른 세트 전용 서약은 새 세트의 같은 등급으로 옮기고 고른 영겁의 안개 서약은 그대로 둔다', () => {
+  const setChosen = apply(
+    NO_CHANGES,
+    { type: 'oathBody', body: bufferOath.body!, id: oathVariantOf(DRAGON_SET, '레전더리')!.id },
+    { type: 'oathSet', oath: bufferOath, setId: SHADOW_SET }
+  )
+  const mistChosen = apply(
+    NO_CHANGES,
+    { type: 'oathBody', body: dealerOath.body!, id: oathVariantOf(null, '레전더리')!.id },
+    { type: 'oathSet', oath: dealerOath, setId: SHADOW_SET }
+  )
+
+  expect(setChosen.oath.body).toBe(oathVariantOf(SHADOW_SET, '레전더리')!.id)
+  expect(mistChosen.oath.body).toBe(oathVariantOf(null, '레전더리')!.id)
+  expect(oathBodyItemOf(viewOf(dealerOath, mistChosen).body!, mistChosen.oath).itemName).toBe(
+    '영겁의 안개 서약'
+  )
 })
 
 it('결정 등급을 바꾸면 조율을 새 결정의 최대 단계로 자르고, 바꾼 결정만 선택지 id와 조율로 요청한다', () => {
@@ -397,6 +455,7 @@ it('응답에 서약 세트가 없고 세트에 속한 본체와 광휘 결정�
 
   expect(oath.setId).toBeNull()
   expect(oath.crystals.every(({ choices }) => choices.length === 0)).toBe(true)
+  expect(idsOf(oath.body!.choices)).toEqual(idsOf(oathVariantsOf(null)))
 })
 
 it('서약 세트를 골라도 조율 정보가 없는 광휘 밖 착용 결정은 조율까지 그대로 두고 요청에 넣지 않는다', () => {

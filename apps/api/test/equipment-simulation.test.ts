@@ -1797,6 +1797,8 @@ const MANA_OATH_SET = 16212
 const SHADOW_EPIC_OATH = 'acde288e06c6a6dda5e2b5d1e606dd00'
 const FOX_EPIC_OATH = '6a9706ebcbfe44e754a77c45f8d4a4aa'
 const EPIC_MIST_OATH = '316e1b0f26a3a471be2a95e33a315171'
+const PRIMEVAL_MIST_OATH = 'ac0586536083d560b38659de8bc0c2b8'
+const SHADOW_PRIMEVAL_OATH = '72adf78e645d9a821b9adcc98ef00044'
 const SHADOW_PRIMAL_CRYSTAL = '5fe3c29985f15b1fdafd4c4d6a247839'
 const SHADOW_UNIQUE_CRYSTAL = '5a984f4a7e3e3d7360c183b95b6546bb'
 const SHADOW_EPIC_CRYSTAL = '5f722339a3f5c7ef9ba0b290873e19f1'
@@ -1809,6 +1811,15 @@ function crystalsOf(payloads: CharacterPayloads): Item[] {
 
 function oathItem(itemId: string, itemName: string, itemRarity: string) {
   return { itemId, itemName, itemRarity }
+}
+
+// 태초 본체는 세트 전용 서약과 영겁의 안개 서약의 세트 포인트가 같아(655) 원본 서약 세트 포인트가 그대로 맞는다.
+function wearingPrimevalMist(payloads: CharacterPayloads): void {
+  const section = payloads.oath.oath as Item
+  section.info = {
+    ...(section.info as Item),
+    ...oathItem(PRIMEVAL_MIST_OATH, '영겁의 안개 서약', '태초')
+  }
 }
 
 test('장비 세트를 고르면 11부위를 새 세트의 같은 등급으로 바꾸고 조율 단계를 유지한다', async (t) => {
@@ -2051,6 +2062,58 @@ test('서약 본체 등급은 서약 세트를 옮긴 뒤의 계열에서 고르
   assert.deepEqual(oath.set, { setId: FOX_OATH_SET })
 })
 
+test('서약 본체는 지금 서약 세트의 세트 전용 서약과 영겁의 안개 서약 사이에서 바꿀 수 있고 본체 칸만 바꾼다', async (t) => {
+  const setBody = fixture('buffer-muse')
+  const mistBody = fixture('buffer-muse')
+  wearingPrimevalMist(mistBody.payloads)
+  const engine = scoring(versionedEngine(SET_ENGINE))
+  const setBodyOrigin = await listen(t, { details: setBody.details, ...engine.options })
+  const mistBodyOrigin = await listen(t, { details: mistBody.details, ...engine.options })
+  const setInfo = (setBody.payloads.oath.oath as Item).info as Item
+  const mistInfo = (mistBody.payloads.oath.oath as Item).info as Item
+
+  const toMist = await simulate(setBodyOrigin, setBody.path, {
+    equipment: [],
+    oathBody: PRIMEVAL_MIST_OATH
+  })
+  const toSet = await simulate(mistBodyOrigin, mistBody.path, {
+    equipment: [],
+    oathBody: SHADOW_PRIMEVAL_OATH
+  })
+  const toMovedSet = await simulate(mistBodyOrigin, mistBody.path, {
+    equipment: [],
+    oathSet: FOX_OATH_SET,
+    oathBody: FOX_EPIC_OATH
+  })
+
+  assert.equal(toMist.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...setInfo,
+        ...oathItem(PRIMEVAL_MIST_OATH, '영겁의 안개 서약', '태초'),
+        setPoint: 655
+      }
+    }
+  })
+  assert.equal(toSet.status, 200)
+  assert.deepEqual(engine.requests[1]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...mistInfo,
+        ...oathItem(SHADOW_PRIMEVAL_OATH, '태초의 어둠 속 그림자 서약', '태초'),
+        setPoint: 655
+      }
+    }
+  })
+  assert.equal(toMovedSet.status, 200)
+  const moved = engine.requests[2]!.input.simulation!.oath!
+  assert.equal(moved.info?.itemName, '빙의된 여우 서약')
+  assert.deepEqual(moved.set, { setId: FOX_OATH_SET })
+})
+
 test('결정 등급을 바꾸면 조율 단계를 새 결정의 최대 단계로 자르고, 함께 보낸 조율은 새 결정으로 검증하며 광휘가 아닌 결정도 바꿀 수 있다', async (t) => {
   const buffer = fixture('buffer-muse')
   const dealer = fixture('dealer-blade')
@@ -2260,6 +2323,7 @@ const BEFORE_INFERRED_OATH_SET_ENGINE = 'dnfscore-native 0.14.0'
 const INFERRED_OATH_SET_ENGINE = 'dnfscore-native 0.15.0'
 const PACK_OATH_SET = 16211
 const PACK_EPIC_CRYSTAL = '4d753a61b206e085665be3de2e53f2d0'
+const PACK_PRIMEVAL_OATH = '20103b50a325efab69497427d864aad8'
 const GLIMMER_CRYSTAL = 'f834b16af8341719efe94a3be49d381e'
 
 function packCrystal(itemId: string, itemName: string, itemRarity: string, setPoint: number) {
@@ -2339,6 +2403,28 @@ test('서약 세트 정보가 없는 캐릭터는 세트 포인트 합이 가장
   assert.equal(engine.requests[2]!.input.simulation, undefined)
 })
 
+test('서약 세트 정보가 없는 캐릭터의 영겁의 안개 서약은 추론한 세트의 세트 전용 서약으로 바꿀 수 있다', async (t) => {
+  const { payloads, details, path } = fixture('buffer-muse')
+  withoutSetInfo(payloads)
+  const engine = scoring(versionedEngine(INFERRED_OATH_SET_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+  const info = oathOf(payloads).info as Item
+
+  const response = await simulate(origin, path, { equipment: [], oathBody: PACK_PRIMEVAL_OATH })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: {
+        ...info,
+        ...oathItem(PACK_PRIMEVAL_OATH, '태동하는 울림의 무리 서약', '태초'),
+        setPoint: 655
+      }
+    }
+  })
+})
+
 for (const [name, body] of [
   ['서약 세트 전환', { equipment: [], oathSet: FOX_OATH_SET }],
   ['결정 조율 변경', { equipment: [], oath: [{ slotNo: 3, tune: 1 }] }],
@@ -2411,18 +2497,37 @@ const invalidSetCases: readonly (readonly [string, FixtureName, Item, PayloadEdi
       payloads.oath = { ...payloads.oath, oath: null }
     }
   ],
-  ['다른 계열의 본체', 'buffer-muse', { equipment: [], oathBody: FOX_EPIC_OATH }, keepPayloads],
   [
-    '세트를 옮기기 전 계열의 본체',
+    '지금 서약 세트가 아닌 세트의 본체',
+    'buffer-muse',
+    { equipment: [], oathBody: FOX_EPIC_OATH },
+    keepPayloads
+  ],
+  [
+    '서약 세트를 옮기기 전 세트의 본체',
     'buffer-muse',
     { equipment: [], oathSet: FOX_OATH_SET, oathBody: SHADOW_EPIC_OATH },
     keepPayloads
   ],
   [
-    '세트 전용 본체를 낀 캐릭터의 안개 서약 본체',
+    '영겁의 안개 서약을 낀 캐릭터의 지금 서약 세트가 아닌 세트의 본체',
     'buffer-muse',
-    { equipment: [], oathBody: EPIC_MIST_OATH },
-    keepPayloads
+    { equipment: [], oathBody: FOX_EPIC_OATH },
+    wearingPrimevalMist
+  ],
+  [
+    '서약 세트 정보가 없고 세트에 속한 본체와 광휘 결정도 없는 캐릭터의 세트 전용 본체',
+    'buffer-muse',
+    { equipment: [], oathBody: SHADOW_EPIC_OATH },
+    (payloads) => {
+      withoutSetInfo(payloads)
+      const section = oathOf(payloads)
+      section.crystal = (section.crystal as Item[]).map((crystal) => ({
+        ...crystal,
+        ...oathItem(GLIMMER_CRYSTAL, '미광의 서약 결정', '레어'),
+        tune: { level: 0, setPoint: 45 }
+      }))
+    }
   ],
   [
     '선택 목록에 없는 본체의 등급 교체',
@@ -2526,6 +2631,31 @@ test('실제 엔진은 장비 세트, 서약 세트, 본체와 결정 등급, �
 
   const weapon = await scoresOf('dealer-blade', { equipment: [{ slotId: 'WEAPON', tune: 3 }] })
   assert.ok(weapon.simulated.value > weapon.baseline.value)
+})
+
+// 엔진 버전이 오르면 점수가 바뀌므로 값은 고정하지 않고 원본과의 관계만 확인한다.
+test('실제 엔진은 영겁의 안개 서약을 세트 전용 태초 서약으로 바꾸면 점수를 올리고 반대로 바꾸면 내린다', {
+  skip: !REAL_SET_ENGINE && '서약 본체 교체를 반영하는 0.9.0 이상 엔진이 없음',
+  timeout: 60_000
+}, async (t) => {
+  const scoresOf = async (edit: PayloadEdit, oathBody: string) => {
+    const { payloads, details, path } = fixture('buffer-muse')
+    edit(payloads)
+    const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
+    const response = await simulate(origin, path, { equipment: [], oathBody })
+
+    assert.equal(response.status, 200)
+    assert.equal(response.body.baseline.skipped, null, oathBody)
+    assert.equal(response.body.simulated.skipped, null, oathBody)
+
+    return response.body as { baseline: { value: number }; simulated: { value: number } }
+  }
+
+  const toSet = await scoresOf(wearingPrimevalMist, SHADOW_PRIMEVAL_OATH)
+  assert.ok(toSet.simulated.value > toSet.baseline.value)
+
+  const toMist = await scoresOf(keepPayloads, PRIMEVAL_MIST_OATH)
+  assert.ok(toMist.simulated.value < toMist.baseline.value)
 })
 
 const REAL_INFERRED_OATH_SET_ENGINE = realEngineSupports({ oathWithoutSetInfo: true })
