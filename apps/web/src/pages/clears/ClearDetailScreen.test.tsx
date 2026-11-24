@@ -294,6 +294,12 @@ function panel(name: string): HTMLElement | null {
   return container.querySelector<HTMLElement>(`section[aria-label="${name}"]`)
 }
 
+function legendNames(name: string): string[] {
+  return [...(panel(name)?.querySelectorAll('ul li:has(> i)') ?? [])].map(
+    (item) => item.textContent ?? ''
+  )
+}
+
 function cardButtons(): HTMLButtonElement[] {
   return [
     ...container.querySelectorAll<HTMLButtonElement>('nav[aria-label="컨텐츠"] > div > button')
@@ -423,7 +429,7 @@ it('이동 집계가 없는 레이드는 일반과 하드 이동 카드를 두�
   expect(panelNames()).not.toContain('난이도 이동')
 })
 
-it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이동, 연속 클리어 주 수, 그룹별 명성 카드를 두지 않는다', async () => {
+it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이동, 연속 클리어 주 수, 그룹별 명성 카드와 응답에 있는 클리어 요일과 시간대 카드를 두지 않는다', async () => {
   await open({ contentKey: 'nightmare' })
 
   expect(container.querySelector('[aria-label="단계"]')?.textContent).toBe('죽음을 딛고 선 자')
@@ -431,10 +437,21 @@ it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이
     '컨텐츠',
     '주차별 클리어',
     '명성 구간',
-    '클리어 요일과 시간대',
     '모험단 기준 클리어 횟수',
     '전직별 클리어'
   ])
+})
+
+it('주차별 클리어는 레이드면 다시 클리어와 신규 막대를, 챌린지면 신규 막대만 두고 한 번이라도 깬 캐릭터 비율 선을 둔다', async () => {
+  await open({ contentKey: 'michaela' })
+  expect(legendNames('주차별 클리어')).toEqual([
+    '다시 클리어',
+    '신규',
+    '한 번이라도 깬 캐릭터 비율'
+  ])
+
+  await open({ contentKey: 'nightmare' })
+  expect(legendNames('주차별 클리어')).toEqual(['신규', '한 번이라도 깬 캐릭터 비율'])
 })
 
 it('지난주 대비는 이탈, 복귀, 신규 수와 두 주의 분할 막대를 두고, 이동은 일반 → 하드, 하드 → 일반 수를 둔다', async () => {
