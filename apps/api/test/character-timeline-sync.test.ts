@@ -19,7 +19,10 @@ import {
   type TimelineInputs
 } from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { FetchCharacterTimeline } from '@dfragon/server-core/application/character-timeline/ports.js'
-import { createTimelineSyncQueue } from '../src/application/character-timeline/queue.js'
+import {
+  createEnhancementBackfillQueue,
+  createTimelineSyncQueue
+} from '../src/application/character-timeline/queue.js'
 import type { TimelineSyncRepository } from '../src/application/character-timeline/repository.js'
 import {
   type TimelineSyncFailure,
@@ -81,7 +84,7 @@ const emptyInputs: TimelineInputs = { events: [], items: [] }
 const noItemDictionary = { fill: async () => 0 }
 const unexpectedItemDictionaryFailure = () => assert.fail('사전 채우기 실패가 보고되면 안 된다')
 
-test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고 다른 캐릭터는 기다리지 않고 시작한다', async () => {
+test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기화하고, 다섯 번째 캐릭터는 앞 동기화가 끝난 뒤 시작한다', async () => {
   const running = gate()
   const synced: TimelineCharacter[] = []
   const queue = createTimelineSyncQueue(
@@ -96,24 +99,53 @@ test('같은 캐릭터를 진행 중에 여러 번 넣어도 한 번만 동기�
     { serverId: 'siroco', characterId: 'other-2' },
     { serverId: 'cain', characterId: 'timeline-fixture' }
   ]
+  const fifth = { serverId: 'siroco', characterId: 'other-3' }
 
   queue.request(character)
   queue.request(character)
   for (const other of others) {
     queue.request(other)
   }
+  queue.request(fifth)
   queue.request(others[2]!)
   queue.request(character)
   await nextTurn()
 
   assert.deepEqual(synced, [character, ...others])
+  assert.deepEqual(queue.counts(), { waiting: 1, running: 4 })
 
   running.release()
   await nextTurn()
   queue.request(character)
   await nextTurn()
 
-  assert.deepEqual(synced, [character, ...others, character])
+  assert.deepEqual(synced, [character, ...others, fifth, character])
+})
+
+test('강화 백필은 캐릭터 2명까지만 함께 처리하고 세 번째는 앞 백필이 끝난 뒤 시작한다', async () => {
+  const running = gate()
+  const backfilled: string[] = []
+  const queue = createEnhancementBackfillQueue(
+    async ({ characterId }) => {
+      backfilled.push(characterId)
+      await running.promise
+    },
+    () => assert.fail('백필 실패가 보고되면 안 된다')
+  )
+
+  for (const characterId of ['first', 'second', 'third']) {
+    queue.request({ serverId: 'siroco', characterId })
+  }
+
+  await nextTurn()
+
+  assert.deepEqual(backfilled, ['first', 'second'])
+  assert.deepEqual(queue.counts(), { waiting: 1, running: 2 })
+
+  running.release()
+  await nextTurn()
+
+  assert.deepEqual(backfilled, ['first', 'second', 'third'])
 })
 
 test('동기화가 실패를 기록하지 못하면 보고하고 다른 캐릭터와 그 캐릭터의 다음 요청은 막지 않는다', async () => {
@@ -474,7 +506,7 @@ test('상세 조회가 강화 백필을 요청하고, 타임라인 조회는 백
 })
 
 // 닫기가 동기화를 기다리게 바뀌면 멈추지 않고 실패하도록 timeout을 둔다.
-test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 타임라인 저장소를 닫는다', {
+test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고, 대기하던 백필은 시작하지 않은 채 타임라인 저장소를 닫는다', {
   timeout: 10_000
 }, async () => {
   const running = gate()
@@ -514,7 +546,7 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
   }
 
   assert.equal(synced, 3)
-  assert.equal(backfilled, 3)
+  assert.equal(backfilled, 2)
 
   await app.close()
   running.release()
@@ -522,5 +554,5 @@ test('앱을 닫으면 진행 중인 동기화와 백필을 기다리지 않고 
 
   assert.equal(closed, 1)
   assert.equal(synced, 3)
-  assert.equal(backfilled, 3)
+  assert.equal(backfilled, 2)
 })
