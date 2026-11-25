@@ -200,7 +200,7 @@ it('조합 통계 loader는 세트 통계를, 무기 통계 loader는 아이템 
   ])
 })
 
-it('스킬 통계 loader는 주소에 전직이 있을 때만 그 전직의 스킬 통계를 받아 캐시에 둔다', async () => {
+it('스킬 통계 loader는 주소의 전직으로, 주소에 직업이 없으면 귀검사(남) 웨펀마스터로 스킬 통계를 받아 캐시에 둔다', async () => {
   const { skillStatsHandlers } = await import('#entities/ranking/api/skill-stats.handlers')
   const { skillStatsFixture } = await import('#pages/stats/api/skill-stats.fixture')
   const { RANKING_JOBS } = await import('#entities/character')
@@ -208,19 +208,24 @@ it('스킬 통계 loader는 주소에 전직이 있을 때만 그 전직의 스�
   const { Route } = await import('./routes/stats.skills')
   const loader = Route.options.loader as Loader
   const job = RANKING_JOBS.find(({ name }) => name === '귀검사(남)')!
-  const grow = job.grows.find(({ name }) => name === '웨펀마스터')!
-  const { queryKey } = skillStatsQuery({ jobId: job.jobId, jobGrowId: grow.jobGrowId, role: null })
+  const [weaponMaster, soulBringer] = job.grows
+  const { queryKey } = skillStatsQuery({
+    jobId: job.jobId,
+    jobGrowId: weaponMaster!.jobGrowId,
+    role: null
+  })
 
   server.use(skillStatsHandlers.of(skillStatsFixture))
-  await loader({ context: { queryClient }, params: {}, deps: { jobId: job.jobId } })
+  await loader({ context: { queryClient }, params: {}, deps: {} })
   await loader({
     context: { queryClient },
     params: {},
-    deps: { jobId: job.jobId, jobGrowId: grow.jobGrowId }
+    deps: { jobId: job.jobId, jobGrowId: soulBringer!.jobGrowId }
   })
 
   expect(requestedSearches()).toEqual([
-    `/stats/skills?jobId=${job.jobId}&jobGrowId=${grow.jobGrowId}`
+    `/stats/skills?jobId=${job.jobId}&jobGrowId=${weaponMaster!.jobGrowId}`,
+    `/stats/skills?jobId=${job.jobId}&jobGrowId=${soulBringer!.jobGrowId}`
   ])
   expect(queryClient.getQueryData(queryKey)).toBeDefined()
 })

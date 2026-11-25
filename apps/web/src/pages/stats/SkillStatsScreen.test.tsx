@@ -47,12 +47,15 @@ const WEAPON_MASTER_FILTER: FameRankingFilter = {
   jobGrowId: WEAPON_MASTER.jobGrowId
 }
 
-async function render(filter: FameRankingFilter): Promise<void> {
+async function render(
+  filter: FameRankingFilter,
+  onFilterChange: (filter: FameRankingFilter) => void = vi.fn()
+): Promise<void> {
   await act(async () =>
     root.render(
       <TestQueryClient>
         <TestRouter>
-          <SkillStatsScreen filter={filter} onFilterChange={vi.fn()} />
+          <SkillStatsScreen filter={filter} onFilterChange={onFilterChange} />
         </TestRouter>
       </TestQueryClient>
     )
@@ -63,6 +66,20 @@ async function renderStats(stats: SkillStats): Promise<void> {
   server.use(skillStatsHandlers.of(stats))
   await render(WEAPON_MASTER_FILTER)
   await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+}
+
+function chips(): HTMLButtonElement[] {
+  return [...container.querySelectorAll<HTMLButtonElement>('button[aria-pressed]')]
+}
+
+function chip(label: string): HTMLButtonElement | undefined {
+  return chips().find((button) => button.textContent === label)
+}
+
+function pressedChips(): string[] {
+  return chips()
+    .filter((button) => button.hasAttribute('data-pressed'))
+    .map((button) => button.textContent ?? '')
 }
 
 function skillRequests(): string[] {
@@ -129,12 +146,36 @@ async function tooltipOf(name: string): Promise<Element> {
   })
 }
 
-it('전직을 고르기 전에는 통계를 받지 않고 전직을 고르라는 한 줄만 보인다', async () => {
-  await render({ jobId: SWORDMAN.jobId })
+it('주소에 고른 직업이 없으면 귀검사(남) 웨펀마스터를 고른 채로 그 통계를 받고 직업 전체, 전직 전체 칩을 두지 않는다', async () => {
+  server.use(skillStatsHandlers.of(skillStatsFixture))
+  await render({})
 
-  expect(container.querySelector('p.state')?.textContent).toBe('전직을 고르세요.')
-  expect(container.querySelector('[aria-label="스킬 창"]')).toBeNull()
-  expect(skillRequests()).toEqual([])
+  await vi.waitFor(() => expect(container.querySelector('[aria-label="스킬 창"]')).not.toBeNull())
+  expect(skillRequests()).toEqual([`?jobId=${SWORDMAN.jobId}&jobGrowId=${WEAPON_MASTER.jobGrowId}`])
+  expect(pressedChips()).toEqual(['귀검사(남)', '웨펀마스터'])
+  expect(chip('직업 전체')).toBeUndefined()
+  expect(chip('전직 전체')).toBeUndefined()
+})
+
+it('주소에 직업만 있으면 그 직업의 첫 전직 통계를 받고, 다른 직업을 고르면 그 직업의 첫 전직까지 넘긴다', async () => {
+  const [, job, nextJob] = RANKING_JOBS.filter((candidate) =>
+    candidate.grows.every((grow) => grow.role === undefined)
+  )
+  const onFilterChange = vi.fn()
+  server.use(skillStatsHandlers.of(skillStatsFixture))
+  await render({ jobId: job!.jobId }, onFilterChange)
+
+  await vi.waitFor(() =>
+    expect(skillRequests()).toEqual([`?jobId=${job!.jobId}&jobGrowId=${job!.grows[0]!.jobGrowId}`])
+  )
+  expect(pressedChips()).toEqual([job!.name, job!.grows[0]!.name])
+
+  await act(async () => chip(nextJob!.name)?.click())
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    jobId: nextJob!.jobId,
+    jobGrowId: nextJob!.grows[0]!.jobGrowId
+  })
 })
 
 it('스킬마다 가장 많이 찍은 레벨을 보이고, 수가 같으면 높은 레벨을 고른다', async () => {

@@ -23,7 +23,6 @@ import {
 } from './skill-stats-board'
 import { StatsBody } from './StatsScreenFrame'
 
-const PICK_GROW = '전직을 고르세요.'
 const EMPTY = '스킬 통계가 없습니다.'
 const FAILED = '스킬 통계를 받지 못했습니다.'
 const FEW_SAMPLES = '표본이 20명 미만입니다.'
@@ -145,19 +144,12 @@ export function SkillStatsScreen({
   onFilterChange: (filter: FameRankingFilter) => void
 }): React.JSX.Element {
   const grow = skillStatsGrowOf(filter)
-  const filterBox = <RankingFilterBox filter={filter} onChange={onFilterChange} />
+  const filterBox = <RankingFilterBox filter={grow.filter} onChange={onFilterChange} growRequired />
 
   return (
     <div className="flex flex-col">
       <StatsTabs />
-      {grow !== null ? (
-        <SkillStatsBody grow={grow} filterBox={filterBox} />
-      ) : (
-        <>
-          {filterBox}
-          <p className="section state">{PICK_GROW}</p>
-        </>
-      )}
+      <SkillStatsBody grow={grow} filterBox={filterBox} />
     </div>
   )
 }

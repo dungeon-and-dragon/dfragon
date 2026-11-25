@@ -14,9 +14,13 @@ const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center max-sm:h-aut
 // 칩 묶음의 값은 문자열이라 직업은 jobId, 전직은 jobGrowId와 역할을 이은 키로 고른다.
 const ALL = 'all'
 
+const JOB_CHOICES: readonly ChipGroupItem<string>[] = RANKING_JOBS.map(({ jobId, name }) => ({
+  value: jobId,
+  label: name
+}))
 const JOB_ITEMS: readonly ChipGroupItem<string>[] = [
   { value: ALL, label: '직업 전체' },
-  ...RANKING_JOBS.map(({ jobId, name }) => ({ value: jobId, label: name }))
+  ...JOB_CHOICES
 ]
 
 function growKey({ jobGrowId, role }: Pick<RankingGrow, 'jobGrowId' | 'role'>): string {
@@ -32,10 +36,10 @@ function onlyGrowOf(job: RankingJob | undefined): RankingGrow | undefined {
   return job.grows[0]
 }
 
-function growItems(job: RankingJob | undefined): ChipGroupItem<string>[] {
+function growItems(job: RankingJob | undefined, growRequired: boolean): ChipGroupItem<string>[] {
   const grows = job?.grows.map((grow) => ({ value: growKey(grow), label: growLabel(grow) })) ?? []
 
-  if (onlyGrowOf(job) !== undefined) {
+  if (growRequired || onlyGrowOf(job) !== undefined) {
     return grows
   }
 
@@ -55,11 +59,16 @@ function growValueOf(filter: FameRankingFilter, job: RankingJob | undefined): st
   return ALL
 }
 
-function jobFilterOf(jobId: string): FameRankingFilter {
+function jobFilterOf(jobId: string, growRequired: boolean): FameRankingFilter {
   const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId)
 
   if (job === undefined) {
     return {}
+  }
+
+  const [firstGrow] = job.grows
+  if (growRequired && firstGrow !== undefined) {
+    return growFilter(job, firstGrow)
   }
 
   const onlyGrow = onlyGrowOf(job)
@@ -107,12 +116,14 @@ export function RankingFilterBox({
   filter,
   onChange,
   onReset,
-  rows = []
+  rows = [],
+  growRequired = false
 }: {
   filter: FameRankingFilter
   onChange: (filter: FameRankingFilter) => void
   onReset?: () => void
   rows?: readonly FilterRow[]
+  growRequired?: boolean
 }): React.JSX.Element {
   const sets = narrowingOf(filter)
   const jobLabelId = useId()
@@ -121,7 +132,7 @@ export function RankingFilterBox({
   const growValue = growValueOf(filter, job)
 
   function selectJob(jobId: string): void {
-    const jobFilter = jobFilterOf(jobId)
+    const jobFilter = jobFilterOf(jobId, growRequired)
 
     onChange({ ...sets, ...jobFilter })
   }
@@ -143,7 +154,7 @@ export function RankingFilterBox({
         <ChoiceField
           label="직업"
           labelId={jobLabelId}
-          items={JOB_ITEMS}
+          items={growRequired ? JOB_CHOICES : JOB_ITEMS}
           value={job?.jobId ?? ALL}
           onValueChange={selectJob}
         />
@@ -155,7 +166,7 @@ export function RankingFilterBox({
         <ChoiceField
           label="전직"
           labelId={growLabelId}
-          items={growItems(job)}
+          items={growItems(job, growRequired)}
           value={growValue}
           onValueChange={selectGrow}
         />

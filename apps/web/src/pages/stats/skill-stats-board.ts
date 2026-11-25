@@ -24,24 +24,24 @@ export type SkillStatsGrow = Readonly<{
   job: RankingJob
   grow: RankingGrow
   statsJob: SkillStatsJob
+  filter: FameRankingFilter
 }>
 
-export function skillStatsGrowOf({
-  jobId,
-  jobGrowId,
-  role
-}: FameRankingFilter): SkillStatsGrow | null {
-  const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId)
-  const grow = job?.grows.find(
+// 저장소 소유자가 정한 첫 화면이다.
+const DEFAULT_JOB = RANKING_JOBS.find((job) => job.name === '귀검사(남)')!
+
+export function skillStatsGrowOf({ jobId, jobGrowId, role }: FameRankingFilter): SkillStatsGrow {
+  const job = RANKING_JOBS.find((candidate) => candidate.jobId === jobId) ?? DEFAULT_JOB
+  const selectedGrow = job.grows.find(
     (candidate) => candidate.jobGrowId === jobGrowId && candidate.role === role
   )
-  if (job === undefined || grow === undefined) {
-    return null
-  }
-  const statsRole = role ?? null
+  const grow = selectedGrow ?? job.grows[0]!
+  const statsRole = grow.role ?? null
   const statsJob = { jobId: job.jobId, jobGrowId: grow.jobGrowId, role: statsRole }
+  const roleFilter = grow.role !== undefined ? { role: grow.role } : {}
+  const filter = { jobId: job.jobId, jobGrowId: grow.jobGrowId, ...roleFilter }
 
-  return { job, grow, statsJob }
+  return { job, grow, statsJob, filter }
 }
 
 type SkillLevels = SkillStats['skills'][number]['levels']

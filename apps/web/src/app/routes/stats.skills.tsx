@@ -11,12 +11,9 @@ export const Route = createFileRoute('/stats/skills')({
   validateSearch: parseJobSearch,
   loaderDeps: ({ search }) => search,
   loader: ({ context: { queryClient }, deps }) => {
-    const grow = skillStatsGrowOf(deps)
-    if (grow === null) {
-      return undefined
-    }
+    const { statsJob } = skillStatsGrowOf(deps)
 
-    return prefetchOnServer(queryClient, skillStatsQuery(grow.statsJob))
+    return prefetchOnServer(queryClient, skillStatsQuery(statsJob))
   },
   component: SkillStatsPage
 })
