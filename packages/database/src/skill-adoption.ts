@@ -21,6 +21,11 @@ export type SkillSelectionCount = {
   type2: number
 }
 
+export type SkillChainCount = {
+  skills: (string | null)[]
+  count: number
+}
+
 export type JobSkillAdoptionQuery = SkillStyleSampleJob & {
   role?: MaleCrusaderRole
 }
@@ -31,7 +36,12 @@ export type JobSkillAdoption = {
   skills: SkillAdoption[]
   evolutions: SkillSelectionCount[]
   enhancements: SkillSelectionCount[]
+  /** 체인 값을 받은 표본 수다. 4칸을 모두 비운 캐릭터도 센다. */
+  chainSampleSize: number
+  chains: SkillChainCount[]
 }
+
+const SKILL_CHAIN_TOP_COUNT = 5
 
 function selectionCountsSql(column: 'evolutions' | 'enhancements'): Prisma.Sql {
   const selections = Prisma.raw(column)
@@ -44,6 +54,21 @@ function selectionCountsSql(column: 'evolutions' | 'enhancements'): Prisma.Sql {
         count(*) FILTER (WHERE (selection->>'type')::int = 2)::int AS type2
       FROM styles CROSS JOIN jsonb_array_elements(styles.${selections}) AS selection
       GROUP BY 1
+    ) counted`
+}
+
+// 칸의 순서까지 같은 체인을 한 조합으로 센다. 수가 같으면 체인 값 순으로 놓아 실행마다 순위가 바뀌지 않게 한다.
+function chainCountsSql(): Prisma.Sql {
+  return Prisma.sql`
+    SELECT COALESCE(jsonb_agg(jsonb_build_object('skills', chain, 'count', count) ORDER BY count DESC, chain), '[]'::jsonb)
+    FROM (
+      SELECT chain, count(*)::int AS count
+      FROM styles
+      WHERE chain IS NOT NULL
+        AND EXISTS (SELECT 1 FROM jsonb_array_elements(chain) AS slot WHERE slot <> 'null'::jsonb)
+      GROUP BY chain
+      ORDER BY count DESC, chain
+      LIMIT ${SKILL_CHAIN_TOP_COUNT}
     ) counted`
 }
 
@@ -61,7 +86,7 @@ export async function readJobSkillAdoption(
   const [adoption] = await client.$queryRaw<JobSkillAdoption[]>`
     WITH sample AS (${skillStyleSampleSql(job)}),
     styles AS (
-      SELECT style.skills, style.evolutions, style.enhancements
+      SELECT style.skills, style.evolutions, style.enhancements, style.chain
       FROM sample
       JOIN character_skill_styles style
         ON style.server_id = sample.server_id
@@ -87,7 +112,9 @@ export async function readJobSkillAdoption(
         ) learned_skills
       ) AS skills,
       (${selectionCountsSql('evolutions')}) AS evolutions,
-      (${selectionCountsSql('enhancements')}) AS enhancements`
+      (${selectionCountsSql('enhancements')}) AS enhancements,
+      (SELECT count(*)::int FROM styles WHERE chain IS NOT NULL) AS "chainSampleSize",
+      (${chainCountsSql()}) AS chains`
 
   return adoption
 }
@@ -143,7 +170,7 @@ export async function readJobSkillAdoptionSnapshot(
 ): Promise<JobSkillAdoptionSnapshot | null> {
   const [row] = await client.$queryRaw<(JobSkillAdoption & { computedAt: Date })[]>`
     SELECT computed_at AS "computedAt", min_fame AS "minFame", sample_size AS "sampleSize",
-      skills, evolutions, enhancements
+      skills, evolutions, enhancements, chain_sample_size AS "chainSampleSize", chains
     FROM job_skill_adoption
     WHERE job_id = ${jobId} AND job_grow_id = ${jobGrowId} AND role = ${storedRole(role)}`
   if (row === undefined) {

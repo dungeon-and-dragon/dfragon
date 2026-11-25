@@ -211,6 +211,8 @@ export type SkillStatsResponse = {
   skills: { name: string; learned: number; levels: [level: number, count: number][] }[]
   evolutions: { name: string; type1: number; type2: number }[]
   enhancements: { name: string; type1: number; type2: number }[]
+  chainSampleSize: number
+  chains: { skills: (string | null)[]; count: number }[]
   computedAt: string | null
   topCount: number
 }
@@ -227,7 +229,9 @@ const emptyJobSkillAdoption: JobSkillAdoption = {
   sampleSize: 0,
   skills: [],
   evolutions: [],
-  enhancements: []
+  enhancements: [],
+  chainSampleSize: 0,
+  chains: []
 }
 
 export function toFameRankingResponse({

@@ -51,13 +51,19 @@ const maleCrusader = {
 const weaponMaster = { jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }
 const blade = { jobId: 'synthetic-job', jobGrowId: 'synthetic-blade' }
 
-const adoptionFor = ({ jobGrowId, role }: JobSkillAdoptionQuery): JobSkillAdoption => ({
-  minFame: 70000,
-  sampleSize: 1,
-  skills: [{ name: `${jobGrowId}:${role ?? 'all'}`, learned: 1, levels: [[1, 1]] }],
-  evolutions: [],
-  enhancements: []
-})
+const adoptionFor = ({ jobGrowId, role }: JobSkillAdoptionQuery): JobSkillAdoption => {
+  const name = `${jobGrowId}:${role ?? 'all'}`
+
+  return {
+    minFame: 70000,
+    sampleSize: 1,
+    skills: [{ name, learned: 1, levels: [[1, 1]] }],
+    evolutions: [],
+    enhancements: [],
+    chainSampleSize: 1,
+    chains: [{ skills: [name, null, null, null], count: 1 }]
+  }
+}
 
 function minutesAfterMidnight(minutes: number): Date {
   return new Date(Date.UTC(2026, 10, 10, 15, minutes))
