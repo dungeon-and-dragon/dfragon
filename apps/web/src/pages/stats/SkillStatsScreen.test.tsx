@@ -142,11 +142,7 @@ function upgradeRows(heading: string): [string, ...string[]][] {
   })
 }
 
-async function tooltipOf(name: string): Promise<Element> {
-  const trigger = container
-    .querySelector(`[role="group"] [role="img"][aria-label="${name}"]`)
-    ?.closest('[data-skill-id]')
-
+async function hover(trigger: Element | null | undefined): Promise<Element> {
   await act(async () => {
     trigger?.dispatchEvent(new MouseEvent('mouseenter'))
   })
@@ -159,6 +155,37 @@ async function tooltipOf(name: string): Promise<Element> {
 
     return popup
   })
+}
+
+async function leave(trigger: Element | null | undefined): Promise<void> {
+  await act(async () => {
+    trigger?.dispatchEvent(new MouseEvent('mouseleave'))
+  })
+  await vi.waitFor(() => {
+    if (document.querySelector('[data-base-ui-portal] > [data-open]') !== null) {
+      throw new Error('Tooltip이 닫히지 않았다')
+    }
+  })
+}
+
+function tooltipOf(name: string): Promise<Element> {
+  const trigger = container
+    .querySelector(`[role="group"] [role="img"][aria-label="${name}"]`)
+    ?.closest('[data-skill-id]')
+
+  return hover(trigger)
+}
+
+function upgradeMarkTrigger(
+  heading: string,
+  name: string,
+  type: 1 | 2
+): Element | null | undefined {
+  const row = [...upgradeSection(heading)!.querySelectorAll('li')].find(
+    (candidate) => candidate.querySelector(`[aria-label="${name}"]`) !== null
+  )
+
+  return row?.querySelectorAll('img')[type - 1]?.parentElement
 }
 
 it('주소에 고른 직업이 없으면 귀검사(남) 웨펀마스터를 고른 채로 그 통계를 받고 직업 전체, 전직 전체 칩을 두지 않는다', async () => {
@@ -283,6 +310,17 @@ it('스킬 개화, 강화는 응답의 스킬마다 두 갈래 표식과 그 스
     ['차지 크래시', 'enhancement-1 33.3%', 'enhancement-2 53.3%'],
     ['맹룡단공참', 'enhancement-1 46.7%', 'enhancement-2 43.3%']
   ])
+})
+
+it('스킬 개화의 1번, 2번 표식에 마우스를 올리면 그 갈래의 개화 이름과 설명을 보이고, 스킬 강화 표식은 Tooltip이 없다', async () => {
+  await renderStats(skillStatsFixture)
+
+  const first = upgradeMarkTrigger('스킬 개화', '발도', 1)
+  expect((await hover(first)).textContent).toBe('Ⅰ 명가의 손놀림합성 설명합성 설명')
+  await leave(first)
+  const second = upgradeMarkTrigger('스킬 개화', '맹룡단공참', 2)
+  expect((await hover(second)).textContent).toBe('Ⅱ 파죽지세합성 설명합성 설명')
+  expect(upgradeSection('스킬 강화')!.querySelector('button')).toBeNull()
 })
 
 it('스킬 강화는 두 강화 비율이 모두 1% 이하인 스킬을 숨기고 하나라도 넘으면 보이며, 스킬 개화는 1% 이하여도 보인다', async () => {
