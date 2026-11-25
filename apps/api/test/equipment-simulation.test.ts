@@ -1863,6 +1863,36 @@ test('비어 있는 결정 칸에는 착용 세트의 선택지로 결정을 더
   })
 })
 
+test('서약 세트를 추론할 수 없는 서약은 고른 세트의 선택지로 빈 칸에 결정을 더하고, 엔진에는 세트를 넣지 않는다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  const section = payloads.oath.oath as Item
+  section.setInfo = null
+  section.info = {
+    ...(section.info as Item),
+    ...oathItem(PRIMEVAL_MIST_OATH, '영겁의 안개 서약', '태초')
+  }
+  section.crystal = []
+  const engine = scoring(versionedEngine(ADDED_OATH_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    oathSet: FOX_OATH_SET,
+    oath: [{ slotNo: 0, variantId: FOX_EPIC_CRYSTAL }]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation!.oath, {
+    crystal: [
+      {
+        slotNo: 0,
+        ...oathItem(FOX_EPIC_CRYSTAL, '여우 : 완전한 광휘 결정', '에픽'),
+        tune: { level: 0, setPoint: 165 }
+      }
+    ]
+  })
+})
+
 test('0.17.0 전 엔진에 서약이 없는 캐릭터의 본체를 더한 요청을 보내면 두 점수 모두 null이다', async (t) => {
   const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
   payloads.oath = { oath: null }
@@ -2627,20 +2657,6 @@ const invalidSetCases: readonly (readonly [string, FixtureName, Item, PayloadEdi
     keepPayloads
   ],
   ['목록에 없는 서약 세트', 'buffer-muse', { equipment: [], oathSet: 16213 }, keepPayloads],
-  [
-    '서약 세트 정보가 없고 세트에 속한 본체와 광휘 결정도 없는 캐릭터의 서약 세트 전환',
-    'buffer-muse',
-    { equipment: [], oathSet: FOX_OATH_SET },
-    (payloads) => {
-      withoutSetInfo(payloads)
-      const section = oathOf(payloads)
-      section.crystal = (section.crystal as Item[]).map((crystal) => ({
-        ...crystal,
-        ...oathItem(GLIMMER_CRYSTAL, '미광의 서약 결정', '레어'),
-        tune: { level: 0, setPoint: 45 }
-      }))
-    }
-  ],
   [
     '서약 세트 정보가 없는 캐릭터의 추론한 세트 밖 결정',
     'buffer-muse',
