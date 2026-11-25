@@ -9,6 +9,7 @@ import {
   type OathUpgradeSelection,
   type EquipmentVariant,
   type EquipmentVariantSlot,
+  emptySlotVariantOf,
   equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
@@ -181,11 +182,11 @@ export type SimulatorRow =
   | Readonly<{ kind: 'slotItem'; slotItem: SimulatorSlotItem }>
 
 /**
- * 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. rarity는 상세 응답이 준
- * 주 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
+ * 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. 주 세트가 없으면(장비가 비었거나
+ * 선택 목록 밖 세트) null이다. rarity는 상세 응답이 준 주 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
  */
 export type SimulatorEquipmentSet = Readonly<{
-  mainSetId: string
+  mainSetId: string | null
   rarity: ItemView['rarity']
   sets: readonly EquipmentSet[]
 }>
@@ -610,10 +611,10 @@ function slotItemRow(
   return { kind: 'slotItem', slotItem }
 }
 
-/** 캐릭터의 주 세트가 선택 목록에 있으면 장비 세트 줄을 둔다. */
+/** 장비 세트 줄은 늘 둔다. 주 세트가 선택 목록에 없으면 고른 세트가 없는 줄이다. */
 export function toEquipmentSet(
   detail: Pick<CharacterDetailView, 'equipment'>
-): SimulatorEquipmentSet | null {
+): SimulatorEquipmentSet {
   const sets = equipmentSets()
   const listed = new Set(sets.map(({ setItemId }) => setItemId))
   const mainSetId = setIdsByPointOf(detail.equipment.setItemInfo).find((setItemId) =>
@@ -621,7 +622,7 @@ export function toEquipmentSet(
   )
 
   if (mainSetId === undefined) {
-    return null
+    return { mainSetId: null, rarity: null, sets }
   }
 
   const mainSet = detail.equipment.setItemInfo.find(({ setItemId }) => setItemId === mainSetId)
@@ -633,7 +634,7 @@ export function toEquipmentSet(
 export function equipmentSetIdOf(
   equipmentSet: SimulatorEquipmentSet,
   changes: SimulatorChanges
-): string {
+): string | null {
   if (changes.equipmentSet === null) {
     return equipmentSet.mainSetId
   }
@@ -663,6 +664,14 @@ function slotInSet(slot: SimulatorSlot, setItemId: string): SimulatorSlot {
   }
 
   const variants = equipmentVariantsOf(setItemId, slotId).map(toVariantChoice)
+
+  // 비어 있는 부위는 그 세트에서 등급이 가장 높은 일반 장비로 채운다. API도 같은 장비를 더한다.
+  if (slot.empty) {
+    const wornVariantId = emptySlotVariantOf(setItemId, slotId)?.id ?? null
+
+    return { ...slot, variants, wornVariantId, wornTune: 0 }
+  }
+
   const worn = variantChoiceOf(slot, slot.wornVariantId)
   const switched = switchEquipmentSet({ [slotId]: worn?.variant ?? null }, setItemId)[slotId]
   const keepsWorn = variants.some(({ id }) => id === slot.wornVariantId)
@@ -1002,6 +1011,10 @@ function movedDraftOf(
   }
 
   const chosen = variantChoiceOf(current, draft.variantId)
+
+  if (chosen === undefined && next.empty) {
+    return { ...draft, variantId: next.wornVariantId, tune: next.wornTune }
+  }
 
   // 선택지 밖 착용 아이템은 옮길 짝이 없어 세트를 바꿔도 조율까지 그대로 둔다.
   if (chosen === undefined) {

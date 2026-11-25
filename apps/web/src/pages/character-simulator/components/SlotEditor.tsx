@@ -174,7 +174,7 @@ function EquipmentSetEditor({
       <Field label="세트">
         <TextChoiceControl
           label="장비 세트"
-          value={equipmentSetIdOf(equipmentSet, changes)}
+          value={equipmentSetIdOf(equipmentSet, changes) ?? ''}
           options={options}
           onChange={changeSet}
         />
