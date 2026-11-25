@@ -1,5 +1,4 @@
 import {
-  ENCHANT_GRADE_SLOTS,
   type EnchantGradeSlot,
   type EnchantGradeTier,
   enchantOptionsOf
@@ -14,6 +13,7 @@ import {
   equipmentVariantsOf,
   findEquipmentVariant,
   findWeaponVariant,
+  jobWeaponTypesOf,
   resolveEquipmentItems,
   switchEquipmentSet,
   WEAPON_RELEASE_MAX,
@@ -58,7 +58,10 @@ import {
 
 type EquipmentItem = CharacterDetailView['equipment']['equipment'][number]
 type SetItem = CharacterDetailView['equipment']['setItemInfo'][number]
-type SimulatorDetail = Pick<CharacterDetailView, 'equipment' | 'card' | 'creature' | 'avatar'>
+type SimulatorDetail = Pick<
+  CharacterDetailView,
+  'character' | 'equipment' | 'card' | 'creature' | 'avatar'
+>
 type WornItem = Parameters<typeof toItemView>[0]
 
 const TITLE_SLOT_ID = 'TITLE'
@@ -87,6 +90,23 @@ const WEAPON_LINE_NAMES: Readonly<Record<NonNullable<WeaponVariant['line']>, str
   '태초의 별': '태초의 별'
 }
 const UNIQUE_WEAPON_NAME = '유니크'
+export const EMPTY_SLOT_NAME = '비어 있음'
+// 응답 순서와 같은 장비 부위 순서와, 비어 있는 부위에 쓰는 응답의 부위 이름이다.
+const EQUIPMENT_SLOT_NAMES: Readonly<Record<EnchantGradeSlot | typeof TITLE_SLOT_ID, string>> = {
+  WEAPON: '무기',
+  TITLE: '칭호',
+  JACKET: '상의',
+  SHOULDER: '머리어깨',
+  PANTS: '하의',
+  SHOES: '신발',
+  WAIST: '벨트',
+  AMULET: '목걸이',
+  WRIST: '팔찌',
+  RING: '반지',
+  SUPPORT: '보조장비',
+  MAGIC_STON: '마법석',
+  EARRING: '귀걸이'
+}
 export const TUNED_WEAPON_NAME = '레거시 조율 완료'
 
 export type EnchantChoice = Readonly<{
@@ -110,10 +130,16 @@ export type VariantChoice = Readonly<{
   weapon: WeaponVariant | null
 }>
 
+export type WeaponTypeChoice = Readonly<{
+  type: string
+  variants: readonly VariantChoice[]
+}>
+
 /**
  * wornVariantId, wornTune, wornPotency, wornRelease는 지금 기준의 아이템, 조율, 정밀도, 해방 수치다. 장비 세트를 고르면 그
  * 세트로 옮긴 값이고, wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율
- * 상한이다(무기).
+ * 상한이다(무기). empty는 비어 있는 부위이고, 강화, 증폭, 마법부여 없이 선택지의 아이템만 더할 수 있다. weaponTypes는 비어
+ * 있는 무기 줄에만 있고, variants는 그 종류들의 선택지를 모두 담는다.
  */
 export type SimulatorSlot = ItemView &
   Readonly<{
@@ -131,6 +157,8 @@ export type SimulatorSlot = ItemView &
     wornPotency: number | null
     wornRelease: number | null
     wornMaxTune: number
+    empty: boolean
+    weaponTypes: readonly WeaponTypeChoice[]
   }>
 
 export type SlotItemChoice = Readonly<{
@@ -255,10 +283,6 @@ export type SimulatorAction =
     }>
   | Readonly<{ type: 'reset' }>
 
-function isGradeSlot(slotId: string | null): slotId is EnchantGradeSlot {
-  return ENCHANT_GRADE_SLOTS.some((gradeSlot) => gradeSlot === slotId)
-}
-
 function isVariantSlot(slotId: string): slotId is EquipmentVariantSlot {
   return EQUIPMENT_VARIANT_SLOTS.some((variantSlot) => variantSlot === slotId)
 }
@@ -371,6 +395,14 @@ function variantChoicesOf(
   }
 
   const setIds = item.setItemId !== null ? [item.setItemId, ...setIdsByPoint] : setIdsByPoint
+
+  return setVariantChoicesOf(slotId, setIds)
+}
+
+function setVariantChoicesOf(
+  slotId: EquipmentVariantSlot,
+  setIds: readonly string[]
+): VariantChoice[] {
   const variants = setIds
     .map((setId) => equipmentVariantsOf(setId, slotId))
     .find((found) => found.length > 0)
@@ -490,7 +522,56 @@ function toSimulatorSlot(
     wornTune,
     wornPotency,
     wornRelease,
-    wornMaxTune
+    wornMaxTune,
+    empty: false,
+    weaponTypes: []
+  }
+}
+
+function emptyWeaponTypes(character: SimulatorDetail['character']): WeaponTypeChoice[] {
+  const { jobId, jobGrowId } = character
+
+  if (jobId === null || jobGrowId === null) {
+    return []
+  }
+
+  return jobWeaponTypesOf(jobId, jobGrowId).map((type) => ({
+    type,
+    variants: weaponVariantsOf(type).map(toWeaponChoice)
+  }))
+}
+
+/** 비어 있는 부위는 무기면 직업이 낄 수 있는 종류의 선택지를, 나머지 11부위면 주 세트의 선택지를 둔다. */
+function emptySlot(
+  slotId: EnchantGradeSlot,
+  character: SimulatorDetail['character'],
+  setIdsByPoint: readonly string[]
+): SimulatorSlot {
+  const weaponTypes = slotId === WEAPON_SLOT_ID ? emptyWeaponTypes(character) : []
+  const variants = isVariantSlot(slotId)
+    ? setVariantChoicesOf(slotId, setIdsByPoint)
+    : weaponTypes.flatMap((weaponType) => weaponType.variants)
+
+  return {
+    itemId: null,
+    itemName: EMPTY_SLOT_NAME,
+    rarity: null,
+    slotId,
+    slotName: EQUIPMENT_SLOT_NAMES[slotId],
+    reinforce: 0,
+    amplified: false,
+    reinforceLimit: 0,
+    reinforceEditable: false,
+    enchants: [],
+    enchantChoices: [],
+    variants,
+    wornVariantId: null,
+    wornTune: 0,
+    wornPotency: null,
+    wornRelease: null,
+    wornMaxTune: 0,
+    empty: true,
+    weaponTypes
   }
 }
 
@@ -504,26 +585,29 @@ function slotItemRow(
   category: SlotItemCategory,
   item: WornItem | null | undefined,
   slotName: string | null = null
-): SimulatorRow[] {
-  // API는 착용하지 않은 부위의 교체를 거절하므로, 캐릭터 상세 장비 탭처럼 그 행을 두지 않는다.
-  if (item?.itemId == null) {
-    return []
-  }
-
+): SimulatorRow {
   const choices = slotItemsOf(category).map(({ id, name, item: represented }) => {
     const { itemId, rarity } = toItemView(represented)
     const choiceName = withoutLevel(name)
 
     return { id, name: choiceName, itemId, rarity }
   })
+  const name = slotName ?? SLOT_ITEM_NAMES[category]
+
+  if (item?.itemId == null) {
+    const empty = { itemId: null, itemName: EMPTY_SLOT_NAME, rarity: null }
+    const slotItem = { ...empty, category, slotName: name, choices, wornChoiceId: null }
+
+    return { kind: 'slotItem', slotItem }
+  }
+
   const view = toItemView(item)
   const itemName = view.itemName !== null ? withoutLevel(view.itemName) : null
   const wornChoiceId =
     findWornSlotItem(category, { itemId: item.itemId, itemName: item.itemName })?.id ?? null
-  const name = slotName ?? SLOT_ITEM_NAMES[category]
   const slotItem = { ...view, itemName, category, slotName: name, choices, wornChoiceId }
 
-  return [{ kind: 'slotItem', slotItem }]
+  return { kind: 'slotItem', slotItem }
 }
 
 /** 캐릭터의 주 세트가 선택 목록에 있으면 장비 세트 줄을 둔다. */
@@ -610,29 +694,35 @@ export function rowsInEquipmentSet(
   })
 }
 
-/** 칭호는 응답의 부위 순서 자리에, 크리쳐와 오라는 캐릭터 상세 장비 탭처럼 장비 뒤에 둔다. 장비는 등급표의 12부위만 둔다. */
+/**
+ * 장비 12부위와 칭호는 응답 순서대로, 크리쳐와 오라는 캐릭터 상세 장비 탭처럼 장비 뒤에 둔다. 비어 있는 부위도 줄을 두고 아이템을
+ * 더할 수 있다.
+ */
 export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
   const role = simulatorRole(detail.card)
   const setIdsByPoint = setIdsByPointOf(detail.equipment.setItemInfo)
-  const equipment = detail.equipment.equipment.flatMap((item): SimulatorRow[] => {
-    const { slotId } = item
+  const slotIds = Object.keys(EQUIPMENT_SLOT_NAMES) as (keyof typeof EQUIPMENT_SLOT_NAMES)[]
+  const equipment = slotIds.map((slotId): SimulatorRow => {
+    const item = detail.equipment.equipment.find((worn) => worn.slotId === slotId)
 
     if (slotId === TITLE_SLOT_ID) {
-      return slotItemRow('title', item, item.slotName)
+      return slotItemRow('title', item, item?.slotName ?? EQUIPMENT_SLOT_NAMES[slotId])
     }
 
-    if (!isGradeSlot(slotId)) {
-      return []
+    if (item === undefined) {
+      const slot = emptySlot(slotId, detail.character, setIdsByPoint)
+
+      return { kind: 'equipment', slot }
     }
 
     const slot = toSimulatorSlot({ ...item, slotId }, role, setIdsByPoint)
 
-    return [{ kind: 'equipment', slot }]
+    return { kind: 'equipment', slot }
   })
 
   const aura = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
 
-  return [...equipment, ...slotItemRow('creature', detail.creature), ...slotItemRow('aura', aura)]
+  return [...equipment, slotItemRow('creature', detail.creature), slotItemRow('aura', aura)]
 }
 
 function originalDraft(slot: SimulatorSlot): SlotDraft {

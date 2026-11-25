@@ -727,7 +727,7 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
   ])
 })
 
-it('칭호, 크리쳐, 오라를 착용하지 않았으면 그 행을 두지 않는다', async () => {
+it('칭호, 크리쳐, 오라를 착용하지 않았어도 그 줄을 비어 있음으로 둔다', async () => {
   const detail = characterDetailFixture('dealer')
   await render({
     ...detail,
@@ -744,10 +744,9 @@ it('칭호, 크리쳐, 오라를 착용하지 않았으면 그 행을 두지 않
     ['차이', '0']
   ])
 
-  expect(slotNames()).not.toContain('칭호')
-  expect(container.querySelector('[aria-label="칭호 교체"]')).toBeNull()
-  expect(container.querySelector('[aria-label="크리쳐 교체"]')).toBeNull()
-  expect(container.querySelector('[aria-label="오라 교체"]')).toBeNull()
+  for (const slotName of ['칭호', '크리쳐', '오라']) {
+    expect(rowOf(slotName).textContent, slotName).toContain('비어 있음')
+  }
 })
 
 it('115레벨이 아닌 장비는 수치와 증폭을 막고 마법부여만 고르게 둔다', async () => {
@@ -878,6 +877,27 @@ it('해방 수치를 낮추면 수치만 요청한다', async () => {
   await vi.waitFor(() =>
     expect(bodies.at(-1)?.equipment).toEqual([{ ...WEAPON_CHANGE, ...KEPT_ITEM, release: 81 }])
   )
+})
+
+it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고, 종류를 바꾸면 고른 무기를 비어 있음으로 되돌린다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const equipment = detail.equipment.equipment.filter(({ slotId }) => slotId !== 'WEAPON')
+  await render({ ...detail, equipment: { ...detail.equipment, equipment } })
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  expect(pressedIn('무기 종류')).toBe('낫')
+  expect(pressedIn('무기 교체')).toBe('비어 있음')
+  await press('무기 교체', '레거시')
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)?.equipment?.[0]?.variantId).toEqual(expect.any(String))
+  )
+
+  await press('무기 종류', '염주')
+
+  expect(pressedIn('무기 종류')).toBe('염주')
+  expect(pressedIn('무기 교체')).toBe('비어 있음')
+  expect(weaponCell()).toBe('비어 있음')
 })
 
 it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 버튼을 두며 바꾼 무기를 요청한다', async () => {

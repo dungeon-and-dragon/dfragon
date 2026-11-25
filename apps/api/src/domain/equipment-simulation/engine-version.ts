@@ -13,6 +13,8 @@ const WEAPON_ITEM_ENGINE_VERSION: EngineVersion = [0, 13, 0]
 const SWITCHING_EQUIPMENT_ENGINE_VERSION: EngineVersion = [0, 14, 0]
 // 0.15.0부터 응답에 서약 세트가 없으면 엔진이 세트 포인트 합이 가장 큰 세트로 서약 세트 상태를 만든다.
 const INFERRED_OATH_SET_ENGINE_VERSION: EngineVersion = [0, 15, 0]
+// 0.16.0부터 원본에 없는 장비, 칭호, 크리쳐, 오라를 더할 수 있다.
+const ADDED_SLOT_ENGINE_VERSION: EngineVersion = [0, 16, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -25,6 +27,8 @@ export interface SimulationFeatures {
   readonly weaponTune: boolean
   /** 무기 아이템과 해방 수치 변경 */
   readonly weaponItem: boolean
+  /** 비어 있는 장비, 칭호, 크리쳐, 오라 부위에 아이템을 더함 */
+  readonly addedSlots: boolean
   /** 서약 세트, 본체, 결정 아이템 교체 */
   readonly oathItems: boolean
   /** 묵언의 진의 단계와 선택지 변경 */
@@ -102,6 +106,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.oathWithoutSetInfo) {
     minimums.push(INFERRED_OATH_SET_ENGINE_VERSION)
+  }
+
+  if (features.addedSlots) {
+    minimums.push(ADDED_SLOT_ENGINE_VERSION)
   }
 
   return minimums

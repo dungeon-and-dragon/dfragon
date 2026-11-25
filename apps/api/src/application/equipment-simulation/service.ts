@@ -23,6 +23,7 @@ import {
   type OathChanges,
   type SimulationFeatures,
   type SlotItemChanges,
+  addsSlotItems,
   avatarItemIds,
   avatarPresetJobOf,
   editAvatar,
@@ -112,7 +113,7 @@ export class EquipmentSimulationService {
       request.equipment,
       request.equipmentSet
     )
-    const weaponEdit = editWeapon(payloads.equipment, request.equipment)
+    const weaponEdit = editWeapon(payloads, request.equipment)
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)
@@ -136,6 +137,10 @@ export class EquipmentSimulationService {
     const editsAvatar = hasAvatarEdit(avatarEdit)
     const editsWeaponItem =
       weaponEdit !== null && (weaponEdit.item !== null || weaponEdit.release !== null)
+    const addsSlots =
+      (weaponEdit !== null && weaponEdit.original === null) ||
+      itemEdits.some(({ added }) => added) ||
+      addsSlotItems(slotEdits)
     const features: SimulationFeatures = {
       slotItems: editsSlotItems,
       equipmentItems: itemEdits.length > 0,
@@ -143,6 +148,7 @@ export class EquipmentSimulationService {
       equipmentSet: request.equipmentSet !== null && itemEdits.length > 0,
       weaponTune: weaponEdit !== null,
       weaponItem: editsWeaponItem,
+      addedSlots: addsSlots,
       oathItems: oathEdit.changesItems,
       oathUpgrade: oathEdit.upgrade !== null,
       buffLevel: buffLevel !== null,

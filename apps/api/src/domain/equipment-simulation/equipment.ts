@@ -16,6 +16,8 @@ import type { ScoreMainStat } from '@dfragon/server-core/domain/score/index.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
 const REINFORCE_LIMIT = 20
+// 원본에 없는 부위로 더한 장비의 착용 품질은 알 수 없어 가장 많이 끼는 최상급으로 둔다.
+export const ADDED_ITEM_GRADE = '최상급'
 const AMPLIFICATION_PREFIX = '차원의 '
 
 export interface EquipmentChange {
@@ -85,7 +87,15 @@ function enchantOf(change: EquipmentChange, role: EnchantGradeRole): EnchantGrad
   return option
 }
 
-/** 착용하지 않은 부위, 범위 밖 수치, 그 부위나 역할의 등급표에 없는 마법부여는 거절한다. */
+// 비어 있는 부위는 weapon.ts, equipment-items.ts가 강화, 증폭, 마법부여 없이 장비를 더한다.
+function isBareAddedSlot(change: EquipmentChange): boolean {
+  return change.reinforce === 0 && !change.amplified && change.enchantId === null
+}
+
+/**
+ * 착용하지 않은 부위, 범위 밖 수치, 그 부위나 역할의 등급표에 없는 마법부여는 거절한다. 비어 있는 부위는 강화, 증폭,
+ * 마법부여가 없을 때만 받는다.
+ */
 export function editEquipment(
   equipment: CharacterPayload,
   changes: readonly EquipmentChange[],
@@ -94,8 +104,12 @@ export function editEquipment(
   const items = equippedItems(equipment)
   const gradeRole = enchantRole(role)
 
-  return changes.map((change) => {
+  return changes.flatMap((change) => {
     const original = items.find((item) => item.slotId === change.slotId)
+
+    if (original === undefined && isBareAddedSlot(change)) {
+      return []
+    }
 
     if (original === undefined) {
       throw new EquipmentSimulationFailure('request')
@@ -107,7 +121,7 @@ export function editEquipment(
 
     const enchant = enchantOf(change, gradeRole)
 
-    return { original, reinforce: change.reinforce, amplified: change.amplified, enchant }
+    return [{ original, reinforce: change.reinforce, amplified: change.amplified, enchant }]
   })
 }
 

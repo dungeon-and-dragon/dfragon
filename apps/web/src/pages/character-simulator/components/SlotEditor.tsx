@@ -1,5 +1,6 @@
 import { type BuffSwitching, selectableBuffLevels } from '@dfragon/lib/buff-switching'
 import { Checkbox, NumberField } from '@dfragon/ui'
+import { useState } from 'react'
 import {
   type AvatarPresetChange,
   avatarPresetNameOf,
@@ -14,6 +15,7 @@ import {
   type SimulatorSlotItem,
   type SlotDraft,
   slotItemChoiceOf,
+  type WeaponTypeChoice,
   tuneLimitOf,
   variantChoiceOf
 } from '#pages/character-simulator/model/simulator-draft'
@@ -110,6 +112,10 @@ export function SlotEditor({
         />
       )
     case 'equipment':
+      if (target.slot.weaponTypes.length > 0) {
+        return <UnwornWeaponEditor slot={target.slot} changes={changes} actions={actions} />
+      }
+
       return <EquipmentEditor slot={target.slot} changes={changes} actions={actions} />
     case 'slotItem':
       return (
@@ -220,12 +226,100 @@ function EquipmentEditor({
           <ReleaseControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
         </Field>
       )}
-      <Field label="강화, 증폭">
-        <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+      {!slot.empty && (
+        <Field label="강화, 증폭">
+          <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+        </Field>
+      )}
+      {!slot.empty && (
+        <Field label="마법부여">
+          <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+        </Field>
+      )}
+    </Fields>
+  )
+}
+
+function weaponTypeOf(
+  weaponTypes: readonly WeaponTypeChoice[],
+  variantId: string | null
+): WeaponTypeChoice {
+  const chosen = weaponTypes.find(({ variants }) => variants.some(({ id }) => id === variantId))
+
+  if (chosen === undefined) {
+    return weaponTypes[0]!
+  }
+
+  return chosen
+}
+
+function UnwornWeaponEditor({
+  slot,
+  changes,
+  actions
+}: {
+  slot: SimulatorSlot
+  changes: SimulatorChanges
+  actions: SlotEditorActions
+}): React.JSX.Element {
+  const slotLabel = slot.slotName ?? slot.slotId
+  const draft = draftOf(slot, changes)
+  const [weaponType, setWeaponType] = useState(
+    () => weaponTypeOf(slot.weaponTypes, draft.variantId).type
+  )
+  const chosenType =
+    slot.weaponTypes.find(({ type }) => type === weaponType) ?? slot.weaponTypes[0]!
+  const tuneLimit = tuneLimitOf(slot, draft.variantId)
+  const typeOptions = slot.weaponTypes.map(({ type }) => ({ id: type, name: type }))
+
+  function changeSlot(next: Partial<SlotDraft>): void {
+    actions.onChange(slot, next)
+  }
+
+  // 다른 종류를 고르면 앞 종류의 무기는 새 종류의 칩에 없으므로 비어 있음으로 되돌린다.
+  function changeWeaponType(type: string): void {
+    setWeaponType(type)
+
+    if (draft.variantId !== null && weaponTypeOf(slot.weaponTypes, draft.variantId).type !== type) {
+      changeSlot({ variantId: null })
+    }
+  }
+
+  return (
+    <Fields>
+      {slot.weaponTypes.length > 1 && (
+        <Field label="무기 종류">
+          <TextChoiceControl
+            label={`${slotLabel} 종류`}
+            value={chosenType.type}
+            options={typeOptions}
+            onChange={changeWeaponType}
+          />
+        </Field>
+      )}
+      <Field label="장비">
+        <ItemControl
+          slot={{ ...slot, variants: chosenType.variants }}
+          slotLabel={slotLabel}
+          draft={draft}
+          onChange={changeSlot}
+        />
       </Field>
-      <Field label="마법부여">
-        <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
-      </Field>
+      {tuneLimit > 0 && (
+        <Field label="조율">
+          <EquipmentTuneControl
+            slotLabel={slotLabel}
+            maxTune={tuneLimit}
+            draft={draft}
+            onChange={changeSlot}
+          />
+        </Field>
+      )}
+      {draft.release !== null && (
+        <Field label="해방">
+          <ReleaseControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
+        </Field>
+      )}
     </Fields>
   )
 }

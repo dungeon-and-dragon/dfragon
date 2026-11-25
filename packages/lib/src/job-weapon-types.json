@@ -1,0 +1,502 @@
+{
+  "source": "2026-11-25 운영 DB에서 115레벨 캐릭터가 낀 무기 종류(itemTypeDetail) 가운데 그 전직 착용의 1% 이상인 종류",
+  "jobs": [
+    {
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 런처",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 레인저",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 메카닉",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 스핏파이어",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "afdf3b989339de478e85b614d274d1ef",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(남)",
+      "jobGrowName": "眞 어썰트",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 런처",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 레인저",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 메카닉",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 스핏파이어",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "944b9aab492c15a8474f96947ceeb9e4",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "거너(여)",
+      "jobGrowName": "眞 패러메딕",
+      "weaponTypes": ["리볼버", "머스켓", "보우건", "자동권총", "핸드캐넌"]
+    },
+    {
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 그래플러",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 넨마스터",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트라이커",
+      "weaponTypes": ["건틀릿", "권투글러브", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "ca0f0e0e9e1d55b5f9955b03d9dd213c",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(남)",
+      "jobGrowName": "眞 스트리트파이터",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 그래플러",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 넨마스터",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트라이커",
+      "weaponTypes": ["건틀릿", "권투글러브", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "a7a059ebe9e6054c0644b40ef316d6e9",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "격투가(여)",
+      "jobGrowName": "眞 스트리트파이터",
+      "weaponTypes": ["건틀릿", "너클", "클로", "통파"]
+    },
+    {
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 검귀",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 버서커",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 소울브링어",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 아수라",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "41f1cdc2ff58bb5fdc287be0db2a8df3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(남)",
+      "jobGrowName": "眞 웨펀마스터",
+      "weaponTypes": ["광검", "대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 다크템플러",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 데몬슬레이어",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 베가본드",
+      "weaponTypes": ["광검", "대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 블레이드",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "1645c45aabb008c98406b3a16447040d",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "귀검사(여)",
+      "jobGrowName": "眞 소드마스터",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "나이트",
+      "jobGrowName": "眞 드래곤나이트",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "나이트",
+      "jobGrowName": "眞 엘븐나이트",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "나이트",
+      "jobGrowName": "眞 카오스",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "0ee8fa5dc525c1a1f23fc6911e921e4a",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "나이트",
+      "jobGrowName": "眞 팔라딘",
+      "weaponTypes": ["대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "17e417b31686389eebff6d754c3401ea",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "다크나이트",
+      "jobGrowName": "眞 다크나이트",
+      "weaponTypes": ["광검", "대검", "도", "둔기", "소검"]
+    },
+    {
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "도적",
+      "jobGrowName": "眞 로그",
+      "weaponTypes": ["단검", "쌍검", "완드"]
+    },
+    {
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "도적",
+      "jobGrowName": "眞 사령술사",
+      "weaponTypes": ["단검", "쌍검", "완드"]
+    },
+    {
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "도적",
+      "jobGrowName": "眞 섀도우댄서",
+      "weaponTypes": ["단검", "쌍검", "완드"]
+    },
+    {
+      "jobId": "ddc49e9ad1ff72a00b53c6cff5b1e920",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "도적",
+      "jobGrowName": "眞 쿠노이치",
+      "weaponTypes": ["단검", "쌍검", "완드", "차크라 웨펀"]
+    },
+    {
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 디멘션워커",
+      "weaponTypes": ["로드", "봉", "빗자루", "스탭", "창"]
+    },
+    {
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 블러드 메이지",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 빙결사",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 스위프트 마스터",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "a5ccbaf5538981c6ef99b236c0a60b73",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(남)",
+      "jobGrowName": "眞 엘레멘탈 바머",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 마도학자",
+      "weaponTypes": ["로드", "봉", "빗자루", "스탭", "창"]
+    },
+    {
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 배틀메이지",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 소환사",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 엘레멘탈마스터",
+      "weaponTypes": ["로드", "봉", "스탭", "창"]
+    },
+    {
+      "jobId": "3909d0b188e9c95311399f776e331da5",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "마법사(여)",
+      "jobGrowName": "眞 인챈트리스",
+      "weaponTypes": ["로드", "봉", "빗자루", "스탭", "창"]
+    },
+    {
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "마창사",
+      "jobGrowName": "眞 다크 랜서",
+      "weaponTypes": ["광창", "미늘창", "장창", "투창"]
+    },
+    {
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "마창사",
+      "jobGrowName": "眞 듀얼리스트",
+      "weaponTypes": ["광창", "미늘창", "장창", "투창"]
+    },
+    {
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "마창사",
+      "jobGrowName": "眞 드래고니안 랜서",
+      "weaponTypes": ["광창", "미늘창", "장창", "투창"]
+    },
+    {
+      "jobId": "3deb7be5f01953ac8b1ecaa1e25e0420",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "마창사",
+      "jobGrowName": "眞 뱅가드",
+      "weaponTypes": ["광창", "미늘창", "장창", "투창"]
+    },
+    {
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "아처",
+      "jobGrowName": "眞 뮤즈",
+      "weaponTypes": ["선현궁"]
+    },
+    {
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "아처",
+      "jobGrowName": "眞 비질란테",
+      "weaponTypes": ["에테리얼 보우"]
+    },
+    {
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "아처",
+      "jobGrowName": "眞 키메라",
+      "weaponTypes": ["컴파운드 보우"]
+    },
+    {
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "아처",
+      "jobGrowName": "眞 트래블러",
+      "weaponTypes": ["장궁"]
+    },
+    {
+      "jobId": "b9cb48777665de22c006fabaf9a560b3",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "아처",
+      "jobGrowName": "眞 헌터",
+      "weaponTypes": ["크로스슈터"]
+    },
+    {
+      "jobId": "8d4d2001cdb357e41633c234eb7501b5",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "제국기사",
+      "jobGrowName": "眞 브레이커",
+      "weaponTypes": ["앵커"]
+    },
+    {
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "총검사",
+      "jobGrowName": "眞 스페셜리스트",
+      "weaponTypes": ["소태도", "장도", "중검", "코어블레이드"]
+    },
+    {
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "총검사",
+      "jobGrowName": "眞 요원",
+      "weaponTypes": ["소태도", "장도", "중검", "코어블레이드"]
+    },
+    {
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "총검사",
+      "jobGrowName": "眞 트러블 슈터",
+      "weaponTypes": ["소태도", "장도", "중검", "코어블레이드"]
+    },
+    {
+      "jobId": "986c2b3d72ee0e4a0b7fcfbe786d4e02",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "총검사",
+      "jobGrowName": "眞 히트맨",
+      "weaponTypes": ["소태도", "장도", "중검", "코어블레이드"]
+    },
+    {
+      "jobId": "b522a95d819a5559b775deb9a490e49a",
+      "jobGrowId": "0a49d9c8b5e1358efff324e5cb11d41e",
+      "jobName": "크리에이터",
+      "jobGrowName": "眞 크리에이터",
+      "weaponTypes": ["로드", "봉", "빗자루", "스탭", "창"]
+    },
+    {
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 어벤저",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 인파이터",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 크루세이더",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "f6a4ad30555b99b499c07835f87ce522",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(남)",
+      "jobGrowName": "眞 퇴마사",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "6d459bc74ba73ee4fe5cdc4655400193",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 무녀",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "c9b492038ee3ca8d27d7004cf58d59f3",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 미스트리스",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "618326026de1a1f1cfba5dbd0b8396e7",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 이단심판관",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "92da05ec93fb43406e193ffb9a2a629b",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 인파이터",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    },
+    {
+      "jobId": "0c1b401bb09241570d364420b3ba3fd7",
+      "jobGrowId": "37495b941da3b1661bc900e68ef3b2c6",
+      "jobName": "프리스트(여)",
+      "jobGrowName": "眞 크루세이더",
+      "weaponTypes": ["낫", "배틀액스", "십자가", "염주", "토템"]
+    }
+  ]
+}

@@ -11,7 +11,10 @@ import { EquipmentSimulationFailure } from './failure.js'
 export type SlotItemChanges = Readonly<Record<SlotItemCategory, string | null>>
 
 interface SlotItemEdit {
+  /** 비어 있는 부위면 부위 칸만 있는 항목이다. */
   readonly original: CharacterPayload
+  /** 원본에 없는 부위에 더하는지다. */
+  readonly added: boolean
   readonly slotItem: SlotItem
 }
 
@@ -64,6 +67,19 @@ function originalOf(
   return creature
 }
 
+// 엔진은 원본에 없는 칭호, 크리쳐, 오라를 아이템 칸만으로 더한다.
+function emptyOf(category: SlotItemCategory): CharacterPayload {
+  if (category === 'title') {
+    return { slotId: 'TITLE' }
+  }
+
+  if (category === 'aura') {
+    return { slotId: 'AURORA' }
+  }
+
+  return {}
+}
+
 function editOf(
   payloads: CharacterPayloads,
   category: SlotItemCategory,
@@ -74,17 +90,21 @@ function editOf(
   }
 
   const slotItem = findSlotItem(category, id)
-  const original = originalOf(payloads, category)
 
-  // 엔진은 원본 항목의 나머지 칸을 그대로 쓰므로, 착용하지 않은 부위는 만들 수 없어 거절한다.
-  if (slotItem === null || original === null) {
+  if (slotItem === null) {
     throw new EquipmentSimulationFailure('request')
   }
 
-  return { original, slotItem }
+  const worn = originalOf(payloads, category)
+
+  if (worn === null) {
+    return { original: emptyOf(category), added: true, slotItem }
+  }
+
+  return { original: worn, added: false, slotItem }
 }
 
-/** 그 카테고리의 목록에 없는 id나 원본에 없는 부위는 거절한다. */
+/** 그 카테고리의 목록에 없는 id는 거절하고, 비어 있는 부위는 고른 아이템을 더한다. */
 export function editSlotItems(
   payloads: CharacterPayloads,
   changes: SlotItemChanges
@@ -98,6 +118,10 @@ export function editSlotItems(
 
 export function hasSlotItemEdits(edits: SlotItemEdits): boolean {
   return edits.title !== null || edits.creature !== null || edits.aura !== null
+}
+
+export function addsSlotItems(edits: SlotItemEdits): boolean {
+  return [edits.title, edits.creature, edits.aura].some((edit) => edit?.added === true)
 }
 
 /** 엔진이 새 아이템의 상세를 최상위 `items`에서 읽으므로 함께 조회할 아이템이다. */
