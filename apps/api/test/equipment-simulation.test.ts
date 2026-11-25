@@ -964,37 +964,6 @@ for (const [name, body, edit] of [
     '문자열이 아닌 크리쳐 id',
     { equipment: [], creature: 1261 },
     (payloads: CharacterPayloads) => payloads
-  ],
-  [
-    '칭호를 착용하지 않은 캐릭터의 칭호 교체',
-    { equipment: [], title: TITLE_ID },
-    (payloads: CharacterPayloads) => {
-      payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
-        ({ slotId }) => slotId !== 'TITLE'
-      )
-
-      return payloads
-    }
-  ],
-  [
-    '크리쳐가 없는 캐릭터의 크리쳐 교체',
-    { equipment: [], creature: CREATURE_ID },
-    (payloads: CharacterPayloads) => {
-      payloads.creature.creature = null
-
-      return payloads
-    }
-  ],
-  [
-    '오라를 착용하지 않은 캐릭터의 오라 교체',
-    { equipment: [], aura: AURA_ID },
-    (payloads: CharacterPayloads) => {
-      payloads.avatar.avatar = (payloads.avatar.avatar as Item[]).filter(
-        ({ slotId }) => slotId !== 'AURORA'
-      )
-
-      return payloads
-    }
   ]
 ] as const) {
   test(`요청 본문 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
@@ -1009,6 +978,49 @@ for (const [name, body, edit] of [
     assert.equal(engine.requests.length, 0)
   })
 }
+
+const ADDED_SLOT_ENGINE = 'dnfscore-native 0.16.0'
+
+test('칭호, 크리쳐, 오라가 비어 있으면 고른 아이템을 아이템 칸만으로 더한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'TITLE'
+  )
+  payloads.creature.creature = null
+  payloads.avatar.avatar = (payloads.avatar.avatar as Item[]).filter(
+    ({ slotId }) => slotId !== 'AURORA'
+  )
+  const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    title: TITLE_ID,
+    creature: CREATURE_ID,
+    aura: AURA_ID
+  })
+
+  assert.equal(response.status, 200)
+  const { simulation } = engine.requests[0]!.input
+  assert.deepEqual(bySlot(simulation!.equipment).TITLE, { slotId: 'TITLE', ...TITLE_ITEM })
+  assert.deepEqual(simulation!.creature, CREATURE_ITEM)
+  assert.deepEqual(simulation!.avatar, [
+    { slotId: 'AURORA', ...AURA_ITEM, clone: { itemId: null, itemName: null } }
+  ])
+})
+
+test('0.16.0 전 엔진에 비어 있는 칭호를 더한 요청을 보내면 두 점수 모두 null이다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, slotItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'TITLE'
+  )
+  const engine = scoring(versionedEngine('dnfscore-native 0.15.0'))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, { equipment: [], title: TITLE_ID })
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+})
 
 function realEnginePackage(): string | null {
   if (REAL_SCORE_LIBRARY_PATH === null) {
@@ -1039,6 +1051,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     equipmentSet: false,
     weaponTune: false,
     weaponItem: false,
+    addedSlots: false,
     oathItems: false,
     oathUpgrade: false,
     buffLevel: false,
@@ -1593,16 +1606,6 @@ const invalidItemCases: readonly (readonly [string, FixtureName, Item, PayloadEd
     'dealer-blade',
     { slotId: 'JACKET', variantId: PURIFICATION_EPIC_RING },
     keepPayloads
-  ],
-  [
-    '착용하지 않은 부위의 아이템 교체',
-    'dealer-blade',
-    { slotId: 'JACKET', variantId: PURIFICATION_EPIC_JACKET },
-    (payloads) => {
-      payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
-        ({ slotId }) => slotId !== 'JACKET'
-      )
-    }
   ],
   [
     '주 세트가 없는 캐릭터의 세트 밖 부위 교체',
@@ -2948,6 +2951,176 @@ for (const [name, edit, change] of invalidWeaponCases) {
     assert.equal(engine.requests.length, 0)
   })
 }
+
+const withoutWeapon = (items: Item[]) => items.filter((item) => item.slotId !== 'WEAPON')
+const bareChange = { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: null }
+
+// 블레이드는 광검을 낄 수 없고, 같은 귀검사(여)의 베가본드는 낄 수 있다.
+const VAGABOND = {
+  jobId: '1645c45aabb008c98406b3a16447040d',
+  jobGrowId: 'c9b492038ee3ca8d27d7004cf58d59f3'
+}
+
+async function addedWeaponSimulation(
+  t: TestContext,
+  fields: Item,
+  { package_ = ADDED_SLOT_ENGINE, job = {} }: { package_?: string; job?: Item } = {}
+) {
+  const { payloads, details, path } = fixture('dealer-blade', withoutWeapon, weaponItemDetails)
+  payloads.basic = { ...payloads.basic, ...job }
+  const engine = scoring(versionedEngine(package_))
+  const origin = await listen(t, { details, ...engine.options })
+  const response = await simulate(origin, path, {
+    equipment: [{ ...bareChange, ...fields }]
+  })
+
+  return { engine, response }
+}
+
+test('무기를 끼지 않은 캐릭터는 직업이 낄 수 있는 종류의 선택지로 강화, 재련, 마법부여 없는 최상급 무기를 더한다', async (t) => {
+  const { engine, response } = await addedWeaponSimulation(t, {
+    variantId: GREATSWORD_STAR,
+    tune: 2
+  })
+
+  assert.equal(response.status, 200)
+  assert.equal(response.body.simulated.value, 1802)
+  const { input } = engine.requests[0]!
+  assert.deepEqual(input.simulation, {
+    equipment: [
+      {
+        slotId: 'WEAPON',
+        ...weaponDetailFields(GREATSWORD_STAR),
+        itemId: GREATSWORD_STAR,
+        itemName: '태초의 별 - 대검',
+        itemRarity: '태초',
+        itemGradeName: '최상급',
+        tune: [{ level: 2 }]
+      }
+    ]
+  })
+  assert.deepEqual(input.items[GREATSWORD_STAR], weaponItemDetails[GREATSWORD_STAR])
+})
+
+test('무기를 끼지 않은 캐릭터에 해방 계열을 더하면 해방 수치 100의 해방 아이템이 되고 조율은 0이다', async (t) => {
+  const { engine, response } = await addedWeaponSimulation(
+    t,
+    { variantId: BEAMSWORD_RELEASE },
+    { job: VAGABOND }
+  )
+
+  assert.equal(response.status, 200)
+  const added = bySlot(engine.requests[0]!.input.simulation!.equipment).WEAPON!
+  assert.equal(added.itemId, BEAMSWORD_RELEASE)
+  assert.deepEqual(added.tune, [{ level: 0 }])
+  assert.deepEqual(added.weaponRelease, { value: 100 })
+})
+
+test('0.16.0 전 엔진에 무기를 더한 요청을 보내면 두 점수 모두 null이다', async (t) => {
+  const { engine, response } = await addedWeaponSimulation(
+    t,
+    { variantId: GREATSWORD_STAR },
+    { package_: WEAPON_ENGINE }
+  )
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+  assert.equal(engine.requests.length, 1)
+})
+
+const invalidAddedWeaponCases: readonly (readonly [string, Item])[] = [
+  ['직업이 낄 수 없는 무기 종류의 선택지', { variantId: BEAMSWORD_RELEASE }],
+  ['선택지 없는 조율', { tune: 1 }],
+  ['선택지 없는 해방 수치', { release: 100 }],
+  ['최대 단계를 넘는 조율', { variantId: GREATSWORD_STAR, tune: 4 }],
+  ['해방 계열이 아닌 선택지의 해방 수치', { variantId: GREATSWORD_STAR, release: 100 }],
+  ['강화', { variantId: GREATSWORD_STAR, reinforce: 10 }],
+  ['증폭', { variantId: GREATSWORD_STAR, amplified: true }],
+  ['마법부여', { variantId: GREATSWORD_STAR, enchantId: 'WEAPON:10316079:dealer' }]
+]
+
+for (const [name, fields] of invalidAddedWeaponCases) {
+  test(`무기를 끼지 않은 캐릭터에 무기를 더하는 사례(${name})는 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { engine, response } = await addedWeaponSimulation(t, fields)
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
+
+test('비어 있는 장비 부위는 주 세트의 선택지로 강화, 마법부여 없는 최상급 장비를 더한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'JACKET'
+  )
+  const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [{ ...bareChange, slotId: 'JACKET', variantId: PURIFICATION_EPIC_JACKET }]
+  })
+
+  assert.equal(response.status, 200)
+  const added = bySlot(engine.requests[0]!.input.simulation!.equipment).JACKET!
+  const detail = equipmentItemDetails[PURIFICATION_EPIC_JACKET]!
+  assert.deepEqual(
+    {
+      slotId: added.slotId,
+      itemId: added.itemId,
+      itemAvailableLevel: added.itemAvailableLevel,
+      itemGradeName: added.itemGradeName,
+      setItemId: added.setItemId,
+      reinforce: added.reinforce,
+      enchant: added.enchant
+    },
+    {
+      slotId: 'JACKET',
+      itemId: PURIFICATION_EPIC_JACKET,
+      itemAvailableLevel: detail.itemAvailableLevel,
+      itemGradeName: '최상급',
+      setItemId: detail.setItemId,
+      reinforce: undefined,
+      enchant: undefined
+    }
+  )
+})
+
+test('0.16.0 전 엔진에 비어 있는 장비 부위를 더한 요청을 보내면 두 점수 모두 null이다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'JACKET'
+  )
+  const engine = scoring(versionedEngine('dnfscore-native 0.15.0'))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [{ ...bareChange, slotId: 'JACKET', variantId: PURIFICATION_EPIC_JACKET }]
+  })
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+})
+
+test('비어 있는 장비 부위에 강화를 보내면 엔진을 부르지 않고 거절한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'JACKET'
+  )
+  const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [
+      {
+        ...bareChange,
+        slotId: 'JACKET',
+        reinforce: 10,
+        variantId: PURIFICATION_EPIC_JACKET
+      }
+    ]
+  })
+
+  assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+  assert.equal(engine.requests.length, 0)
+})
 
 const REAL_WEAPON_ENGINE = realEngineSupports({ weaponTune: true, weaponItem: true })
 
