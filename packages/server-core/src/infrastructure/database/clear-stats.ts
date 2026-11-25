@@ -28,6 +28,7 @@ import {
   type DatabaseClient,
   type LegionClearWeek,
   type StoredClearPopulation,
+  analyzeContentClears,
   readClearPopulationJobs,
   readClearRecordRaidModes,
   readClearRecordRaidStageCounts,
@@ -178,6 +179,10 @@ export class DatabaseClearStatsRepository
 
   recordLegionClears(week: LegionClearWeek): Promise<void> {
     return recordLegionContentClears(this.client, week)
+  }
+
+  analyzeContentClears(): Promise<void> {
+    return analyzeContentClears(this.client)
   }
 
   recordPopulation(population: ContentClearPopulationInput): Promise<void> {

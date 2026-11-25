@@ -197,6 +197,12 @@ export async function recordLegionContentClears(
     WHERE "content_clears"."cleared_at" > EXCLUDED."cleared_at"`
 }
 
+// 새로 쌓인 주는 통계에 없어 planner가 그 주를 한 행으로 보고, 이전 주 EXISTS가 pkey 대신 주 index를 훑어 끝나지 않는다.
+// 수억 행 table이라 autoanalyze가 한참 뒤에 돌아, 마감한 주를 집계하기 전에 통계를 다시 모은다.
+export async function analyzeContentClears(client: DatabaseClient): Promise<void> {
+  await client.$executeRaw`ANALYZE "content_clears"`
+}
+
 // 마감한 주의 분모는 나중에 다시 저장해도 바뀌지 않는다.
 export async function recordContentClearPopulation(
   client: DatabaseClient,

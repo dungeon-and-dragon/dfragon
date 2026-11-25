@@ -90,6 +90,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
     readOverviewSampleWeeks: async () => [...movedOverviewWeeks, week('2026-10-29')],
     readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
+    analyzeContentClears: async () => undefined,
     recordPopulation: async () => undefined,
     readContentJobFames: async ({ contentId, weekStart }) => [
       {
@@ -174,6 +175,7 @@ test('레기온은 출시 주부터 레이드 분모가 마감한 가장 최근 
       recordLegionClears: async ({ contentId, name, weekStart, copySnapshot }: LegionClearWeek) => {
         moved.push(`${contentId}/${name}/${formatResetDate(weekStart)}/${copySnapshot}`)
       },
+      analyzeContentClears: async () => undefined,
       recordPopulation: async (input) => {
         recorded.push(input)
         populations.push({ ...input, jobs: [...input.jobs] })
@@ -267,6 +269,7 @@ test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는
       recordLegionClears: async ({ contentId, weekStart, copySnapshot }: LegionClearWeek) => {
         moved.push(`${contentId}/${formatResetDate(weekStart)}/${copySnapshot}`)
       },
+      analyzeContentClears: async () => undefined,
       recordPopulation: async (input) => {
         populations.push({ ...input, jobs: [...input.jobs] })
       },
@@ -296,6 +299,54 @@ test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는
   assert.deepEqual(overviews, ['2025-04-17'])
 })
 
+// 새로 쌓인 주를 통계 없이 집계하면 planner가 그 주를 한 행으로 보고 끝나지 않는 계획을 골라, 집계 전에 통계를 다시 모아야 한다.
+// 레기온을 옮긴 뒤 집계 전에 멈춘 실행도 다음 실행에서 통계를 모아야 해, 옮길 주가 없어도 집계할 주가 있으면 모은다.
+test('집계할 마감한 주가 있으면 레기온을 옮긴 뒤 집계 전에 클리어 통계를 다시 모으고, 집계할 주가 없으면 모으지 않는다', async () => {
+  const run = async (
+    populations: StoredClearPopulation[],
+    sampledWeeks: { contentId: string; weekStart: Date }[] = []
+  ) => {
+    const steps: string[] = []
+    const step = (name: string) => {
+      if (steps.at(-1) !== name) {
+        steps.push(name)
+      }
+    }
+
+    const service = new ClearWeekSampleService(
+      {
+        ...emptySampleRepository,
+        readPopulations: async () => populations,
+        readContentWeekSampleWeeks: async () => sampledWeeks,
+        readOverviewSampleWeeks: async () => sampledWeeks.map(({ weekStart }) => weekStart),
+        readPopulationJobs: async () => [],
+        recordLegionClears: async () => step('move'),
+        analyzeContentClears: async () => step('analyze'),
+        recordPopulation: async () => undefined,
+        readContentJobFames: async () => {
+          step('sample')
+
+          return []
+        },
+        recordContentWeekSamples: async () => undefined,
+        recordOverviewSamples: async () => undefined
+      },
+      () => week('2025-04-24')
+    )
+
+    await service.recordMissing(() => undefined)
+
+    return steps
+  }
+
+  const raidWeek = population('nabel-normal', '2025-04-17', true)
+  const movedWeeks = [...movedLegionWeeksBefore('2025-04-24'), raidWeek]
+
+  assert.deepEqual(await run([raidWeek]), ['move', 'analyze', 'sample'])
+  assert.deepEqual(await run(movedWeeks), ['analyze', 'sample'])
+  assert.deepEqual(await run(movedWeeks, movedWeeks), [])
+})
+
 test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개요의 점수 분포를 담지 않고, 1주차부터는 담는다', async () => {
   const scoreBand = { kind: 'equipment' as const, score: 50_000, population: 100, cleared: 10 }
   const contentSamples = new Map<string, ClearContentWeekSamples>()
@@ -310,6 +361,7 @@ test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개�
     readOverviewSampleWeeks: async () => [],
     readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
+    analyzeContentClears: async () => undefined,
     recordPopulation: async () => undefined,
     readScoreBands: async () => [scoreBand],
     readScores: async () => [
@@ -356,6 +408,7 @@ test('지난주 행의 점수를 쓰는 지난주 대비 그룹 점수는 지난
     readOverviewSampleWeeks: async () => [],
     readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
+    analyzeContentClears: async () => undefined,
     recordPopulation: async () => undefined,
     readWeekGroupScores: async () => [groupScore],
     recordContentWeekSamples: async ({ weekStart }, samples) => {
