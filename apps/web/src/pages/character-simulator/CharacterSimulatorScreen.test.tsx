@@ -1106,11 +1106,16 @@ it('장비창은 장비, 서약, 기타 구획 순서이고 기타 구획에 아
   expect(etcNames()).toEqual(['아바타', '스위칭', '묵언의 진의'])
 })
 
-it('서약이 없는 캐릭터는 서약 구획과 묵언의 진의 줄 없이 장비, 기타 구획만 그린다', async () => {
+it('서약이 없는 캐릭터도 서약 구획에 비어 있는 세트, 서약, 결정 11칸 줄을 두고 묵언의 진의 줄은 두지 않는다', async () => {
   await render({ ...characterDetailFixture('dealer'), oath: null })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(windowSectionTitles()).toEqual(['장비', '기타'])
+  expect(windowSectionTitles()).toEqual(['장비', '서약', '기타'])
+  expect(rowsIn('서약').map((row) => row.textContent)).toEqual([
+    '세트비어 있음',
+    '서약비어 있음',
+    ...Array.from({ length: 11 }, (_, index) => `결정 ${index + 1}비어 있음`)
+  ])
   expect(etcNames()).toEqual(['아바타', '스위칭'])
 })
 
@@ -1124,7 +1129,7 @@ it('아바타, 스위칭, 묵언의 진의 줄이 모두 없으면 기타 구획
   })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(windowSectionTitles()).toEqual(['장비'])
+  expect(windowSectionTitles()).toEqual(['장비', '서약'])
 })
 
 it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용한 값으로 되돌린다', async () => {
@@ -1353,6 +1358,17 @@ it('응답에 서약 세트가 없으면 세트 포인트 합이 가장 큰 세�
   expect(oathRowOf('결정 1').querySelectorAll('td')[1]!.textContent).toBe(
     '그림자 : 완전한 광휘 결정III'
   )
+})
+
+it('영겁의 안개 서약만 끼고 결정이 없어 서약 세트를 추론할 수 없으면 세트 줄을 두지 않는다', async () => {
+  const detail = characterDetailFixture('buffer')
+  await render({ ...detail, oath: { ...detail.oath!, setInfo: null, crystal: [] } })
+  await waitForScores(UNCHANGED_SCORES, '버프 점수')
+
+  expect(rowsIn('서약').map((row) => row.querySelector('td')?.textContent)).toEqual([
+    '서약',
+    ...Array.from({ length: 11 }, (_, index) => `결정 ${index + 1}`)
+  ])
 })
 
 it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색으로 보인다', async () => {

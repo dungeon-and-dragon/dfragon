@@ -48,11 +48,15 @@ export interface OathEdit {
   readonly changesItems: boolean
   /** 원본 서약 응답에 세트가 없어 지금 세트를 본체와 결정으로 추론하는지 */
   readonly setInfoMissing: boolean
+  /** 원본에 없는 본체나 결정 칸에 아이템을 더하는지 */
+  readonly addsItems: boolean
 }
 
 type SimulatedOath = NonNullable<ScoreSimulationInput['oath']>
 
 const PRIMEVAL_RARITY = '태초'
+// 서약 결정 칸은 slotNo 0~10이다.
+const CRYSTAL_SLOTS = 11
 
 const noOathEdit: OathEdit = {
   set: null,
@@ -60,7 +64,8 @@ const noOathEdit: OathEdit = {
   crystals: [],
   upgrade: null,
   changesItems: false,
-  setInfoMissing: false
+  setInfoMissing: false,
+  addsItems: false
 }
 
 function hasChanges(changes: OathChanges): boolean {
@@ -336,13 +341,87 @@ function primevalCount(
   }).length
 }
 
+function emptyCrystals(
+  crystals: readonly CharacterPayload[],
+  changes: readonly OathCrystalChange[]
+): CharacterPayload[] {
+  return changes.flatMap(({ slotNo }) => {
+    if (crystals.some((crystal) => crystal.slotNo === slotNo)) {
+      return []
+    }
+
+    if (!Number.isInteger(slotNo) || slotNo < 0 || slotNo >= CRYSTAL_SLOTS) {
+      throw new EquipmentSimulationFailure('request')
+    }
+
+    return [{ slotNo }]
+  })
+}
+
+function bodyChoiceOf(id: string): { variant: OathVariant; setId: number | null } {
+  const sets: (number | null)[] = [...oathSets().map(({ setId }) => setId), null]
+
+  for (const setId of sets) {
+    const variant = oathVariantsOf(setId).find((candidate) => candidate.id === id)
+
+    if (variant !== undefined) {
+      return { variant, setId }
+    }
+  }
+
+  throw new EquipmentSimulationFailure('request')
+}
+
 /**
- * 서약 세트를 옮긴 뒤 본체 등급과 결정의 등급, 조율을 바꾼다.
- * 서약이 없는 캐릭터, 목록에 없는 세트나 선택지, 원본에 없는 슬롯, 조율 단계 밖의 조율과 태초 결정이 3개를 넘는 결정 교체는 거절한다.
+ * 원본에 서약이 없으면 고른 본체를 아이템 칸만으로 더하고, 결정은 고른 서약 세트(없으면 본체의 세트)의 선택지로 비어 있는 칸에 더한다.
+ * 본체를 고르지 않은 요청, 서약 세트를 정할 수 없는 결정, 진의는 거절한다. 서약 세트는 엔진이 더한 본체와 결정으로 정한다.
+ */
+function addedOath(changes: OathChanges): OathEdit {
+  if (changes.body === null || changes.upgrade !== null) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  const chosen = bodyChoiceOf(changes.body)
+  const set = changes.set !== null ? checkedSet(changes.set, changes.set) : null
+  const setId = set ?? chosen.setId
+  const { itemId, itemName, itemRarity } = chosen.variant.item
+  const crystals = emptyCrystals([], changes.crystals).flatMap((crystal) => {
+    const change = changes.crystals.find(({ slotNo }) => slotNo === crystal.slotNo)
+    const simulated = simulatedCrystal(crystal, change, null, setId)
+
+    if (simulated === null) {
+      return []
+    }
+
+    return [simulated]
+  })
+
+  if (primevalCount(crystals, crystals) > PRIMEVAL_OATH_CRYSTAL_LIMIT) {
+    throw new EquipmentSimulationFailure('request')
+  }
+
+  return {
+    set: null,
+    body: { itemId, itemName, itemRarity },
+    crystals,
+    upgrade: null,
+    changesItems: true,
+    setInfoMissing: true,
+    addsItems: true
+  }
+}
+
+/**
+ * 서약 세트를 옮긴 뒤 본체 등급과 결정의 등급, 조율을 바꾸고, 비어 있는 결정 칸에는 결정을 더한다. 서약이 없으면 본체부터 더한다.
+ * 목록에 없는 세트나 선택지, 칸 밖의 슬롯, 조율 단계 밖의 조율과 태초 결정이 3개를 넘는 결정 교체는 거절한다.
  */
 export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit {
   if (!hasChanges(changes)) {
     return noOathEdit
+  }
+
+  if (!isRecord(oath.oath)) {
+    return addedOath(changes)
   }
 
   const section = wornOath(oath)
@@ -355,14 +434,9 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
   // 엔진에는 서약 세트가 실제로 바뀔 때만 세트를 넣는다.
   const changedSet = set !== worn ? set : null
 
-  for (const { slotNo } of changes.crystals) {
-    if (!crystals.some((crystal) => crystal.slotNo === slotNo)) {
-      throw new EquipmentSimulationFailure('request')
-    }
-  }
-
+  const slots = [...crystals, ...emptyCrystals(crystals, changes.crystals)]
   const body = simulatedBody(section.info, set, setId, changes.body)
-  const edited = crystals.flatMap((crystal) => {
+  const edited = slots.flatMap((crystal) => {
     const change = changes.crystals.find(({ slotNo }) => slotNo === crystal.slotNo)
     const simulated = simulatedCrystal(crystal, change, set, setId)
 
@@ -387,8 +461,19 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
   const changesItems = changedSet !== null || body !== null || changesCrystals
 
   const setInfoMissing = setInfoSet === null
+  const addsItems = edited.some(
+    (crystal) => !crystals.some(({ slotNo }) => slotNo === crystal.slotNo)
+  )
 
-  return { set: changedSet, body, crystals: edited, upgrade, changesItems, setInfoMissing }
+  return {
+    set: changedSet,
+    body,
+    crystals: edited,
+    upgrade,
+    changesItems,
+    setInfoMissing,
+    addsItems
+  }
 }
 
 export function hasOathEdit(edit: OathEdit): boolean {

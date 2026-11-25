@@ -93,7 +93,6 @@ it('서약은 착용한 세트, 그 세트 전용 서약과 영겁의 안개 서
   ])
   expect(idsOf(first!.choices)).toEqual(idsOf(oathCrystalVariantsOf(DRAGON_SET)))
   expect(first!.wornVariantId).toBe(crystalId(DRAGON_SET, '에픽'))
-  expect(toSimulatorOath({ oath: null })).toBeNull()
 })
 
 it('서약 세트를 고르면 본체와 광휘 결정이 그 세트의 같은 등급이 되고 조율은 그대로이며 세트만 요청한다', () => {
@@ -473,4 +472,70 @@ it('서약 세트를 골라도 조율 정보가 없는 광휘 밖 착용 결정�
   expect(changed.oath.crystals).toEqual({})
   expect(crystalDraftOf(crystalAt(view, 2), changed.oath)).toEqual({ variantId: null, tune: 2 })
   expect(simulationBody([], view, changed)).toEqual({ equipment: [], oathSet: SHADOW_SET })
+})
+
+it('서약이 없으면 비어 있는 본체와 11칸의 빈 결정을 두고, 세트 전용 본체를 고르면 그 세트를 골라 결정 선택지를 연다', () => {
+  const empty = toSimulatorOath({ oath: null })
+  const body = empty.body!
+  const chosen = oathVariantOf(SHADOW_SET, '태초')!
+  const changed = apply(NO_CHANGES, { type: 'oathBody', body, id: chosen.id })
+  const view = oathInSet(empty, changed.oath.set)
+  const before = crystalChoicesOf(empty, crystalAt(empty, 0), NO_CHANGES.oath)
+
+  expect(empty).toMatchObject({ setId: null, rarity: null, upgrade: null })
+  expect(body).toMatchObject({ itemId: null, itemName: '비어 있음', empty: true })
+  expect(empty.crystals.map(({ slotNo, empty: blank }) => [slotNo, blank])).toEqual(
+    Array.from({ length: 11 }, (_, slotNo) => [slotNo, true])
+  )
+  expect(before).toEqual([])
+  expect(changed.oath).toMatchObject({ body: chosen.id, set: SHADOW_SET })
+  expect(idsOf(crystalAt(view, 0).choices)).toEqual(idsOf(oathCrystalVariantsOf(SHADOW_SET)))
+})
+
+it('비어 있는 결정 칸은 착용 세트의 결정을 고를 수 있고 고르면 그 칸에 결정을 더하는 요청을 보낸다', () => {
+  const detail = characterDetailFixture('dealer')
+  const oath = detail.oath!
+  const partial = {
+    ...detail,
+    oath: { ...oath, crystal: oath.crystal.filter(({ slotNo }) => slotNo !== 10) }
+  }
+  const view = toSimulatorOath(partial)
+  const empty = crystalAt(view, 10)
+  const epic = crystalId(DRAGON_SET, '에픽')
+  const changed = apply(NO_CHANGES, {
+    type: 'crystal',
+    oath: view,
+    crystal: empty,
+    draft: { variantId: epic }
+  })
+
+  expect(empty).toMatchObject({
+    itemId: null,
+    itemName: '비어 있음',
+    empty: true,
+    wornVariantId: null
+  })
+  expect(idsOf(empty.choices)).toEqual(idsOf(oathCrystalVariantsOf(DRAGON_SET)))
+  expect(simulationBody(toSimulatorRows(partial), view, changed)).toEqual({
+    equipment: [],
+    oath: [{ slotNo: 10, tune: 0, variantId: epic }]
+  })
+})
+
+it('서약이 없으면 본체를 고르기 전에는 서약 세트를 골라도 서약을 요청하지 않는다', () => {
+  const detail = { ...characterDetailFixture('dealer'), oath: null }
+  const empty = toSimulatorOath(detail)
+  const rows = toSimulatorRows(detail)
+  const setOnly = apply(NO_CHANGES, { type: 'oathSet', oath: empty, setId: SHADOW_SET })
+  const chosen = oathVariantOf(SHADOW_SET, '태초')!
+  const withBody = apply(setOnly, { type: 'oathBody', body: empty.body!, id: chosen.id })
+
+  expect(simulationBody(rows, oathInSet(empty, setOnly.oath.set), setOnly)).toEqual({
+    equipment: []
+  })
+  expect(simulationBody(rows, oathInSet(empty, withBody.oath.set), withBody)).toEqual({
+    equipment: [],
+    oathSet: SHADOW_SET,
+    oathBody: chosen.id
+  })
 })

@@ -149,6 +149,7 @@ export class EquipmentSimulationService {
       weaponTune: weaponEdit !== null,
       weaponItem: editsWeaponItem,
       addedSlots: addsSlots,
+      addedOath: oathEdit.addsItems,
       oathItems: oathEdit.changesItems,
       oathUpgrade: oathEdit.upgrade !== null,
       buffLevel: buffLevel !== null,

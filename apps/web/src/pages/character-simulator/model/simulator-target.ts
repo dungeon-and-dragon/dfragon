@@ -48,13 +48,9 @@ function switchingTargets(switching: BuffSwitching | null): SimulatorTarget[] {
   return [{ kind: 'switching', key: 'switching', switching }]
 }
 
-function oathTargets(oath: SimulatorOath | null): SimulatorTarget[] {
-  if (oath === null) {
-    return []
-  }
-
-  const setTargets: SimulatorTarget[] =
-    oath.setId !== null ? [{ kind: 'oathSet', key: 'oathSet', oath }] : []
+function oathTargets(oath: SimulatorOath): SimulatorTarget[] {
+  const setListed = oath.setId !== null || oath.body?.empty === true
+  const setTargets: SimulatorTarget[] = setListed ? [{ kind: 'oathSet', key: 'oathSet', oath }] : []
   const bodyTargets: SimulatorTarget[] =
     oath.body !== null ? [{ kind: 'oathBody', key: 'oathBody', body: oath.body }] : []
   const crystalTargets = oath.crystals.map(
@@ -64,8 +60,8 @@ function oathTargets(oath: SimulatorOath | null): SimulatorTarget[] {
   return [...setTargets, ...bodyTargets, ...crystalTargets]
 }
 
-function oathUpgradeTargets(oath: SimulatorOath | null): SimulatorTarget[] {
-  if (oath === null || oath.upgrade === null) {
+function oathUpgradeTargets(oath: SimulatorOath): SimulatorTarget[] {
+  if (oath.upgrade === null) {
     return []
   }
 
@@ -81,7 +77,7 @@ export function toSimulatorTargets(
   rows: readonly SimulatorRow[],
   avatarPresetAvailable: boolean,
   switching: BuffSwitching | null,
-  oath: SimulatorOath | null
+  oath: SimulatorOath
 ): SimulatorTarget[] {
   return [
     { kind: 'equipmentSet', key: 'equipmentSet', equipmentSet },

@@ -33,6 +33,7 @@ import {
   itemRarityOfGrade,
   toItemView
 } from '#entities/character'
+import { EMPTY_SLOT_NAME } from './empty-slot'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 import type { AvatarPresetChange } from './simulator-avatar'
 import { changeUpgradeUnlock, type SimulatorOathUpgrade } from './simulator-oath-upgrade'
@@ -91,7 +92,7 @@ const WEAPON_LINE_NAMES: Readonly<Record<NonNullable<WeaponVariant['line']>, str
   '태초의 별': '태초의 별'
 }
 const UNIQUE_WEAPON_NAME = '유니크'
-export const EMPTY_SLOT_NAME = '비어 있음'
+export { EMPTY_SLOT_NAME } from './empty-slot'
 // 응답 순서와 같은 장비 부위 순서와, 비어 있는 부위에 쓰는 응답의 부위 이름이다.
 const EQUIPMENT_SLOT_NAMES: Readonly<Record<EnchantGradeSlot | typeof TITLE_SLOT_ID, string>> = {
   WEAPON: '무기',
@@ -1185,11 +1186,14 @@ export function simulationBody(
 
     return [toSimulationChange(row.slot, draft)]
   })
-  const crystals = oathCrystalChanges(oath, changes.oath)
+  // 서약이 없는 캐릭터는 본체를 고르기 전까지 서약 세트만 골라도 더할 서약이 없어 보내지 않는다.
+  const oathChanges =
+    oath?.body?.empty === true && changes.oath.body === null ? NO_OATH_CHANGES : changes.oath
+  const crystals = oathCrystalChanges(oath, oathChanges)
   const equipmentSet = changes.equipmentSet !== null ? { equipmentSet: changes.equipmentSet } : {}
-  const oathSet = changes.oath.set !== null ? { oathSet: changes.oath.set } : {}
-  const oathBody = changes.oath.body !== null ? { oathBody: changes.oath.body } : {}
-  const oathUpgrade = changes.oath.upgrade !== null ? { oathUpgrade: changes.oath.upgrade } : {}
+  const oathSet = oathChanges.set !== null ? { oathSet: oathChanges.set } : {}
+  const oathBody = oathChanges.body !== null ? { oathBody: oathChanges.body } : {}
+  const oathUpgrade = oathChanges.upgrade !== null ? { oathUpgrade: oathChanges.upgrade } : {}
   const crystalChanges = crystals.length > 0 ? { oath: crystals } : {}
   const avatarPreset = changes.avatarPreset !== null ? { avatarPreset: changes.avatarPreset } : {}
   const buffLevel = changes.buffLevel !== null ? { buffLevel: changes.buffLevel } : {}

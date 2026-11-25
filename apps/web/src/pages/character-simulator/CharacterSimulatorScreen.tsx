@@ -114,10 +114,7 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     () => rowsInEquipmentSet(wornRows, changes.equipmentSet),
     [wornRows, changes.equipmentSet]
   )
-  const oath = useMemo(
-    () => (wornOath !== null ? oathInSet(wornOath, changes.oath.set) : null),
-    [wornOath, changes.oath.set]
-  )
+  const oath = useMemo(() => oathInSet(wornOath, changes.oath.set), [wornOath, changes.oath.set])
   const targets = useMemo(
     () => toSimulatorTargets(equipmentSet, rows, avatarPresetAvailable, switching, oath),
     [equipmentSet, rows, avatarPresetAvailable, switching, oath]
@@ -141,19 +138,11 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
       dispatch({ type: 'buffLevel', switching: buffSwitching, level }),
     onSwitchingEquipmentChange: (buffSwitching, count) =>
       dispatch({ type: 'switchingEquipment', switching: buffSwitching, count }),
-    onOathSetChange: (setId) => {
-      if (wornOath !== null) {
-        dispatch({ type: 'oathSet', oath: wornOath, setId })
-      }
-    },
+    onOathSetChange: (setId) => dispatch({ type: 'oathSet', oath: wornOath, setId }),
     onOathBodyChange: (oathBody, id) => dispatch({ type: 'oathBody', body: oathBody, id }),
     onOathUpgradeUnlockChange: (upgrade, step, unlocked) =>
       dispatch({ type: 'oathUpgradeUnlock', upgrade, step, unlocked }),
-    onCrystalChange: (crystal, draft) => {
-      if (oath !== null) {
-        dispatch({ type: 'crystal', oath, crystal, draft })
-      }
-    }
+    onCrystalChange: (crystal, draft) => dispatch({ type: 'crystal', oath, crystal, draft })
   }
 
   function select(key: string): void {
