@@ -1020,7 +1020,7 @@ it('무기를 끼지 않은 캐릭터는 무기 줄을 비어 있음으로 두�
   expect(unworn).toMatchObject({
     itemId: null,
     itemName: EMPTY_SLOT_NAME,
-    reinforceEditable: false
+    reinforceEditable: true
   })
   expect(unworn.weaponTypes.map(({ type }) => type)).toEqual([
     '낫',
@@ -1075,6 +1075,40 @@ it('비어 있는 장비 부위는 주 세트의 선택지를 두고, 고르면 
       release: null
     }
   ])
+})
+
+it('비어 있는 장비 부위는 아이템을 고른 뒤에만 강화, 증폭, 마법부여를 싣고, 비어 있음으로 되돌리면 함께 뺀다', () => {
+  const detail = characterDetailFixture('dealer')
+  const bare = {
+    ...detail,
+    equipment: {
+      ...detail.equipment,
+      equipment: detail.equipment.equipment.filter(({ slotId }) => slotId !== 'JACKET')
+    }
+  }
+  const rows = toSimulatorRows(bare)
+  const jacket = slotOf(slotsOf(rows), 'JACKET')
+  const epic = variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반')
+  const enchantId = jacket.enchantChoices[0]!.id
+  const loaded = { reinforce: 10, amplified: true, enchantId }
+
+  const unchosen = apply(NO_CHANGES, { type: 'change', slot: jacket, draft: loaded })
+  const chosen = apply(
+    NO_CHANGES,
+    { type: 'change', slot: jacket, draft: { variantId: epic.id } },
+    {
+      type: 'change',
+      slot: jacket,
+      draft: loaded
+    }
+  )
+  const cleared = apply(chosen, { type: 'change', slot: jacket, draft: { variantId: null } })
+
+  expect(unchosen).toEqual(NO_CHANGES)
+  expect(simulationBody(rows, null, chosen).equipment).toEqual([
+    expect.objectContaining({ slotId: 'JACKET', variantId: epic.id, ...loaded })
+  ])
+  expect(cleared.equipment).toEqual({})
 })
 
 it('무기를 끼지 않은 캐릭터가 무기를 고르면 강화, 마법부여 없이 그 선택지와 조율, 해방 수치를 보낸다', () => {

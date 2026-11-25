@@ -879,7 +879,7 @@ it('해방 수치를 낮추면 수치만 요청한다', async () => {
   )
 })
 
-it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고, 종류를 바꾸면 고른 무기를 비어 있음으로 되돌린다', async () => {
+it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고 강화를 싣고, 종류를 바꾸면 무기를 비어 있음으로 되돌리고 강화 칸을 감춘다', async () => {
   const detail = characterDetailFixture('dealer')
   const equipment = detail.equipment.equipment.filter(({ slotId }) => slotId !== 'WEAPON')
   await render({ ...detail, equipment: { ...detail.equipment, equipment } })
@@ -888,9 +888,19 @@ it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고, 종류를 
 
   expect(pressedIn('무기 종류')).toBe('낫')
   expect(pressedIn('무기 교체')).toBe('비어 있음')
+  expect(has('무기 수치')).toBe(false)
+  expect(has('무기 마법부여')).toBe(false)
+
   await press('무기 교체', '레거시')
+  await step('무기 수치 올리기', 3)
+
+  expect(has('무기 마법부여')).toBe(true)
   await vi.waitFor(() =>
-    expect(bodies.at(-1)?.equipment?.[0]?.variantId).toEqual(expect.any(String))
+    expect(bodies.at(-1)?.equipment?.[0]).toMatchObject({
+      slotId: 'WEAPON',
+      reinforce: 3,
+      variantId: expect.any(String)
+    })
   )
 
   await press('무기 종류', '염주')
@@ -898,6 +908,7 @@ it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고, 종류를 
   expect(pressedIn('무기 종류')).toBe('염주')
   expect(pressedIn('무기 교체')).toBe('비어 있음')
   expect(weaponCell()).toBe('비어 있음')
+  expect(has('무기 수치')).toBe(false)
 })
 
 it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 버튼을 두며 바꾼 무기를 요청한다', async () => {
