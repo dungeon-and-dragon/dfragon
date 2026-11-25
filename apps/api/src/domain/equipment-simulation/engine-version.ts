@@ -15,6 +15,8 @@ const SWITCHING_EQUIPMENT_ENGINE_VERSION: EngineVersion = [0, 14, 0]
 const INFERRED_OATH_SET_ENGINE_VERSION: EngineVersion = [0, 15, 0]
 // 0.16.0부터 원본에 없는 장비, 칭호, 크리쳐, 오라를 더할 수 있다.
 const ADDED_SLOT_ENGINE_VERSION: EngineVersion = [0, 16, 0]
+// 0.17.0부터 원본에 없는 서약 본체와 결정 칸을 더할 수 있다.
+const ADDED_OATH_ENGINE_VERSION: EngineVersion = [0, 17, 0]
 const ENGINE_VERSION_PATTERN = /(\d+)\.(\d+)\.(\d+)/
 
 export interface SimulationFeatures {
@@ -29,6 +31,8 @@ export interface SimulationFeatures {
   readonly weaponItem: boolean
   /** 비어 있는 장비, 칭호, 크리쳐, 오라 부위에 아이템을 더함 */
   readonly addedSlots: boolean
+  /** 서약이 없거나 비어 있는 결정 칸에 아이템을 더함 */
+  readonly addedOath: boolean
   /** 서약 세트, 본체, 결정 아이템 교체 */
   readonly oathItems: boolean
   /** 묵언의 진의 단계와 선택지 변경 */
@@ -110,6 +114,10 @@ function minimumVersions(features: SimulationFeatures): EngineVersion[] {
 
   if (features.addedSlots) {
     minimums.push(ADDED_SLOT_ENGINE_VERSION)
+  }
+
+  if (features.addedOath) {
+    minimums.push(ADDED_OATH_ENGINE_VERSION)
   }
 
   return minimums
