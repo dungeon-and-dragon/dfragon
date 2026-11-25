@@ -1,4 +1,11 @@
-import { type SkillIconImage, type SkillMarks, SkillSprite, skillMarkOf } from '#entities/catalog'
+import {
+  type EvolutionBranch,
+  type SkillIconImage,
+  type SkillMarks,
+  SkillSprite,
+  skillMarkOf
+} from '#entities/catalog'
+import { BranchTooltip, EvolutionBranchExplain } from './BranchTooltip'
 import { SKILL_ICON } from './skill-classes'
 
 const HEADING = 'section-title'
@@ -12,7 +19,42 @@ export type SkillUpgradeRate = Readonly<{
   name: string
   icon: SkillIconImage | null
   rates: readonly [string, string]
+  branches: readonly [EvolutionBranch, EvolutionBranch] | null
 }>
+
+const RATE = 'flex shrink-0 items-center gap-1'
+
+function Rate({
+  mark,
+  markClassName,
+  rate,
+  branch
+}: {
+  mark: string
+  markClassName: string
+  rate: string
+  branch: EvolutionBranch | undefined
+}): React.JSX.Element {
+  const content = (
+    <>
+      <img src={mark} alt="" draggable={false} className={`${markClassName} shrink-0`} />
+      <span className="num w-[48px] text-right">{rate}</span>
+    </>
+  )
+
+  if (branch === undefined) {
+    return <span className={RATE}>{content}</span>
+  }
+
+  return (
+    <BranchTooltip
+      tooltip={<EvolutionBranchExplain branch={branch} />}
+      className={`${RATE} cursor-default`}
+    >
+      {content}
+    </BranchTooltip>
+  )
+}
 
 function UpgradeRateSection({
   kind,
@@ -33,7 +75,7 @@ function UpgradeRateSection({
     <section aria-label={heading}>
       <h2 className={HEADING}>{heading}</h2>
       <ol className="m-0 list-none p-0">
-        {rows.map(({ name, icon, rates }) => (
+        {rows.map(({ name, icon, rates, branches }) => (
           <li
             key={name}
             className="box-border flex min-h-[48px] items-center gap-3 border-b border-line px-4 py-2"
@@ -47,15 +89,13 @@ function UpgradeRateSection({
             )}
             <span className="min-w-0 grow truncate">{name}</span>
             {([1, 2] as const).map((type) => (
-              <span key={type} className="flex shrink-0 items-center gap-1">
-                <img
-                  src={skillMarkOf(marks, kind, type)}
-                  alt=""
-                  draggable={false}
-                  className={`${MARK_SIZE[kind]} shrink-0`}
-                />
-                <span className="num w-[48px] text-right">{rates[type - 1]}</span>
-              </span>
+              <Rate
+                key={type}
+                mark={skillMarkOf(marks, kind, type)}
+                markClassName={MARK_SIZE[kind]}
+                rate={rates[type - 1]!}
+                branch={branches?.[type - 1]}
+              />
             ))}
           </li>
         ))}

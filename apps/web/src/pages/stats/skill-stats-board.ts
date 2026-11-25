@@ -1,9 +1,11 @@
 import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import {
   buffSkillIconOf,
+  type EvolutionBranch,
   type SkillWindow,
   type SkillWindowCatalog,
   type SkillWindowPick,
+  skillEvolutionBranchesOf,
   type UpgradeType
 } from '#entities/catalog'
 import {
@@ -152,12 +154,23 @@ function isEnhancedEnough(
   return [type1, type2].some((count) => shareOf(count, learned) > ENHANCED_SHARE_MIN)
 }
 
-type IconOrder = Readonly<{ icon: SkillWindow['icons'][number]['icon']; order: number }>
+type IconOrder = Readonly<{
+  skillId: number
+  icon: SkillWindow['icons'][number]['icon']
+  order: number
+}>
+
+type BranchesOf = (skillId: number) => readonly [EvolutionBranch, EvolutionBranch] | null
+
+function noBranches(): null {
+  return null
+}
 
 function upgradeRatesOf(
   upgrades: SkillStats['evolutions'],
   learnedByName: ReadonlyMap<string, number>,
-  iconByName: ReadonlyMap<string, IconOrder>
+  iconByName: ReadonlyMap<string, IconOrder>,
+  branchesOf: BranchesOf
 ): SkillUpgradeRate[] {
   const rows = upgrades.map(({ name, type1, type2 }) => {
     const learned = learnedByName.get(name) ?? 0
@@ -168,8 +181,9 @@ function upgradeRatesOf(
     ] as const
     const icon = placed?.icon ?? null
     const order = placed?.order ?? Number.POSITIVE_INFINITY
+    const branches = placed !== undefined ? branchesOf(placed.skillId) : null
 
-    return { row: { name, icon, rates }, order }
+    return { row: { name, icon, rates, branches }, order }
   })
 
   return rows.toSorted((left, right) => left.order - right.order).map(({ row }) => row)
@@ -177,6 +191,7 @@ function upgradeRatesOf(
 
 export function skillUpgradeRateBoardOf(
   stats: SkillStats,
+  catalog: SkillWindowCatalog,
   skillWindow: SkillWindow
 ): SkillUpgradeRateBoard | null {
   if (stats.sampleSize < SKILL_STATS_MIN_SAMPLE) {
@@ -187,10 +202,13 @@ export function skillUpgradeRateBoardOf(
   const placedIcons = skillWindow.icons.toSorted(
     (left, right) => left.row - right.row || left.col - right.col
   )
-  const iconByName = new Map(placedIcons.map(({ name, icon }, order) => [name, { icon, order }]))
-  const evolutions = upgradeRatesOf(stats.evolutions, learnedByName, iconByName)
+  const iconByName = new Map(
+    placedIcons.map(({ skillId, name, icon }, order) => [name, { skillId, icon, order }])
+  )
+  const catalogBranchesOf = (skillId: number) => skillEvolutionBranchesOf(catalog, skillId)
+  const evolutions = upgradeRatesOf(stats.evolutions, learnedByName, iconByName, catalogBranchesOf)
   const enhanced = stats.enhancements.filter((upgrade) => isEnhancedEnough(upgrade, learnedByName))
-  const enhancements = upgradeRatesOf(enhanced, learnedByName, iconByName)
+  const enhancements = upgradeRatesOf(enhanced, learnedByName, iconByName, noBranches)
 
   return { evolutions, enhancements }
 }

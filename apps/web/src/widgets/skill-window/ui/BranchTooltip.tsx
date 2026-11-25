@@ -1,0 +1,44 @@
+import { Tooltip } from '@dfragon/ui'
+import { type EvolutionBranch, GameText } from '#entities/catalog'
+import { EVOLUTION_NUMERALS } from '#widgets/skill-window/lib/upgrade-labels'
+
+export function EvolutionBranchExplain({ branch }: { branch: EvolutionBranch }): React.JSX.Element {
+  return (
+    <>
+      <b className="font-semibold">{`${EVOLUTION_NUMERALS[branch.type]} ${branch.name}`}</b>
+      <GameText lines={branch.basicExplain} className="text-fg-muted" />
+      <GameText lines={branch.explain} />
+    </>
+  )
+}
+
+export function BranchTooltip({
+  tooltip,
+  current,
+  className,
+  children
+}: {
+  tooltip: React.ReactNode
+  current?: boolean
+  className: string
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    // 설명 창이 아래 갈래를 덮으므로, 마우스가 설명 창으로 옮겨 가면 닫아 다른 갈래를 볼 수 있게 한다.
+    <Tooltip.Root disableHoverablePopup>
+      <Tooltip.Trigger
+        delay={0}
+        closeDelay={0}
+        aria-current={current || undefined}
+        className={className}
+      >
+        {children}
+      </Tooltip.Trigger>
+      <Tooltip.Popup side="bottom" align="end">
+        <span className="flex w-[340px] flex-col gap-2 py-1 text-xs leading-relaxed break-keep whitespace-normal">
+          {tooltip}
+        </span>
+      </Tooltip.Popup>
+    </Tooltip.Root>
+  )
+}

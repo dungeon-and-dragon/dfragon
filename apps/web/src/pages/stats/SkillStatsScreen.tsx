@@ -97,7 +97,7 @@ function SkillChainContent({
 }
 
 function SkillUpgradeContent({ board }: { board: SkillStatsBoard }): React.JSX.Element | null {
-  const upgrades = skillUpgradeRateBoardOf(board, board.skillWindow)
+  const upgrades = skillUpgradeRateBoardOf(board, board.catalog, board.skillWindow)
 
   if (upgrades === null) {
     return null

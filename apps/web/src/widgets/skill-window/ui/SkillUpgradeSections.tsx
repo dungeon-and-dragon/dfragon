@@ -1,14 +1,13 @@
-import { Tooltip } from '@dfragon/ui'
 import {
   type EnhancementRow,
   type EvolutionRow,
-  GameText,
   type SkillMarks,
   type SkillUpgradeBoard,
   skillMarkOf,
   SkillSprite
 } from '#entities/catalog'
-import { ENHANCEMENT_LABELS, EVOLUTION_NUMERALS } from '#widgets/skill-window/lib/upgrade-labels'
+import { ENHANCEMENT_LABELS } from '#widgets/skill-window/lib/upgrade-labels'
+import { BranchTooltip, EvolutionBranchExplain } from './BranchTooltip'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { EVOLUTION_MARK, PIXELATED, SKILL_ICON } from './skill-classes'
 
@@ -55,22 +54,9 @@ function Branch({
   }
 
   return (
-    // 설명 창이 아래 갈래를 덮으므로, 마우스가 설명 창으로 옮겨 가면 닫아 다른 갈래를 볼 수 있게 한다.
-    <Tooltip.Root disableHoverablePopup>
-      <Tooltip.Trigger
-        delay={0}
-        closeDelay={0}
-        aria-current={picked || undefined}
-        className={branchClassName}
-      >
-        {content}
-      </Tooltip.Trigger>
-      <Tooltip.Popup side="bottom" align="end">
-        <span className="flex w-[340px] flex-col gap-2 py-1 text-xs leading-relaxed break-keep whitespace-normal">
-          {tooltip}
-        </span>
-      </Tooltip.Popup>
-    </Tooltip.Root>
+    <BranchTooltip tooltip={tooltip} current={picked} className={branchClassName}>
+      {content}
+    </BranchTooltip>
   )
 }
 
@@ -159,15 +145,7 @@ function EvolutionSection({
                     picked={row.picked === branch.type}
                     mark={skillMarkOf(marks, 'evolution', branch.type)}
                     label={branch.name}
-                    tooltip={
-                      <>
-                        <b className="font-semibold">
-                          {`${EVOLUTION_NUMERALS[branch.type]} ${branch.name}`}
-                        </b>
-                        <GameText lines={branch.basicExplain} className="text-fg-muted" />
-                        <GameText lines={branch.explain} />
-                      </>
-                    }
+                    tooltip={<EvolutionBranchExplain branch={branch} />}
                   />
                 ))}
               </div>
