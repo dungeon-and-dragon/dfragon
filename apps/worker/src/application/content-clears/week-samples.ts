@@ -94,6 +94,10 @@ export class ClearWeekSampleService {
 
     reportProgress(done, total)
 
+    if (total > 0) {
+      await this.repository.analyzeContentClears()
+    }
+
     for (const { content, population } of contentWeeks) {
       const samples = await this.samples.loadContent(content, population)
       const week = { contentId: content.id, weekStart: population.weekStart }

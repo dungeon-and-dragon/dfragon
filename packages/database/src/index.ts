@@ -122,6 +122,7 @@ export type {
 } from './clear-record.js'
 export { createDatabaseClient } from './client.js'
 export {
+  analyzeContentClears,
   countClearPopulation,
   finishContentClearCollection,
   readClearPopulation,

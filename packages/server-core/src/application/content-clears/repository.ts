@@ -67,6 +67,7 @@ export interface ClearWeekSampleRepository extends ClearSampleRepository {
   readOverviewSampleWeeks(): Promise<Date[]>
   readPopulationJobs(minMaxFame: number): Promise<ClearPopulationJob[]>
   recordLegionClears(week: LegionClearWeek): Promise<void>
+  analyzeContentClears(): Promise<void>
   recordPopulation(population: ContentClearPopulationInput): Promise<void>
   recordContentWeekSamples(
     week: ClearContentWeek,
