@@ -98,7 +98,7 @@ export function SlotEditor({
   actions
 }: {
   target: SimulatorTarget
-  oath: SimulatorOath | null
+  oath: SimulatorOath
   changes: SimulatorChanges
   actions: SlotEditorActions
 }): React.JSX.Element {
@@ -143,7 +143,7 @@ export function SlotEditor({
       return (
         <CrystalEditor
           crystal={target.crystal}
-          choices={oath !== null ? crystalChoicesOf(oath, target.crystal, changes.oath) : []}
+          choices={crystalChoicesOf(oath, target.crystal, changes.oath)}
           changes={changes}
           actions={actions}
         />

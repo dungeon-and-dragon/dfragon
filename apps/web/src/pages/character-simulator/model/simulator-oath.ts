@@ -18,6 +18,7 @@ import {
   itemRarityOfGrade,
   toItemView
 } from '#entities/character'
+import { EMPTY_SLOT_NAME } from './empty-slot'
 import {
   type OathUpgradeChanges,
   type SimulatorOathUpgrade,
@@ -39,10 +40,15 @@ export type OathChoice = Readonly<{
 
 /**
  * wornVariantId는 지금 기준의 본체 선택지 id다. 서약 세트를 바꾸면 그 세트의 같은 등급이 되고, null이면 선택지에 없는 본체다.
- * setBound가 false면 세트에 속하지 않는 본체라 서약 세트를 바꿔도 그대로다.
+ * setBound가 false면 세트에 속하지 않는 본체라 서약 세트를 바꿔도 그대로다. empty면 서약이 없는 캐릭터의 본체 줄이다.
  */
 export type SimulatorOathBody = ItemView &
-  Readonly<{ choices: readonly OathChoice[]; wornVariantId: string | null; setBound: boolean }>
+  Readonly<{
+    choices: readonly OathChoice[]
+    wornVariantId: string | null
+    setBound: boolean
+    empty: boolean
+  }>
 
 /**
  * wornVariantId, wornTune은 지금 기준의 결정과 조율이다. 서약 세트를 바꾸면 광휘 결정은 그 세트의 같은 등급이 된다.
@@ -55,6 +61,7 @@ export type SimulatorOathCrystal = ItemView &
     wornVariantId: string | null
     wornTune: number
     wornMaxTune: number
+    empty: boolean
   }>
 
 /**
@@ -129,13 +136,13 @@ function toOathBody(info: Oath['info'], setId: number | null): SimulatorOathBody
   const itemView = toItemView(info)
 
   if (match === null) {
-    return { ...itemView, choices: [], wornVariantId: null, setBound: false }
+    return { ...itemView, choices: [], wornVariantId: null, setBound: false, empty: false }
   }
 
   const choices = bodyChoicesOf(setId, match.setId)
   const setBound = match.setId !== null
 
-  return { ...itemView, choices, wornVariantId: match.variant.id, setBound }
+  return { ...itemView, choices, wornVariantId: match.variant.id, setBound, empty: false }
 }
 
 function toOathCrystal(crystal: OathCrystalItem, wornSetId: number | null): SimulatorOathCrystal[] {
@@ -151,7 +158,59 @@ function toOathCrystal(crystal: OathCrystalItem, wornSetId: number | null): Simu
   const wornTune = crystal.tune?.level ?? 0
   const itemView = toItemView(crystal)
 
-  return [{ ...itemView, slotNo: crystal.slotNo, choices, wornVariantId, wornTune, wornMaxTune }]
+  return [
+    {
+      ...itemView,
+      slotNo: crystal.slotNo,
+      choices,
+      wornVariantId,
+      wornTune,
+      wornMaxTune,
+      empty: false
+    }
+  ]
+}
+
+// 서약 결정 칸은 slotNo 0~10이다.
+const CRYSTAL_SLOTS = 11
+const EMPTY_ITEM: ItemView = { itemId: null, itemName: EMPTY_SLOT_NAME, rarity: null }
+
+function emptyCrystal(slotNo: number, setId: number | null): SimulatorOathCrystal {
+  const choices = setId !== null ? oathCrystalVariantsOf(setId).map(toOathChoice) : []
+
+  return {
+    ...EMPTY_ITEM,
+    slotNo,
+    choices,
+    wornVariantId: null,
+    wornTune: 0,
+    wornMaxTune: 0,
+    empty: true
+  }
+}
+
+function emptyBody(): SimulatorOathBody {
+  const setIds: (number | null)[] = [...oathSets().map(({ setId }) => setId), null]
+  const choices = setIds.flatMap((setId) => oathVariantsOf(setId).map(toOathChoice))
+
+  return { ...EMPTY_ITEM, choices, wornVariantId: null, setBound: false, empty: true }
+}
+
+function withEmptyCrystals(
+  crystals: readonly SimulatorOathCrystal[],
+  setId: number | null
+): SimulatorOathCrystal[] {
+  const slotNos = Array.from({ length: CRYSTAL_SLOTS }, (_, slotNo) => slotNo)
+
+  return slotNos.map((slotNo) => {
+    const worn = crystals.find((crystal) => crystal.slotNo === slotNo)
+
+    if (worn !== undefined) {
+      return worn
+    }
+
+    return emptyCrystal(slotNo, setId)
+  })
 }
 
 function listedSetId(setId: number | null | undefined): number | null {
@@ -183,20 +242,22 @@ function wornSetIdOf(oath: Oath): number | null {
   return inferOathSetId({ bodyItemId, crystals })
 }
 
-/** 서약이 없으면 null이다. 결정은 slotNo 순서로 둔다. */
-export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): SimulatorOath | null {
+/** 결정은 slotNo 0~10 순서로 두고, 비어 있는 칸과 서약이 없는 캐릭터의 본체는 비어 있음으로 둔다. */
+export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): SimulatorOath {
   const { oath } = detail
+  const sets = oathSets()
 
   if (oath === null) {
-    return null
+    const body = emptyBody()
+    const crystals = withEmptyCrystals([], null)
+
+    return { setId: null, rarity: null, sets, body, upgrade: null, crystals }
   }
 
   const setId = wornSetIdOf(oath)
   const rarity = itemRarityOfGrade(oath.setInfo?.setRarityName ?? null)
-  const crystals = oath.crystal
-    .flatMap((crystal) => toOathCrystal(crystal, setId))
-    .toSorted((a, b) => a.slotNo - b.slotNo)
-  const sets = oathSets()
+  const worn = oath.crystal.flatMap((crystal) => toOathCrystal(crystal, setId))
+  const crystals = withEmptyCrystals(worn, setId)
   const body = toOathBody(oath.info, setId)
   const upgrade = toSimulatorOathUpgrade(detail)
 
@@ -208,7 +269,7 @@ function choiceOf(choices: readonly OathChoice[], id: string | null): OathChoice
 }
 
 function bodyInSet(body: SimulatorOathBody, setId: number): SimulatorOathBody {
-  if (body.choices.length === 0) {
+  if (body.choices.length === 0 || body.empty) {
     return body
   }
 
@@ -340,6 +401,11 @@ export function crystalChoicesOf(
   crystal: SimulatorOathCrystal,
   changes: OathChanges
 ): readonly OathChoice[] {
+  // 서약이 없으면 본체를 고른 뒤에만 결정을 더할 수 있다.
+  if (oath.body?.empty === true && changes.body === null) {
+    return []
+  }
+
   const primevalOthers = oath.crystals.filter(
     (other) => other.slotNo !== crystal.slotNo && crystalItemOf(other, changes).rarity === PRIMEVAL
   ).length
@@ -381,6 +447,7 @@ export function changeCrystal(
   return { ...changes, crystals: { ...others, [crystal.slotNo]: { variantId, tune } } }
 }
 
+/** 서약이 없는 캐릭터가 세트 전용 본체를 고르면 그 세트를 서약 세트로 골라 결정 선택지를 연다. */
 export function changeOathBody(
   changes: OathChanges,
   body: SimulatorOathBody,
@@ -390,11 +457,19 @@ export function changeOathBody(
     return { ...changes, body: null }
   }
 
-  if (choiceOf(body.choices, id) === undefined) {
+  const choice = choiceOf(body.choices, id)
+
+  if (choice === undefined) {
     return changes
   }
 
-  return { ...changes, body: id }
+  if (!body.empty) {
+    return { ...changes, body: id }
+  }
+
+  const set = findOathVariant(choice.itemId)?.setId ?? changes.set
+
+  return { ...changes, body: id, set }
 }
 
 /**

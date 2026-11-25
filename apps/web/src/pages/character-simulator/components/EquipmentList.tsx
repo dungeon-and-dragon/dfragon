@@ -328,7 +328,7 @@ export function OathList({
                   onSelect={onSelect}
                 >
                   <ItemName
-                    name={oathSetNameOf(target.oath)}
+                    name={oathSetNameOf(target.oath) ?? EMPTY_SLOT_NAME}
                     rarity={target.oath.rarity}
                     weight="normal"
                   />
