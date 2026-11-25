@@ -163,12 +163,12 @@ function inferredSetId(
 }
 
 /** 본체와 결정을 옮길 서약 세트이고, 원본과 같은 세트여도 다른 세트의 본체와 광휘 결정을 그 세트로 옮긴다. */
-function checkedSet(worn: number | null, set: number | null): number | null {
+function checkedSet(set: number | null): number | null {
   if (set === null) {
     return null
   }
 
-  if (worn === null || !oathSets().some(({ setId }) => setId === set)) {
+  if (!oathSets().some(({ setId }) => setId === set)) {
     throw new EquipmentSimulationFailure('request')
   }
 
@@ -382,7 +382,7 @@ function addedOath(changes: OathChanges): OathEdit {
   }
 
   const chosen = bodyChoiceOf(changes.body)
-  const set = changes.set !== null ? checkedSet(changes.set, changes.set) : null
+  const set = checkedSet(changes.set)
   const setId = set ?? chosen.setId
   const { itemId, itemName, itemRarity } = chosen.variant.item
   const crystals = emptyCrystals([], changes.crystals).flatMap((crystal) => {
@@ -429,10 +429,11 @@ export function editOath(oath: CharacterPayload, changes: OathChanges): OathEdit
   const setInfoSet = setInfoSetId(section)
   // 응답에 세트가 없어도 게임은 세트 포인트 합이 가장 큰 세트의 효과를 적용한다.
   const worn = setInfoSet ?? inferredSetId(section, crystals)
-  const set = checkedSet(worn, changes.set)
+  const set = checkedSet(changes.set)
   const setId = set ?? worn
-  // 엔진에는 서약 세트가 실제로 바뀔 때만 세트를 넣는다.
-  const changedSet = set !== worn ? set : null
+  // 엔진에는 서약 세트가 실제로 바뀔 때만 세트를 넣는다. 세트를 추론할 수 없는 서약은 옮길 본체와 광휘 결정이 없어,
+  // 고른 세트는 더할 결정의 선택지만 정하고 세트는 엔진이 결정으로 추론한다.
+  const changedSet = worn !== null && set !== worn ? set : null
 
   const slots = [...crystals, ...emptyCrystals(crystals, changes.crystals)]
   const body = simulatedBody(section.info, set, setId, changes.body)
