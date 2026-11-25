@@ -709,6 +709,22 @@ test('전체 개요는 저장되지 않은 주와 잘못된 week를 400으로 �
   }
 })
 
+test('레이드 분모 없이 레기온 분모만 있는 주는 전체 개요가 고를 주로 두지 않아 400으로 거절한다', async () => {
+  const { app, origin } = await listen(
+    fakeReader({
+      readPopulations: async () => [...populations, population('legion-venus', '2025-02-06', 900)]
+    })
+  )
+  try {
+    const { status, body } = await getJson(origin, '/stats/clears/overview?week=2025-02-06')
+
+    assert.equal(status, 400)
+    assert.equal(body.error.code, 'INVALID_CHARACTER_QUERY')
+  } finally {
+    await app.close()
+  }
+})
+
 test('전체 개요는 마지막 수집 시각이 같으면 다시 읽지 않고, 바뀌면 미리 계산한 새 값을 준다', async () => {
   let collectedAt = at('2026-11-10T06:30:00')
   let reads = 0

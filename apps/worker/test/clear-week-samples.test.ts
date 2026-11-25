@@ -253,21 +253,27 @@ test('레기온은 출시 주부터 레이드 분모가 마감한 가장 최근 
   assert.equal(summary.legions, 4)
 })
 
-test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는 출시 주부터 옮긴다', async () => {
+test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는 출시 주부터 옮기고, 레이드 분모가 없는 주는 전체 개요를 저장하지 않는다', async () => {
   const moved: string[] = []
+  const populations: StoredClearPopulation[] = [population('nabel-normal', '2025-04-17', true)]
+  const overviews: string[] = []
   const service = new ClearWeekSampleService(
     {
       ...emptySampleRepository,
-      readPopulations: async () => [population('nabel-normal', '2025-04-17', true)],
+      readPopulations: async () => populations,
       readContentWeekSampleWeeks: async () => [],
       readOverviewSampleWeeks: async () => [],
       readPopulationJobs: async () => [],
       recordLegionClears: async ({ contentId, weekStart, copySnapshot }: LegionClearWeek) => {
         moved.push(`${contentId}/${formatResetDate(weekStart)}/${copySnapshot}`)
       },
-      recordPopulation: async () => undefined,
+      recordPopulation: async (input) => {
+        populations.push({ ...input, jobs: [...input.jobs] })
+      },
       recordContentWeekSamples: async () => undefined,
-      recordOverviewSamples: async () => undefined
+      recordOverviewSamples: async (weekStart) => {
+        overviews.push(formatResetDate(weekStart))
+      }
     },
     () => week('2025-04-24')
   )
@@ -287,6 +293,7 @@ test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는
     'legion-venus/2025-04-10/false',
     'legion-venus/2025-04-17/true'
   ])
+  assert.deepEqual(overviews, ['2025-04-17'])
 })
 
 test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개요의 점수 분포를 담지 않고, 1주차부터는 담는다', async () => {
