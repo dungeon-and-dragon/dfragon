@@ -394,15 +394,17 @@ model CharacterStatsSnapshot {
 }
 
 model JobSkillAdoptionSnapshot {
-  jobId        String   @map("job_id")
-  jobGrowId    String   @map("job_grow_id")
-  role         String
-  computedAt   DateTime @map("computed_at") @db.Timestamptz(3)
-  minFame      Int?     @map("min_fame")
-  sampleSize   Int      @map("sample_size")
-  skills       Json
-  evolutions   Json
-  enhancements Json
+  jobId           String   @map("job_id")
+  jobGrowId       String   @map("job_grow_id")
+  role            String
+  computedAt      DateTime @map("computed_at") @db.Timestamptz(3)
+  minFame         Int?     @map("min_fame")
+  sampleSize      Int      @map("sample_size")
+  skills          Json
+  evolutions      Json
+  enhancements    Json
+  chains          Json     @default("[]")
+  chainSampleSize Int      @default(0) @map("chain_sample_size")
 
   @@id([jobId, jobGrowId, role])
   @@map("job_skill_adoption")
