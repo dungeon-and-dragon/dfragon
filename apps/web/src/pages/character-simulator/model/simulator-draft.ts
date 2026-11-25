@@ -140,7 +140,7 @@ export type WeaponTypeChoice = Readonly<{
 /**
  * wornVariantId, wornTune, wornPotency, wornRelease는 지금 기준의 아이템, 조율, 정밀도, 해방 수치다. 장비 세트를 고르면 그
  * 세트로 옮긴 값이고, wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율
- * 상한이다(무기). empty는 비어 있는 부위이고, 강화, 증폭, 마법부여 없이 선택지의 아이템만 더할 수 있다. weaponTypes는 비어
+ * 상한이다(무기). empty는 비어 있는 부위이고, 선택지의 아이템을 고른 뒤에만 강화, 증폭, 마법부여를 고를 수 있다. weaponTypes는 비어
  * 있는 무기 줄에만 있고, variants는 그 종류들의 선택지를 모두 담는다.
  */
 export type SimulatorSlot = ItemView &
@@ -547,6 +547,7 @@ function emptyWeaponTypes(character: SimulatorDetail['character']): WeaponTypeCh
 function emptySlot(
   slotId: EnchantGradeSlot,
   character: SimulatorDetail['character'],
+  role: EnchantRole,
   setIdsByPoint: readonly string[]
 ): SimulatorSlot {
   const weaponTypes = slotId === WEAPON_SLOT_ID ? emptyWeaponTypes(character) : []
@@ -562,10 +563,10 @@ function emptySlot(
     slotName: EQUIPMENT_SLOT_NAMES[slotId],
     reinforce: 0,
     amplified: false,
-    reinforceLimit: 0,
-    reinforceEditable: false,
+    reinforceLimit: REINFORCE_LIMIT,
+    reinforceEditable: true,
     enchants: [],
-    enchantChoices: [],
+    enchantChoices: enchantChoices(slotId, role),
     variants,
     wornVariantId: null,
     wornTune: 0,
@@ -720,7 +721,7 @@ export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
     }
 
     if (item === undefined) {
-      const slot = emptySlot(slotId, detail.character, setIdsByPoint)
+      const slot = emptySlot(slotId, detail.character, role, setIdsByPoint)
 
       return { kind: 'equipment', slot }
     }
@@ -837,6 +838,13 @@ function isAllowed(slot: SimulatorSlot, current: SlotDraft, next: SlotDraft): bo
     return false
   }
 
+  const bare = next.reinforce === 0 && !next.amplified && next.enchantId === null
+
+  // 빈 부위는 아이템을 고른 뒤에만 강화, 증폭, 마법부여를 싣는다.
+  if (slot.empty && !bare && variantChoiceOf(slot, next.variantId) === undefined) {
+    return false
+  }
+
   if (!isInRange(next.reinforce, slot.reinforceLimit)) {
     return false
   }
@@ -870,6 +878,11 @@ function switchVariant(
   }
 
   const choice = variantChoiceOf(slot, variantId)
+
+  // 빈 부위를 비어 있음으로 되돌리면 그 장비에 실은 강화, 증폭, 마법부여도 뺀다.
+  if (choice === undefined && slot.empty) {
+    return { ...originalDraft(slot), variantId }
+  }
 
   if (choice === undefined) {
     return { ...current, variantId, tune: slot.wornTune, potency: null, release: null }
