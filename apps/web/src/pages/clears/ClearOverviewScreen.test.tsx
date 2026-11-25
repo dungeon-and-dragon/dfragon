@@ -579,6 +579,21 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
   ])
 })
 
+it('레이드 기록 없이 레기온 기록만 있는 주는 고를 주에 두지 않아, 그 주로 열면 가장 최근 주를 고른다', async () => {
+  const venus = content('legion-venus', 'legion', '베누스', '2025-02-05T21:00:00.000Z', [
+    week('2025-02-06', 300),
+    ...recentWeeks([500, 480])
+  ])
+  await open('2025-02-06', {
+    stats: () => HttpResponse.json({ ...stats, legions: [{ ...venus, entryFame: null }] })
+  })
+
+  expect(wheelRows()).toEqual(['11-05 ~ 11-11', '11-12 ~ 11-18집계 중', ''])
+  expect(requestsTo('/stats/clears/overview')).toEqual([
+    `/stats/clears/overview?week=${LATEST_WEEK}`
+  ])
+})
+
 it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프를 바꾸면 축이 그 점수 기준으로 바뀐다', async () => {
   await open(undefined, {
     overview: (selected) => {

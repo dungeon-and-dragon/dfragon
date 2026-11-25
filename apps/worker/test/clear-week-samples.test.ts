@@ -11,6 +11,8 @@ import type {
 import type { ClearSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearWeekSampleService } from '../src/application/content-clears/week-samples.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
+import { CLEAR_LEGIONS } from '@dfragon/server-core/domain/content-clears/index.js'
+import { addHours } from 'date-fns'
 
 // 합성 분모와 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
 const week = (date: string) => new Date(`${date}T06:00:00+09:00`)
@@ -42,6 +44,27 @@ const population = (contentId: string, date: string, closed: boolean): StoredCle
   collectedAt: week('2026-11-13'),
   closed
 })
+// 레기온마다 출시 주부터 주어진 주 전까지 이미 옮기고 상세와 전체 개요까지 저장한 주다.
+const movedLegionWeeksBefore = (date: string): StoredClearPopulation[] =>
+  CLEAR_LEGIONS.flatMap(({ id, releasedAt }) => {
+    const weeks: StoredClearPopulation[] = []
+
+    for (
+      let weekStart = releasedAt;
+      weekStart < week(date);
+      weekStart = addHours(weekStart, 7 * 24)
+    ) {
+      weeks.push(population(id, formatResetDate(weekStart), true))
+    }
+
+    return weeks
+  })
+const movedLegionWeeks = movedLegionWeeksBefore('2026-10-29')
+const movedContentWeeks = movedLegionWeeks.map(({ contentId, weekStart }) => ({
+  contentId,
+  weekStart
+}))
+const movedOverviewWeeks = movedLegionWeeks.map(({ weekStart }) => weekStart)
 
 test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부터 저장하고, 전체 개요는 그 주의 모든 분모가 마감했을 때만 저장한다', async () => {
   const recordedContents: string[] = []
@@ -52,6 +75,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
   const service = new ClearWeekSampleService({
     ...emptySampleRepository,
     readPopulations: async () => [
+      ...movedLegionWeeks,
       population('michaela-hard', '2026-10-29', true),
       population('michaela-hard', '2026-11-05', true),
       population('engraved-nightmare-1', '2026-11-05', true),
@@ -60,9 +84,10 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
       population('retired-raid', '2026-11-05', true)
     ],
     readContentWeekSampleWeeks: async () => [
+      ...movedContentWeeks,
       { contentId: 'michaela-hard', weekStart: week('2026-10-29') }
     ],
-    readOverviewSampleWeeks: async () => [week('2026-10-29')],
+    readOverviewSampleWeeks: async () => [...movedOverviewWeeks, week('2026-10-29')],
     readPopulationJobs: async () => [],
     recordLegionClears: async () => undefined,
     recordPopulation: async () => undefined,
@@ -105,7 +130,7 @@ test('마감한 주 집계는 저장하지 않은 마감한 주를 최근 주부
   assert.equal(recordedSamples.get('engraved-nightmare-1/2026-11-05')?.streaks, null)
 })
 
-test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 입장 명성과 수집 하한 가운데 높은 명성부터 센 뒤 상세 집계를 계산한다', async () => {
+test('레기온은 출시 주부터 레이드 분모가 마감한 가장 최근 주까지 아직 옮기지 않은 주만 옮기고, 막 마감한 주만 명성과 점수를 복사하게 표시하며, 분모는 입장 명성과 수집 하한 가운데 높은 명성부터 센 뒤 상세 집계를 계산한다', async () => {
   const jobsFrom = (minFame: number) => [
     {
       jobId: 'synthetic-job',
@@ -116,6 +141,7 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
     }
   ]
   const populations: StoredClearPopulation[] = [
+    ...movedLegionWeeks,
     population('michaela-hard', '2026-04-16', true),
     population('michaela-hard', '2026-10-29', true),
     population('michaela-hard', '2026-11-05', true),
@@ -131,6 +157,7 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
       ...emptySampleRepository,
       readPopulations: async () => populations,
       readContentWeekSampleWeeks: async () => [
+        ...movedContentWeeks,
         { contentId: 'michaela-hard', weekStart: week('2026-04-16') },
         { contentId: 'michaela-hard', weekStart: week('2026-10-29') },
         { contentId: 'michaela-hard', weekStart: week('2026-11-05') },
@@ -138,6 +165,7 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
         { contentId: 'legion-venus', weekStart: week('2026-04-16') }
       ],
       readOverviewSampleWeeks: async () => [
+        ...movedOverviewWeeks,
         week('2026-04-16'),
         week('2026-10-29'),
         week('2026-11-05')
@@ -223,6 +251,49 @@ test('레기온은 출시 뒤 레이드 분모가 마감한 주 가운데 아직
     ]
   )
   assert.equal(summary.legions, 4)
+})
+
+test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는 출시 주부터 옮기고, 레이드 분모가 없는 주는 전체 개요를 저장하지 않는다', async () => {
+  const moved: string[] = []
+  const populations: StoredClearPopulation[] = [population('nabel-normal', '2025-04-17', true)]
+  const overviews: string[] = []
+  const service = new ClearWeekSampleService(
+    {
+      ...emptySampleRepository,
+      readPopulations: async () => populations,
+      readContentWeekSampleWeeks: async () => [],
+      readOverviewSampleWeeks: async () => [],
+      readPopulationJobs: async () => [],
+      recordLegionClears: async ({ contentId, weekStart, copySnapshot }: LegionClearWeek) => {
+        moved.push(`${contentId}/${formatResetDate(weekStart)}/${copySnapshot}`)
+      },
+      recordPopulation: async (input) => {
+        populations.push({ ...input, jobs: [...input.jobs] })
+      },
+      recordContentWeekSamples: async () => undefined,
+      recordOverviewSamples: async (weekStart) => {
+        overviews.push(formatResetDate(weekStart))
+      }
+    },
+    () => week('2025-04-24')
+  )
+
+  await service.recordMissing(() => undefined)
+
+  assert.deepEqual(moved.toSorted(), [
+    'legion-venus/2025-02-06/false',
+    'legion-venus/2025-02-13/false',
+    'legion-venus/2025-02-20/false',
+    'legion-venus/2025-02-27/false',
+    'legion-venus/2025-03-06/false',
+    'legion-venus/2025-03-13/false',
+    'legion-venus/2025-03-20/false',
+    'legion-venus/2025-03-27/false',
+    'legion-venus/2025-04-03/false',
+    'legion-venus/2025-04-10/false',
+    'legion-venus/2025-04-17/true'
+  ])
+  assert.deepEqual(overviews, ['2025-04-17'])
 })
 
 test('각인된 악몽 1주차 전 주는 상세의 점수 구간과 전체 개요의 점수 분포를 담지 않고, 1주차부터는 담는다', async () => {
