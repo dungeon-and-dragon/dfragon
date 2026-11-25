@@ -11,5 +11,8 @@ export { DatabaseStatsJobRepository } from './stats-jobs.js'
 export { DatabaseJobRunCleanupRepository } from './job-run-cleanup.js'
 export { DatabaseScoreCalculationRepository } from './score-calculation.js'
 export { DatabaseAcquisitionItemRepository } from './item-dictionary.js'
-export { DatabaseCharacterActivityRepository } from './character-activity.js'
+export {
+  CHARACTER_ACTIVITY_POOL,
+  DatabaseCharacterActivityRepository
+} from './character-activity.js'
 export { DatabaseTimelineSyncRequestRepository } from './timeline-sync-request.js'

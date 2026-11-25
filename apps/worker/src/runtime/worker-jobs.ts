@@ -80,6 +80,7 @@ export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
 
 export function createWorkerJobs(
   client: DatabaseClient,
+  activityClient: DatabaseClient,
   collection: WorkerJobDependencies
 ): JobDefinition[] {
   const clock = { now: () => new Date(), pause: (ms: number) => setTimeout(ms) }
@@ -128,7 +129,7 @@ export function createWorkerJobs(
     pause: clock.pause
   })
   const activityService = new CharacterActivityService(
-    new DatabaseCharacterActivityRepository(client),
+    new DatabaseCharacterActivityRepository(activityClient),
     { fetchLatestActivity, fetchBasic, readConcurrency, report, ...clock }
   )
   const statsService = new StatsJobService(new DatabaseStatsJobRepository(client))
