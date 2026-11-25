@@ -8,6 +8,7 @@ import {
   draftOf,
   hasChanges,
   NO_CHANGES,
+  EMPTY_SLOT_NAME,
   resolvedItemsOf,
   rowsInEquipmentSet,
   type SimulatorAction,
@@ -24,6 +25,7 @@ import {
   TUNED_WEAPON_NAME,
   tuneLimitOf
 } from './simulator-draft'
+import { withoutWeapon } from '#pages/character-simulator/api/simulation.fixture'
 import { toSimulatorSwitching } from './simulator-switching'
 
 const GRADE_SLOTS = [
@@ -363,7 +365,7 @@ it('그 부위의 목록에 없는 id는 받지 않는다', () => {
   )
 })
 
-it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터는 그 행을 두지 않는다', () => {
+it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터도 그 줄을 비어 있음으로 두고 묶음을 고를 수 있다', () => {
   const detail = characterDetailFixture('dealer')
   const bare = {
     ...detail,
@@ -374,9 +376,25 @@ it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터는 그 행을 두
     creature: null,
     avatar: detail.avatar.filter(({ slotId }) => slotId !== 'AURORA')
   }
+  const rows = toSimulatorRows(bare)
+  const slotItems = slotItemsIn(rows)
+  const [title] = slotItems
+  const id = title!.choices[0]!.id
+  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id })
 
-  expect(slotItemsIn(toSimulatorRows(bare))).toEqual([])
-  expect(slotsOf(toSimulatorRows(bare))).toHaveLength(12)
+  expect(slotItems.map(({ category, slotName }) => [category, slotName])).toEqual([
+    ['title', '칭호'],
+    ['creature', '크리쳐'],
+    ['aura', '오라']
+  ])
+  expect(
+    slotItems.every(
+      ({ itemId, itemName, wornChoiceId }) =>
+        itemId === null && itemName === EMPTY_SLOT_NAME && wornChoiceId === null
+    )
+  ).toBe(true)
+  expect(slotsOf(rows)).toHaveLength(12)
+  expect(simulationBody(rows, null, chosen)).toEqual({ equipment: [], title: id })
 })
 
 const bufferDetail = characterDetailFixture('buffer')
@@ -984,4 +1002,99 @@ it('아바타는 종결 아바타와 엠블렘을 고르면 프리셋을 요청�
   expect(simulationBody([], null, changed)).toEqual({ equipment: [], avatarPreset: 'best' })
   expect(hasChanges(changed)).toBe(true)
   expect(apply(changed, { type: 'avatarPreset', preset: null })).toEqual(NO_CHANGES)
+})
+
+it('무기를 끼지 않은 캐릭터는 무기 줄을 비어 있음으로 두고, 직업이 낄 수 있는 종류마다 무기 선택지를 둔다', () => {
+  // 딜러 fixture 캐릭터는 프리스트다.
+  const slots = slotsOf(toSimulatorRows(withoutWeapon(characterDetailFixture('dealer'))))
+  const unworn = slots[0]!
+
+  expect(slots.map(({ slotId }) => slotId)).toEqual(GRADE_SLOTS)
+  expect(unworn).toMatchObject({
+    itemId: null,
+    itemName: EMPTY_SLOT_NAME,
+    reinforceEditable: false
+  })
+  expect(unworn.weaponTypes.map(({ type }) => type)).toEqual([
+    '낫',
+    '배틀액스',
+    '십자가',
+    '염주',
+    '토템'
+  ])
+  expect(unworn.variants.map(({ id }) => id)).toEqual(
+    unworn.weaponTypes.flatMap(({ variants }) => variants.map(({ id }) => id))
+  )
+  expect(unworn.weaponTypes.map(({ variants }) => variants.length)).toEqual([9, 9, 9, 9, 9])
+  expect(slotOf(dealerSlots, 'WEAPON').weaponTypes).toEqual([])
+})
+
+it('직업이 무기 종류 표에 없으면 비어 있는 무기 줄에 선택지를 두지 않는다', () => {
+  const detail = withoutWeapon(characterDetailFixture('dealer'))
+  const unknown = { ...detail, character: { ...detail.character, jobGrowId: 'unknown-grow' } }
+  const unworn = slotOf(slotsOf(toSimulatorRows(unknown)), 'WEAPON')
+
+  expect(unworn).toMatchObject({ empty: true, variants: [], weaponTypes: [] })
+})
+
+it('비어 있는 장비 부위는 주 세트의 선택지를 두고, 고르면 강화, 마법부여 없이 그 선택지를 보낸다', () => {
+  const detail = characterDetailFixture('dealer')
+  const bare = {
+    ...detail,
+    equipment: {
+      ...detail.equipment,
+      equipment: detail.equipment.equipment.filter(({ slotId }) => slotId !== 'JACKET')
+    }
+  }
+  const rows = toSimulatorRows(bare)
+  const jacket = slotOf(slotsOf(rows), 'JACKET')
+  const epic = variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반')
+  const chosen = apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { variantId: epic.id } })
+
+  expect(slotsOf(rows).map(({ slotId }) => slotId)).toEqual(GRADE_SLOTS)
+  expect(jacket).toMatchObject({ empty: true, itemName: EMPTY_SLOT_NAME, slotName: '상의' })
+  expect(jacket.variants.map(({ id }) => id)).toEqual(
+    equipmentVariantsOf(SOUL_FAIRY_SET, 'JACKET').map(({ id }) => id)
+  )
+  expect(simulationBody(rows, null, chosen).equipment).toEqual([
+    {
+      slotId: 'JACKET',
+      reinforce: 0,
+      amplified: false,
+      enchantId: null,
+      variantId: epic.id,
+      tune: 0,
+      potency: null,
+      release: null
+    }
+  ])
+})
+
+it('무기를 끼지 않은 캐릭터가 무기를 고르면 강화, 마법부여 없이 그 선택지와 조율, 해방 수치를 보낸다', () => {
+  const rows = toSimulatorRows(withoutWeapon(characterDetailFixture('dealer')))
+  const unworn = slotOf(slotsOf(rows), 'WEAPON')
+  const release = unworn.variants.find(({ weapon }) => weapon?.line === '해방')!
+  const tunable = unworn.variants.find(({ maxTune }) => maxTune > 0)!
+  const released = apply(NO_CHANGES, {
+    type: 'change',
+    slot: unworn,
+    draft: { variantId: release.id }
+  })
+  const tuned = apply(
+    NO_CHANGES,
+    { type: 'change', slot: unworn, draft: { variantId: tunable.id } },
+    { type: 'change', slot: unworn, draft: { tune: 2 } }
+  )
+  const added = { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: null, potency: null }
+
+  expect(simulationBody(rows, null, released).equipment).toEqual([
+    { ...added, variantId: release.id, tune: null, release: 100 }
+  ])
+  expect(simulationBody(rows, null, tuned).equipment).toEqual([
+    { ...added, variantId: tunable.id, tune: 2, release: null }
+  ])
+  expect(resolvedItemsOf(rows, tuned).WEAPON?.itemId).toBe(tunable.itemId)
+  expect(apply(NO_CHANGES, { type: 'change', slot: unworn, draft: { reinforce: 10 } })).toEqual(
+    NO_CHANGES
+  )
 })

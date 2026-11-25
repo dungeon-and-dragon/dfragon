@@ -727,7 +727,7 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
   ])
 })
 
-it('칭호, 크리쳐, 오라를 착용하지 않았으면 그 행을 두지 않는다', async () => {
+it('칭호, 크리쳐, 오라를 착용하지 않았어도 그 줄을 비어 있음으로 둔다', async () => {
   const detail = characterDetailFixture('dealer')
   await render({
     ...detail,
@@ -744,10 +744,9 @@ it('칭호, 크리쳐, 오라를 착용하지 않았으면 그 행을 두지 않
     ['차이', '0']
   ])
 
-  expect(slotNames()).not.toContain('칭호')
-  expect(container.querySelector('[aria-label="칭호 교체"]')).toBeNull()
-  expect(container.querySelector('[aria-label="크리쳐 교체"]')).toBeNull()
-  expect(container.querySelector('[aria-label="오라 교체"]')).toBeNull()
+  for (const slotName of ['칭호', '크리쳐', '오라']) {
+    expect(rowOf(slotName).textContent, slotName).toContain('비어 있음')
+  }
 })
 
 it('115레벨이 아닌 장비는 수치와 증폭을 막고 마법부여만 고르게 둔다', async () => {
