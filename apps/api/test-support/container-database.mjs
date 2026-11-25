@@ -1176,7 +1176,14 @@ try {
     { allowFailure: true }
   )
   assert.equal(missingImportFile.code, 1)
-  assert.equal(missingImportFile.stderr, 'Character collector failed\n')
+  assert.equal(missingImportFile.stderr, '')
+  assert.deepEqual(
+    missingImportFile.stdout
+      .split('\n')
+      .filter((line) => line.includes('"CHARACTER_COLLECTOR_FAILED"'))
+      .map((line) => JSON.parse(line).errorChain.length > 0),
+    [true]
+  )
 
   stage = 'graceful stop'
   // Podman은 network namespace를 빌려 쓰는 컨테이너가 남아 있으면 빌려준 API 컨테이너를 지우지 않는다.
