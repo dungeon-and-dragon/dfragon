@@ -127,6 +127,21 @@ function chainRows(): [string[], string][] {
   })
 }
 
+function upgradeSection(heading: string): HTMLElement | null {
+  return container.querySelector(`section[aria-label="${heading}"]`)
+}
+
+function upgradeRows(heading: string): [string, ...string[]][] {
+  return [...upgradeSection(heading)!.querySelectorAll('li')].map((row) => {
+    const name = row.querySelector('[role="img"]')?.getAttribute('aria-label') ?? '빈 칸'
+    const rates = [...row.querySelectorAll('img')].map(
+      (img) => `${img.src.match(MARK_FILE)?.[0]} ${img.nextElementSibling?.textContent}`
+    )
+
+    return [name, ...rates]
+  })
+}
+
 async function tooltipOf(name: string): Promise<Element> {
   const trigger = container
     .querySelector(`[role="group"] [role="img"][aria-label="${name}"]`)
@@ -225,13 +240,15 @@ it('스킬 Tooltip은 채택률과 레벨 분포를 보이고 레벨 분포에 �
   expect(tooltip.querySelector('[data-current-level]')).toBeNull()
 })
 
-it('표본이 20명 미만이면 스킬 창의 레벨, 흐림, 표식을 모두 빼고 체인 자리에 표본 부족을 알린다', async () => {
+it('표본이 20명 미만이면 스킬 창의 레벨, 흐림, 표식과 개화, 강화 비율을 모두 빼고 체인 자리에 표본 부족을 알린다', async () => {
   await renderStats({ ...skillStatsFixture, sampleSize: 19 })
 
   for (const name of ['크리티컬 히트', '발도', '차지 크래시', '환영검무']) {
     expect(cellOf(name), name).toEqual({ level: '', dim: false, marks: [], picked: false })
   }
   expect(chainPanel().textContent).toBe('스킬 체인표본이 20명 미만입니다.')
+  expect(upgradeSection('스킬 개화')).toBeNull()
+  expect(upgradeSection('스킬 강화')).toBeNull()
   expect((await tooltipOf('발도')).textContent).toBe('발도')
 })
 
@@ -246,6 +263,26 @@ it('체인 조합이 없으면 체인 자리에 조합이 없다고 보인다', 
   await renderStats({ ...skillStatsFixture, chains: [] })
 
   expect(chainPanel().textContent).toBe('스킬 체인스킬 체인 조합이 없습니다.')
+})
+
+it('스킬 개화, 강화는 응답의 스킬마다 두 갈래 표식과 그 스킬을 배운 표본 대비 비율을 스킬 창의 줄 순서로 보인다', async () => {
+  const [baldo, maengryong] = skillStatsFixture.evolutions
+  const [chargeCrash, maengryongEnhancement] = skillStatsFixture.enhancements
+  await renderStats({
+    ...skillStatsFixture,
+    evolutions: [maengryong!, baldo!, { name: '류심 충', type1: 0, type2: 0 }],
+    enhancements: [maengryongEnhancement!, chargeCrash!]
+  })
+
+  expect(upgradeRows('스킬 개화')).toEqual([
+    ['류심 충', 'evolution-1 0.0%', 'evolution-2 0.0%'],
+    ['발도', 'evolution-1 55.6%', 'evolution-2 27.8%'],
+    ['맹룡단공참', 'evolution-1 46.7%', 'evolution-2 43.3%']
+  ])
+  expect(upgradeRows('스킬 강화')).toEqual([
+    ['차지 크래시', 'enhancement-1 33.3%', 'enhancement-2 53.3%'],
+    ['맹룡단공참', 'enhancement-1 46.7%', 'enhancement-2 43.3%']
+  ])
 })
 
 it('통계를 계산한 적이 없으면 통계가 없다고 보이고, 받지 못하면 다른 통계 탭과 같은 실패 표시를 보인다', async () => {
