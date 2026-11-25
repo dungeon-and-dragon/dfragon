@@ -13,7 +13,7 @@ import {
 } from '@dfragon/lib/equipment-variants'
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
-import type { EquipmentChange } from './equipment.js'
+import { ADDED_ITEM_GRADE, type EquipmentChange } from './equipment.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
 const EXALTED_POTENCY_DEFAULT = 100
@@ -34,7 +34,10 @@ interface TuneEdit {
 
 export interface EquipmentItemEdit {
   readonly slotId: EquipmentVariantSlot
+  /** 비어 있는 부위면 slotId만 있는 항목이다. */
   readonly original: CharacterPayload
+  /** 원본에 없는 부위에 더하는지다. */
+  readonly added: boolean
   /** null이면 착용한 아이템을 그대로 둔다. */
   readonly item: EquipmentVariantItem | null
   readonly kind: EquipmentVariantKind
@@ -46,7 +49,9 @@ export interface EquipmentItemEdit {
 
 interface WornSlot {
   readonly slotId: EquipmentVariantSlot
+  /** 비어 있는 부위면 slotId만 있는 항목이다. */
   readonly original: CharacterPayload
+  readonly added: boolean
   /** 선택 목록에 없는 아이템(레어, 고유 장비 등)이면 null이다. */
   readonly variant: EquipmentVariant | null
 }
@@ -71,7 +76,14 @@ function wornSlots(equipment: CharacterPayload): Map<EquipmentVariantSlot, WornS
     if (typeof slotId === 'string' && isVariantSlot(slotId)) {
       const variant =
         typeof itemId === 'string' ? (findEquipmentVariant(itemId)?.variant ?? null) : null
-      slots.set(slotId, { slotId, original, variant })
+      slots.set(slotId, { slotId, original, variant, added: false })
+    }
+  }
+
+  // 비어 있는 부위도 주 세트의 선택지로 장비를 더할 수 있다.
+  for (const slotId of EQUIPMENT_VARIANT_SLOTS) {
+    if (!slots.has(slotId)) {
+      slots.set(slotId, { slotId, original: { slotId }, variant: null, added: true })
     }
   }
 
@@ -257,7 +269,6 @@ function switchedTargets(
 }
 
 function itemChanges(
-  worn: ReadonlyMap<EquipmentVariantSlot, WornSlot>,
   changes: readonly EquipmentChange[]
 ): Map<EquipmentVariantSlot, EquipmentChange> {
   const checked = new Map<EquipmentVariantSlot, EquipmentChange>()
@@ -266,10 +277,6 @@ function itemChanges(
     // 무기는 weapon.ts가 맡는다.
     if (!hasItemChange(change) || !isVariantSlot(change.slotId)) {
       continue
-    }
-
-    if (!worn.has(change.slotId)) {
-      throw new EquipmentSimulationFailure('request')
     }
 
     checked.set(change.slotId, change)
@@ -293,8 +300,8 @@ function resolvedItems(targets: Targets): EquipmentVariantItems {
 }
 
 /**
- * 무기를 뺀 11부위의 세트 전환, 아이템, 조율, 정밀도 변경과 5축성 변환으로 바뀌는 부위다.
- * 목록에 없는 세트, 착용하지 않은 부위, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
+ * 무기를 뺀 11부위의 세트 전환, 아이템, 조율, 정밀도 변경과 5축성 변환으로 바뀌는 부위다. 비어 있는 부위는 고른 선택지로 장비를 더하고,
+ * 세트를 바꿔도 채우지 않는다. 목록에 없는 세트, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
  */
 export function editEquipmentItems(
   equipment: CharacterPayload,
@@ -303,7 +310,7 @@ export function editEquipmentItems(
 ): EquipmentItemEdit[] {
   const equipmentSet = checkedEquipmentSet(requestedSet)
   const worn = wornSlots(equipment)
-  const checked = itemChanges(worn, changes)
+  const checked = itemChanges(changes)
   const targets = switchedTargets(worn, equipmentSet)
 
   for (const [slotId, change] of checked) {
@@ -342,6 +349,7 @@ export function editEquipmentItems(
       {
         slotId: slot.slotId,
         original: slot.original,
+        added: slot.added,
         item,
         kind: target.kind,
         tune,
@@ -418,6 +426,12 @@ function replacedEntry(
     }
 
     replaceItem(replaced, edit.item, edit.kind, detail)
+
+    // 엔진은 원본에 없는 부위를 강화, 마법부여 없이 아이템, 품질 등급, 조율, 정밀도로만 더한다.
+    if (edit.added) {
+      replaced.itemAvailableLevel = detail.itemAvailableLevel ?? null
+      replaced.itemGradeName = ADDED_ITEM_GRADE
+    }
   }
 
   if (edit.tune !== null) {

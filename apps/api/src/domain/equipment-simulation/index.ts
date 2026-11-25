@@ -19,6 +19,7 @@ export type { OathChanges, OathCrystalChange } from './oath.js'
 export { editOath, hasOathEdit, simulatedOath } from './oath.js'
 export type { SimulatedSlotItems, SlotItemChanges } from './slot-items.js'
 export {
+  addsSlotItems,
   editSlotItems,
   hasSlotItemEdits,
   simulatedSlotItems,
