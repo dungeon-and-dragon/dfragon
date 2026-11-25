@@ -276,6 +276,15 @@ function UnwornWeaponEditor({
     actions.onChange(slot, next)
   }
 
+  // 다른 종류를 고르면 앞 종류의 무기는 새 종류의 칩에 없으므로 비어 있음으로 되돌린다.
+  function changeWeaponType(type: string): void {
+    setWeaponType(type)
+
+    if (draft.variantId !== null && weaponTypeOf(slot.weaponTypes, draft.variantId).type !== type) {
+      changeSlot({ variantId: null })
+    }
+  }
+
   return (
     <Fields>
       {slot.weaponTypes.length > 1 && (
@@ -284,7 +293,7 @@ function UnwornWeaponEditor({
             label={`${slotLabel} 종류`}
             value={chosenType.type}
             options={typeOptions}
-            onChange={setWeaponType}
+            onChange={changeWeaponType}
           />
         </Field>
       )}
