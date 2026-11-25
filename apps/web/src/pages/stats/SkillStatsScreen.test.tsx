@@ -285,6 +285,43 @@ it('스킬 개화, 강화는 응답의 스킬마다 두 갈래 표식과 그 스
   ])
 })
 
+it('스킬 강화는 두 강화 비율이 모두 1% 이하인 스킬을 숨기고 하나라도 넘으면 보이며, 스킬 개화는 1% 이하여도 보인다', async () => {
+  const skills = skillStatsFixture.skills.map((skill) => {
+    if (skill.name !== '류심 충' && skill.name !== '류심 승') {
+      return skill
+    }
+
+    return { ...skill, learned: 399, levels: [[30, 399]] as [number, number][] }
+  })
+  const bothAtFloor = { name: '류심 쾌', type1: 4, type2: 4 }
+  await renderStats({
+    ...skillStatsFixture,
+    skills,
+    evolutions: [bothAtFloor],
+    enhancements: [
+      bothAtFloor,
+      { name: '류심 승', type1: 4, type2: 0 },
+      { name: '류심 충', type1: 0, type2: 4 }
+    ]
+  })
+
+  expect(upgradeRows('스킬 개화')).toEqual([['류심 쾌', 'evolution-1 1.0%', 'evolution-2 1.0%']])
+  expect(upgradeRows('스킬 강화')).toEqual([
+    ['류심 충', 'enhancement-1 0.0%', 'enhancement-2 1.0%'],
+    ['류심 승', 'enhancement-1 1.0%', 'enhancement-2 0.0%']
+  ])
+})
+
+it('스킬 강화를 모두 숨기면 스킬 강화 제목도 그리지 않는다', async () => {
+  await renderStats({
+    ...skillStatsFixture,
+    enhancements: [{ name: '류심 쾌', type1: 4, type2: 4 }]
+  })
+
+  expect(upgradeSection('스킬 개화')).not.toBeNull()
+  expect(upgradeSection('스킬 강화')).toBeNull()
+})
+
 it('통계를 계산한 적이 없으면 통계가 없다고 보이고, 받지 못하면 다른 통계 탭과 같은 실패 표시를 보인다', async () => {
   await renderStats({ ...skillStatsFixture, computedAt: null })
 

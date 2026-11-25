@@ -140,6 +140,18 @@ export type SkillUpgradeRateBoard = Readonly<{
   enhancements: readonly SkillUpgradeRate[]
 }>
 
+// 저장소 소유자가 정한 기준이다. 두 강화 비율이 모두 이 퍼센트 이하면 줄을 숨긴다.
+const ENHANCED_SHARE_MIN = 1
+
+function isEnhancedEnough(
+  { name, type1, type2 }: SkillStats['enhancements'][number],
+  learnedByName: ReadonlyMap<string, number>
+): boolean {
+  const learned = learnedByName.get(name) ?? 0
+
+  return [type1, type2].some((count) => shareOf(count, learned) > ENHANCED_SHARE_MIN)
+}
+
 type IconOrder = Readonly<{ icon: SkillWindow['icons'][number]['icon']; order: number }>
 
 function upgradeRatesOf(
@@ -177,7 +189,8 @@ export function skillUpgradeRateBoardOf(
   )
   const iconByName = new Map(placedIcons.map(({ name, icon }, order) => [name, { icon, order }]))
   const evolutions = upgradeRatesOf(stats.evolutions, learnedByName, iconByName)
-  const enhancements = upgradeRatesOf(stats.enhancements, learnedByName, iconByName)
+  const enhanced = stats.enhancements.filter((upgrade) => isEnhancedEnough(upgrade, learnedByName))
+  const enhancements = upgradeRatesOf(enhanced, learnedByName, iconByName)
 
   return { evolutions, enhancements }
 }
