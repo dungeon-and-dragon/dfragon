@@ -1106,11 +1106,16 @@ it('장비창은 장비, 서약, 기타 구획 순서이고 기타 구획에 아
   expect(etcNames()).toEqual(['아바타', '스위칭', '묵언의 진의'])
 })
 
-it('서약이 없는 캐릭터는 서약 구획과 묵언의 진의 줄 없이 장비, 기타 구획만 그린다', async () => {
+it('서약이 없는 캐릭터도 서약 구획에 비어 있는 세트, 서약, 결정 11칸 줄을 두고 묵언의 진의 줄은 두지 않는다', async () => {
   await render({ ...characterDetailFixture('dealer'), oath: null })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(windowSectionTitles()).toEqual(['장비', '기타'])
+  expect(windowSectionTitles()).toEqual(['장비', '서약', '기타'])
+  expect(rowsIn('서약').map((row) => row.textContent)).toEqual([
+    '세트비어 있음',
+    '서약비어 있음',
+    ...Array.from({ length: 11 }, (_, index) => `결정 ${index + 1}비어 있음`)
+  ])
   expect(etcNames()).toEqual(['아바타', '스위칭'])
 })
 
@@ -1124,7 +1129,7 @@ it('아바타, 스위칭, 묵언의 진의 줄이 모두 없으면 기타 구획
   })
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(windowSectionTitles()).toEqual(['장비'])
+  expect(windowSectionTitles()).toEqual(['장비', '서약'])
 })
 
 it('초기화하면 바꾼 등급, 조율, 서약 결정 조율을 모두 착용한 값으로 되돌린다', async () => {
