@@ -6,6 +6,21 @@
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#0a0a0b" />
     <title>DFragon 운영</title>
+    <!-- iOS Safari의 입력 칸 포커스 확대만 끈다. iOS는 maximum-scale이 있어도 손가락 확대를 막지 않는다. -->
+    <script>
+    {
+      const IOS_DEVICE_USER_AGENT = /iPhone|iPad|iPod/
+
+      if (
+        IOS_DEVICE_USER_AGENT.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      ) {
+        document
+          .querySelector('meta[name="viewport"]')
+          ?.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1')
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

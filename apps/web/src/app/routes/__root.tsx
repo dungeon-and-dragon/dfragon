@@ -13,7 +13,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: 'UTF-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
       // route가 제목을 정하지 않는 없는 주소 화면은 이 제목을 쓴다.
       { title: PRODUCT_NAME },
       { name: 'description', content: SITE_DESCRIPTION },
