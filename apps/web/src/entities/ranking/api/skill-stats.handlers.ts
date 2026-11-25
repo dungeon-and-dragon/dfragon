@@ -12,7 +12,9 @@ export function evolutionSkillStats(names: readonly string[]): SkillStats {
     sampleSize: 10,
     skills: [],
     evolutions: names.map((name) => ({ name, type1: 3, type2: 2 })),
-    enhancements: []
+    enhancements: [],
+    chainSampleSize: 0,
+    chains: []
   }
 }
 

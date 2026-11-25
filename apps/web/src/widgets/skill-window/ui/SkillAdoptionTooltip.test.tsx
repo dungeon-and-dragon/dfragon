@@ -35,7 +35,9 @@ const STATS: SkillStats = {
     }
   ],
   evolutions: [{ name: '참수', type1: 616, type2: 381 }],
-  enhancements: [{ name: '참수', type1: 480, type2: 495 }]
+  enhancements: [{ name: '참수', type1: 480, type2: 495 }],
+  chainSampleSize: 0,
+  chains: []
 }
 
 const BEHEAD = { name: '참수', level: 41, maxLevel: 50 } as const

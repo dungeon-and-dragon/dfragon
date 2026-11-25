@@ -2,7 +2,7 @@ export { fameRankingQuery, useFameRanking } from './api/useFameRanking'
 export type { FameRankingPages } from './api/useFameRanking'
 export { itemStatsQuery, useItemStats } from './api/useItemStats'
 export { setStatsQuery, useSetStats } from './api/useSetStats'
-export { skillStatsQueryKey, useSkillStats } from './api/useSkillStats'
+export { skillStatsQuery, skillStatsQueryKey, useSkillStats } from './api/useSkillStats'
 export {
   catalogOptionNamesOf,
   equipmentSetShortName,
@@ -48,7 +48,7 @@ export type {
   StoredCharacter
 } from './model/ranking-stats'
 export type { OathSetCount, SetStats } from './model/set-stats'
-export { skillAdoptionOf, skillStatsSchema } from './model/skill-stats'
+export { SKILL_STATS_MIN_SAMPLE, skillAdoptionOf, skillStatsSchema } from './model/skill-stats'
 export type {
   SkillAdoption,
   SkillAdoptionTarget,

@@ -25,6 +25,7 @@ import { Route as GuildsGuildIdRouteImport } from './routes/guilds.$guildId'
 import { Route as StatsIndexRouteImport } from './routes/stats.index'
 import { Route as StatsCombosRouteImport } from './routes/stats.combos'
 import { Route as StatsSetsRouteImport } from './routes/stats.sets'
+import { Route as StatsSkillsRouteImport } from './routes/stats.skills'
 import { Route as StatsWeaponsRouteImport } from './routes/stats.weapons'
 import { Route as AdventuresAdventureNameIndexRouteImport } from './routes/adventures.$adventureName.index'
 import { Route as AdventuresAdventureNameEquipmentRouteImport } from './routes/adventures.$adventureName.equipment'
@@ -112,6 +113,11 @@ const StatsSetsRoute = StatsSetsRouteImport.update({
   path: '/stats/sets',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatsSkillsRoute = StatsSkillsRouteImport.update({
+  id: '/stats/skills',
+  path: '/stats/skills',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatsWeaponsRoute = StatsWeaponsRouteImport.update({
   id: '/stats/weapons',
   path: '/stats/weapons',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
+  '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures/': typeof AdventuresIndexRoute
   '/clears/': typeof ClearsIndexRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
+  '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures': typeof AdventuresIndexRoute
   '/clears': typeof ClearsIndexRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
+  '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures/': typeof AdventuresIndexRoute
   '/clears/': typeof ClearsIndexRoute
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/guilds/$guildId'
     | '/stats/combos'
     | '/stats/sets'
+    | '/stats/skills'
     | '/stats/weapons'
     | '/adventures/'
     | '/clears/'
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/guilds/$guildId'
     | '/stats/combos'
     | '/stats/sets'
+    | '/stats/skills'
     | '/stats/weapons'
     | '/adventures'
     | '/clears'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/guilds/$guildId'
     | '/stats/combos'
     | '/stats/sets'
+    | '/stats/skills'
     | '/stats/weapons'
     | '/adventures/'
     | '/clears/'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   GuildsGuildIdRoute: typeof GuildsGuildIdRoute
   StatsCombosRoute: typeof StatsCombosRoute
   StatsSetsRoute: typeof StatsSetsRoute
+  StatsSkillsRoute: typeof StatsSkillsRoute
   StatsWeaponsRoute: typeof StatsWeaponsRoute
   AdventuresIndexRoute: typeof AdventuresIndexRoute
   ClearsIndexRoute: typeof ClearsIndexRoute
@@ -434,6 +447,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatsSetsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stats/skills': {
+      id: '/stats/skills'
+      path: '/stats/skills'
+      fullPath: '/stats/skills'
+      preLoaderRoute: typeof StatsSkillsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stats/weapons': {
       id: '/stats/weapons'
       path: '/stats/weapons'
@@ -493,6 +513,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuildsGuildIdRoute: GuildsGuildIdRoute,
   StatsCombosRoute: StatsCombosRoute,
   StatsSetsRoute: StatsSetsRoute,
+  StatsSkillsRoute: StatsSkillsRoute,
   StatsWeaponsRoute: StatsWeaponsRoute,
   AdventuresIndexRoute: AdventuresIndexRoute,
   ClearsIndexRoute: ClearsIndexRoute,

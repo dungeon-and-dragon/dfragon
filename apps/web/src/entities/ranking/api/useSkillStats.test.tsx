@@ -59,7 +59,9 @@ const SKILL_STATS: SkillStats = {
   sampleSize: 0,
   skills: [],
   evolutions: [],
-  enhancements: []
+  enhancements: [],
+  chainSampleSize: 0,
+  chains: []
 }
 
 it('스킬 채택률 응답을 schema로 읽어 계약에 없는 필드는 버린다', async () => {

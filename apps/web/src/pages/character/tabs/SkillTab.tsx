@@ -23,6 +23,7 @@ import {
   type SkillAdoptionSource,
   SkillChainSection,
   SkillUpgradeSections,
+  SkillWindowColumns,
   SkillWindowGrid
 } from '#widgets/skill-window'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
@@ -34,9 +35,6 @@ import { SkillTreeCode } from './skill/SkillTreeCode'
 const LIST = 'm-0 flex list-none flex-col gap-1 p-0'
 const LIST_ROW = 'flex items-baseline justify-between gap-2'
 const SUBTLE = 'whitespace-nowrap text-fg-subtle'
-// 스킬 창 최소 폭(테두리 포함 522px)에 왼쪽 열 여백과 오른쪽 340px 열을 더한 896px보다 탭이 좁으면 오른쪽 열을 아래로 내린다.
-const ROOT =
-  'grid grid-cols-[minmax(max-content,1fr)_340px] divide-x divide-line text-sm @max-[56rem]:grid-cols-1 @max-[56rem]:divide-x-0 @max-[56rem]:divide-y @max-[56rem]:overflow-x-auto'
 
 function LearnedSkillRows({ rows }: { rows: readonly LearnedSkillRow[] }): React.JSX.Element {
   return (
@@ -126,7 +124,7 @@ function SkillSideColumn({
   const board = catalog !== null ? skillUpgradeBoardOf(catalog, detail.character, style) : null
 
   return (
-    <div className="min-w-0">
+    <>
       {hash !== null && <SkillTreeCode hash={hash} />}
       <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
       {board !== null && source !== null ? (
@@ -137,7 +135,7 @@ function SkillSideColumn({
           <SkillUpgrades label="스킬 강화" upgrades={skillUpgradesOf(style, 'enhancement')} />
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -159,21 +157,20 @@ function SkillColumns({
   role: MaleCrusaderRole | null
 }): React.JSX.Element {
   const [now] = useState(Date.now)
-  const source = catalog !== null ? { stats, role, marks: catalog.marks, now } : null
+  const source =
+    catalog !== null ? { stats, role, marks: catalog.marks, now, pointsOwnLevel: true } : null
 
   return (
-    <div className="@container">
-      <div className={ROOT}>
-        <div className="p-4">
-          {skillWindow !== null && source !== null ? (
-            <SkillWindowGrid skillWindow={skillWindow} source={source} />
-          ) : (
-            <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
-          )}
-        </div>
-        <SkillSideColumn detail={detail} style={style} catalog={catalog} source={source} />
-      </div>
-    </div>
+    <SkillWindowColumns
+      main={
+        skillWindow !== null && source !== null ? (
+          <SkillWindowGrid skillWindow={skillWindow} source={source} />
+        ) : (
+          <LearnedSkillRows rows={learnedSkillRowsOf([...style.active, ...style.passive])} />
+        )
+      }
+      side={<SkillSideColumn detail={detail} style={style} catalog={catalog} source={source} />}
+    />
   )
 }
 

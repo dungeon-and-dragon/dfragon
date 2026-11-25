@@ -21,7 +21,9 @@ export const skillStatsSchema = z.object({
       )
   ),
   evolutions: z.array(upgradeCounts),
-  enhancements: z.array(upgradeCounts)
+  enhancements: z.array(upgradeCounts),
+  chainSampleSize: count,
+  chains: z.array(z.object({ skills: z.array(z.string().nullable()), count }))
 })
 
 export type SkillStats = z.infer<typeof skillStatsSchema>

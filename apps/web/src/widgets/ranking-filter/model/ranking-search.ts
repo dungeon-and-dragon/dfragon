@@ -222,6 +222,10 @@ export function rankingSearchOf({
   return { ...rest, ...items, ...evolutionSearch }
 }
 
+export function parseJobSearch(search: Record<string, unknown>): FameRankingFilter {
+  return jobFilterOf(searchSchema.parse(search))
+}
+
 const setSampleSchema = z.enum(SET_SAMPLES).optional().catch(undefined)
 
 // 전체가 기본 표본이라 주소에는 그 밖의 표본만 둔다.

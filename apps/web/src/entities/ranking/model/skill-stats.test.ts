@@ -20,6 +20,8 @@ function statsOf(overrides: Partial<SkillStats> = {}): SkillStats {
     ],
     evolutions: [{ name: '발도', type1: 12, type2: 6 }],
     enhancements: [{ name: '발도', type1: 3, type2: 15 }],
+    chainSampleSize: 0,
+    chains: [],
     ...overrides
   }
 }

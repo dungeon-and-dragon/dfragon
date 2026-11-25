@@ -205,6 +205,8 @@ export type SkillAdoptionSource = Readonly<{
   role: MaleCrusaderRole | null
   marks: SkillMarks
   now: number
+  // 캐릭터의 스킬은 레벨 분포에 그 캐릭터의 레벨을 점으로 찍고, 통계 화면은 찍지 않는다.
+  pointsOwnLevel: boolean
 }>
 
 export type SkillAdoptionSkill = Readonly<{
@@ -216,7 +218,7 @@ export type SkillAdoptionSkill = Readonly<{
 }>
 
 function adoptionOf(
-  { stats, role }: SkillAdoptionSource,
+  { stats, role, pointsOwnLevel }: SkillAdoptionSource,
   skill: SkillAdoptionSkill
 ): SkillAdoption | null {
   if (stats === null || (role !== null && skill.name === MALE_CRUSADER_DEALER_SKILL)) {
@@ -225,7 +227,7 @@ function adoptionOf(
 
   return skillAdoptionOf(stats, {
     name: skill.name,
-    level: skill.level,
+    level: pointsOwnLevel ? skill.level : null,
     maxLevel: skill.maxLevel,
     evolutionNames: skill.evolutionNames,
     hasEnhancement: skill.enhanceable

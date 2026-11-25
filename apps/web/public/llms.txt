@@ -13,6 +13,7 @@
 - [세트 통계](https://dfragon.com/stats/sets): 장비 세트, 서약 세트, 장비와 서약 조합, 무기, 유일 장비의 착용 비율
 - [조합 통계](https://dfragon.com/stats/combos): 장비 세트와 서약 세트 조합의 착용 비율
 - [무기 통계](https://dfragon.com/stats/weapons): 무기 종류별 착용 비율
+- [스킬 통계](https://dfragon.com/stats/skills): 전직별 스킬 레벨, 개화, 강화 채택률과 스킬 체인 조합
 - [클리어 집계](https://dfragon.com/clears): 레이드, 레기온 등 컨텐츠의 주간 클리어율과 클리어 캐릭터의 명성, 점수 분포
 
 ## 주소 형식

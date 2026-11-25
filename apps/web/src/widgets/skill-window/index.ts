@@ -1,5 +1,8 @@
+export { SkillChainPanel, SkillChainRates } from './ui/SkillChainRates'
+export type { SkillChainRate } from './ui/SkillChainRates'
 export { SkillChainSection } from './ui/SkillChainSection'
 export { SkillUpgradeSections } from './ui/SkillUpgradeSections'
+export { SkillWindowColumns } from './ui/SkillWindowColumns'
 export { SkillWindowGrid } from './ui/SkillWindowGrid'
 export type { SkillAdoptionSource } from './ui/SkillAdoptionTooltip'
 export { SKILL_TOOLTIP } from './ui/skill-classes'

@@ -13,6 +13,7 @@ export {
   skillMarkOf,
   skillUpgradeBoardOf,
   skillUpgradesOf,
+  skillWindowByPicks,
   skillWindowIndexSchema,
   skillWindowJobSchema,
   skillWindowOf
@@ -32,5 +33,6 @@ export type {
   SkillWindowIcon,
   SkillWindowIndex,
   SkillWindowJob,
+  SkillWindowPick,
   UpgradeType
 } from './model/skill-window'
