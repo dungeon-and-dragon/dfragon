@@ -80,7 +80,7 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
         <Portrait src={characterImageUrl(character)} />
       </div>
       <div className={IDENTITY}>
-        {/* 좁은 화면에서 이름이 줄어들지 않도록 갱신, 시뮬레이터 버튼을 다음 줄로 넘긴다. */}
+        {/* 좁은 화면에서 이름이 줄어들지 않도록 갱신 버튼을 다음 줄로 넘긴다. */}
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <h1 className="screen-title">{character.characterName ?? MISSING_VALUE}</h1>
           {favorite != null && <FavoriteToggle character={favorite} />}
@@ -93,13 +93,6 @@ export function CharacterSummary({ detail }: { detail: CharacterDetailView }): R
               onRefresh={refreshCharacter}
             />
           </ClientOnly>
-          <Link
-            to="/c/$serverId/$characterId/simulator"
-            params={{ serverId: character.serverId, characterId: character.characterId }}
-            className="btn btn-secondary btn-sm shrink-0 no-underline"
-          >
-            장비 시뮬레이터
-          </Link>
         </div>
         <div className={LINE}>
           <ServerBadge serverId={character.serverId} />
