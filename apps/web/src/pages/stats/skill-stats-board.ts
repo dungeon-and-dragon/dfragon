@@ -1,6 +1,7 @@
 import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import {
   buffSkillIconOf,
+  type SkillWindow,
   type SkillWindowCatalog,
   type SkillWindowPick,
   type UpgradeType
@@ -11,7 +12,7 @@ import {
   type SkillStats,
   type SkillStatsJob
 } from '#entities/ranking'
-import type { SkillChainRate } from '#widgets/skill-window'
+import type { SkillChainRate, SkillUpgradeRate } from '#widgets/skill-window'
 import { formatShare, shareOf } from './set-stats-bars'
 
 // 저장소 소유자가 #2010 시안에서 정한 기준이다. 배운 표본이 20% 미만인 스킬은 흐리게, 배운 표본의 절반 이상이 고른 갈래만 표식을 그린다.
@@ -132,4 +133,51 @@ export function skillChainBoardOf(
   })
 
   return { status: 'rates', chains: rates }
+}
+
+export type SkillUpgradeRateBoard = Readonly<{
+  evolutions: readonly SkillUpgradeRate[]
+  enhancements: readonly SkillUpgradeRate[]
+}>
+
+type IconOrder = Readonly<{ icon: SkillWindow['icons'][number]['icon']; order: number }>
+
+function upgradeRatesOf(
+  upgrades: SkillStats['evolutions'],
+  learnedByName: ReadonlyMap<string, number>,
+  iconByName: ReadonlyMap<string, IconOrder>
+): SkillUpgradeRate[] {
+  const rows = upgrades.map(({ name, type1, type2 }) => {
+    const learned = learnedByName.get(name) ?? 0
+    const placed = iconByName.get(name)
+    const rates = [
+      formatShare(shareOf(type1, learned)),
+      formatShare(shareOf(type2, learned))
+    ] as const
+    const icon = placed?.icon ?? null
+    const order = placed?.order ?? Number.POSITIVE_INFINITY
+
+    return { row: { name, icon, rates }, order }
+  })
+
+  return rows.toSorted((left, right) => left.order - right.order).map(({ row }) => row)
+}
+
+export function skillUpgradeRateBoardOf(
+  stats: SkillStats,
+  skillWindow: SkillWindow
+): SkillUpgradeRateBoard | null {
+  if (stats.sampleSize < SKILL_STATS_MIN_SAMPLE) {
+    return null
+  }
+
+  const learnedByName = new Map(stats.skills.map(({ name, learned }) => [name, learned]))
+  const placedIcons = skillWindow.icons.toSorted(
+    (left, right) => left.row - right.row || left.col - right.col
+  )
+  const iconByName = new Map(placedIcons.map(({ name, icon }, order) => [name, { icon, order }]))
+  const evolutions = upgradeRatesOf(stats.evolutions, learnedByName, iconByName)
+  const enhancements = upgradeRatesOf(stats.enhancements, learnedByName, iconByName)
+
+  return { evolutions, enhancements }
 }

@@ -10,6 +10,7 @@ import { RankingFilterBox } from '#widgets/ranking-filter'
 import {
   SkillChainPanel,
   SkillChainRates,
+  SkillUpgradeRates,
   SkillWindowColumns,
   SkillWindowGrid
 } from '#widgets/skill-window'
@@ -19,7 +20,8 @@ import {
   type SkillStatsGrow,
   skillChainBoardOf,
   skillStatsGrowOf,
-  skillStatsPickOf
+  skillStatsPickOf,
+  skillUpgradeRateBoardOf
 } from './skill-stats-board'
 import { StatsBody } from './StatsScreenFrame'
 
@@ -94,6 +96,16 @@ function SkillChainContent({
   }
 }
 
+function SkillUpgradeContent({ board }: { board: SkillStatsBoard }): React.JSX.Element | null {
+  const upgrades = skillUpgradeRateBoardOf(board, board.skillWindow)
+
+  if (upgrades === null) {
+    return null
+  }
+
+  return <SkillUpgradeRates {...upgrades} marks={board.catalog.marks} />
+}
+
 function SkillStatsBody({
   grow,
   filterBox
@@ -125,9 +137,12 @@ function SkillStatsBody({
           <SkillWindowColumns
             main={<SkillWindowGrid skillWindow={board.skillWindow} source={source} />}
             side={
-              <SkillChainPanel>
-                <SkillChainContent board={board} grow={grow} />
-              </SkillChainPanel>
+              <>
+                <SkillChainPanel>
+                  <SkillChainContent board={board} grow={grow} />
+                </SkillChainPanel>
+                <SkillUpgradeContent board={board} />
+              </>
             }
           />
         )
