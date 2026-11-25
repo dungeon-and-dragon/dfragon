@@ -222,6 +222,25 @@ export function withPendingReleaseWeapon(
   return { ...detail, equipment: { ...detail.equipment, equipment } }
 }
 
+// 무기를 끼지 않은 합성 캐릭터다.
+export function withoutWeapon(detail: CharacterDetailView): CharacterDetailView {
+  const equipment = detail.equipment.equipment.filter(({ slotId }) => slotId !== 'WEAPON')
+
+  return { ...detail, equipment: { ...detail.equipment, equipment } }
+}
+
+const EMPTIED_SLOTS = ['WEAPON', 'TITLE', 'JACKET']
+
+// 무기, 칭호, 상의, 크리쳐, 오라를 끼지 않은 합성 캐릭터다.
+export function withEmptySlots(detail: CharacterDetailView): CharacterDetailView {
+  const equipment = detail.equipment.equipment.filter(
+    ({ slotId }) => slotId === null || !EMPTIED_SLOTS.includes(slotId)
+  )
+  const avatar = detail.avatar.filter(({ slotId }) => slotId !== 'AURORA')
+
+  return { ...detail, equipment: { ...detail.equipment, equipment }, creature: null, avatar }
+}
+
 const TWISTED_SWITCHING_SLOTS = ['SUPPORT', 'MAGIC_STON', 'EARRING']
 
 export function withSwitchingEquipment(

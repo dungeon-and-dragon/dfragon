@@ -4,7 +4,11 @@ import type { RequestHandler } from 'msw'
 import { storyCharacterDetail } from '#pages/character/api/character.fixture'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
-import { withPendingReleaseWeapon, withSwitchingEquipment } from './api/simulation.fixture'
+import {
+  withEmptySlots,
+  withPendingReleaseWeapon,
+  withSwitchingEquipment
+} from './api/simulation.fixture'
 import { simulatorStoryHandlers } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
 
@@ -326,6 +330,11 @@ export const 무기교체: Story = {
 
 export const 무기해방: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated, withPendingRelease),
+  play: chooseWeapon
+}
+
+export const 빈부위: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated, withEmptySlots),
   play: chooseWeapon
 }
 
