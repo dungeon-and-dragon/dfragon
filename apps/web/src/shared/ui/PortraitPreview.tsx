@@ -14,7 +14,8 @@ export function PortraitPreview({
   const handleLoad = () => setLoadedSource(src)
 
   return (
-    <Tooltip.Root disabled={loadedSource !== src}>
+    // 확대 그림이 옆 행을 덮으므로, 마우스가 썸네일을 벗어나면 확대 그림 위에 있어도 닫는다.
+    <Tooltip.Root disabled={loadedSource !== src} disableHoverablePopup>
       <Tooltip.Trigger delay={0} closeDelay={0} render={children} onLoad={handleLoad} />
       <Tooltip.Popup side="right">
         <img src={src} alt="" draggable={false} className="tooltip-portrait" />
