@@ -37,7 +37,7 @@ const BATCH_KEY_REFRESH_MS = 5000
 // Neople 공지(2026-03-05)의 애플리케이션 기준 허용량이다. IP 기준 분당 5만 건은 worker 전체 상한(설정)으로 지킨다.
 const KEY_REQUESTS_PER_SECOND = 500
 
-function writeReport(code: string, details?: Readonly<Record<string, unknown>>): void {
+export function writeReport(code: string, details?: Readonly<Record<string, unknown>>): void {
   writeAccessLogToStdout(
     JSON.stringify({
       time: new Date().toISOString(),
