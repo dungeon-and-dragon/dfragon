@@ -3,7 +3,7 @@
   "source": {
     "dataset": "phase32-rev16b sha256:1d9658f799d58202e96c6d210420c02c6cc1fc367e2c82035c9866d5aa124487",
     "generated_at": "2026-11-18T18:00:00+09:00",
-    "rule": "부위마다 그 부위 카드의 명성 가운데 가장 높은 값이 종결, 다음 값이 준종결. 준종결 항목의 status와 reinforceSkill이 종결 항목과 같으면 종결 항목에 합침. 같은 등급, 역할, 명성에서 다른 옵션이 같고 단일 속성이나 2속성 강화 N인 항목은 모든 속성 강화 N 항목에 합침. 역할은 reinforceSkill이 있으면 buffer, status에 속성 강화, 공격력, 최종 데미지 증가, 공격력 증폭이 있으면 dealer, 그 밖에는 4스탯이면 buffer, 힘이나 지능만 있으면 dealer, 체력이나 정신력만 있으면 buffer"
+    "rule": "부위, 역할마다 그 역할 카드의 명성 가운데 가장 높은 값이 종결, 다음 값이 준종결. 준종결 항목의 status와 reinforceSkill이 종결 항목과 같으면 종결 항목에 합침. 같은 등급, 역할, 명성에서 다른 옵션이 같고 단일 속성이나 2속성 강화 N인 항목은 모든 속성 강화 N 항목에 합침. 역할은 reinforceSkill이 있으면 buffer, status에 속성 강화, 공격력, 최종 데미지 증가, 공격력 증폭이 있으면 dealer, 그 밖에는 4스탯이면 buffer, 힘이나 지능만 있으면 dealer, 체력이나 정신력만 있으면 buffer"
   },
   "slots": {
     "WEAPON": {
@@ -875,6 +875,56 @@
     "WAIST": {
       "종결": [
         {
+          "id": "WAIST:10361762:dealer",
+          "status": [
+            {
+              "name": "힘",
+              "value": 50
+            },
+            {
+              "name": "지능",
+              "value": 50
+            },
+            {
+              "name": "체력",
+              "value": 50
+            },
+            {
+              "name": "정신력",
+              "value": 50
+            },
+            {
+              "name": "물리 공격력",
+              "value": 15
+            },
+            {
+              "name": "마법 공격력",
+              "value": 15
+            },
+            {
+              "name": "독립 공격력",
+              "value": 15
+            },
+            {
+              "name": "물리 크리티컬 히트",
+              "value": "3%"
+            },
+            {
+              "name": "마법 크리티컬 히트",
+              "value": "3%"
+            },
+            {
+              "name": "최종 데미지 증가",
+              "value": "3%"
+            }
+          ],
+          "reinforceSkill": [],
+          "fame": 221,
+          "cardName": "중천 딜러 벨트 카드 (최종 데미지 3%)",
+          "cardId": 10361762,
+          "roles": ["dealer"]
+        },
+        {
           "id": "WAIST:10362002:buffer",
           "status": [
             {
@@ -957,35 +1007,39 @@
       ],
       "준종결": [
         {
-          "id": "WAIST:10361762:dealer",
+          "id": "WAIST:10336291:dealer",
           "status": [
             {
               "name": "힘",
-              "value": 50
+              "value": 40
             },
             {
               "name": "지능",
-              "value": 50
+              "value": 40
             },
             {
               "name": "체력",
-              "value": 50
+              "value": 40
             },
             {
               "name": "정신력",
-              "value": 50
+              "value": 40
             },
             {
               "name": "물리 공격력",
-              "value": 15
+              "value": 10
             },
             {
               "name": "마법 공격력",
-              "value": 15
+              "value": 10
             },
             {
               "name": "독립 공격력",
-              "value": 15
+              "value": 10
+            },
+            {
+              "name": "최종 데미지 증가",
+              "value": "2%"
             },
             {
               "name": "물리 크리티컬 히트",
@@ -994,16 +1048,12 @@
             {
               "name": "마법 크리티컬 히트",
               "value": "3%"
-            },
-            {
-              "name": "최종 데미지 증가",
-              "value": "3%"
             }
           ],
           "reinforceSkill": [],
-          "fame": 221,
-          "cardName": "중천 딜러 벨트 카드 (최종 데미지 3%)",
-          "cardId": 10361762,
+          "fame": 210,
+          "cardName": "사무치는 냉룡 스카사 카드",
+          "cardId": 10336291,
           "roles": ["dealer"]
         }
       ]
