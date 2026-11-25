@@ -202,11 +202,7 @@ it('딜러 요약은 이름, 서버와 모험단과 길드, 전직과 레벨, �
   const card: Card = { role: 'dealer', score: scoreOf({ value: 392332 }) }
   await renderLoaded(detailOf({ card }))
 
-  expect(textLines()).toEqual([
-    '커피갱신30분 전장비 시뮬레이터',
-    '바칼동네커피필로시스',
-    '버서커Lv 115'
-  ])
+  expect(textLines()).toEqual(['커피갱신30분 전', '바칼동네커피필로시스', '버서커Lv 115'])
   expect(summary().querySelector('img')?.getAttribute('src')).toBe(
     'https://img-api.neople.co.kr/df/servers/bakal/characters/dealer-1?zoom=1'
   )
@@ -233,19 +229,26 @@ it('캐릭터 상세 요약의 동명 전직 뒤에 성별을 붙인다', async 
   expect(textLines()[2]).toBe('넨마스터(여)Lv 115')
 })
 
-it('갱신 버튼 옆의 장비 시뮬레이터와 모험단, 길드 이름은 그 페이지로 가는 링크다', async () => {
+it('모험단, 길드 이름은 그 페이지로 가는 링크다', async () => {
   await renderLoaded(detailOf())
 
   const links = [...summary().querySelectorAll('a')].map((link) => [
     link.textContent,
     link.getAttribute('href')
   ])
-  expect(refreshButton().parentElement?.nextElementSibling?.textContent).toBe('장비 시뮬레이터')
   expect(links).toEqual([
-    ['장비 시뮬레이터', '/c/bakal/dealer-1/simulator'],
     ['동네커피', '/adventures/%EB%8F%99%EB%84%A4%EC%BB%A4%ED%94%BC'],
     ['필로시스', '/guilds/guild-1']
   ])
+})
+
+it('장비 시뮬레이터는 마지막 탭 바로 오른쪽에서 시뮬레이터 화면으로 가는 링크다', async () => {
+  await renderLoaded(detailOf())
+
+  const simulator = container.querySelector('[role="tablist"]')?.nextElementSibling
+  expect(simulator?.tagName).toBe('A')
+  expect(simulator?.textContent).toBe('장비 시뮬레이터')
+  expect(simulator?.getAttribute('href')).toBe('/c/bakal/dealer-1/simulator')
 })
 
 it('버퍼 요약은 점수 라벨이 버프 점수이고 버퍼 색이며, 근사값은 표처럼 ≈를 붙인다', async () => {
