@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { CharacterBasicInput, CollectedCharacter } from '@dfragon/database'
+import { setImmediate } from 'node:timers/promises'
+import type { CharacterBasicInput, CollectedCharacter, DatabaseClient } from '@dfragon/database'
 import { type CharacterTimelineQuery, NeopleRequestFailure } from '@dfragon/neople'
 import {
   CharacterActivityService,
@@ -14,6 +15,10 @@ import type {
 } from '../src/application/character-activity/ports.js'
 import type { CharacterActivityRepository } from '../src/application/character-activity/repository.js'
 import { CharacterCollectionFailure } from '../src/domain/character-collection/failure.js'
+import {
+  CHARACTER_ACTIVITY_POOL,
+  DatabaseCharacterActivityRepository
+} from '../src/infrastructure/database/character-activity.js'
 import { createJobSchedule } from '../src/infrastructure/jobs/scheduler.js'
 import { createNeopleLatestActivity } from '../src/infrastructure/neople/character-activity.js'
 
@@ -348,4 +353,40 @@ test('최근 활동 조회는 Neople 점검, timeout을 unavailable로, 나머�
   })
   assert.deepEqual(await failing(new NeopleRequestFailure('timeout')), { status: 'unavailable' })
   assert.deepEqual(await failing(new NeopleRequestFailure('api')), { status: 'failed' })
+})
+
+test('명성 갱신 저장은 수백 명을 함께 받아도 전용 pool 크기만큼만 transaction을 함께 염', async () => {
+  let open = 0
+  let mostOpen = 0
+  let committed = 0
+  // 저장 함수가 여는 interactive transaction만 흉내 낸다. 실제 쿼리는 DB 계층 테스트가 확인한다.
+  const client = {
+    $transaction: async () => {
+      open++
+      mostOpen = Math.max(mostOpen, open)
+      await setImmediate()
+      open--
+      committed++
+    }
+  } as unknown as DatabaseClient
+  const repository = new DatabaseCharacterActivityRepository(client)
+  const basics = Array.from({ length: 600 }, (_, index) => ({
+    serverId: 'cain',
+    characterId: `c${index}`,
+    characterName: `합성-${index}`,
+    adventureName: '합성 모험단',
+    level: 115,
+    jobId: 'job-a',
+    jobGrowId: 'grow-a1',
+    jobName: '합성 직업',
+    jobGrowName: '합성 전직',
+    fame: 50_000,
+    guildId: null,
+    guildName: null
+  }))
+
+  await Promise.all(basics.map((basic) => repository.recordBasic(basic)))
+
+  assert.equal(committed, 600)
+  assert.equal(mostOpen, CHARACTER_ACTIVITY_POOL.maxConnections)
 })
