@@ -1053,6 +1053,7 @@ function realEngineSupports(features: Partial<SimulationFeatures>): boolean {
     weaponTune: false,
     weaponItem: false,
     addedSlots: false,
+    addedOath: false,
     oathItems: false,
     oathUpgrade: false,
     buffLevel: false,
@@ -1808,6 +1809,122 @@ const SHADOW_UNIQUE_CRYSTAL = '5a984f4a7e3e3d7360c183b95b6546bb'
 const SHADOW_EPIC_CRYSTAL = '5f722339a3f5c7ef9ba0b290873e19f1'
 const VALKYRIE_EPIC_CRYSTAL = '4b842bd9f4b36b3136b05c91d4f1e55b'
 const FOX_EPIC_CRYSTAL = '05efe7c9d4cf9f5bd0fc1aa56f1cf157'
+
+const ADDED_OATH_ENGINE = 'dnfscore-native 0.17.0'
+
+test('서약이 없는 캐릭터는 고른 본체를 아이템 칸만으로 더하고, 결정은 그 본체의 세트 선택지로 빈 칸에 더한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.oath = { oath: null }
+  const engine = scoring(versionedEngine(ADDED_OATH_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    oathBody: SHADOW_PRIMEVAL_OATH,
+    oath: [{ slotNo: 3, variantId: SHADOW_EPIC_CRYSTAL, tune: 1 }]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [],
+    oath: {
+      info: oathItem(SHADOW_PRIMEVAL_OATH, '태초의 어둠 속 그림자 서약', '태초'),
+      crystal: [
+        {
+          slotNo: 3,
+          ...oathItem(SHADOW_EPIC_CRYSTAL, '그림자 : 완전한 광휘 결정', '에픽'),
+          tune: { level: 1, setPoint: 175 }
+        }
+      ]
+    }
+  })
+})
+
+test('비어 있는 결정 칸에는 착용 세트의 선택지로 결정을 더한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  const oath = payloads.oath.oath as Item
+  payloads.oath = {
+    oath: { ...oath, crystal: (oath.crystal as Item[]).filter(({ slotNo }) => slotNo !== 10) }
+  }
+  const engine = scoring(versionedEngine(ADDED_OATH_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    oath: [{ slotNo: 10, variantId: VALKYRIE_EPIC_CRYSTAL }]
+  })
+
+  assert.equal(response.status, 200)
+  const [added] = engine.requests[0]!.input.simulation!.oath!.crystal! as Item[]
+  assert.deepEqual(added, {
+    slotNo: 10,
+    ...oathItem(VALKYRIE_EPIC_CRYSTAL, '발키리 : 완전한 광휘 결정', '에픽'),
+    tune: { level: 0, setPoint: 165 }
+  })
+})
+
+test('0.17.0 전 엔진에 서약이 없는 캐릭터의 본체를 더한 요청을 보내면 두 점수 모두 null이다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.oath = { oath: null }
+  const engine = scoring(versionedEngine('dnfscore-native 0.16.0'))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, { equipment: [], oathBody: SHADOW_PRIMEVAL_OATH })
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+})
+
+test('0.17.0 전 엔진에 비어 있는 결정 칸을 채운 요청을 보내면 두 점수 모두 null이다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  const oath = payloads.oath.oath as Item
+  payloads.oath = {
+    oath: { ...oath, crystal: (oath.crystal as Item[]).filter(({ slotNo }) => slotNo !== 10) }
+  }
+  const engine = scoring(versionedEngine('dnfscore-native 0.16.0'))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [],
+    oath: [{ slotNo: 10, variantId: VALKYRIE_EPIC_CRYSTAL }]
+  })
+
+  assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
+})
+
+for (const [name, body] of [
+  [
+    '본체 없이 결정만 더하는 요청',
+    { equipment: [], oath: [{ slotNo: 0, variantId: SHADOW_EPIC_CRYSTAL }] }
+  ],
+  [
+    '칸 밖의 결정',
+    {
+      equipment: [],
+      oathBody: SHADOW_PRIMEVAL_OATH,
+      oath: [{ slotNo: 11, variantId: SHADOW_EPIC_CRYSTAL }]
+    }
+  ],
+  [
+    '다른 세트의 결정',
+    {
+      equipment: [],
+      oathBody: SHADOW_PRIMEVAL_OATH,
+      oath: [{ slotNo: 0, variantId: VALKYRIE_EPIC_CRYSTAL }]
+    }
+  ]
+] as const) {
+  test(`서약이 없는 캐릭터의 ${name}은 엔진을 부르지 않고 ${INVALID_REQUEST}로 거절한다`, async (t) => {
+    const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+    payloads.oath = { oath: null }
+    const engine = scoring(versionedEngine(ADDED_OATH_ENGINE))
+    const origin = await listen(t, { details, ...engine.options })
+
+    const response = await simulate(origin, path, body)
+
+    assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
+    assert.equal(engine.requests.length, 0)
+  })
+}
 
 function crystalsOf(payloads: CharacterPayloads): Item[] {
   return (payloads.oath.oath as Item).crystal as Item[]
