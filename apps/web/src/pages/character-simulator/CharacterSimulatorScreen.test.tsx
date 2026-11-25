@@ -879,6 +879,27 @@ it('해방 수치를 낮추면 수치만 요청한다', async () => {
   )
 })
 
+it('비어 있는 무기는 종류를 고른 뒤 무기를 고르고, 종류를 바꾸면 고른 무기를 비어 있음으로 되돌린다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const equipment = detail.equipment.equipment.filter(({ slotId }) => slotId !== 'WEAPON')
+  await render({ ...detail, equipment: { ...detail.equipment, equipment } })
+  await waitForScores(UNCHANGED_SCORES)
+  await choose('무기')
+
+  expect(pressedIn('무기 종류')).toBe('낫')
+  expect(pressedIn('무기 교체')).toBe('비어 있음')
+  await press('무기 교체', '레거시')
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)?.equipment?.[0]?.variantId).toEqual(expect.any(String))
+  )
+
+  await press('무기 종류', '염주')
+
+  expect(pressedIn('무기 종류')).toBe('염주')
+  expect(pressedIn('무기 교체')).toBe('비어 있음')
+  expect(weaponCell()).toBe('비어 있음')
+})
+
 it('디거시에서 레거시로 바꾸면 해방 수치를 감추고 조율 버튼을 두며 바꾼 무기를 요청한다', async () => {
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
