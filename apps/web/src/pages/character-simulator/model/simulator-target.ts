@@ -49,8 +49,7 @@ function switchingTargets(switching: BuffSwitching | null): SimulatorTarget[] {
 }
 
 function oathTargets(oath: SimulatorOath): SimulatorTarget[] {
-  const setListed = oath.setId !== null || oath.body?.empty === true
-  const setTargets: SimulatorTarget[] = setListed ? [{ kind: 'oathSet', key: 'oathSet', oath }] : []
+  const setTargets: SimulatorTarget[] = [{ kind: 'oathSet', key: 'oathSet', oath }]
   const bodyTargets: SimulatorTarget[] =
     oath.body !== null ? [{ kind: 'oathBody', key: 'oathBody', body: oath.body }] : []
   const crystalTargets = oath.crystals.map(
