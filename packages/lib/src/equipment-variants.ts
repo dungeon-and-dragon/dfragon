@@ -1,4 +1,5 @@
 import table from './equipment-variants.json' with { type: 'json' }
+import jobWeaponTable from './job-weapon-types.json' with { type: 'json' }
 
 export const EQUIPMENT_VARIANT_SLOTS = [
   'JACKET',
@@ -579,6 +580,19 @@ export function weaponVariantsOf(itemTypeDetail: string): readonly WeaponVariant
   }
 
   return variants
+}
+
+/** 무기를 끼지 않은 캐릭터가 고를 수 있는 무기 종류다. 표에 없는 전직은 빈 목록이다. */
+export function jobWeaponTypesOf(jobId: string, jobGrowId: string): readonly string[] {
+  const job = jobWeaponTable.jobs.find(
+    (candidate) => candidate.jobId === jobId && candidate.jobGrowId === jobGrowId
+  )
+
+  if (job === undefined) {
+    return []
+  }
+
+  return job.weaponTypes
 }
 
 /** 해방 계열의 "억압 - " 아이템도 그 선택지로 찾는다. */
