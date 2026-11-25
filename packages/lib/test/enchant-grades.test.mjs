@@ -113,10 +113,10 @@ for (const [name, slotId, role, expected] of [
     { 종결: [['WAIST:10362002:buffer']], 준종결: [] }
   ],
   [
-    '허리 딜러는 종결 항목이 없으면 빈 목록이다',
+    '허리 딜러는 버퍼와 따로 딜러 카드의 명성으로 등급을 정한다',
     'WAIST',
     'dealer',
-    { 종결: [], 준종결: [['WAIST:10361762:dealer']] }
+    { 종결: [['WAIST:10361762:dealer']], 준종결: [['WAIST:10336291:dealer']] }
   ]
 ]) {
   test(`enchantOptionsOf: ${name}`, () => {
