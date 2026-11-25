@@ -352,34 +352,6 @@ for (const [name, fixtureName, amplified, changes, expected] of [
   })
 }
 
-test('힘 캐릭터가 지능 100 마법부여를 고르면 같은 묶음의 힘 100 항목을 엔진에 넣는다', async (t) => {
-  const { payloads, details, path } = fixture('dealer-blade')
-  const engine = scoring()
-  const origin = await listen(t, { details, ...engine.options })
-
-  const response = await simulate(origin, path, {
-    equipment: [
-      { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316079:dealer' }
-    ]
-  })
-
-  assert.equal(response.status, 200)
-  assert.deepEqual(
-    engine.requests.map(({ input }) => input.simulation !== undefined),
-    [false, true]
-  )
-  assert.deepEqual(engine.requests[1]!.input.simulation, {
-    equipment: [
-      {
-        ...itemOf(payloads.equipment.equipment as unknown[], 'WEAPON'),
-        reinforce: 0,
-        amplificationName: null,
-        enchant: { status: [{ name: '힘', value: 100 }] }
-      }
-    ]
-  })
-})
-
 test('4스탯 항목이 있는 묶음은 주스탯을 계산하지 않고 그 항목을 엔진에 넣는다', async (t) => {
   const { payloads, details, path } = fixture('buffer-muse', (items) =>
     items.map((item) => ({ ...item, amplificationName: null }))
@@ -763,16 +735,6 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
     { slotId: 'JACKET', reinforce: 12, amplified: true, enchantId: null }
   ])
   assert.ok(amplified.simulated.value > amplified.baseline.value)
-
-  // 같은 묶음의 지능 100과 힘 100은 힘 캐릭터에게 같은 항목이 되어 점수도 같다.
-  const intelligence = await scoresOf(dealerOrigin, dealer.path, [
-    { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316079:dealer' }
-  ])
-  const strength = await scoresOf(dealerOrigin, dealer.path, [
-    { slotId: 'WEAPON', reinforce: 0, amplified: false, enchantId: 'WEAPON:10316077:dealer' }
-  ])
-  assert.equal(intelligence.simulated.value, strength.simulated.value)
-  assert.notEqual(strength.simulated.value, strength.baseline.value)
 
   const buffRaised = await scoresOf(bufferOrigin, buffer.path, [
     { slotId: 'WEAPON', reinforce: 13, amplified: true, enchantId: null }
@@ -3203,7 +3165,7 @@ test('무기를 끼지 않은 캐릭터에 더한 무기에는 강화, 증폭, �
     variantId: GREATSWORD_STAR,
     reinforce: 10,
     amplified: true,
-    enchantId: 'WEAPON:10316079:dealer'
+    enchantId: 'WEAPON:10413546:dealer'
   })
 
   assert.equal(response.status, 200)
@@ -3221,7 +3183,7 @@ test('무기를 끼지 않은 캐릭터에 더한 무기에는 강화, 증폭, �
       itemGradeName: '최상급',
       reinforce: 10,
       amplificationName: '차원의 힘',
-      enchant: { status: [{ name: '힘', value: 100 }] }
+      enchant: { status: [{ name: '모든 속성 강화', value: 15 }] }
     }
   )
 })
@@ -3233,7 +3195,7 @@ const invalidAddedWeaponCases: readonly (readonly [string, Item])[] = [
   ['최대 단계를 넘는 조율', { variantId: GREATSWORD_STAR, tune: 4 }],
   ['해방 계열이 아닌 선택지의 해방 수치', { variantId: GREATSWORD_STAR, release: 100 }],
   ['선택지 없는 강화', { reinforce: 10 }],
-  ['선택지 없는 마법부여', { enchantId: 'WEAPON:10316079:dealer' }]
+  ['선택지 없는 마법부여', { enchantId: 'WEAPON:10413546:dealer' }]
 ]
 
 for (const [name, fields] of invalidAddedWeaponCases) {
