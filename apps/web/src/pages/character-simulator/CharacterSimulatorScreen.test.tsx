@@ -1360,6 +1360,17 @@ it('응답에 서약 세트가 없으면 세트 포인트 합이 가장 큰 세�
   )
 })
 
+it('영겁의 안개 서약만 끼고 결정이 없어 서약 세트를 추론할 수 없으면 세트 줄을 두지 않는다', async () => {
+  const detail = characterDetailFixture('buffer')
+  await render({ ...detail, oath: { ...detail.oath!, setInfo: null, crystal: [] } })
+  await waitForScores(UNCHANGED_SCORES, '버프 점수')
+
+  expect(rowsIn('서약').map((row) => row.querySelector('td')?.textContent)).toEqual([
+    '서약',
+    ...Array.from({ length: 11 }, (_, index) => `결정 ${index + 1}`)
+  ])
+})
+
 it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색으로 보인다', async () => {
   const detail = characterDetailFixture('dealer')
   const setItemInfo = detail.equipment.setItemInfo.map((set) => ({
