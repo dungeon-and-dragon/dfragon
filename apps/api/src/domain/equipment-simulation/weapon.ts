@@ -290,13 +290,26 @@ function replaceItem(
   }
 }
 
-// 엔진은 원본에 없는 무기를 강화, 재련, 마법부여 없이 아이템, 품질 등급, 조율, 해방 수치로만 더한다.
-function addedWeaponEntry(item: EquipmentVariantItem, detail: CharacterPayload): CharacterPayload {
-  const weapon: CharacterPayload = { slotId: WEAPON_SLOT }
+function addedWeaponEntry(
+  entry: CharacterPayload | undefined,
+  item: EquipmentVariantItem,
+  detail: CharacterPayload
+): CharacterPayload {
+  const weapon: CharacterPayload =
+    entry !== undefined ? structuredClone(entry) : { slotId: WEAPON_SLOT }
+
   replaceItem(weapon, item, detail)
   weapon.itemGradeName = ADDED_ITEM_GRADE
 
   return weapon
+}
+
+export function addedWeaponSlots(edit: WeaponEdit | null): string[] {
+  if (edit === null || edit.original !== null) {
+    return []
+  }
+
+  return [WEAPON_SLOT]
 }
 
 function editedTune(weapon: CharacterPayload, edit: WeaponEdit): unknown[] {
@@ -333,7 +346,7 @@ function weaponEntryOf(
       throw new Error('An added weapon needs its item')
     }
 
-    return addedWeaponEntry(edit.item, itemDetailOf(edit.item, details))
+    return addedWeaponEntry(entry, edit.item, itemDetailOf(edit.item, details))
   }
 
   const weapon = structuredClone(entry ?? edit.original)

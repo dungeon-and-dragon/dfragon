@@ -87,33 +87,35 @@ function enchantOf(change: EquipmentChange, role: EnchantGradeRole): EnchantGrad
   return option
 }
 
-// 비어 있는 부위는 weapon.ts, equipment-items.ts가 강화, 증폭, 마법부여 없이 장비를 더한다.
-function isBareAddedSlot(change: EquipmentChange): boolean {
+function isBareSlot(change: EquipmentChange): boolean {
   return change.reinforce === 0 && !change.amplified && change.enchantId === null
 }
 
 /**
- * 착용하지 않은 부위, 범위 밖 수치, 그 부위나 역할의 등급표에 없는 마법부여는 거절한다. 비어 있는 부위는 강화, 증폭,
- * 마법부여가 없을 때만 받는다.
+ * 범위 밖 수치, 그 부위나 역할의 등급표에 없는 마법부여는 거절한다. 비어 있는 부위는 `addedSlots`(이 요청이 장비를 더하는
+ * 부위)일 때만 그 장비에 강화, 증폭, 마법부여를 싣고, 장비를 더하지 않는 빈 부위에 실으면 거절한다.
  */
 export function editEquipment(
   equipment: CharacterPayload,
   changes: readonly EquipmentChange[],
-  role: CharacterRole | null
+  role: CharacterRole | null,
+  addedSlots: ReadonlySet<string>
 ): EquipmentEdit[] {
   const items = equippedItems(equipment)
   const gradeRole = enchantRole(role)
 
   return changes.flatMap((change) => {
-    const original = items.find((item) => item.slotId === change.slotId)
+    const worn = items.find((item) => item.slotId === change.slotId)
 
-    if (original === undefined && isBareAddedSlot(change)) {
+    if (worn === undefined && isBareSlot(change)) {
       return []
     }
 
-    if (original === undefined) {
+    if (worn === undefined && !addedSlots.has(change.slotId)) {
       throw new EquipmentSimulationFailure('request')
     }
+
+    const original = worn ?? { slotId: change.slotId }
 
     if (change.reinforce > Math.max(REINFORCE_LIMIT, currentReinforce(original))) {
       throw new EquipmentSimulationFailure('request')
