@@ -597,7 +597,7 @@ const invalidBodies: readonly (readonly [string, unknown])[] = [
   ['빠진 칸', { equipment: [{ slotId: 'JACKET', reinforce: 10, amplified: false }] }],
   ['임의 마법부여 값', { equipment: [{ ...change, status: [{ name: '힘', value: 999 }] }] }],
   ['모르는 마법부여', { equipment: [{ ...change, enchantId: 'missing-enchant-grade' }] }],
-  ['다른 부위의 마법부여', { equipment: [{ ...change, enchantId: 'SHOULDER:10361761:dealer' }] }],
+  ['다른 부위의 마법부여', { equipment: [{ ...change, enchantId: 'SHOULDER:10401273:dealer' }] }],
   ['다른 역할의 마법부여', { equipment: [{ ...change, enchantId: 'JACKET:10417946:buffer' }] }],
   ['모르는 최상위 칸', { equipment: [], fame: 1 }]
 ]
@@ -779,9 +779,9 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
   assert.equal(buffRaised.baseline.calculator, 'buff')
   assert.ok(buffRaised.simulated.value > buffRaised.baseline.value)
 
-  // 스킬 레벨 3은 원본 어깨와 같고 4스탯이 원본 120보다 낮은 110이라 점수가 내려간다.
+  // 스킬 레벨 3은 원본 어깨와 같고 4스탯이 원본 120보다 낮은 100이라 점수가 내려간다.
   const skillEnchanted = await scoresOf(bufferOrigin, buffer.path, [
-    { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: 'SHOULDER:10362000:buffer' }
+    { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: 'SHOULDER:10343455:buffer' }
   ])
   assert.ok(skillEnchanted.simulated.value < skillEnchanted.baseline.value)
 })
