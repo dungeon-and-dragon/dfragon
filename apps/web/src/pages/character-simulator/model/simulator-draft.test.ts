@@ -1,5 +1,9 @@
 import { type EnchantGradeSlot, enchantOptionsOf } from '@dfragon/lib/enchant-grades'
-import { type EquipmentVariantSlot, equipmentVariantsOf } from '@dfragon/lib/equipment-variants'
+import {
+  EQUIPMENT_VARIANT_SLOTS,
+  type EquipmentVariantSlot,
+  equipmentVariantsOf
+} from '@dfragon/lib/equipment-variants'
 import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { expect, it } from 'vitest'
 import type { CharacterDetailView } from '#entities/character'
@@ -662,7 +666,10 @@ function switchSet(changes: SimulatorChanges, rows: readonly SimulatorRow[], set
 it('장비 세트 줄은 선택 목록에 있는 세트 가운데 세트 포인트가 가장 큰 세트를 주 세트로 둔다', () => {
   expect(dealerSet.mainSetId).toBe(SOUL_FAIRY_SET)
   expect(dealerSet.sets).toHaveLength(13)
-  expect(toEquipmentSet(withSets(bufferDetail, [pointed('unlisted-set', 9_999)]))).toBeNull()
+  expect(toEquipmentSet(withSets(bufferDetail, [pointed('unlisted-set', 9_999)]))).toMatchObject({
+    mainSetId: null,
+    rarity: null
+  })
 })
 
 it('장비 세트를 고르면 11부위의 선택지와 기준 아이템이 그 세트의 같은 등급, 같은 종류가 되고 세트만 요청한다', () => {
@@ -1097,4 +1104,40 @@ it('무기를 끼지 않은 캐릭터가 무기를 고르면 강화, 마법부�
   expect(apply(NO_CHANGES, { type: 'change', slot: unworn, draft: { reinforce: 10 } })).toEqual(
     NO_CHANGES
   )
+})
+
+it('장비가 모두 비어 주 세트가 없어도 세트를 고르면 빈 11부위를 그 세트에서 등급이 가장 높은 일반 장비로 채운다', () => {
+  const detail = characterDetailFixture('dealer')
+  const emptied = {
+    ...detail,
+    equipment: {
+      equipment: detail.equipment.equipment.filter(({ slotId }) => slotId === 'TITLE'),
+      setItemInfo: []
+    }
+  }
+  const rows = toSimulatorRows(emptied)
+  const equipmentSet = toEquipmentSet(emptied)
+  const chosen = apply(NO_CHANGES, {
+    type: 'equipmentSet',
+    rows,
+    equipmentSet,
+    setItemId: SOUL_FAIRY_SET
+  })
+  const items = resolvedItemsOf(rowsInEquipmentSet(rows, chosen.equipmentSet), chosen)
+
+  expect(equipmentSet.mainSetId).toBeNull()
+  expect(slotOf(slotsOf(rows), 'JACKET').variants).toEqual([])
+  expect(chosen.equipmentSet).toBe(SOUL_FAIRY_SET)
+  // 이 세트의 일반 장비는 장신구 3부위만 태초가 있고 나머지 8부위는 에픽이 가장 높다.
+  for (const slotId of EQUIPMENT_VARIANT_SLOTS) {
+    const rarity = ['AMULET', 'WRIST', 'RING'].includes(slotId) ? '태초' : '에픽'
+    expect(items[slotId]?.itemId, slotId).toBe(
+      variantOf(SOUL_FAIRY_SET, slotId, rarity, '일반').item.itemId
+    )
+  }
+  expect(items.WEAPON).toBeUndefined()
+  expect(simulationBody(rowsInEquipmentSet(rows, chosen.equipmentSet), null, chosen)).toEqual({
+    equipmentSet: SOUL_FAIRY_SET,
+    equipment: []
+  })
 })
