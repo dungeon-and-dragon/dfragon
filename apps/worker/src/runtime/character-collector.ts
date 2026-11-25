@@ -20,6 +20,7 @@ import {
 import type { readCollectorConfiguration } from './collector-configuration.js'
 import { CharacterCollectionService } from '#application/character-collection/index.js'
 import {
+  CHARACTER_ACTIVITY_POOL,
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
   DatabaseJobRepository
@@ -99,7 +100,8 @@ export async function startCharacterCollector(
   )
   const fetchBasic = createNeopleCharacterBasic(neople)
   const openScoreEngine = createScoreEngineOpener(configuration.scoreLibraryPath, report)
-  const jobs = createWorkerJobs(client, {
+  const activityClient = createDatabaseClient(configuration.database, CHARACTER_ACTIVITY_POOL)
+  const jobs = createWorkerJobs(client, activityClient, {
     createFetchTimeline: createNeopleClearTimeline(neople),
     createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
     fetchSkillStyle: createNeopleSkillStyle(neople),
