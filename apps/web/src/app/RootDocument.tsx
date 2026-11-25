@@ -26,11 +26,23 @@ const APPLY_SAVED_COLOR_MODE = `try {
   }
 } catch {}`
 
-// 위 script가 hydration 전에 html의 data-color-mode와 theme-color의 media를 바꾸므로 그 요소들은 불일치 경고를 끈다.
+// iOS Safari는 글자가 16px보다 작은 입력 칸에 포커스하면 화면을 확대한다. iOS는 maximum-scale이 있어도
+// 손가락 확대를 막지 않으므로 iOS에서만 붙여 포커스 확대만 끈다. 다른 기기에서는 손가락 확대까지 막혀 붙이지 않는다.
+// iPadOS Safari는 Mac으로 알리므로 터치 지점 수로 가린다.
+const DISABLE_IOS_FOCUS_ZOOM = `if (/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+  document.querySelector('meta[name="viewport"]')?.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1')
+}`
+
+// 위 script들이 hydration 전에 html의 data-color-mode, theme-color의 media, viewport의 content를 바꾸므로 그 요소들은 불일치 경고를 끈다.
 export function RootDocument({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html lang="ko" suppressHydrationWarning>
       <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+          suppressHydrationWarning
+        />
         <HeadContent />
         <meta
           name="theme-color"
@@ -46,6 +58,7 @@ export function RootDocument({ children }: { children: React.ReactNode }): React
           content="#0a0a0b"
           suppressHydrationWarning
         />
+        <script dangerouslySetInnerHTML={{ __html: DISABLE_IOS_FOCUS_ZOOM }} />
         <script dangerouslySetInnerHTML={{ __html: APPLY_SAVED_COLOR_MODE }} />
         <script dangerouslySetInnerHTML={{ __html: LOAD_GOOGLE_TAG_MANAGER }} />
       </head>
