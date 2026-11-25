@@ -46,7 +46,7 @@ export function CharacterTabs({
             serverId: detail.character.serverId,
             characterId: detail.character.characterId
           }}
-          className="btn btn-secondary btn-sm ml-2 shrink-0 no-underline"
+          className="tab shrink-0 no-underline"
         >
           장비 시뮬레이터
         </Link>
