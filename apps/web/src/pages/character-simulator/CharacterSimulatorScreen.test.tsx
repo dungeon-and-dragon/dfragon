@@ -1360,15 +1360,38 @@ it('응답에 서약 세트가 없으면 세트 포인트 합이 가장 큰 세�
   )
 })
 
-it('영겁의 안개 서약만 끼고 결정이 없어 서약 세트를 추론할 수 없으면 세트 줄을 두지 않는다', async () => {
+it('영겁의 안개 서약만 끼고 결정이 없어 서약 세트를 추론할 수 없으면 세트 줄을 비어 있음으로 두고, 세트를 고르면 그 세트의 결정을 더할 수 있다', async () => {
   const detail = characterDetailFixture('buffer')
   await render({ ...detail, oath: { ...detail.oath!, setInfo: null, crystal: [] } })
   await waitForScores(UNCHANGED_SCORES, '버프 점수')
 
-  expect(rowsIn('서약').map((row) => row.querySelector('td')?.textContent)).toEqual([
-    '서약',
-    ...Array.from({ length: 11 }, (_, index) => `결정 ${index + 1}`)
+  expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('비어 있음')
+
+  await chooseCrystal(0)
+
+  expect(container.querySelector('[aria-label="결정 1 교체"]')).toBeNull()
+
+  await chooseOath('세트')
+  await press('서약 세트', '어둠에 잠긴 그림자 서약')
+  await chooseCrystal(0)
+
+  const crystals = oathCrystalVariantsOf(SHADOW_OATH_SET)
+  const [unique] = crystals
+
+  expect(buttonNames('결정 1 교체')).toEqual([
+    '비어 있음',
+    ...crystals.map(({ item }) => item.itemName)
   ])
+
+  await act(async () => buttonOf('결정 1 교체', unique!.item.itemName).click())
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipment: [],
+      oathSet: SHADOW_OATH_SET,
+      oath: [{ slotNo: 0, variantId: unique!.id, tune: 0 }]
+    })
+  )
 })
 
 it('장비 세트와 서약 세트 이름은 응답이 준 세트 등급의 색으로 보인다', async () => {

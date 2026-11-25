@@ -66,7 +66,7 @@ export type SimulatorOathCrystal = ItemView &
 
 /**
  * setId는 응답에 서약 세트가 없으면 inferOathSetId로 찾은 세트다. null이면 선택 목록에 없거나 찾을 수 없는 서약 세트라
- * 세트를 고르지 않는다. rarity는 상세 응답이 준 서약 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
+ * 세트를 고르기 전에는 결정 선택지가 없다. rarity는 상세 응답이 준 서약 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
  */
 export type SimulatorOath = Readonly<{
   setId: number | null
