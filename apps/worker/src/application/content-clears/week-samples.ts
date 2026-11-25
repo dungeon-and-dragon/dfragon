@@ -28,16 +28,21 @@ const contentWeekKey = (contentId: string, weekStart: Date) => `${contentId}/${w
 const newestFirst = (left: Date, right: Date) => right.getTime() - left.getTime()
 
 // 전체 개요는 한 주의 모든 컨텐츠를 함께 보므로 그 주의 모든 분모가 마감했을 때만 저장한다.
+// 첫 레이드 전 베누스만 있던 주는 개요에 보일 레이드 집계가 없어 저장하지 않는다.
 function closedWeekStarts(populations: readonly StoredClearPopulation[]): Date[] {
-  const weeks = new Map<number, { weekStart: Date; closed: boolean }>()
+  const weeks = new Map<number, { weekStart: Date; closed: boolean; hasRaid: boolean }>()
 
-  for (const { weekStart, closed } of populations) {
+  for (const { contentId, weekStart, closed } of populations) {
     const key = weekStart.getTime()
-    const allClosed = (weeks.get(key)?.closed ?? true) && closed
-    weeks.set(key, { weekStart, closed: allClosed })
+    const week = weeks.get(key)
+    const allClosed = (week?.closed ?? true) && closed
+    const hasRaid = (week?.hasRaid ?? false) || CLEAR_CONTENTS.some(({ id }) => id === contentId)
+    weeks.set(key, { weekStart, closed: allClosed, hasRaid })
   }
 
-  return [...weeks.values()].filter(({ closed }) => closed).map(({ weekStart }) => weekStart)
+  return [...weeks.values()]
+    .filter(({ closed, hasRaid }) => closed && hasRaid)
+    .map(({ weekStart }) => weekStart)
 }
 
 // 마감한 주의 클리어 기록과 분모는 다시 바뀌지 않아, 저장한 주는 다시 계산하지 않는다.

@@ -48,13 +48,21 @@ export function weekOf(content: ClearContent, weekStart: string): ClearWeek | un
 
 export type OverviewWeek = Readonly<{ weekStart: string; closed: boolean }>
 
+// 첫 레이드 전 베누스만 있던 주는 개요에 보일 레이드 집계가 없어 고를 주에서 뺀다.
 export function overviewWeeks(contents: readonly ClearContent[]): OverviewWeek[] {
   const weeks = new Map<string, boolean>()
   for (const { weekStart, closed } of contents.flatMap((content) => content.weeks)) {
     weeks.set(weekStart, (weeks.get(weekStart) ?? true) && closed)
   }
 
+  const raidWeeks = new Set(
+    contents
+      .filter(({ kind }) => kind !== 'legion')
+      .flatMap((content) => content.weeks.map(({ weekStart }) => weekStart))
+  )
+
   return [...weeks]
+    .filter(([weekStart]) => raidWeeks.has(weekStart))
     .map(([weekStart, closed]) => ({ weekStart, closed }))
     .toSorted((left, right) => left.weekStart.localeCompare(right.weekStart))
 }

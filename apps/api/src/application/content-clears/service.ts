@@ -263,8 +263,11 @@ export class ClearStatsService {
     weekStart: string | undefined
   ): Promise<ClearOverview> {
     const { populations } = await this.summaryOf(current)
+    // 첫 레이드 전 베누스만 있던 주는 개요에 보일 레이드 집계가 없어 고를 주에서 뺀다.
     const weekStarts = new Map(
-      populations.map((population) => [formatResetDate(population.weekStart), population.weekStart])
+      populations
+        .filter(({ contentId }) => CLEAR_CONTENTS.some(({ id }) => id === contentId))
+        .map((population) => [formatResetDate(population.weekStart), population.weekStart])
     )
 
     const selectedWeek = weekStart ?? [...weekStarts.keys()].sort().at(-1)
