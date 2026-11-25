@@ -64,19 +64,12 @@ function memberIdsOf(slotId, role) {
 // 표를 다시 생성해 묶임이 바뀌면 이 기대값도 함께 고친다.
 for (const [name, slotId, role, expected] of [
   [
-    '딜러 무기의 힘 100과 지능 100은 올스탯 +100 하나로 묶인다',
+    '딜러 무기는 모든 속성 강화 +15 항목만 둔다',
     'WEAPON',
     'dealer',
     {
       종결: [['WEAPON:10337702:dealer']],
-      준종결: [
-        ['WEAPON:10316077:dealer', 'WEAPON:10316079:dealer'],
-        ['WEAPON:10317432:dealer'],
-        ['WEAPON:10334668:dealer'],
-        ['WEAPON:10334670:dealer'],
-        ['WEAPON:10334672:dealer'],
-        ['WEAPON:10413546:dealer']
-      ]
+      준종결: [['WEAPON:10413546:dealer']]
     }
   ],
   [
@@ -144,12 +137,24 @@ test('findEnchantOption은 멤버 어느 id로도 그 묶음을 찾고 다른 �
   assert.equal(findEnchantOption('WEAPON', 'buffer', 'missing-enchant-grade'), null)
 })
 
+// 지금 등급표에는 4스탯 멤버 없이 여러 멤버가 묶인 항목이 없어 표 모양대로 만든다.
+function gradeOf(id, status) {
+  return { id, status, reinforceSkill: [], fame: 196, cardName: id, cardId: 0, roles: ['dealer'] }
+}
+
+const STRENGTH_GRADE = gradeOf('strength', [{ name: '힘', value: 100 }])
+const INTELLIGENCE_GRADE = gradeOf('intelligence', [{ name: '지능', value: 100 }])
+const mainStatOption = {
+  id: STRENGTH_GRADE.id,
+  display: [{ name: '올스탯', value: 100 }],
+  members: [STRENGTH_GRADE, INTELLIGENCE_GRADE]
+}
+
 test('optionNeedsMainStat은 멤버가 둘 이상이고 4스탯 멤버가 없을 때만 true다', () => {
-  const dealerWeapon = findEnchantOption('WEAPON', 'dealer', 'WEAPON:10316077:dealer')
   const bufferWeapon = findEnchantOption('WEAPON', 'buffer', 'WEAPON:10326802:buffer')
   const single = findEnchantOption('WAIST', 'dealer', 'WAIST:10361762:dealer')
 
-  assert.equal(optionNeedsMainStat(dealerWeapon), true)
+  assert.equal(optionNeedsMainStat(mainStatOption), true)
   assert.equal(optionNeedsMainStat(bufferWeapon), false)
   assert.equal(optionNeedsMainStat(single), false)
 })
@@ -162,22 +167,6 @@ for (const [name, slotId, role, id, mainStat, expected] of [
     'WEAPON:10326802:buffer',
     '체력',
     'WEAPON:10413548:buffer'
-  ],
-  [
-    '주스탯을 가진 멤버',
-    'WEAPON',
-    'dealer',
-    'WEAPON:10316077:dealer',
-    '지능',
-    'WEAPON:10316079:dealer'
-  ],
-  [
-    '주스탯을 가진 멤버가 없으면 첫 멤버',
-    'WEAPON',
-    'dealer',
-    'WEAPON:10316079:dealer',
-    '체력',
-    'WEAPON:10316077:dealer'
   ],
   [
     '멤버가 하나면 그 멤버',
@@ -194,3 +183,8 @@ for (const [name, slotId, role, id, mainStat, expected] of [
     assert.equal(chooseEnchantGrade(option, mainStat).id, expected)
   })
 }
+
+test('chooseEnchantGrade는 주스탯을 가진 멤버를 고르고 없으면 첫 멤버를 고른다', () => {
+  assert.equal(chooseEnchantGrade(mainStatOption, '지능'), INTELLIGENCE_GRADE)
+  assert.equal(chooseEnchantGrade(mainStatOption, '체력'), STRENGTH_GRADE)
+})

@@ -102,16 +102,24 @@ it('버퍼는 직업별 스킬 강화를 버프 패시브 스킬 한 줄로 두�
 })
 
 it('등급표 목록은 표시가 같아진 항목을 한 줄로 보이고 착용한 마법부여와 같은 표기를 쓴다', () => {
-  const semiFinals = enchantOptionsOf('WEAPON', 'dealer').준종결
-  const listed = semiFinals.map((option) =>
+  const finals = enchantOptionsOf('JACKET', 'dealer').종결
+  const listed = finals.map((option) =>
     optionEnchantLabels(option, 'dealer')
       .map(({ label }) => label)
       .join(', ')
   )
 
-  expect(listed.filter((label) => label === '올스탯 +100')).toHaveLength(1)
-  expect(listed).toContain('물리 공격력 +90, 올스탯 +60')
-  expect(labels([['지능', 100]])).toEqual(['올스탯 +100'])
+  expect(listed).toEqual(['최종 데미지 증가 +3%, 공격력 +110, 올스탯 +90'])
+  expect(
+    labels([
+      ['힘', 90],
+      ['지능', 90],
+      ['물리 공격력', 110],
+      ['마법 공격력', 110],
+      ['독립 공격력', 110],
+      ['최종 데미지 증가', '3%']
+    ])
+  ).toEqual(['최종 데미지 증가 +3%', '공격력 +110', '올스탯 +90'])
 })
 
 it('마법부여가 없으면 빈 목록이다', () => {

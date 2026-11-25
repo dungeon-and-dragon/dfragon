@@ -222,21 +222,22 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
 })
 
 it('표시가 같아 합친 묶음은 묶음 id로만 고르고 묶음의 다른 항목 id는 받지 않는다', () => {
-  const merged = enchantOptionsOf('WEAPON', 'dealer').준종결.find(
+  const jacket = slotOf(dealerSlots, 'JACKET')
+  const merged = enchantOptionsOf('JACKET', 'dealer').종결.find(
     (option) => option.members.length > 1
   )
   expect(merged).toBeDefined()
   const [, other] = merged!.members
 
-  expect(weapon.enchantChoices.map(({ id }) => id)).toContain(merged!.id)
+  expect(jacket.enchantChoices.map(({ id }) => id)).toContain(merged!.id)
   expect(
     draftOf(
-      weapon,
-      apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { enchantId: merged!.id } })
+      jacket,
+      apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { enchantId: merged!.id } })
     ).enchantId
   ).toBe(merged!.id)
   expect(
-    apply(NO_CHANGES, { type: 'change', slot: weapon, draft: { enchantId: other!.id } })
+    apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { enchantId: other!.id } })
   ).toEqual(NO_CHANGES)
 })
 

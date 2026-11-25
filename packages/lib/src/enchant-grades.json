@@ -67,48 +67,6 @@
       ],
       "준종결": [
         {
-          "id": "WEAPON:10316077:dealer",
-          "status": [
-            {
-              "name": "힘",
-              "value": 100
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "무념의 시로코-레스테 카드",
-          "cardId": 10316077,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10316079:dealer",
-          "status": [
-            {
-              "name": "지능",
-              "value": 100
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "무아의 시로코-레베체 카드",
-          "cardId": 10316079,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10317432:dealer",
-          "status": [
-            {
-              "name": "모든 속성 강화",
-              "value": 13
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "반야 카드",
-          "cardId": 10317432,
-          "roles": ["dealer"]
-        },
-        {
           "id": "WEAPON:10326802:buffer",
           "status": [
             {
@@ -135,64 +93,6 @@
           "cardName": "혼돈의 천사 루치펠 카드",
           "cardId": 10326833,
           "roles": ["buffer"]
-        },
-        {
-          "id": "WEAPON:10334668:dealer",
-          "status": [
-            {
-              "name": "물리 공격력",
-              "value": 90
-            },
-            {
-              "name": "힘",
-              "value": 60
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "화룡 애쉬코어 카드",
-          "cardId": 10334668,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10334670:dealer",
-          "status": [
-            {
-              "name": "마법 공격력",
-              "value": 90
-            },
-            {
-              "name": "지능",
-              "value": 60
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "진룡 이트레녹 카드",
-          "cardId": 10334670,
-          "roles": ["dealer"]
-        },
-        {
-          "id": "WEAPON:10334672:dealer",
-          "status": [
-            {
-              "name": "독립 공격력",
-              "value": 90
-            },
-            {
-              "name": "힘",
-              "value": 60
-            },
-            {
-              "name": "지능",
-              "value": 60
-            }
-          ],
-          "reinforceSkill": [],
-          "fame": 196,
-          "cardName": "흑룡 네이저 카드",
-          "cardId": 10334672,
-          "roles": ["dealer"]
         },
         {
           "id": "WEAPON:10413546:dealer",
