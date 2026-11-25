@@ -32,14 +32,6 @@ function rowTarget(row: SimulatorRow): SimulatorTarget {
   return { kind: 'equipment', key: `equipment:${slot.slotId}`, slot }
 }
 
-function equipmentSetTargets(equipmentSet: SimulatorEquipmentSet | null): SimulatorTarget[] {
-  if (equipmentSet === null) {
-    return []
-  }
-
-  return [{ kind: 'equipmentSet', key: 'equipmentSet', equipmentSet }]
-}
-
 function avatarTargets(avatarPresetAvailable: boolean): SimulatorTarget[] {
   if (!avatarPresetAvailable) {
     return []
@@ -85,14 +77,14 @@ function oathUpgradeTargets(oath: SimulatorOath | null): SimulatorTarget[] {
  * 구획의 아바타, 스위칭, 진의를 둔다.
  */
 export function toSimulatorTargets(
-  equipmentSet: SimulatorEquipmentSet | null,
+  equipmentSet: SimulatorEquipmentSet,
   rows: readonly SimulatorRow[],
   avatarPresetAvailable: boolean,
   switching: BuffSwitching | null,
   oath: SimulatorOath | null
 ): SimulatorTarget[] {
   return [
-    ...equipmentSetTargets(equipmentSet),
+    { kind: 'equipmentSet', key: 'equipmentSet', equipmentSet },
     ...rows.map(rowTarget),
     ...oathTargets(oath),
     ...avatarTargets(avatarPresetAvailable),

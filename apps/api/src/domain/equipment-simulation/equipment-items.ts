@@ -5,6 +5,7 @@ import {
   type EquipmentVariantItems,
   type EquipmentVariantKind,
   type EquipmentVariantSlot,
+  emptySlotVariantOf,
   equipmentSets,
   equipmentVariantsOf,
   findEquipmentVariant,
@@ -252,7 +253,10 @@ function checkedEquipmentSet(equipmentSet: string | null): string | null {
   return equipmentSet
 }
 
-/** 세트를 고르면 유일 장비와 선택지 밖 착용 아이템을 뺀 부위를 그 세트의 같은 등급으로 옮긴다. */
+/**
+ * 세트를 고르면 유일 장비와 선택지 밖 착용 아이템을 뺀 부위를 그 세트의 같은 등급으로 옮기고, 비어 있는 부위는 그 세트에서 등급이
+ * 가장 높은 일반 장비로 채운다.
+ */
 function switchedTargets(
   worn: ReadonlyMap<EquipmentVariantSlot, WornSlot>,
   equipmentSet: string | null
@@ -265,7 +269,19 @@ function switchedTargets(
 
   const switched = switchEquipmentSet(Object.fromEntries(wornTargets), equipmentSet)
 
-  return new Map([...wornTargets].map(([slotId, variant]) => [slotId, switched[slotId] ?? variant]))
+  return new Map(
+    [...worn].map(([slotId, slot]) => {
+      if (slot.added) {
+        const filled = emptySlotVariantOf(equipmentSet, slotId)
+
+        return [slotId, filled]
+      }
+
+      const variant = switched[slotId] ?? slot.variant
+
+      return [slotId, variant]
+    })
+  )
 }
 
 function itemChanges(
@@ -301,7 +317,7 @@ function resolvedItems(targets: Targets): EquipmentVariantItems {
 
 /**
  * 무기를 뺀 11부위의 세트 전환, 아이템, 조율, 정밀도 변경과 5축성 변환으로 바뀌는 부위다. 비어 있는 부위는 고른 선택지로 장비를 더하고,
- * 세트를 바꿔도 채우지 않는다. 목록에 없는 세트, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
+ * 세트를 고르면 그 세트로 채운다. 목록에 없는 세트, 그 세트의 선택지에 없는 id, 조율 단계 밖의 조율, 유일 장비가 아닌 아이템의 정밀도는 거절한다.
  */
 export function editEquipmentItems(
   equipment: CharacterPayload,

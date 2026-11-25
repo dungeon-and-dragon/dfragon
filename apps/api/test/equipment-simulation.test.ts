@@ -3,6 +3,7 @@ import { EventEmitter } from 'node:events'
 import { readFileSync } from 'node:fs'
 import test, { type TestContext } from 'node:test'
 import type { CharacterBasicInput, CharacterScoreInput } from '@dfragon/database'
+import { equipmentVariantsOf } from '@dfragon/lib/equipment-variants'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -1824,6 +1825,43 @@ function wearingPrimevalMist(payloads: CharacterPayloads): void {
     ...oathItem(PRIMEVAL_MIST_OATH, '영겁의 안개 서약', '태초')
   }
 }
+
+test('장비 세트를 고르면 비어 있는 부위를 그 세트에서 등급이 가장 높은 일반 장비로 채운다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'JACKET'
+  )
+  const engine = scoring(versionedEngine('dnfscore-native 0.16.0'))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipmentSet: SHADOW_SET.setItemId,
+    equipment: []
+  })
+
+  assert.equal(response.status, 200)
+  const jacket = bySlot(engine.requests[0]!.input.simulation!.equipment).JACKET!
+  // 그림자 세트 상의의 일반 장비는 에픽이 가장 높다.
+  const filled = equipmentVariantsOf(SHADOW_SET.setItemId, 'JACKET').find(
+    ({ rarity, kind }) => rarity === '에픽' && kind === '일반'
+  )!
+  assert.deepEqual(
+    {
+      itemId: jacket.itemId,
+      setItemId: jacket.setItemId,
+      itemGradeName: jacket.itemGradeName,
+      tune: jacket.tune,
+      reinforce: jacket.reinforce
+    },
+    {
+      itemId: filled.item.itemId,
+      setItemId: SHADOW_SET.setItemId,
+      itemGradeName: '최상급',
+      tune: [{ level: 0, setPoint: filled.tuneSetPoints[0] }],
+      reinforce: undefined
+    }
+  )
+})
 
 test('장비 세트를 고르면 11부위를 새 세트의 같은 등급으로 바꾸고 조율 단계를 유지한다', async (t) => {
   const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)

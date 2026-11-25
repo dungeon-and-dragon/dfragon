@@ -9,6 +9,7 @@ import { MISSING_VALUE } from '#shared/lib/missing-value'
 import {
   draftOf,
   enchantLabelsOf,
+  EMPTY_SLOT_NAME,
   equipmentSetNameOf,
   FULL_POTENCY,
   resolvedItemsOf,
@@ -143,7 +144,7 @@ function EquipmentSetRow({
       <td>
         <PickButton selected={selected}>
           <ItemName
-            name={equipmentSetNameOf(equipmentSet, changes)}
+            name={equipmentSetNameOf(equipmentSet, changes) ?? EMPTY_SLOT_NAME}
             rarity={equipmentSet.rarity}
             weight="normal"
           />

@@ -320,6 +320,14 @@ export function equipmentVariantsOf(
   return variants
 }
 
+/** 장비 세트를 골랐을 때 비어 있는 부위를 채우는, 그 세트의 그 부위에서 등급이 가장 높은 일반 장비다. */
+export function emptySlotVariantOf(
+  setItemId: string,
+  slotId: EquipmentVariantSlot
+): EquipmentVariant | null {
+  return highestVariantOf(equipmentVariantsOf(setItemId, slotId))
+}
+
 export function findEquipmentVariant(itemId: string): EquipmentVariantMatch | null {
   const match = matchesByItemId.get(itemId)
 
