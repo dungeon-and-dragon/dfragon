@@ -10,6 +10,7 @@ export {
   buffSkillIconOf,
   learnedSkillRowsOf,
   skillChainOf,
+  skillEvolutionBranchesOf,
   skillMarkOf,
   skillUpgradeBoardOf,
   skillUpgradesOf,
@@ -20,6 +21,7 @@ export {
 } from './model/skill-window'
 export type {
   EnhancementRow,
+  EvolutionBranch,
   EvolutionRow,
   LearnedSkillRow,
   SkillChain,

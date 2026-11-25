@@ -319,10 +319,11 @@ export type EvolutionBranch = Readonly<{
   explain: GameTextLines
 }>
 
+type EvolutionBranches = readonly [EvolutionBranch, EvolutionBranch]
+
 export type EnhancementBranch = Readonly<{ type: UpgradeType }>
 
-export type EvolutionRow = UpgradeSkill &
-  Readonly<{ branches: readonly [EvolutionBranch, EvolutionBranch] }>
+export type EvolutionRow = UpgradeSkill & Readonly<{ branches: EvolutionBranches }>
 
 export type EnhancementRow = UpgradeSkill &
   Readonly<{ branches: readonly [EnhancementBranch, EnhancementBranch] }>
@@ -386,6 +387,32 @@ export function skillMarkOf(marks: SkillMarks, kind: keyof SkillMarks, type: Upg
   return second
 }
 
+function evolutionBranchesOf({ evolution }: CatalogSkill): EvolutionBranches | null {
+  if (evolution === undefined) {
+    return null
+  }
+
+  const [first, second] = evolution
+
+  return [
+    { type: 1, ...first },
+    { type: 2, ...second }
+  ]
+}
+
+export function skillEvolutionBranchesOf(
+  { job }: SkillWindowCatalog,
+  skillId: number
+): EvolutionBranches | null {
+  const skill = job.skills[skillId]
+
+  if (skill === undefined) {
+    return null
+  }
+
+  return evolutionBranchesOf(skill)
+}
+
 export function skillUpgradeBoardOf(
   catalog: SkillWindowCatalog,
   character: SkillCharacter,
@@ -400,21 +427,15 @@ export function skillUpgradeBoardOf(
   const evolutionByName = pickedTypesByName(style, 'evolution')
   const enhancementByName = pickedTypesByName(style, 'enhancement')
   const evolutions = learnable.flatMap((learnableSkill): EvolutionRow[] => {
-    const branches = learnableSkill.skill.evolution
-    if (branches === undefined) {
+    const branches = evolutionBranchesOf(learnableSkill.skill)
+
+    if (branches === null) {
       return []
     }
-    const [first, second] = branches
 
-    return [
-      {
-        ...upgradeSkillOf(tree.job, learnableSkill, evolutionByName, levelByName),
-        branches: [
-          { type: 1, ...first },
-          { type: 2, ...second }
-        ]
-      }
-    ]
+    const evolution = upgradeSkillOf(tree.job, learnableSkill, evolutionByName, levelByName)
+
+    return [{ ...evolution, branches }]
   })
   const enhancements = learnable.flatMap((learnableSkill): EnhancementRow[] => {
     if (learnableSkill.skill.enhancement === undefined) {
