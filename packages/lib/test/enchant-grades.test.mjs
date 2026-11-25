@@ -102,7 +102,7 @@ for (const [name, slotId, role, expected] of [
     'SHOULDER',
     'dealer',
     {
-      종결: [['SHOULDER:10361761:dealer'], ['SHOULDER:10401273:dealer']],
+      종결: [['SHOULDER:10401273:dealer']],
       준종결: [['SHOULDER:10325749:dealer']]
     }
   ],
@@ -113,10 +113,10 @@ for (const [name, slotId, role, expected] of [
     { 종결: [['WAIST:10362002:buffer']], 준종결: [] }
   ],
   [
-    '최종 데미지와 크리티컬이 다른 허리 종결 항목은 묶이지 않는다',
+    '허리 딜러는 종결 항목이 없으면 빈 목록이다',
     'WAIST',
     'dealer',
-    { 종결: [['WAIST:10361763:dealer']], 준종결: [['WAIST:10361762:dealer']] }
+    { 종결: [], 준종결: [['WAIST:10361762:dealer']] }
   ]
 ]) {
   test(`enchantOptionsOf: ${name}`, () => {
@@ -139,7 +139,7 @@ test('findEnchantOption은 멤버 어느 id로도 그 묶음을 찾고 다른 �
   const option = findEnchantOption('WEAPON', 'buffer', 'WEAPON:10326833:buffer')
 
   assert.equal(option?.id, 'WEAPON:10326802:buffer')
-  assert.equal(findEnchantOption('WAIST', 'dealer', 'SHOULDER:10361761:dealer'), null)
+  assert.equal(findEnchantOption('WAIST', 'dealer', 'SHOULDER:10401273:dealer'), null)
   assert.equal(findEnchantOption('WEAPON', 'dealer', 'WEAPON:10326833:buffer'), null)
   assert.equal(findEnchantOption('WEAPON', 'buffer', 'missing-enchant-grade'), null)
 })
@@ -147,7 +147,7 @@ test('findEnchantOption은 멤버 어느 id로도 그 묶음을 찾고 다른 �
 test('optionNeedsMainStat은 멤버가 둘 이상이고 4스탯 멤버가 없을 때만 true다', () => {
   const dealerWeapon = findEnchantOption('WEAPON', 'dealer', 'WEAPON:10316077:dealer')
   const bufferWeapon = findEnchantOption('WEAPON', 'buffer', 'WEAPON:10326802:buffer')
-  const single = findEnchantOption('WAIST', 'dealer', 'WAIST:10361763:dealer')
+  const single = findEnchantOption('WAIST', 'dealer', 'WAIST:10361762:dealer')
 
   assert.equal(optionNeedsMainStat(dealerWeapon), true)
   assert.equal(optionNeedsMainStat(bufferWeapon), false)
@@ -183,9 +183,9 @@ for (const [name, slotId, role, id, mainStat, expected] of [
     '멤버가 하나면 그 멤버',
     'WAIST',
     'dealer',
-    'WAIST:10361763:dealer',
+    'WAIST:10361762:dealer',
     null,
-    'WAIST:10361763:dealer'
+    'WAIST:10361762:dealer'
   ]
 ]) {
   test(`chooseEnchantGrade: ${name}`, () => {
