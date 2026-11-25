@@ -479,3 +479,25 @@ model Item {
 
   @@map("items")
 }
+
+model LabItem {
+  id        BigInt   @id @default(autoincrement())
+  category  String
+  role      String
+  tier      String
+  itemName  String   @map("item_name")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([category, role, tier, itemName])
+  @@map("lab_items")
+}
+
+model AuctionPrice {
+  itemName   String   @id @map("item_name")
+  itemId     String?  @map("item_id")
+  itemRarity String?  @map("item_rarity")
+  unitPrice  BigInt?  @map("unit_price")
+  checkedAt  DateTime @map("checked_at") @db.Timestamptz(3)
+
+  @@map("auction_prices")
+}
