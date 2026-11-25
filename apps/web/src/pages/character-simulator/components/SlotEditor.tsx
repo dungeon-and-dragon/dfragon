@@ -226,17 +226,33 @@ function EquipmentEditor({
           <ReleaseControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
         </Field>
       )}
-      {!slot.empty && (
-        <Field label="강화, 증폭">
-          <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
-        </Field>
-      )}
-      {!slot.empty && (
-        <Field label="마법부여">
-          <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
-        </Field>
+      {(!slot.empty || choice !== undefined) && (
+        <ReinforceFields slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
       )}
     </Fields>
+  )
+}
+
+function ReinforceFields({
+  slot,
+  slotLabel,
+  draft,
+  onChange
+}: {
+  slot: SimulatorSlot
+  slotLabel: string
+  draft: SlotDraft
+  onChange: (next: Partial<SlotDraft>) => void
+}): React.JSX.Element {
+  return (
+    <>
+      <Field label="강화, 증폭">
+        <ReinforceControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={onChange} />
+      </Field>
+      <Field label="마법부여">
+        <EnchantControl slot={slot} slotLabel={slotLabel} draft={draft} onChange={onChange} />
+      </Field>
+    </>
   )
 }
 
@@ -271,6 +287,7 @@ function UnwornWeaponEditor({
     slot.weaponTypes.find(({ type }) => type === weaponType) ?? slot.weaponTypes[0]!
   const tuneLimit = tuneLimitOf(slot, draft.variantId)
   const typeOptions = slot.weaponTypes.map(({ type }) => ({ id: type, name: type }))
+  const choice = variantChoiceOf(slot, draft.variantId)
 
   function changeSlot(next: Partial<SlotDraft>): void {
     actions.onChange(slot, next)
@@ -319,6 +336,9 @@ function UnwornWeaponEditor({
         <Field label="해방">
           <ReleaseControl slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
         </Field>
+      )}
+      {choice !== undefined && (
+        <ReinforceFields slot={slot} slotLabel={slotLabel} draft={draft} onChange={changeSlot} />
       )}
     </Fields>
   )

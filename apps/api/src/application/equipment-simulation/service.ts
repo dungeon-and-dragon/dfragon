@@ -23,6 +23,8 @@ import {
   type OathChanges,
   type SimulationFeatures,
   type SlotItemChanges,
+  addedItemSlots,
+  addedWeaponSlots,
   addsSlotItems,
   avatarItemIds,
   avatarPresetJobOf,
@@ -107,13 +109,14 @@ export class EquipmentSimulationService {
     signal: AbortSignal
   ): Promise<EquipmentSimulationScores> {
     const { payloads, role, items } = await this.loadScoreSource(identity, signal)
-    const edits = editEquipment(payloads.equipment, request.equipment, role)
     const itemEdits = editEquipmentItems(
       payloads.equipment,
       request.equipment,
       request.equipmentSet
     )
     const weaponEdit = editWeapon(payloads, request.equipment)
+    const addedSlots = new Set([...addedItemSlots(itemEdits), ...addedWeaponSlots(weaponEdit)])
+    const edits = editEquipment(payloads.equipment, request.equipment, role, addedSlots)
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)

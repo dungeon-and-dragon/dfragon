@@ -375,6 +375,16 @@ export function editEquipmentItems(
   })
 }
 
+export function addedItemSlots(edits: readonly EquipmentItemEdit[]): string[] {
+  return edits.flatMap(({ slotId, added, item }) => {
+    if (!added || item === null) {
+      return []
+    }
+
+    return [slotId]
+  })
+}
+
 /** 엔진이 새 아이템의 상세를 최상위 `items`에서 읽으므로 함께 조회할 아이템이다. */
 export function equipmentItemIds(edits: readonly EquipmentItemEdit[]): string[] {
   return edits.flatMap(({ item }) => {
@@ -443,7 +453,7 @@ function replacedEntry(
 
     replaceItem(replaced, edit.item, edit.kind, detail)
 
-    // 엔진은 원본에 없는 부위를 강화, 마법부여 없이 아이템, 품질 등급, 조율, 정밀도로만 더한다.
+    // 원본에 없는 부위는 착용 품질을 알 수 없어 최상급으로 더한다.
     if (edit.added) {
       replaced.itemAvailableLevel = detail.itemAvailableLevel ?? null
       replaced.itemGradeName = ADDED_ITEM_GRADE

@@ -3148,7 +3148,7 @@ async function addedWeaponSimulation(
   return { engine, response }
 }
 
-test('무기를 끼지 않은 캐릭터는 직업이 낄 수 있는 종류의 선택지로 강화, 재련, 마법부여 없는 최상급 무기를 더한다', async (t) => {
+test('무기를 끼지 않은 캐릭터는 직업이 낄 수 있는 종류의 선택지로 최상급 무기를 더하고, 강화, 마법부여를 고르지 않으면 싣지 않는다', async (t) => {
   const { engine, response } = await addedWeaponSimulation(t, {
     variantId: GREATSWORD_STAR,
     tune: 2
@@ -3198,15 +3198,42 @@ test('0.16.0 전 엔진에 무기를 더한 요청을 보내면 두 점수 모�
   assert.equal(engine.requests.length, 1)
 })
 
+test('무기를 끼지 않은 캐릭터에 더한 무기에는 강화, 증폭, 마법부여를 함께 실을 수 있다', async (t) => {
+  const { engine, response } = await addedWeaponSimulation(t, {
+    variantId: GREATSWORD_STAR,
+    reinforce: 10,
+    amplified: true,
+    enchantId: 'WEAPON:10316079:dealer'
+  })
+
+  assert.equal(response.status, 200)
+  const added = bySlot(engine.requests.at(-1)!.input.simulation!.equipment).WEAPON!
+  assert.deepEqual(
+    {
+      itemId: added.itemId,
+      itemGradeName: added.itemGradeName,
+      reinforce: added.reinforce,
+      amplificationName: added.amplificationName,
+      enchant: added.enchant
+    },
+    {
+      itemId: GREATSWORD_STAR,
+      itemGradeName: '최상급',
+      reinforce: 10,
+      amplificationName: '차원의 힘',
+      enchant: { status: [{ name: '힘', value: 100 }] }
+    }
+  )
+})
+
 const invalidAddedWeaponCases: readonly (readonly [string, Item])[] = [
   ['직업이 낄 수 없는 무기 종류의 선택지', { variantId: BEAMSWORD_RELEASE }],
   ['선택지 없는 조율', { tune: 1 }],
   ['선택지 없는 해방 수치', { release: 100 }],
   ['최대 단계를 넘는 조율', { variantId: GREATSWORD_STAR, tune: 4 }],
   ['해방 계열이 아닌 선택지의 해방 수치', { variantId: GREATSWORD_STAR, release: 100 }],
-  ['강화', { variantId: GREATSWORD_STAR, reinforce: 10 }],
-  ['증폭', { variantId: GREATSWORD_STAR, amplified: true }],
-  ['마법부여', { variantId: GREATSWORD_STAR, enchantId: 'WEAPON:10316079:dealer' }]
+  ['선택지 없는 강화', { reinforce: 10 }],
+  ['선택지 없는 마법부여', { enchantId: 'WEAPON:10316079:dealer' }]
 ]
 
 for (const [name, fields] of invalidAddedWeaponCases) {
@@ -3218,7 +3245,7 @@ for (const [name, fields] of invalidAddedWeaponCases) {
   })
 }
 
-test('비어 있는 장비 부위는 주 세트의 선택지로 강화, 마법부여 없는 최상급 장비를 더한다', async (t) => {
+test('비어 있는 장비 부위는 주 세트의 선택지로 최상급 장비를 더하고, 강화, 마법부여를 고르지 않으면 싣지 않는다', async (t) => {
   const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
   payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
     ({ slotId }) => slotId !== 'JACKET'
@@ -3270,7 +3297,7 @@ test('0.16.0 전 엔진에 비어 있는 장비 부위를 더한 요청을 보�
   assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
 })
 
-test('비어 있는 장비 부위에 강화를 보내면 엔진을 부르지 않고 거절한다', async (t) => {
+test('비어 있는 장비 부위에 더한 장비에는 강화, 증폭, 마법부여를 함께 실을 수 있다', async (t) => {
   const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
   payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
     ({ slotId }) => slotId !== 'JACKET'
@@ -3284,9 +3311,43 @@ test('비어 있는 장비 부위에 강화를 보내면 엔진을 부르지 않
         ...bareChange,
         slotId: 'JACKET',
         reinforce: 10,
+        amplified: true,
+        enchantId: DEALER_JACKET_ID,
         variantId: PURIFICATION_EPIC_JACKET
       }
     ]
+  })
+
+  assert.equal(response.status, 200)
+  const added = bySlot(engine.requests.at(-1)!.input.simulation!.equipment).JACKET!
+  assert.deepEqual(
+    {
+      itemId: added.itemId,
+      itemGradeName: added.itemGradeName,
+      reinforce: added.reinforce,
+      amplificationName: added.amplificationName,
+      enchant: added.enchant
+    },
+    {
+      itemId: PURIFICATION_EPIC_JACKET,
+      itemGradeName: '최상급',
+      reinforce: 10,
+      amplificationName: '차원의 힘',
+      enchant: DEALER_JACKET_ENCHANT
+    }
+  )
+})
+
+test('장비를 더하지 않는 빈 부위에 강화나 마법부여만 보내면 엔진을 부르지 않고 거절한다', async (t) => {
+  const { payloads, details, path } = fixture('dealer-blade', undefined, equipmentItemDetails)
+  payloads.equipment.equipment = (payloads.equipment.equipment as Item[]).filter(
+    ({ slotId }) => slotId !== 'JACKET'
+  )
+  const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
+  const origin = await listen(t, { details, ...engine.options })
+
+  const response = await simulate(origin, path, {
+    equipment: [{ ...bareChange, slotId: 'JACKET', reinforce: 10, enchantId: DEALER_JACKET_ID }]
   })
 
   assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
