@@ -104,7 +104,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `job_skill_adoption`: worker job이 계산한 전직, 역할별 최신 스킬 채택 수와 스킬 체인 조합 상위 5개
 - `batch_neople_keys`: worker가 쓰는 batch Neople key와 켜짐 여부, 거절 시각
 - `worker_events`: worker가 남긴 이벤트(Neople 실패, 잡 시작과 끝 등) 한 번이 한 행
-- `lab_items`: 실험실 화면에 보일 아이템. 종류, 역할, 등급, 아이템 이름마다 한 행
+- `lab_items`: 실험실 화면에 보일 아이템. 종류, 역할, 등급, 아이템 이름마다 한 행. 특수 재화로 교환하는 아이템은 재화와 개수를 함께 둡니다
+- `lab_currencies`: 실험실 아이템을 교환하는 특수 재화의 이름과 아이콘 이미지
 - `auction_prices`: 아이템 이름마다 경매장 최저가의 최신 값 한 행. 매물이 없으면 가격 열이 비고 확인한 시각만 있습니다
 
 ## 검증
