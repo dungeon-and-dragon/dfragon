@@ -88,14 +88,28 @@ export const batchKeyListSchema = z.object({ keys: z.array(batchKeySchema) })
 
 export const batchKeyAdditionSchema = z.object({ id: z.int().positive() })
 
+const labItemCostSchema = z.object({ currencyId: z.int().positive(), count: z.int().positive() })
+
+const labItemSchema = z.object({ itemName: z.string(), cost: labItemCostSchema.nullable() })
+
 const labItemGroupSchema = z.object({
   category: z.string(),
   role: z.string(),
   tier: z.string(),
-  itemNames: z.array(z.string())
+  items: z.array(labItemSchema)
 })
 
 export const labItemListSchema = z.object({ groups: z.array(labItemGroupSchema) })
+
+const labCurrencySchema = z.object({
+  id: z.int().positive(),
+  name: z.string(),
+  updatedAt: timestamp
+})
+
+export const labCurrencyListSchema = z.object({ currencies: z.array(labCurrencySchema) })
+
+export const labCurrencyAdditionSchema = z.object({ id: z.int().positive() })
 
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
 
@@ -110,5 +124,9 @@ export type QueueList = z.infer<typeof queueListSchema>
 export type Collection = z.infer<typeof collectionSchema>
 export type BatchKey = z.infer<typeof batchKeySchema>
 export type BatchKeyList = z.infer<typeof batchKeyListSchema>
+export type LabItemCost = z.infer<typeof labItemCostSchema>
+export type LabItem = z.infer<typeof labItemSchema>
 export type LabItemGroup = z.infer<typeof labItemGroupSchema>
+export type LabCurrency = z.infer<typeof labCurrencySchema>
+export type LabCurrencyList = z.infer<typeof labCurrencyListSchema>
 export type LabItemList = z.infer<typeof labItemListSchema>

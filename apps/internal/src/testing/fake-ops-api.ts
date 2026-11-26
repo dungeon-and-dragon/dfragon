@@ -40,11 +40,22 @@ export type BatchKeyBody = {
   rejectedAt: string | null
 }
 
+export type LabItemBody = {
+  itemName: string
+  cost: { currencyId: number; count: number } | null
+}
+
 export type LabItemGroupBody = {
   category: string
   role: string
   tier: string
-  itemNames: string[]
+  items: LabItemBody[]
+}
+
+export type LabCurrencyBody = {
+  id: number
+  name: string
+  updatedAt: string
 }
 
 export type RecordedRequest = {
@@ -102,6 +113,7 @@ function json(status: number, body: unknown): Response {
 const API_PREFIX_PATTERN = /^\/api\//
 const JOB_ACTION_PATH_PATTERN = /^jobs\/([^/]+)\/(runs|pause|resume)$/
 const BATCH_KEY_PATH_PATTERN = /^batch-neople-keys\/(\d+)(?:\/(enable|disable))?$/
+const LAB_CURRENCY_PATH_PATTERN = /^lab-currencies\/(\d+)$/
 
 const failure = (status: number, code: string) => json(status, { error: { code } })
 
@@ -119,6 +131,9 @@ export class FakeOpsApi {
   collection: CollectionBody = { waiting: 0, oldestQueuedAt: null, failures: [] }
   batchKeys: BatchKeyBody[] = []
   labItems: LabItemGroupBody[] = []
+  labCurrencies: LabCurrencyBody[] = []
+  labCurrencyIcons = new Map<number, string>()
+  now = () => new Date().toISOString()
   requests: RecordedRequest[] = []
   private nextRunId = 1000
   private nextBatchKeyId = 100
@@ -194,6 +209,20 @@ export class FakeOpsApi {
 
     if (method === 'PUT' && path === 'lab-items') {
       return this.replaceLabItems(body as LabItemGroupBody)
+    }
+
+    if (method === 'GET' && path === 'lab-currencies') {
+      return json(200, { currencies: this.labCurrencies })
+    }
+
+    if (method === 'POST' && path === 'lab-currencies') {
+      return this.addLabCurrency(body as { name: string; icon: string })
+    }
+
+    if (method === 'PUT' && LAB_CURRENCY_PATH_PATTERN.test(path)) {
+      const [, id] = LAB_CURRENCY_PATH_PATTERN.exec(path) ?? []
+
+      return this.updateLabCurrency(Number(id), body as { name: string; icon?: string })
     }
 
     if (BATCH_KEY_PATH_PATTERN.test(path)) {
@@ -297,7 +326,36 @@ export class FakeOpsApi {
       ({ category, role, tier }) =>
         category !== group.category || role !== group.role || tier !== group.tier
     )
-    this.labItems = group.itemNames.length > 0 ? [...others, group] : others
+    this.labItems = group.items.length > 0 ? [...others, group] : others
+
+    return new Response(null, { status: 204 })
+  }
+
+  /** 운영 app처럼 이름이 겹치면 409로 답한다. 아이콘 형식 검증은 운영 app 테스트가 맡는다. */
+  private addLabCurrency({ name, icon }: { name: string; icon: string }): Response {
+    if (this.labCurrencies.some((currency) => currency.name === name)) {
+      return failure(409, 'LAB_CURRENCY_DUPLICATE')
+    }
+
+    const id = this.labCurrencies.length + 1
+    this.labCurrencies = [...this.labCurrencies, { id, name, updatedAt: this.now() }]
+    this.labCurrencyIcons.set(id, icon)
+
+    return json(201, { id })
+  }
+
+  private updateLabCurrency(id: number, { name, icon }: { name: string; icon?: string }): Response {
+    if (this.labCurrencies.some((currency) => currency.name === name && currency.id !== id)) {
+      return failure(409, 'LAB_CURRENCY_DUPLICATE')
+    }
+
+    this.labCurrencies = this.labCurrencies.map((currency) =>
+      currency.id === id ? { ...currency, name, updatedAt: this.now() } : currency
+    )
+
+    if (icon !== undefined) {
+      this.labCurrencyIcons.set(id, icon)
+    }
 
     return new Response(null, { status: 204 })
   }

@@ -1,3 +1,5 @@
+import type { LabItemPriceTarget } from '@dfragon/database'
+
 export interface LabItemRepository {
-  readItemNames(): Promise<string[]>
+  readPriceTargets(): Promise<LabItemPriceTarget[]>
 }

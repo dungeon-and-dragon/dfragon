@@ -7,6 +7,7 @@ import {
   characterSectionSchemas,
   characterSkillStyleSchema,
   charactersFameSchema,
+  itemSearchSchema,
   itemShopSchema,
   jobsSchema,
   multiItemsSchema,
@@ -43,6 +44,12 @@ export interface AuctionQuery {
   itemName: string
   wordType: 'match'
   sort: 'unitPrice:asc'
+  limit: number
+}
+
+export interface ItemSearchQuery {
+  itemName: string
+  wordType: 'match'
   limit: number
 }
 
@@ -102,6 +109,8 @@ function makeClient(transport: Transport) {
         signal,
         searchParams: { itemIds: itemIds.join(',') }
       }),
+    searchItems: (query: ItemSearchQuery) =>
+      transport.get('/df/items', itemSearchSchema, { searchParams: { ...query } }),
     itemShop: (itemId: string, signal: AbortSignal) =>
       transport.get(`/df/items/${encodeURIComponent(itemId)}/shop`, itemShopSchema, { signal }),
     auction: (query: AuctionQuery) =>

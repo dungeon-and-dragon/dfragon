@@ -62,6 +62,9 @@ function fakeKeys(
     auction: async () => {
       throw new Error('이 테스트는 경매장을 부르지 않는다')
     },
+    searchItems: async () => {
+      throw new Error('이 테스트는 아이템 검색을 부르지 않는다')
+    },
     servers: async () => {
       throw new Error('이 테스트는 서버 목록을 부르지 않는다')
     },
@@ -296,6 +299,7 @@ test('먼저 내보낼 요청은 key의 속도 제한에서도 먼저 내보내�
     character: unexpectedRequest,
     multiItems: unexpectedRequest,
     auction: unexpectedRequest,
+    searchItems: unexpectedRequest,
     servers: unexpectedRequest,
     jobs: unexpectedRequest,
     charactersFame: unexpectedRequest,

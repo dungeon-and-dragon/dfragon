@@ -27,6 +27,7 @@ export function dispatchNeople(dispatch: NeopleDispatch): WorkerNeople {
       dispatch((neople) => neople.charactersFame(serverId, query)),
     jobs: () => dispatch((neople) => neople.jobs()),
     multiItems: (itemIds, signal) => dispatch((neople) => neople.multiItems(itemIds, signal)),
+    searchItems: (query) => dispatch((neople) => neople.searchItems(query)),
     servers: () => dispatch((neople) => neople.servers())
   }
 }

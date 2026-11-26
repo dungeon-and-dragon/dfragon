@@ -15,6 +15,7 @@ Neople Open API(`api.neople.co.kr`)와 캐릭터 이미지 서버(`img-api.neopl
   - `characterSkillStyle(identity)`: 캐릭터 스킬 스타일. `characterSkillStyleSchema`로 바꾼 값을 돌려주며 schema에 맞지 않으면 `api` 실패입니다.
   - `characterTimeline(identity, query)`: 타임라인 한 페이지. 다음 페이지는 `{ next }`만 보냅니다.
   - `multiItems(itemIds, signal)`: 여러 아이템의 공용 상세. 행은 호출한 쪽이 고르도록 `unknown[]`로 돌려줍니다.
+  - `searchItems(query)`: 이름으로 찾은 아이템의 itemId, 이름, 등급
   - `itemShop(itemId, signal)`: 아이템의 오늘의 등급
   - `skill(jobId, skillId, signal)`: 스킬 상세
 - `createNeopleImageClient()`: 이미지 서버 client를 만듭니다. `characterImage(identity, signal)`는 API key 없이 PNG를 받아 `ArrayBuffer`로 돌려줍니다.

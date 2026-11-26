@@ -3,6 +3,8 @@ import { bodyLimit } from 'hono/body-limit'
 import { OpsFailure } from '#domain/failure.js'
 
 const BODY_LIMIT_BYTES = 16 * 1024
+// 재화 아이콘은 base64로 JSON에 실어 받으므로 아이콘 상한(64KiB)의 4/3배와 이름을 담을 만큼 둔다.
+const ICON_BODY_LIMIT_BYTES = 96 * 1024
 const SAFE_METHODS = new Set(['GET', 'HEAD'])
 
 // 로그인이 없는 운영 포트라, 소유자 브라우저에서 다른 사이트가 form으로 보내는 요청을 preflight가 필요한 JSON으로만 받아 막는다.
@@ -14,11 +16,15 @@ export const requireJsonContentType: MiddlewareHandler = async (c, next) => {
   await next()
 }
 
-export const limitJsonBody = bodyLimit({
-  maxSize: BODY_LIMIT_BYTES,
-  onError: () => {
-    throw new OpsFailure('request')
-  }
+function rejectLargeBody(): never {
+  throw new OpsFailure('request')
+}
+
+export const limitJsonBody = bodyLimit({ maxSize: BODY_LIMIT_BYTES, onError: rejectLargeBody })
+
+export const limitIconJsonBody = bodyLimit({
+  maxSize: ICON_BODY_LIMIT_BYTES,
+  onError: rejectLargeBody
 })
 
 export async function readJsonBody(c: Context): Promise<unknown> {

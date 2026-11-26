@@ -1,4 +1,10 @@
-import { type DatabaseClient, type LabItemPriceRow, readLabItemPrices } from '@dfragon/database'
+import {
+  type DatabaseClient,
+  type LabCurrencyIcon,
+  type LabItemPriceRow,
+  readLabCurrencyIcon,
+  readLabItemPrices
+} from '@dfragon/database'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
 
 export class DatabaseLabItemRepository implements LabItemRepository {
@@ -6,5 +12,9 @@ export class DatabaseLabItemRepository implements LabItemRepository {
 
   readLabItemPrices(): Promise<LabItemPriceRow[]> {
     return readLabItemPrices(this.client)
+  }
+
+  readCurrencyIcon(id: number): Promise<LabCurrencyIcon | null> {
+    return readLabCurrencyIcon(this.client, id)
   }
 }

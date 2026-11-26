@@ -147,10 +147,24 @@ function filledApi(): FakeOpsApi {
   api.addBatchKey('batch-1', 'synthetic-0000-a1b2')
   api.addBatchKey('batch-2', 'synthetic-0000-c3d4', { enabled: false })
   api.addBatchKey('batch-3', 'synthetic-0000-e5f6', { enabled: false, rejectedAt })
-  // 실험실 아이템 이름은 지어낸 이름이다.
+  // 실험실 아이템과 재화 이름은 지어낸 이름이다.
+  api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: minutesAgo(30) }]
   api.labItems = [
-    { category: 'WEAPON', role: 'dealer', tier: '종결', itemNames: ['합성 카드 A', '합성 카드 B'] },
-    { category: 'TITLE', role: 'all', tier: '종결', itemNames: ['합성 칭호 A'] }
+    {
+      category: 'WEAPON',
+      role: 'dealer',
+      tier: '종결',
+      items: [
+        { itemName: '합성 카드 A', cost: null },
+        { itemName: '합성 보주', cost: { currencyId: 1, count: 5 } }
+      ]
+    },
+    {
+      category: 'TITLE',
+      role: 'all',
+      tier: '종결',
+      items: [{ itemName: '합성 칭호 A', cost: null }]
+    }
   ]
 
   return api
