@@ -4,11 +4,15 @@ import { act, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { PageNoteTarget } from '#shared/ui/page-note-target'
+import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
+import { ITEM_DETAIL_URL } from '#widgets/item-tooltip/api/item-detail.handlers'
+import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
+import { LAB_CURRENCY_ICON_PATH } from './api/lab-items.fixture'
 import { LAB_ITEMS_URL, labItemsHandlers } from './api/lab-items.handlers'
-import type { LabItems } from './api/useLabItems'
+import type { LabItemsResponse } from './api/useLabItems'
 import { LabEnchantsPage } from './LabEnchantsPage'
 
 let container: HTMLDivElement
@@ -100,11 +104,24 @@ it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이�
   expect(cellTexts(enchantTable())).toEqual([
     ['무기', '종결', '멸절의 폭룡왕 바칼 카드', '1,480,000,000'],
     ['준종결', '허망한 맹신, 호스디그 카드', '-'],
+    ['합성 무기 보주', '×5'],
     ['상의', '종결', '천해천 딜러 상의 카드 (최종 데미지 3%)', '268,000,000'],
     ['준종결', '중천 딜러 상의 카드 (최종 데미지 2%)', '41,500,000']
   ])
   const weapon = enchantTable().querySelector('tbody th')!
-  expect(weapon.getAttribute('rowspan')).toBe('2')
+  expect(weapon.getAttribute('rowspan')).toBe('3')
+})
+
+it('재화로 교환하는 아이템의 가격 칸은 경매장 가격 대신 재화 아이콘과 개수만 보인다', async () => {
+  await renderLoaded()
+
+  const row = nameOf(enchantTable(), '합성 무기 보주').closest('tr')!
+  const priceCell = row.querySelector('td:last-child')!
+  const icon = priceCell.querySelector('img')!
+
+  expect(priceCell.textContent).toBe('×5')
+  expect(icon.getAttribute('src')).toBe(`${API_BASE_URL}${LAB_CURRENCY_ICON_PATH}`)
+  expect(icon.getAttribute('alt')).toBe('합성 교환 주화')
 })
 
 it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, 크리쳐, 오라 표는 그대로다', async () => {
@@ -143,7 +160,8 @@ it('마지막 업데이트는 마법부여와 칭호 묶음을 통틀어 가장 
     itemId: null,
     itemRarity: null,
     unitPrice: null,
-    checkedAt
+    checkedAt,
+    cost: null
   })
   server.use(
     http.get(LAB_ITEMS_URL, () =>
@@ -162,7 +180,7 @@ it('마지막 업데이트는 마법부여와 칭호 묶음을 통틀어 가장 
             items: [item('합성 칭호', '2026-11-26T05:35:00.000Z')]
           }
         ]
-      } satisfies LabItems)
+      } satisfies LabItemsResponse)
     )
   )
   await render()
@@ -201,4 +219,63 @@ it('묶음이 없으면 역할 칩 없이 카드가 없다는 한 줄만 보인�
   await vi.waitFor(() => expect(container.textContent).toContain('마법부여 카드가 없습니다.'))
   expect(container.querySelector('[aria-label="역할"]')).toBeNull()
   expect(container.querySelector('table')).toBeNull()
+})
+
+it('itemId가 있는 아이템 이름에 마우스를 올리면 그 아이템 정보를 tooltip으로 보이고, 재화 아이콘과 itemId가 없는 줄에는 tooltip이 없다', async () => {
+  const requestedItemIds: string[] = []
+
+  server.use(
+    http.get(ITEM_DETAIL_URL, ({ params }) => {
+      const itemId = String(params.itemId)
+      requestedItemIds.push(itemId)
+
+      return HttpResponse.json(storyItemDetail(itemId))
+    }),
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '준종결',
+            items: [
+              {
+                itemName: '합성 보주',
+                itemId: 'synthetic-orb',
+                itemRarity: '유니크',
+                unitPrice: null,
+                checkedAt: null,
+                cost: { currencyName: '합성 주화', count: 5, iconPath: LAB_CURRENCY_ICON_PATH }
+              },
+              {
+                itemName: '합성 카드',
+                itemId: null,
+                itemRarity: null,
+                unitPrice: null,
+                checkedAt: null,
+                cost: null
+              }
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  const hover = (element: Element) =>
+    act(async () => {
+      element.dispatchEvent(new MouseEvent('mouseenter'))
+    })
+  // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
+  await hover(nameOf(enchantTable(), '합성 카드').parentElement!)
+  await hover(enchantTable().querySelector('td:last-child img')!)
+  expect(document.querySelector('.tooltip-item')).toBeNull()
+
+  await hover(nameOf(enchantTable(), '합성 보주').parentElement!)
+  expect(document.querySelector('.tooltip-item')).not.toBeNull()
+
+  await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
+  expect(requestedItemIds).toEqual(['synthetic-orb'])
 })
