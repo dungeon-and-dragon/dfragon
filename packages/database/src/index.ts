@@ -21,6 +21,8 @@ export {
   recordItemDictionary
 } from './item-dictionary.js'
 export type { ItemDictionaryEntry, UnlistedAcquisitionQuery } from './item-dictionary.js'
+export { readLabItemGroups, replaceLabItemGroup } from './lab-item.js'
+export type { LabItemGroup } from './lab-item.js'
 export {
   TIMELINE_SYNC_REQUEST_KINDS,
   claimTimelineSyncRequests,

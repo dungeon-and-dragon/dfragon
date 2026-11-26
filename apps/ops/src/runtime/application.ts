@@ -3,6 +3,7 @@ import {
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
   DatabaseJobRepository,
+  DatabaseLabItemRepository,
   DatabaseQueueRepository
 } from '#infrastructure/database/index.js'
 import { createOpsHttpApp } from './ops-app.js'
@@ -16,6 +17,7 @@ export function createOpsRuntime(database: DatabaseConfiguration) {
     readQueueCounts: () => queues.readCounts(),
     collection: new DatabaseCollectionRepository(client),
     batchNeopleKeys: new DatabaseBatchNeopleKeyRepository(client),
+    labItems: new DatabaseLabItemRepository(client),
     close: () => client.$disconnect()
   })
 }
