@@ -1,12 +1,12 @@
 # DFragon 운영 app
 
-`apps/ops`는 운영 화면(`apps/internal`)이 부르는 job, 타임라인 queue 현황, 수집 대기열, batch Neople key 경로(`/api/*`)를 내는 Hono app입니다.
+`apps/ops`는 운영 화면(`apps/internal`)이 부르는 job, 타임라인 queue 현황, 수집 대기열, batch Neople key, 실험실 아이템과 재화 경로(`/api/*`)를 내는 Hono app입니다.
 로그인이 없으므로 공개 인터넷에 열지 않습니다.
 
 ## 코드 위치
 
 `src/`는 API와 같은 계층 폴더로 나눕니다(ADR 0047, ADR 0057).
-기능(`jobs`, `queues`, `collection`, `batch-neople-keys`)마다 아래 파일을 둡니다.
+기능(`jobs`, `queues`, `collection`, `batch-neople-keys`, `lab-items`, `lab-currencies`)마다 아래 파일을 둡니다.
 계층 사이의 import 방향과 presentation의 Repository import는 `pnpm lint`가 막습니다.
 
 | 역할 | 파일 | 내용 |
