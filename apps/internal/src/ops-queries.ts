@@ -6,7 +6,7 @@ import {
   type UseMutationResult
 } from '@tanstack/react-query'
 import { createContext, use } from 'react'
-import type { LabCurrencyDraft, OpsClient } from '#ops-api/ops-client'
+import type { LabCurrencyDraft, LabItemDetailDraft, OpsClient } from '#ops-api/ops-client'
 import type { LabItemGroup } from '#ops-api/ops-schemas'
 
 export const REFRESH_INTERVAL_MS = 1_000
@@ -17,6 +17,7 @@ const COLLECTION_KEY = ['collection'] as const
 const BATCH_KEYS_KEY = ['batch-keys'] as const
 const LAB_ITEMS_KEY = ['lab-items'] as const
 const LAB_CURRENCIES_KEY = ['lab-currencies'] as const
+const LAB_ITEM_DETAILS_KEY = ['lab-item-details'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -199,5 +200,25 @@ export function useUpdateLabCurrency(): UseMutationResult<void, Error, LabCurren
     mutationFn: ({ id, icon, ...currency }: LabCurrencyUpdate) =>
       client.updateLabCurrency(id, currency, icon),
     onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CURRENCIES_KEY })
+  })
+}
+
+export function useLabItemDetails() {
+  const client = useOpsClient()
+
+  return useQuery({ queryKey: LAB_ITEM_DETAILS_KEY, queryFn: client.readLabItemDetails })
+}
+
+export function useLabItemIconUrl(): OpsClient['labItemIconUrl'] {
+  return useOpsClient().labItemIconUrl
+}
+
+export function useSaveLabItemDetail(): UseMutationResult<void, Error, LabItemDetailDraft> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (detail: LabItemDetailDraft) => client.saveLabItemDetail(detail),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_ITEM_DETAILS_KEY })
   })
 }
