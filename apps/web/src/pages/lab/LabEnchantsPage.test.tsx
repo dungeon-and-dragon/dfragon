@@ -416,14 +416,16 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
   expect(requestedItemIds).toEqual([])
 })
 
-it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이며 딜러 탭에서는 딜러 옵션만 강조하고, 카드가 아니면 보이지 않는다', async () => {
+it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
   server.use(itemDetailHandlers.detail)
   await renderLoaded()
   const card = nameOf(enchantTable(), '멸절의 폭룡왕 바칼 카드').parentElement!
 
   await hover(card)
 
-  await vi.waitFor(() => expect(document.body.textContent).toContain('부여 부위 무기'))
+  await vi.waitFor(() =>
+    expect(document.querySelector('.tooltip-item [data-card-slots]')?.textContent).toBe('무기')
+  )
 
   const rows = [...document.querySelectorAll('.tooltip-item [data-card-option]')]
   const lines = rows.map((row) => [...row.children].map((cell) => cell.textContent).join(' '))
@@ -448,7 +450,8 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위�
   await hover(nameOf(accessoryTable(), '프로스트의 전설').parentElement!)
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
-  expect(document.body.textContent).not.toContain('부여 부위')
+  expect(document.querySelector('.tooltip-item [data-card-slots]')).toBeNull()
+  expect(document.querySelector('.tooltip-item [data-card-option]')).toBeNull()
 })
 
 it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화를, 버퍼 탭은 올스탯 묶음을 이름과 값 모두 강조한다', async () => {
@@ -470,12 +473,13 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
       }
     ]
   })
+
   server.use(
-    http.get(LAB_ITEMS_URL, () =>
-      HttpResponse.json({
-        groups: [card('dealer'), card('buffer')]
-      } satisfies LabItemsResponse)
-    ),
+    http.get(LAB_ITEMS_URL, () => {
+      const groups = [card('dealer'), card('buffer')]
+
+      return HttpResponse.json({ groups } satisfies LabItemsResponse)
+    }),
     http.get(ITEM_DETAIL_URL, () =>
       HttpResponse.json({
         ...storyItemDetail(itemId),
@@ -499,13 +503,16 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
 
   const emphasizedCells = async () => {
     const name = nameOf(enchantTable(), '합성 양용 카드').parentElement!
+
     await hover(name)
     await vi.waitFor(() =>
       expect(document.querySelector('.tooltip-item [data-card-option]')).not.toBeNull()
     )
+
     const cells = [...document.querySelectorAll('.tooltip-item [data-card-option] > span')]
       .filter((cell) => cell.classList.contains('text-game-enchant'))
       .map((cell) => cell.textContent)
+
     await leave(name)
     await vi.waitFor(() => expect(document.querySelector('.tooltip-item')).toBeNull())
 
