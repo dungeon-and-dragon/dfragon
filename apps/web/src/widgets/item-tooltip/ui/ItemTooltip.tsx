@@ -30,7 +30,9 @@ function CardOptions({
 
   return (
     <div className="flex flex-col gap-2 border-t border-line pt-2">
-      <p className="m-0 text-fg-muted">{`부여 부위 ${card.slots.join(', ')}`}</p>
+      <p data-card-slots="" className="m-0 text-fg-muted">
+        {card.slots.join(', ')}
+      </p>
       <div className="grid gap-x-2" style={{ gridTemplateColumns }}>
         {rows.map(({ name, values, emphasized }) => {
           const tone = emphasized ? 'text-game-enchant' : ''
