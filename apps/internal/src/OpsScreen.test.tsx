@@ -129,6 +129,14 @@ function typeInto(input: HTMLInputElement, value: string): void {
   })
 }
 
+function selectOption(select: HTMLSelectElement, value: string): void {
+  const setValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set
+  act(() => {
+    setValue?.call(select, value)
+    select.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+}
+
 function statsJob() {
   return job({
     name: 'stats',
@@ -625,6 +633,10 @@ describe('batch key 패널', () => {
 const WEAPON_DEALER_FINAL = { category: 'WEAPON', role: 'dealer', tier: '종결' }
 const TITLE_FINAL = { category: 'TITLE', role: 'all', tier: '종결' }
 
+function unpriced(itemName: string) {
+  return { itemName, cost: null }
+}
+
 function labGroup(title: string): HTMLFieldSetElement {
   const group = [...section('실험실 아이템').querySelectorAll('fieldset')].find(
     (candidate) => candidate.querySelector('legend')?.textContent === title
@@ -668,10 +680,23 @@ async function uploadCandidateFile(content: unknown): Promise<void> {
     throw new Error('후보 파일 입력이 없습니다.')
   }
   const text = typeof content === 'string' ? content : JSON.stringify(content)
-  const file = new File([text], 'candidates.json', { type: 'application/json' })
+  await chooseFile(input, new File([text], 'candidates.json', { type: 'application/json' }))
+}
+
+async function chooseFile(input: HTMLInputElement, file: File): Promise<void> {
   Object.defineProperty(input, 'files', { configurable: true, value: [file] })
   act(() => input.dispatchEvent(new Event('change', { bubbles: true })))
   await flush()
+}
+
+function labelled<Element extends HTMLElement>(scope: ParentNode, label: string): Element {
+  const element = scope.querySelector<Element>(`[aria-label="${label}"]`)
+
+  if (element === null) {
+    throw new Error(`${label} 입력이 없습니다.`)
+  }
+
+  return element
 }
 
 async function openLabItems(api: FakeOpsApi): Promise<void> {
@@ -683,7 +708,9 @@ async function openLabItems(api: FakeOpsApi): Promise<void> {
 describe('실험실 아이템 패널', () => {
   it('후보 파일을 올리면 묶음별 후보가 보이고 DB에 있는 이름만 체크되며 쓰기 요청은 가지 않는다', async () => {
     const api = new FakeOpsApi()
-    api.labItems = [{ ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 A', '합성 카드 DB'] }]
+    api.labItems = [
+      { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 카드 A'), unpriced('합성 카드 DB')] }
+    ]
     await openLabItems(api)
 
     await uploadCandidateFile({
@@ -723,14 +750,14 @@ describe('실험실 아이템 패널', () => {
     await click(buttonIn(section('실험실 아이템'), '저장'))
 
     await waitFor(() =>
-      expect(api.labItems).toEqual([{ ...TITLE_FINAL, itemNames: ['합성 칭호 새 이름'] }])
+      expect(api.labItems).toEqual([{ ...TITLE_FINAL, items: [unpriced('합성 칭호 새 이름')] }])
     )
     expect(api.writes()).toMatchObject([
       {
         method: 'PUT',
         path: '/api/lab-items',
         contentType: 'application/json',
-        body: { ...TITLE_FINAL, itemNames: ['합성 칭호 새 이름'] }
+        body: { ...TITLE_FINAL, items: [unpriced('합성 칭호 새 이름')] }
       }
     ])
     await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
@@ -740,8 +767,8 @@ describe('실험실 아이템 패널', () => {
   it('두 묶음 가운데 한 묶음만 체크가 바뀌면 그 묶음의 PUT 한 번만 보낸다', async () => {
     const api = new FakeOpsApi()
     api.labItems = [
-      { ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 A', '합성 카드 B'] },
-      { ...TITLE_FINAL, itemNames: ['합성 칭호 A'] }
+      { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 카드 A'), unpriced('합성 카드 B')] },
+      { ...TITLE_FINAL, items: [unpriced('합성 칭호 A')] }
     ]
     await openLabItems(api)
 
@@ -752,10 +779,13 @@ describe('실험실 아이템 패널', () => {
 
     await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
     expect(api.writes()).toHaveLength(1)
-    expect(api.writes()[0]?.body).toEqual({ ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 B'] })
+    expect(api.writes()[0]?.body).toEqual({
+      ...WEAPON_DEALER_FINAL,
+      items: [unpriced('합성 카드 B')]
+    })
     expect(api.labItems).toEqual([
-      { ...TITLE_FINAL, itemNames: ['합성 칭호 A'] },
-      { ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 B'] }
+      { ...TITLE_FINAL, items: [unpriced('합성 칭호 A')] },
+      { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 카드 B')] }
     ])
   })
 
@@ -786,6 +816,120 @@ describe('실험실 아이템 패널', () => {
       expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 A', false]])
     }
 
+    expect(api.writes()).toEqual([])
+  })
+})
+
+// 합성 그림이다. 화면은 파일을 base64로 바꿔 보내기만 하고, 형식 판정은 운영 app 테스트가 맡는다.
+const ICON_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x00, 0xff])
+const ICON_BASE64 = 'iVBORwD/'
+
+describe('실험실 재화와 아이템 비용', () => {
+  it('재화 이름과 아이콘 파일을 넣어 추가하면 base64 아이콘과 함께 POST하고 목록에 보인다', async () => {
+    const api = new FakeOpsApi()
+    await openLabItems(api)
+    const currencies = section('실험실 재화')
+
+    typeInto(labelled(currencies, '새 재화 이름'), ' 합성 재화 ')
+    await chooseFile(
+      labelled(currencies, '새 재화 아이콘'),
+      new File([ICON_BYTES], 'coin.png', { type: 'image/png' })
+    )
+    await click(buttonIn(currencies, '추가'))
+
+    await waitFor(() => expect(api.labCurrencies.map(({ name }) => name)).toEqual(['합성 재화']))
+    expect(api.writes()).toMatchObject([
+      {
+        method: 'POST',
+        path: '/api/lab-currencies',
+        contentType: 'application/json',
+        body: { name: '합성 재화', icon: ICON_BASE64 }
+      }
+    ])
+    await waitFor(() =>
+      expect(labelled<HTMLInputElement>(section('실험실 재화'), '합성 재화 이름').value).toBe(
+        '합성 재화'
+      )
+    )
+    expect(section('실험실 재화').querySelector('img')?.getAttribute('src')).toMatch(
+      /^http:\/\/ops\.test\/api\/lab-currencies\/1\/icon\?v=\d+$/
+    )
+  })
+
+  it('이미 있는 이름으로 재화를 고치면 겹친다는 문구를 보이고 바꾸지 않는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCurrencies = [
+      { id: 1, name: '합성 재화 A', updatedAt: NOW.toISOString() },
+      { id: 2, name: '합성 재화 B', updatedAt: NOW.toISOString() }
+    ]
+    await openLabItems(api)
+    const row = labelled(section('실험실 재화'), '합성 재화 B 재화')
+
+    typeInto(labelled(row, '합성 재화 B 이름'), '합성 재화 A')
+    await click(buttonIn(row, '저장'))
+
+    await waitFor(() =>
+      expect(row.querySelector('[role="alert"]')?.textContent).toBe('같은 이름의 재화가 있습니다.')
+    )
+    expect(api.labCurrencies.map(({ name }) => name)).toEqual(['합성 재화 A', '합성 재화 B'])
+  })
+
+  it('아이템 줄에서 재화와 개수를 고르면 그 묶음을 비용과 함께 PUT하고, 경매장으로 되돌리면 비용을 지운다', async () => {
+    const api = new FakeOpsApi()
+    api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: NOW.toISOString() }]
+    api.labItems = [
+      { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 보주'), unpriced('합성 카드 A')] }
+    ]
+    await openLabItems(api)
+    const group = labGroup('무기 딜러 종결')
+    await waitFor(() =>
+      expect(labelled(group, '합성 보주 재화').textContent).toContain('합성 재화')
+    )
+
+    selectOption(labelled(group, '합성 보주 재화'), '1')
+    typeInto(labelled(group, '합성 보주 개수'), '5')
+    await click(buttonIn(section('실험실 아이템'), '저장'))
+
+    const exchanged = { itemName: '합성 보주', cost: { currencyId: 1, count: 5 } }
+    await waitFor(() =>
+      expect(api.labItems).toEqual([
+        { ...WEAPON_DEALER_FINAL, items: [exchanged, unpriced('합성 카드 A')] }
+      ])
+    )
+    await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
+    expect(labelled<HTMLInputElement>(group, '합성 보주 개수').value).toBe('5')
+
+    selectOption(labelled(group, '합성 보주 재화'), '')
+    expect(group.querySelector('[aria-label="합성 보주 개수"]')).toBeNull()
+    await click(buttonIn(section('실험실 아이템'), '저장'))
+
+    await waitFor(() =>
+      expect(api.labItems).toEqual([
+        { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 보주'), unpriced('합성 카드 A')] }
+      ])
+    )
+    expect(api.writes().filter(({ path }) => path === '/api/lab-items')).toHaveLength(2)
+  })
+
+  it('재화 개수가 1 이상의 정수가 아니면 저장 버튼을 막는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: NOW.toISOString() }]
+    api.labItems = [{ ...TITLE_FINAL, items: [unpriced('합성 칭호 A')] }]
+    await openLabItems(api)
+    const group = labGroup('칭호 종결')
+    await waitFor(() =>
+      expect(labelled(group, '합성 칭호 A 재화').textContent).toContain('합성 재화')
+    )
+
+    selectOption(labelled(group, '합성 칭호 A 재화'), '1')
+
+    for (const count of ['0', '', '1.5']) {
+      typeInto(labelled(group, '합성 칭호 A 개수'), count)
+      expect(buttonIn(section('실험실 아이템'), '저장').disabled, count).toBe(true)
+    }
+
+    typeInto(labelled(group, '합성 칭호 A 개수'), '2')
+    expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(false)
     expect(api.writes()).toEqual([])
   })
 })
