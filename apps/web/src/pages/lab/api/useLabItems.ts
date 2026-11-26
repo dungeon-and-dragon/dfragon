@@ -8,11 +8,16 @@ export const LAB_ITEMS_PATH = '/lab/items'
 
 // API는 자기 origin 기준 경로를 주므로, 화면이 바로 쓰게 API 주소를 붙인다.
 const currencyCostSchema = z
-  .object({ currencyName: z.string(), count: z.number().int().positive(), iconPath: z.string() })
-  .transform(({ currencyName, count, iconPath }) => {
+  .object({
+    currencyName: z.string(),
+    description: z.string().nullable(),
+    count: z.number().int().positive(),
+    iconPath: z.string()
+  })
+  .transform(({ currencyName, description, count, iconPath }) => {
     const iconUrl = `${API_BASE_URL}${iconPath}`
 
-    return { currencyName, count, iconUrl }
+    return { currencyName, description, count, iconUrl }
   })
 
 const labItemsSchema = z.object({
