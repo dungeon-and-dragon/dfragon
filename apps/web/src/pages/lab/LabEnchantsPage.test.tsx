@@ -221,9 +221,47 @@ it('묶음이 없으면 역할 칩 없이 카드가 없다는 한 줄만 보인�
   expect(container.querySelector('table')).toBeNull()
 })
 
-it('itemId가 있는 아이템 이름에 마우스를 올리면 그 아이템 정보를 tooltip으로 보이고, 재화 아이콘과 itemId가 없는 줄에는 tooltip이 없다', async () => {
-  const requestedItemIds: string[] = []
+function exchangedItems(): LabItemsResponse {
+  return {
+    groups: [
+      {
+        category: 'WEAPON',
+        role: 'dealer',
+        tier: '준종결',
+        items: [
+          {
+            itemName: '합성 보주',
+            itemId: 'synthetic-orb',
+            itemRarity: '유니크',
+            unitPrice: null,
+            checkedAt: null,
+            cost: {
+              currencyName: '합성 주화',
+              description: '합성 설명\n둘째 줄',
+              count: 5,
+              iconPath: LAB_CURRENCY_ICON_PATH
+            }
+          },
+          {
+            itemName: '합성 카드',
+            itemId: null,
+            itemRarity: null,
+            unitPrice: null,
+            checkedAt: null,
+            cost: {
+              currencyName: '합성 동전',
+              description: null,
+              count: 2,
+              iconPath: LAB_CURRENCY_ICON_PATH
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
 
+async function renderExchanged(requestedItemIds: string[]): Promise<void> {
   server.use(
     http.get(ITEM_DETAIL_URL, ({ params }) => {
       const itemId = String(params.itemId)
@@ -231,51 +269,62 @@ it('itemId가 있는 아이템 이름에 마우스를 올리면 그 아이템 �
 
       return HttpResponse.json(storyItemDetail(itemId))
     }),
-    http.get(LAB_ITEMS_URL, () =>
-      HttpResponse.json({
-        groups: [
-          {
-            category: 'WEAPON',
-            role: 'dealer',
-            tier: '준종결',
-            items: [
-              {
-                itemName: '합성 보주',
-                itemId: 'synthetic-orb',
-                itemRarity: '유니크',
-                unitPrice: null,
-                checkedAt: null,
-                cost: { currencyName: '합성 주화', count: 5, iconPath: LAB_CURRENCY_ICON_PATH }
-              },
-              {
-                itemName: '합성 카드',
-                itemId: null,
-                itemRarity: null,
-                unitPrice: null,
-                checkedAt: null,
-                cost: null
-              }
-            ]
-          }
-        ]
-      } satisfies LabItemsResponse)
-    )
+    http.get(LAB_ITEMS_URL, () => HttpResponse.json(exchangedItems()))
   )
   await render()
   await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+}
 
-  const hover = (element: Element) =>
-    act(async () => {
-      element.dispatchEvent(new MouseEvent('mouseenter'))
-    })
-  // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
+// Base UI Tooltip은 trigger의 mouseenter, mouseleave를 직접 듣는다.
+async function hover(element: Element): Promise<void> {
+  await act(async () => {
+    element.dispatchEvent(new MouseEvent('mouseenter'))
+  })
+}
+
+async function leave(element: Element): Promise<void> {
+  await act(async () => {
+    element.dispatchEvent(new MouseEvent('mouseleave'))
+  })
+}
+
+function currencyIconOf(itemName: string): HTMLImageElement {
+  return nameOf(enchantTable(), itemName).closest('tr')!.querySelector('td:last-child img')!
+}
+
+function openTooltips(): string[] {
+  return [...document.querySelectorAll('.tooltip-item')].map((box) => box.textContent ?? '')
+}
+
+it('itemId가 있는 아이템 이름에 마우스를 올리면 그 아이템 정보를 tooltip으로 보이고, itemId가 없는 줄에는 tooltip이 없다', async () => {
+  const requestedItemIds: string[] = []
+  await renderExchanged(requestedItemIds)
+
   await hover(nameOf(enchantTable(), '합성 카드').parentElement!)
-  await hover(enchantTable().querySelector('td:last-child img')!)
-  expect(document.querySelector('.tooltip-item')).toBeNull()
+  expect(openTooltips()).toEqual([])
 
   await hover(nameOf(enchantTable(), '합성 보주').parentElement!)
-  expect(document.querySelector('.tooltip-item')).not.toBeNull()
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
   expect(requestedItemIds).toEqual(['synthetic-orb'])
+})
+
+it('재화 아이콘에 마우스를 올리면 아이템 정보를 받지 않고 재화 아이콘, 이름, 설명을 보이며, 설명이 없으면 이름만 보인다', async () => {
+  const requestedItemIds: string[] = []
+  await renderExchanged(requestedItemIds)
+
+  await hover(currencyIconOf('합성 보주'))
+
+  expect(openTooltips()).toEqual(['합성 주화합성 설명\n둘째 줄'])
+  const box = document.querySelector('.tooltip-item')!
+  expect(box.querySelector('img')?.getAttribute('src')).toBe(
+    `${API_BASE_URL}${LAB_CURRENCY_ICON_PATH}`
+  )
+
+  await leave(currencyIconOf('합성 보주'))
+  await vi.waitFor(() => expect(openTooltips()).toEqual([]))
+  await hover(currencyIconOf('합성 카드'))
+
+  expect(openTooltips()).toEqual(['합성 동전'])
+  expect(requestedItemIds).toEqual([])
 })
