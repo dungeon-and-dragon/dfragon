@@ -76,7 +76,8 @@ test('GET /items/:itemId는 Neople 아이템 상세를 툴팁 필드로 좁히�
       { name: '적중률', value: '15%' }
     ],
     explain: '[호위무사의 혼]\n장착 시 호위무사의 혼이 착용자를 보호합니다.',
-    flavorText: '방어는 최선의 공격이지'
+    flavorText: '방어는 최선의 공격이지',
+    card: null
   })
 })
 
@@ -98,7 +99,72 @@ test('상세 설명이 없거나 비어 있으면 짧은 설명을 쓰고, 없�
     fame: null,
     status: [],
     explain: null,
-    flavorText: null
+    flavorText: null,
+    card: null
+  })
+})
+
+// 카드 이름은 등급표에 있는 이름이고, cardInfo 모양은 Neople 실제 응답과 같다. 옵션 값은 그 응답의 값이다.
+const cardId = '0239b1478c2a8214e70eac57581cddd2'
+const cardRow = {
+  itemId: cardId,
+  itemName: '안개신의 무의식 카드',
+  itemRarity: '레전더리',
+  itemType: '카드',
+  itemStatus: [{ name: '모험가 명성', value: 210 }],
+  cardInfo: {
+    slots: [
+      { slotId: 'JACKET', slotName: '상의' },
+      { slotId: 'PANTS', slotName: '하의' }
+    ],
+    enchant: [
+      {
+        upgrade: 1,
+        status: [
+          { name: '힘', value: 105 },
+          { name: '캐스트속도', value: '6%' },
+          { name: '모험가 명성', value: 196 }
+        ]
+      },
+      {
+        upgrade: 0,
+        status: [
+          { name: '힘', value: 100 },
+          { name: '캐스트속도', value: '5%' },
+          { name: '모험가 명성', value: 196 }
+        ]
+      }
+    ]
+  }
+}
+
+test('카드는 부여 부위 이름과 강화 단계별 옵션을 낮은 단계부터 주고, 옵션 값은 숫자도 문자열로 준다', async (t) => {
+  const { fetchCatalog } = recordingCatalog([cardRow])
+  const origin = await startItemApp(t, fetchCatalog)
+
+  const response = await fetch(`${origin}/items/${cardId}`)
+  const { card } = (await response.json()) as { card: unknown }
+
+  assert.deepEqual(card, {
+    slots: ['상의', '하의'],
+    enchants: [
+      {
+        upgrade: 0,
+        status: [
+          { name: '힘', value: '100' },
+          { name: '캐스트속도', value: '5%' },
+          { name: '모험가 명성', value: '196' }
+        ]
+      },
+      {
+        upgrade: 1,
+        status: [
+          { name: '힘', value: '105' },
+          { name: '캐스트속도', value: '6%' },
+          { name: '모험가 명성', value: '196' }
+        ]
+      }
+    ]
   })
 })
 
