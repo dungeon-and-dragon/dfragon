@@ -1,6 +1,4 @@
-import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import {
-  isEnchantCategory,
   LAB_ITEM_CATEGORIES,
   LAB_ITEM_TIERS,
   type LabItemCategory,
@@ -44,19 +42,11 @@ const ROLE_NAMES: Readonly<Record<LabItemRole, string | undefined>> = {
   all: undefined
 }
 
-function hasGradeOptions({ category, role, tier }: LabItemGroupKey): boolean {
-  if (!isEnchantCategory(category) || role === 'all') {
-    return true
-  }
-
-  return enchantOptionsOf(category, role)[tier].length > 0
-}
-
 const GROUPS: readonly LabItemGroupKey[] = LAB_ITEM_CATEGORIES.flatMap((category) =>
   labItemRolesOf(category).flatMap((role) =>
     LAB_ITEM_TIERS.map((tier) => ({ category, role, tier }))
   )
-).filter(hasGradeOptions)
+)
 
 function titleOf({ category, role, tier }: LabItemGroupKey): string {
   const words = [CATEGORY_NAMES[category], ROLE_NAMES[role], tier]
