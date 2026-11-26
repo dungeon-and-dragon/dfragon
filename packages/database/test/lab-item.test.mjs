@@ -21,8 +21,13 @@ const webpIcon = { bytes: new Uint8Array([0x52, 0x49, 0x46, 0x46]), contentType:
 
 const MIGRATIONS = [
   '20261126100000_add_lab_items_auction_prices',
-  '20261126200000_add_lab_currencies'
+  '20261126200000_add_lab_currencies',
+  '20261127100000_add_lab_currency_description'
 ]
+
+function currency(name, description = null) {
+  return { name, description }
+}
 
 function unpriced(itemName) {
   return { itemName, cost: null }
@@ -71,7 +76,7 @@ async function connectWithEmptyTables(t) {
 }
 
 async function addCurrency(client, name) {
-  const addition = await addLabCurrency(client, name, pngIcon)
+  const addition = await addLabCurrency(client, currency(name), pngIcon)
   assert.equal(addition.status, 'added')
 
   return addition.id
@@ -168,7 +173,13 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: '유니크',
     unitPrice: null,
     checkedAt,
-    cost: { currencyId, currencyName: '합성 재화', currencyUpdatedAt: updatedAt, count: 3 }
+    cost: {
+      currencyId,
+      currencyName: '합성 재화',
+      currencyDescription: null,
+      currencyUpdatedAt: updatedAt,
+      count: 3
+    }
   }
 
   assert.deepEqual(await readLabItemPrices(client), [
@@ -179,44 +190,61 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
   ])
 })
 
-test('재화는 이름이 겹치면 더하거나 바꾸지 않고, 아이콘 없이 고치면 이름만 바꾼다', {
+test('재화는 이름이 겹치면 더하거나 바꾸지 않고, 아이콘 없이 고치면 이름과 설명만 바꾼다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
   const firstId = await addCurrency(client, '합성 재화 A')
   const secondId = await addCurrency(client, '합성 재화 B')
 
-  assert.deepEqual(await addLabCurrency(client, '합성 재화 A', webpIcon), {
-    status: 'duplicate'
-  })
-  assert.deepEqual(await updateLabCurrency(client, secondId, '합성 재화 A', null), {
-    status: 'duplicate'
-  })
-  assert.deepEqual(await updateLabCurrency(client, secondId + 100, '합성 재화 C', null), {
-    status: 'notFound'
-  })
+  const addedDuplicate = await addLabCurrency(client, currency('합성 재화 A'), webpIcon)
+  assert.deepEqual(addedDuplicate, { status: 'duplicate' })
+  const renamedDuplicate = await updateLabCurrency(client, secondId, currency('합성 재화 A'), null)
+  assert.deepEqual(renamedDuplicate, { status: 'duplicate' })
+  const missing = await updateLabCurrency(client, secondId + 100, currency('합성 재화 C'), null)
+  assert.deepEqual(missing, { status: 'notFound' })
 
   // 같은 ms 안에 고쳐도 바뀐 시각을 비교할 수 있게 먼저 시각을 과거로 돌린다.
   const before = new Date('2026-11-01T00:00:00.000Z')
   await client.$executeRaw`UPDATE "lab_currencies" SET "updated_at" = ${before}`
-  assert.deepEqual(await updateLabCurrency(client, secondId, '합성 재화 C', null), {
-    status: 'updated'
-  })
+  const described = await updateLabCurrency(
+    client,
+    secondId,
+    currency('합성 재화 C', '합성 설명\n둘째 줄'),
+    null
+  )
+  assert.deepEqual(described, { status: 'updated' })
   assert.deepEqual(await readLabCurrencyIcon(client, secondId), pngIcon)
 
-  assert.deepEqual(await updateLabCurrency(client, firstId, '합성 재화 A', webpIcon), {
-    status: 'updated'
-  })
+  const reiconed = await updateLabCurrency(client, firstId, currency('합성 재화 A'), webpIcon)
+  assert.deepEqual(reiconed, { status: 'updated' })
   assert.deepEqual(await readLabCurrencyIcon(client, firstId), webpIcon)
 
   const currencies = await readLabCurrencies(client)
   assert.deepEqual(
-    currencies.map(({ id, name }) => ({ id, name })),
+    currencies.map(({ id, name, description }) => ({ id, name, description })),
     [
-      { id: firstId, name: '합성 재화 A' },
-      { id: secondId, name: '합성 재화 C' }
+      { id: firstId, name: '합성 재화 A', description: null },
+      { id: secondId, name: '합성 재화 C', description: '합성 설명\n둘째 줄' }
     ]
   )
   assert.ok(currencies.every(({ updatedAt }) => updatedAt > before))
   assert.equal(await readLabCurrencyIcon(client, secondId + 100), null)
+})
+
+test('재화 설명은 추가할 때 넣을 수 있고, 가격 읽기의 비용에 함께 실린다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const addition = await addLabCurrency(client, currency('합성 재화', '합성 설명'), pngIcon)
+  assert.equal(addition.status, 'added')
+
+  await replaceLabItemGroup(client, {
+    ...titleFinal,
+    items: [{ itemName: '합성 칭호 A', cost: { currencyId: addition.id, count: 2 } }]
+  })
+
+  const [row] = await readLabItemPrices(client)
+  assert.equal(row.cost.currencyDescription, '합성 설명')
+  assert.equal((await readLabCurrencies(client))[0].description, '합성 설명')
 })
