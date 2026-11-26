@@ -1,6 +1,7 @@
 import type {
   LabCurrencyAddition,
   LabCurrencyIcon,
+  LabCurrencyInput,
   LabCurrencySummary,
   LabCurrencyUpdate
 } from '@dfragon/database'
@@ -8,6 +9,10 @@ import type {
 export interface LabCurrencyRepository {
   readCurrencies(): Promise<LabCurrencySummary[]>
   readIcon(id: number): Promise<LabCurrencyIcon | null>
-  add(name: string, icon: LabCurrencyIcon): Promise<LabCurrencyAddition>
-  update(id: number, name: string, icon: LabCurrencyIcon | null): Promise<LabCurrencyUpdate>
+  add(input: LabCurrencyInput, icon: LabCurrencyIcon): Promise<LabCurrencyAddition>
+  update(
+    id: number,
+    input: LabCurrencyInput,
+    icon: LabCurrencyIcon | null
+  ): Promise<LabCurrencyUpdate>
 }

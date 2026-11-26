@@ -1,5 +1,6 @@
 import { ItemIcon, itemRarityOfGrade, rarityTextClasses } from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
+import { Tooltip } from '@dfragon/ui'
 import { ItemTooltip } from '#widgets/item-tooltip'
 import type { LabItemCategory } from '@dfragon/lib/lab-items'
 import type { LabCurrencyCost, LabItem } from './api/useLabItems'
@@ -130,10 +131,38 @@ function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
   return <ItemTooltip itemId={item.itemId}>{name}</ItemTooltip>
 }
 
+// 재화는 Neople 아이템이 아니어서 아이템 정보 대신 운영 화면에서 넣은 이름과 설명을 같은 모양의 상자로 보인다.
+function CurrencyTooltip({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger
+        delay={0}
+        closeDelay={0}
+        render={<img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />}
+      />
+      <Tooltip.Popup side="left" align="start" sideOffset={8}>
+        <div className="tooltip-item">
+          <div className="flex max-w-[280px] flex-col gap-2 text-fg">
+            <div className="flex items-center gap-2">
+              <img src={cost.iconUrl} alt="" className="size-[24px]" />
+              <b className="min-w-0 grow text-sm">{cost.currencyName}</b>
+            </div>
+            {cost.description !== null && (
+              <p className="m-0 border-t border-line pt-2 whitespace-pre-line">
+                {cost.description}
+              </p>
+            )}
+          </div>
+        </div>
+      </Tooltip.Popup>
+    </Tooltip.Root>
+  )
+}
+
 function CurrencyCost({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
   return (
     <span className="inline-flex items-center gap-1 align-middle">
-      <img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />
+      <CurrencyTooltip cost={cost} />
       {`×${integer.format(cost.count)}`}
     </span>
   )

@@ -209,12 +209,18 @@ test('고른 아이템이 없으면 200과 빈 groups로 답한다', async (t) =
   assert.deepEqual(await response.json(), { groups: [] })
 })
 
-test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
+test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 설명, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
   const currencyUpdatedAt = new Date('2026-11-27T01:02:03.004Z')
   const exchanged: LabItemPriceRow = {
     ...row('WEAPON', 'dealer', '준종결', '합성 보주', 5_000),
     itemRarity: '유니크',
-    cost: { currencyId: 7, currencyName: '합성 재화', currencyUpdatedAt, count: 5 }
+    cost: {
+      currencyId: 7,
+      currencyName: '합성 재화',
+      currencyDescription: '합성 설명',
+      currencyUpdatedAt,
+      count: 5
+    }
   }
 
   const response = await requestLabItems(t, [exchanged])
@@ -234,6 +240,7 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
             checkedAt: CHECKED_AT,
             cost: {
               currencyName: '합성 재화',
+              description: '합성 설명',
               count: 5,
               iconPath: `/lab/currencies/7/icon?v=${currencyUpdatedAt.getTime()}`
             }

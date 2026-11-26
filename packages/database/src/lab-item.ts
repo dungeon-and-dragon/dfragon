@@ -75,6 +75,7 @@ export async function replaceLabItemGroup(
 export type LabItemPriceCost = {
   currencyId: number
   currencyName: string
+  currencyDescription: string | null
   currencyUpdatedAt: Date
   count: number
 }
@@ -95,6 +96,7 @@ type StoredLabItemPriceRow = Omit<LabItemPriceRow, 'unitPrice' | 'cost'> & {
   unitPrice: bigint | null
   currencyId: bigint | null
   currencyName: string | null
+  currencyDescription: string | null
   currencyUpdatedAt: Date | null
   currencyCount: number | null
 }
@@ -102,6 +104,7 @@ type StoredLabItemPriceRow = Omit<LabItemPriceRow, 'unitPrice' | 'cost'> & {
 function toPriceCost({
   currencyId,
   currencyName,
+  currencyDescription,
   currencyUpdatedAt,
   currencyCount
 }: StoredLabItemPriceRow): LabItemPriceCost | null {
@@ -119,6 +122,7 @@ function toPriceCost({
   return {
     currencyId: id,
     currencyName,
+    currencyDescription,
     currencyUpdatedAt,
     count: currencyCount
   }
@@ -131,7 +135,7 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       i."category", i."role", i."tier", i."item_name" AS "itemName",
       p."item_id" AS "itemId", p."item_rarity" AS "itemRarity",
       p."unit_price" AS "unitPrice", p."checked_at" AS "checkedAt",
-      c."id" AS "currencyId", c."name" AS "currencyName",
+      c."id" AS "currencyId", c."name" AS "currencyName", c."description" AS "currencyDescription",
       c."updated_at" AS "currencyUpdatedAt", i."currency_count" AS "currencyCount"
     FROM "lab_items" i
     LEFT JOIN "auction_prices" p ON p."item_name" = i."item_name"

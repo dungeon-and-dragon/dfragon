@@ -37,6 +37,8 @@ export class OpsRequestFailure extends Error {
   }
 }
 
+export type LabCurrencyDraft = { name: string; description: string }
+
 export type OpsClient = {
   readJobs: () => Promise<JobList>
   readRuns: (before: number | undefined) => Promise<RunPage>
@@ -52,8 +54,12 @@ export type OpsClient = {
   readLabItems: () => Promise<LabItemList>
   replaceLabItems: (group: LabItemGroup) => Promise<void>
   readLabCurrencies: () => Promise<LabCurrencyList>
-  addLabCurrency: (name: string, icon: string) => Promise<void>
-  updateLabCurrency: (id: number, name: string, icon: string | undefined) => Promise<void>
+  addLabCurrency: (currency: LabCurrencyDraft, icon: string) => Promise<void>
+  updateLabCurrency: (
+    id: number,
+    currency: LabCurrencyDraft,
+    icon: string | undefined
+  ) => Promise<void>
   labCurrencyIconUrl: (id: number, updatedAt: Date) => string
 }
 
@@ -151,14 +157,15 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
     },
     readLabCurrencies: async () =>
       readBody(await http.get('lab-currencies'), labCurrencyListSchema),
-    addLabCurrency: async (name, icon) => {
+    addLabCurrency: async ({ name, description }, icon) => {
       await readBody(
-        await http.post('lab-currencies', { json: { name, icon } }),
+        await http.post('lab-currencies', { json: { name, description, icon } }),
         labCurrencyAdditionSchema
       )
     },
-    updateLabCurrency: async (id, name, icon) => {
-      await expectNoContent(await http.put(`lab-currencies/${id}`, { json: { name, icon } }))
+    updateLabCurrency: async (id, { name, description }, icon) => {
+      const json = { name, description, icon }
+      await expectNoContent(await http.put(`lab-currencies/${id}`, { json }))
     },
     labCurrencyIconUrl: (id, updatedAt) =>
       new URL(`lab-currencies/${id}/icon?v=${updatedAt.getTime()}`, baseUrl).href

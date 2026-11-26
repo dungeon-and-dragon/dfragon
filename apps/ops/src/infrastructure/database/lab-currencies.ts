@@ -3,6 +3,7 @@ import {
   type DatabaseClient,
   type LabCurrencyAddition,
   type LabCurrencyIcon,
+  type LabCurrencyInput,
   type LabCurrencySummary,
   type LabCurrencyUpdate,
   readLabCurrencies,
@@ -22,11 +23,15 @@ export class DatabaseLabCurrencyRepository implements LabCurrencyRepository {
     return readLabCurrencyIcon(this.client, id)
   }
 
-  add(name: string, icon: LabCurrencyIcon): Promise<LabCurrencyAddition> {
-    return addLabCurrency(this.client, name, icon)
+  add(input: LabCurrencyInput, icon: LabCurrencyIcon): Promise<LabCurrencyAddition> {
+    return addLabCurrency(this.client, input, icon)
   }
 
-  update(id: number, name: string, icon: LabCurrencyIcon | null): Promise<LabCurrencyUpdate> {
-    return updateLabCurrency(this.client, id, name, icon)
+  update(
+    id: number,
+    input: LabCurrencyInput,
+    icon: LabCurrencyIcon | null
+  ): Promise<LabCurrencyUpdate> {
+    return updateLabCurrency(this.client, id, input, icon)
   }
 }

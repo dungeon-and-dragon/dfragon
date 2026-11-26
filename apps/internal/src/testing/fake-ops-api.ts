@@ -55,7 +55,21 @@ export type LabItemGroupBody = {
 export type LabCurrencyBody = {
   id: number
   name: string
+  description: string | null
   updatedAt: string
+}
+
+type LabCurrencyRequest = { name: string; description: string; icon?: string }
+
+/** 운영 app처럼 빈 설명은 설명 없음으로 둔다. */
+function storedDescription(description: string): string | null {
+  const trimmed = description.trim()
+
+  if (trimmed === '') {
+    return null
+  }
+
+  return trimmed
 }
 
 export type RecordedRequest = {
@@ -216,13 +230,13 @@ export class FakeOpsApi {
     }
 
     if (method === 'POST' && path === 'lab-currencies') {
-      return this.addLabCurrency(body as { name: string; icon: string })
+      return this.addLabCurrency(body as LabCurrencyRequest & { icon: string })
     }
 
     if (method === 'PUT' && LAB_CURRENCY_PATH_PATTERN.test(path)) {
       const [, id] = LAB_CURRENCY_PATH_PATTERN.exec(path) ?? []
 
-      return this.updateLabCurrency(Number(id), body as { name: string; icon?: string })
+      return this.updateLabCurrency(Number(id), body as LabCurrencyRequest)
     }
 
     if (BATCH_KEY_PATH_PATTERN.test(path)) {
@@ -332,26 +346,40 @@ export class FakeOpsApi {
   }
 
   /** 운영 app처럼 이름이 겹치면 409로 답한다. 아이콘 형식 검증은 운영 app 테스트가 맡는다. */
-  private addLabCurrency({ name, icon }: { name: string; icon: string }): Response {
+  private addLabCurrency({
+    name,
+    description,
+    icon
+  }: LabCurrencyRequest & { icon: string }): Response {
     if (this.labCurrencies.some((currency) => currency.name === name)) {
       return failure(409, 'LAB_CURRENCY_DUPLICATE')
     }
 
     const id = this.labCurrencies.length + 1
-    this.labCurrencies = [...this.labCurrencies, { id, name, updatedAt: this.now() }]
+    const stored = storedDescription(description)
+    const updatedAt = this.now()
+    const added = { id, name, description: stored, updatedAt }
+    this.labCurrencies = [...this.labCurrencies, added]
     this.labCurrencyIcons.set(id, icon)
 
     return json(201, { id })
   }
 
-  private updateLabCurrency(id: number, { name, icon }: { name: string; icon?: string }): Response {
+  private updateLabCurrency(id: number, { name, description, icon }: LabCurrencyRequest): Response {
     if (this.labCurrencies.some((currency) => currency.name === name && currency.id !== id)) {
       return failure(409, 'LAB_CURRENCY_DUPLICATE')
     }
 
-    this.labCurrencies = this.labCurrencies.map((currency) =>
-      currency.id === id ? { ...currency, name, updatedAt: this.now() } : currency
-    )
+    this.labCurrencies = this.labCurrencies.map((currency) => {
+      if (currency.id !== id) {
+        return currency
+      }
+
+      const stored = storedDescription(description)
+      const updatedAt = this.now()
+
+      return { ...currency, name, description: stored, updatedAt }
+    })
 
     if (icon !== undefined) {
       this.labCurrencyIcons.set(id, icon)

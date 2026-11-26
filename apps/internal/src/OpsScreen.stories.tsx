@@ -148,7 +148,14 @@ function filledApi(): FakeOpsApi {
   api.addBatchKey('batch-2', 'synthetic-0000-c3d4', { enabled: false })
   api.addBatchKey('batch-3', 'synthetic-0000-e5f6', { enabled: false, rejectedAt })
   // 실험실 아이템과 재화 이름은 지어낸 이름이다.
-  api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: minutesAgo(30) }]
+  api.labCurrencies = [
+    {
+      id: 1,
+      name: '합성 재화',
+      description: '합성 교환처에서 아이템과 바꿀 수 있다.',
+      updatedAt: minutesAgo(30)
+    }
+  ]
   api.labItems = [
     {
       category: 'WEAPON',

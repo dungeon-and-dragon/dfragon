@@ -62,6 +62,22 @@ export function readCurrencyId(value: string): number {
 
 const name = z.string().trim().min(1)
 
+// 화면의 tooltip 한 상자에 들어갈 길이로 둔다.
+const DESCRIPTION_MAX_LENGTH = 500
+
+// 빈 설명은 설명이 없는 것으로 저장해 화면이 이름만 보이게 한다.
+const description = z
+  .string()
+  .trim()
+  .max(DESCRIPTION_MAX_LENGTH)
+  .transform((value) => {
+    if (value === '') {
+      return null
+    }
+
+    return value
+  })
+
 const icon = z.base64().transform((value, context): LabCurrencyIcon => {
   const read = readIcon(value)
 
@@ -74,9 +90,9 @@ const icon = z.base64().transform((value, context): LabCurrencyIcon => {
   return read
 })
 
-export const addBody = z.object({ name, icon })
+export const addBody = z.object({ name, description, icon })
 
-export const updateBody = z.object({ name, icon: icon.optional() })
+export const updateBody = z.object({ name, description, icon: icon.optional() })
 
 export type LabCurrencyResponse = LabCurrencySummary
 

@@ -11,6 +11,7 @@ import type { LabItemRepository } from './repository.js'
 
 export interface LabItemCurrencyCost {
   currencyName: string
+  description: string | null
   count: number
   iconPath: string
 }
@@ -48,12 +49,13 @@ function currencyIconPath(currencyId: number, updatedAt: Date): string {
 function toCurrencyCost({
   currencyId,
   currencyName,
+  currencyDescription,
   currencyUpdatedAt,
   count
 }: LabItemPriceCost): LabItemCurrencyCost {
   const iconPath = currencyIconPath(currencyId, currencyUpdatedAt)
 
-  return { currencyName, count, iconPath }
+  return { currencyName, description: currencyDescription, count, iconPath }
 }
 
 function comparePrices(left: LabItemPrice, right: LabItemPrice): number {

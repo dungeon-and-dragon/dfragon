@@ -6,7 +6,7 @@ import {
   type UseMutationResult
 } from '@tanstack/react-query'
 import { createContext, use } from 'react'
-import type { OpsClient } from '#ops-api/ops-client'
+import type { LabCurrencyDraft, OpsClient } from '#ops-api/ops-client'
 import type { LabItemGroup } from '#ops-api/ops-schemas'
 
 export const REFRESH_INTERVAL_MS = 1_000
@@ -176,26 +176,28 @@ export function useLabCurrencyIconUrl(): OpsClient['labCurrencyIconUrl'] {
   return useOpsClient().labCurrencyIconUrl
 }
 
-type LabCurrencyAddition = { name: string; icon: string }
+type LabCurrencyAddition = LabCurrencyDraft & { icon: string }
 
 export function useAddLabCurrency(): UseMutationResult<void, Error, LabCurrencyAddition> {
   const client = useOpsClient()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ name, icon }: LabCurrencyAddition) => client.addLabCurrency(name, icon),
+    mutationFn: ({ icon, ...currency }: LabCurrencyAddition) =>
+      client.addLabCurrency(currency, icon),
     onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CURRENCIES_KEY })
   })
 }
 
-type LabCurrencyUpdate = { id: number; name: string; icon: string | undefined }
+type LabCurrencyUpdate = LabCurrencyDraft & { id: number; icon: string | undefined }
 
 export function useUpdateLabCurrency(): UseMutationResult<void, Error, LabCurrencyUpdate> {
   const client = useOpsClient()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ id, name, icon }: LabCurrencyUpdate) => client.updateLabCurrency(id, name, icon),
+    mutationFn: ({ id, icon, ...currency }: LabCurrencyUpdate) =>
+      client.updateLabCurrency(id, currency, icon),
     onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CURRENCIES_KEY })
   })
 }

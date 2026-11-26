@@ -40,7 +40,8 @@ export class LabCurrencyController {
         throw new OpsFailure('request')
       }
 
-      const id = await this.service.add(request.data.name, request.data.icon)
+      const { name, description, icon } = request.data
+      const id = await this.service.add({ name, description }, icon)
 
       return c.json(toLabCurrencyAdditionResponse(id), 201)
     })
@@ -53,7 +54,8 @@ export class LabCurrencyController {
         throw new OpsFailure('request')
       }
 
-      await this.service.update(id, request.data.name, request.data.icon ?? null)
+      const { name, description, icon } = request.data
+      await this.service.update(id, { name, description }, icon ?? null)
 
       return c.body(null, 204)
     })

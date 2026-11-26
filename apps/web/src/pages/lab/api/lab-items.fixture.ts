@@ -5,7 +5,7 @@ const CHECKED_AT = '2026-11-26T05:30:00.000Z'
 export const LAB_CURRENCY_ICON_PATH = '/lab/currencies/1/icon?v=1764135000000'
 
 // 이름은 마법부여 등급표와 부위별 아이템 id 파일에 있는 이름이고, 칭호, 크리쳐, 오라의 itemId와 레어리티는 그 파일 그대로다.
-// 카드의 itemId는 그 파일에 없어 null로 두고, 가격은 합성 값이다. 보주와 재화는 지어낸 이름이다.
+// 카드의 itemId는 그 파일에 없어 null로 두고, 가격은 합성 값이다. 보주와 재화의 이름, 설명은 지어낸 값이다.
 export const labItemsFixture = {
   items: {
     groups: [
@@ -43,7 +43,13 @@ export const labItemsFixture = {
             itemRarity: '유니크',
             unitPrice: null,
             checkedAt: CHECKED_AT,
-            cost: { currencyName: '합성 교환 주화', count: 5, iconPath: LAB_CURRENCY_ICON_PATH }
+            cost: {
+              currencyName: '합성 교환 주화',
+              description:
+                '합성 교환소에서 장비 보주와 바꿀 수 있는 주화.\n한 번에 여러 개를 쓸 수 있다.',
+              count: 5,
+              iconPath: LAB_CURRENCY_ICON_PATH
+            }
           }
         ]
       },
