@@ -22,6 +22,8 @@ import { Route as AdventuresIndexRouteImport } from './routes/adventures.index'
 import { Route as ClearsIndexRouteImport } from './routes/clears.index'
 import { Route as ClearsContentRouteImport } from './routes/clears.$content'
 import { Route as GuildsGuildIdRouteImport } from './routes/guilds.$guildId'
+import { Route as LabIndexRouteImport } from './routes/lab.index'
+import { Route as LabEnchantsRouteImport } from './routes/lab.enchants'
 import { Route as StatsIndexRouteImport } from './routes/stats.index'
 import { Route as StatsCombosRouteImport } from './routes/stats.combos'
 import { Route as StatsSetsRouteImport } from './routes/stats.sets'
@@ -98,6 +100,16 @@ const GuildsGuildIdRoute = GuildsGuildIdRouteImport.update({
   path: '/guilds/$guildId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabIndexRoute = LabIndexRouteImport.update({
+  id: '/lab/',
+  path: '/lab/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LabEnchantsRoute = LabEnchantsRouteImport.update({
+  id: '/lab/enchants',
+  path: '/lab/enchants',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatsIndexRoute = StatsIndexRouteImport.update({
   id: '/stats/',
   path: '/stats/',
@@ -165,12 +177,14 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
+  '/lab/enchants': typeof LabEnchantsRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures/': typeof AdventuresIndexRoute
   '/clears/': typeof ClearsIndexRoute
+  '/lab/': typeof LabIndexRoute
   '/stats/': typeof StatsIndexRoute
   '/adventures/$adventureName/equipment': typeof AdventuresAdventureNameEquipmentRoute
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
@@ -190,12 +204,14 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
+  '/lab/enchants': typeof LabEnchantsRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures': typeof AdventuresIndexRoute
   '/clears': typeof ClearsIndexRoute
+  '/lab': typeof LabIndexRoute
   '/stats': typeof StatsIndexRoute
   '/adventures/$adventureName/equipment': typeof AdventuresAdventureNameEquipmentRoute
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
@@ -216,12 +232,14 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
+  '/lab/enchants': typeof LabEnchantsRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
   '/adventures/': typeof AdventuresIndexRoute
   '/clears/': typeof ClearsIndexRoute
+  '/lab/': typeof LabIndexRoute
   '/stats/': typeof StatsIndexRoute
   '/adventures/$adventureName/equipment': typeof AdventuresAdventureNameEquipmentRoute
   '/adventures/$adventureName/timeline': typeof AdventuresAdventureNameTimelineRoute
@@ -243,12 +261,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
+    | '/lab/enchants'
     | '/stats/combos'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
     | '/adventures/'
     | '/clears/'
+    | '/lab/'
     | '/stats/'
     | '/adventures/$adventureName/equipment'
     | '/adventures/$adventureName/timeline'
@@ -268,12 +288,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
+    | '/lab/enchants'
     | '/stats/combos'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
     | '/adventures'
     | '/clears'
+    | '/lab'
     | '/stats'
     | '/adventures/$adventureName/equipment'
     | '/adventures/$adventureName/timeline'
@@ -293,12 +315,14 @@ export interface FileRouteTypes {
     | '/terms'
     | '/clears/$content'
     | '/guilds/$guildId'
+    | '/lab/enchants'
     | '/stats/combos'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
     | '/adventures/'
     | '/clears/'
+    | '/lab/'
     | '/stats/'
     | '/adventures/$adventureName/equipment'
     | '/adventures/$adventureName/timeline'
@@ -319,12 +343,14 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   ClearsContentRoute: typeof ClearsContentRoute
   GuildsGuildIdRoute: typeof GuildsGuildIdRoute
+  LabEnchantsRoute: typeof LabEnchantsRoute
   StatsCombosRoute: typeof StatsCombosRoute
   StatsSetsRoute: typeof StatsSetsRoute
   StatsSkillsRoute: typeof StatsSkillsRoute
   StatsWeaponsRoute: typeof StatsWeaponsRoute
   AdventuresIndexRoute: typeof AdventuresIndexRoute
   ClearsIndexRoute: typeof ClearsIndexRoute
+  LabIndexRoute: typeof LabIndexRoute
   StatsIndexRoute: typeof StatsIndexRoute
   AdventuresAdventureNameEquipmentRoute: typeof AdventuresAdventureNameEquipmentRoute
   AdventuresAdventureNameTimelineRoute: typeof AdventuresAdventureNameTimelineRoute
@@ -426,6 +452,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuildsGuildIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/': {
+      id: '/lab/'
+      path: '/lab'
+      fullPath: '/lab/'
+      preLoaderRoute: typeof LabIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lab/enchants': {
+      id: '/lab/enchants'
+      path: '/lab/enchants'
+      fullPath: '/lab/enchants'
+      preLoaderRoute: typeof LabEnchantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stats/': {
       id: '/stats/'
       path: '/stats'
@@ -511,12 +551,14 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   ClearsContentRoute: ClearsContentRoute,
   GuildsGuildIdRoute: GuildsGuildIdRoute,
+  LabEnchantsRoute: LabEnchantsRoute,
   StatsCombosRoute: StatsCombosRoute,
   StatsSetsRoute: StatsSetsRoute,
   StatsSkillsRoute: StatsSkillsRoute,
   StatsWeaponsRoute: StatsWeaponsRoute,
   AdventuresIndexRoute: AdventuresIndexRoute,
   ClearsIndexRoute: ClearsIndexRoute,
+  LabIndexRoute: LabIndexRoute,
   StatsIndexRoute: StatsIndexRoute,
   AdventuresAdventureNameEquipmentRoute: AdventuresAdventureNameEquipmentRoute,
   AdventuresAdventureNameTimelineRoute: AdventuresAdventureNameTimelineRoute,
