@@ -1,9 +1,11 @@
-import type { LabItems } from './useLabItems'
+import type { LabItemsResponse } from './useLabItems'
 
 const CHECKED_AT = '2026-11-26T05:30:00.000Z'
 
+export const LAB_CURRENCY_ICON_PATH = '/lab/currencies/1/icon?v=1764135000000'
+
 // 이름은 마법부여 등급표와 부위별 아이템 id 파일에 있는 이름이고, 칭호, 크리쳐, 오라의 itemId와 레어리티는 그 파일 그대로다.
-// 카드의 itemId는 그 파일에 없어 null로 두고, 가격은 합성 값이다.
+// 카드의 itemId는 그 파일에 없어 null로 두고, 가격은 합성 값이다. 보주와 재화는 지어낸 이름이다.
 export const labItemsFixture = {
   items: {
     groups: [
@@ -17,7 +19,8 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '레전더리',
             unitPrice: 1_480_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -31,7 +34,16 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '유니크',
             unitPrice: null,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
+          },
+          {
+            itemName: '합성 무기 보주',
+            itemId: null,
+            itemRarity: '유니크',
+            unitPrice: null,
+            checkedAt: CHECKED_AT,
+            cost: { currencyName: '합성 교환 주화', count: 5, iconPath: LAB_CURRENCY_ICON_PATH }
           }
         ]
       },
@@ -45,7 +57,8 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '레전더리',
             unitPrice: 612_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -59,14 +72,16 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '유니크',
             unitPrice: 88_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           },
           {
             itemName: '혼돈의 천사 루치펠 카드',
             itemId: null,
             itemRarity: null,
             unitPrice: null,
-            checkedAt: null
+            checkedAt: null,
+            cost: null
           }
         ]
       },
@@ -80,7 +95,8 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '레전더리',
             unitPrice: 268_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -94,7 +110,8 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '유니크',
             unitPrice: 41_500_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -108,7 +125,8 @@ export const labItemsFixture = {
             itemId: null,
             itemRarity: '레전더리',
             unitPrice: 233_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -122,14 +140,16 @@ export const labItemsFixture = {
             itemId: '42fd3d4144f788b37ed19c70281dcda6',
             itemRarity: '레어',
             unitPrice: 95_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           },
           {
             itemName: '진정한 각성을 이룬 자',
             itemId: 'c89a01593a155a3cbaaf272084d8fb57',
             itemRarity: '레어',
             unitPrice: 120_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -143,7 +163,8 @@ export const labItemsFixture = {
             itemId: 'bf04e5b415fea3989e8607efb4987d14',
             itemRarity: '레어',
             unitPrice: 54_000_000,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -157,10 +178,11 @@ export const labItemsFixture = {
             itemId: '6997321d175648e99eb75adf5c8e2625',
             itemRarity: '레어',
             unitPrice: null,
-            checkedAt: CHECKED_AT
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       }
     ]
-  } satisfies LabItems
+  } satisfies LabItemsResponse
 }
