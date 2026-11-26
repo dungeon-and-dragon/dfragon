@@ -1,12 +1,12 @@
 import { LAB_ITEM_CATEGORIES, LAB_ITEM_ROLES, LAB_ITEM_TIERS } from '@dfragon/lib/lab-items'
 import { z } from 'zod'
 import { createJsonRequest } from '#shared/api/json-request'
-import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
+import { API_BASE_URL, BROWSER_API_PATH, dfragonHttp } from '#shared/api/dfragon-api'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 
 export const LAB_ITEMS_PATH = '/lab/items'
 
-// API는 자기 origin 기준 경로를 주므로, 화면이 바로 쓰게 API 주소를 붙인다.
+// API는 자기 origin 기준 경로를 주므로, 브라우저가 여는 같은 origin의 API 경로를 붙인다.
 const currencyCostSchema = z
   .object({
     currencyName: z.string(),
@@ -15,7 +15,7 @@ const currencyCostSchema = z
     iconPath: z.string()
   })
   .transform(({ currencyName, description, count, iconPath }) => {
-    const iconUrl = `${API_BASE_URL}${iconPath}`
+    const iconUrl = `${BROWSER_API_PATH}${iconPath}`
 
     return { currencyName, description, count, iconUrl }
   })
