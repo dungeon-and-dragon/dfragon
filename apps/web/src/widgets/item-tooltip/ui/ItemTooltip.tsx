@@ -1,6 +1,7 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactElement } from 'react'
 import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
+import { cardOptionLines } from '#widgets/item-tooltip/model/card-options'
 import type { ItemCard, ItemDetail } from '#widgets/item-tooltip/model/item-detail'
 import { ItemIcon, raritySolidOfName, rarityTextOfName } from '#entities/character'
 
@@ -9,19 +10,16 @@ const FAILED = '아이템 정보를 받지 못했습니다.'
 const integer = new Intl.NumberFormat('ko-KR')
 
 function CardOptions({ card }: { card: ItemCard }): React.JSX.Element {
+  const lines = cardOptionLines(card)
+
   return (
     <div className="flex flex-col gap-2 border-t border-line pt-2">
       <p className="m-0 text-fg-muted">{`부여 부위 ${card.slots.join(', ')}`}</p>
-      {card.enchants.map(({ upgrade, status }) => (
-        <div key={upgrade} className="flex flex-col">
-          <b>{`+${upgrade}`}</b>
-          <ul className="m-0 flex list-none flex-col p-0">
-            {status.map(({ name, value }) => (
-              <li key={name}>{`${name} ${value}`}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <ul className="m-0 flex list-none flex-col p-0">
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+      </ul>
     </div>
   )
 }
