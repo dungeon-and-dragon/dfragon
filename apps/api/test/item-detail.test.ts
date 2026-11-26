@@ -154,7 +154,8 @@ test('카드는 부여 부위 이름과 강화 단계별 옵션을 낮은 단계
           { name: '힘', value: '100' },
           { name: '캐스트속도', value: '5%' },
           { name: '모험가 명성', value: '196' }
-        ]
+        ],
+        reinforceSkill: []
       },
       {
         upgrade: 1,
@@ -162,10 +163,51 @@ test('카드는 부여 부위 이름과 강화 단계별 옵션을 낮은 단계
           { name: '힘', value: '105' },
           { name: '캐스트속도', value: '6%' },
           { name: '모험가 명성', value: '196' }
-        ]
+        ],
+        reinforceSkill: []
       }
     ]
   })
+})
+
+test('버프 스킬을 올리는 카드는 단계마다 직업별 스킬 이름과 값을 문자열로 준다', async (t) => {
+  // 카드 이름과 직업, 스킬 이름은 지어낸 값이고, reinforceSkill 모양은 Neople 실제 응답을 따랐다.
+  const buffCardId = 'synthetic-buff-card'
+  const { fetchCatalog } = recordingCatalog([
+    {
+      itemId: buffCardId,
+      itemName: '합성 버프 카드',
+      itemType: '카드',
+      cardInfo: {
+        slots: [{ slotId: 'JACKET', slotName: '상의' }],
+        enchant: [
+          {
+            upgrade: 0,
+            status: [{ name: '힘', value: 105 }],
+            reinforceSkill: [
+              {
+                jobId: 'synthetic-job',
+                jobName: '합성 직업',
+                skills: [{ skillId: 'synthetic-skill', name: '합성 버프', value: 4 }]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ])
+  const origin = await startItemApp(t, fetchCatalog)
+
+  const response = await fetch(`${origin}/items/${buffCardId}`)
+  const { card } = (await response.json()) as { card: { enchants: unknown[] } }
+
+  assert.deepEqual(card.enchants, [
+    {
+      upgrade: 0,
+      status: [{ name: '힘', value: '105' }],
+      reinforceSkill: [{ jobName: '합성 직업', skills: [{ name: '합성 버프', value: '4' }] }]
+    }
+  ])
 })
 
 test('GET /items/:itemId는 형식이 잘못된 itemId를 Neople에 묻지 않고 400으로 거절한다', async (t) => {

@@ -4,7 +4,13 @@ const statusSchema = z.object({ name: z.string(), value: z.string() })
 
 const cardSchema = z.object({
   slots: z.array(z.string()),
-  enchants: z.array(z.object({ upgrade: z.number().int(), status: z.array(statusSchema) }))
+  enchants: z.array(
+    z.object({
+      upgrade: z.number().int(),
+      status: z.array(statusSchema),
+      reinforceSkill: z.array(z.object({ jobName: z.string(), skills: z.array(statusSchema) }))
+    })
+  )
 })
 
 export const itemDetailSchema = z.object({

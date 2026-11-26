@@ -1,4 +1,7 @@
-import { STORY_CARD_ITEM_ID } from '#widgets/item-tooltip/api/item-detail.fixture'
+import {
+  STORY_BUFF_CARD_ITEM_ID,
+  STORY_CARD_ITEM_ID
+} from '#widgets/item-tooltip/api/item-detail.fixture'
 import type { LabItemsResponse } from './useLabItems'
 
 const CHECKED_AT = '2026-11-26T05:30:00.000Z'
@@ -152,6 +155,23 @@ export const labItemsFixture = {
             iconPath: null,
             description: null,
             unitPrice: 233_000_000,
+            checkedAt: CHECKED_AT,
+            cost: null
+          }
+        ]
+      },
+      {
+        category: 'JACKET',
+        role: 'buffer',
+        tier: '준종결',
+        items: [
+          {
+            itemName: '합성 여신 카드',
+            itemId: STORY_BUFF_CARD_ITEM_ID,
+            itemRarity: '레전더리',
+            iconPath: null,
+            description: null,
+            unitPrice: 51_000_000,
             checkedAt: CHECKED_AT,
             cost: null
           }
