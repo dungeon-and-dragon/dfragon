@@ -43,6 +43,8 @@ import type {
 } from '#application/character-timeline/repository.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearStatsService, emptyClearStatsRepository } from '#application/content-clears/index.js'
+import type { LabItemRepository } from '#application/lab-items/repository.js'
+import { LabItemService, emptyLabItemRepository } from '#application/lab-items/index.js'
 import type { RankingStatsRepository } from '#application/ranking-stats/repository.js'
 import {
   RankingStatsService,
@@ -90,6 +92,7 @@ export interface ApiServicesOptions {
   readonly characterHistory?: CharacterHistoryRepository
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsRepository
+  readonly labItems?: LabItemRepository
   readonly clearStats?: ClearStatsRepository
   readonly todayGrade: { readonly fetchShopGrade: FetchShopGrade }
   readonly soulPrices?: { readonly fetchLowestListing: FetchLowestListing }
@@ -257,6 +260,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
   const adventureGuild = createAdventureGuild(options.adventureGuild, timelineSync)
   const rankingStats = new RankingStatsService(options.rankingStats ?? emptyRankingStatsRepository)
+  const labItems = new LabItemService(options.labItems ?? emptyLabItemRepository)
   const clearStats = new ClearStatsService(options.clearStats ?? emptyClearStatsRepository, () =>
     reportCode('CLEAR_STATS_REFRESH_FAILED')
   )
@@ -275,7 +279,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       clearStats,
       itemDetail,
       todayGrade,
-      soulPrices
+      soulPrices,
+      labItems
     },
     refreshClearStats: () => clearStats.refresh(),
     /** 한 단계가 실패해도 나머지 단계를 실행하고, 실패를 모아 던진다. */

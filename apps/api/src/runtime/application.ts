@@ -11,6 +11,7 @@ import {
   DatabaseCharacterHistoryRepository,
   DatabaseCharacterSearchRepository,
   DatabaseCharacterTimelineRepository,
+  DatabaseLabItemRepository,
   DatabaseRankingStatsRepository,
   DatabaseTimelineSyncRequestRepository
 } from '#infrastructure/database/index.js'
@@ -47,6 +48,7 @@ function createDatabaseSubscribers(
   | 'characterHistory'
   | 'adventureGuild'
   | 'rankingStats'
+  | 'labItems'
   | 'clearStats'
 > &
   Pick<ApiHttpAppOptions['search'], 'readAdventureNames' | 'readCharacterScores'> {
@@ -80,6 +82,7 @@ function createDatabaseSubscribers(
     readCharacterScores: (characters) => characterSearch.readCharacterScores(characters),
     adventureGuild: new DatabaseAdventureGuildRepository(client),
     rankingStats: new DatabaseRankingStatsRepository(client),
+    labItems: new DatabaseLabItemRepository(client),
     clearStats: new DatabaseClearStatsRepository(clearStatsClient)
   }
 }
