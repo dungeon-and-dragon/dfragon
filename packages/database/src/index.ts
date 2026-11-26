@@ -14,8 +14,8 @@ export type {
   BatchNeopleKeySummary,
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
-export { readLabItemNames, recordAuctionPrice } from './auction-price.js'
-export type { AuctionPriceEntry } from './auction-price.js'
+export { readLabItemPriceTargets, recordAuctionPrice } from './auction-price.js'
+export type { AuctionPriceEntry, LabItemPriceTarget } from './auction-price.js'
 export {
   readItemDictionary,
   readUnlistedAcquisitionItemIds,
@@ -23,8 +23,26 @@ export {
   recordItemDictionary
 } from './item-dictionary.js'
 export type { ItemDictionaryEntry, UnlistedAcquisitionQuery } from './item-dictionary.js'
+export {
+  addLabCurrency,
+  readLabCurrencies,
+  readLabCurrencyIcon,
+  updateLabCurrency
+} from './lab-currency.js'
+export type {
+  LabCurrencyAddition,
+  LabCurrencyIcon,
+  LabCurrencySummary,
+  LabCurrencyUpdate
+} from './lab-currency.js'
 export { readLabItemGroups, readLabItemPrices, replaceLabItemGroup } from './lab-item.js'
-export type { LabItemGroup, LabItemPriceRow } from './lab-item.js'
+export type {
+  LabItemCost,
+  LabItemEntry,
+  LabItemGroup,
+  LabItemPriceCost,
+  LabItemPriceRow
+} from './lab-item.js'
 export {
   TIMELINE_SYNC_REQUEST_KINDS,
   claimTimelineSyncRequests,
