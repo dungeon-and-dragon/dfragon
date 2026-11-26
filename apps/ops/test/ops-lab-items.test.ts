@@ -31,19 +31,20 @@ function memoryStore(groups: LabItemGroup[] = [], currencies: StoredCurrency[] =
     }
   }
   const currencyStore: LabCurrencyRepository = {
-    readCurrencies: async () => stored.map(({ id, name, updatedAt }) => ({ id, name, updatedAt })),
+    readCurrencies: async () =>
+      stored.map(({ id, name, description, updatedAt }) => ({ id, name, description, updatedAt })),
     readIcon: async (id) => stored.find((currency) => currency.id === id)?.icon ?? null,
-    add: async (name, icon) => {
+    add: async ({ name, description }, icon) => {
       if (stored.some((currency) => currency.name === name)) {
         return { status: 'duplicate' }
       }
 
       const id = stored.length + 1
-      stored.push({ id, name, updatedAt: new Date('2026-11-27T00:00:00.000Z'), icon })
+      stored.push({ id, name, description, updatedAt: new Date('2026-11-27T00:00:00.000Z'), icon })
 
       return { status: 'added', id }
     },
-    update: async (id, name, icon) => {
+    update: async (id, { name, description }, icon) => {
       const currency = stored.find((candidate) => candidate.id === id)
 
       if (currency === undefined) {
@@ -55,6 +56,7 @@ function memoryStore(groups: LabItemGroup[] = [], currencies: StoredCurrency[] =
       }
 
       currency.name = name
+      currency.description = description
       currency.icon = icon ?? currency.icon
 
       return { status: 'updated' }
@@ -105,6 +107,7 @@ const base64Of = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64')
 const coin = {
   id: 1,
   name: '합성 재화',
+  description: '합성 설명',
   updatedAt: new Date('2026-11-26T00:00:00.000Z'),
   icon: { bytes: PNG_BYTES, contentType: 'image/png' }
 }
@@ -221,7 +224,7 @@ test('재화를 등록하면 파일 앞부분으로 정한 형식으로 아이�
 
   const added = await request(
     'lab-currencies',
-    jsonRequest('POST', { name: ' 합성 재화 ', icon: base64Of(WEBP_BYTES) })
+    jsonRequest('POST', { name: ' 합성 재화 ', description: '', icon: base64Of(WEBP_BYTES) })
   )
 
   assert.equal(added.status, 201)
@@ -230,7 +233,9 @@ test('재화를 등록하면 파일 앞부분으로 정한 형식으로 아이�
 
   const list = await request('lab-currencies')
   assert.deepEqual(await list.json(), {
-    currencies: [{ id: 1, name: '합성 재화', updatedAt: '2026-11-27T00:00:00.000Z' }]
+    currencies: [
+      { id: 1, name: '합성 재화', description: null, updatedAt: '2026-11-27T00:00:00.000Z' }
+    ]
   })
 
   const icon = await request('lab-currencies/1/icon')
@@ -256,6 +261,7 @@ test('PNG, JPEG, GIF, WebP 아이콘은 올린 쪽이 밝힌 형식과 상관없
       'lab-currencies',
       jsonRequest('POST', {
         name: `합성 재화 ${index}`,
+        description: '',
         icon: base64Of(bytes),
         contentType: 'image/svg+xml'
       })
@@ -269,48 +275,91 @@ test('PNG, JPEG, GIF, WebP 아이콘은 올린 쪽이 밝힌 형식과 상관없
   )
 })
 
-test('재화를 고치면 아이콘 없이는 이름만 바꾸고, 겹친 이름은 409, 없는 재화는 404로 답한다', async (t) => {
+test('재화 설명은 앞뒤 공백을 지워 저장하고, 비우면 설명 없음으로 저장한다', async (t) => {
+  const { store, stored } = memoryStore([], [coin])
+  const request = await startOpsApp(t, store)
+
+  const added = await request(
+    'lab-currencies',
+    jsonRequest('POST', {
+      name: '합성 재화 B',
+      description: ' 합성 설명\n둘째 줄 ',
+      icon: base64Of(PNG_BYTES)
+    })
+  )
+  const cleared = await request(
+    'lab-currencies/1',
+    jsonRequest('PUT', { name: '합성 재화', description: '   ' })
+  )
+
+  assert.equal(added.status, 201)
+  assert.equal(cleared.status, 204)
+  assert.deepEqual(
+    stored.map(({ name, description }) => ({ name, description })),
+    [
+      { name: '합성 재화', description: null },
+      { name: '합성 재화 B', description: '합성 설명\n둘째 줄' }
+    ]
+  )
+})
+
+test('재화를 고치면 아이콘 없이는 이름과 설명만 바꾸고, 겹친 이름은 409, 없는 재화는 404로 답한다', async (t) => {
   const { store, stored } = memoryStore([], [coin, { ...coin, id: 2, name: '합성 재화 B' }])
   const request = await startOpsApp(t, store)
 
-  const renamed = await request('lab-currencies/1', jsonRequest('PUT', { name: '바뀐 재화' }))
+  const renamed = await request(
+    'lab-currencies/1',
+    jsonRequest('PUT', { name: '바뀐 재화', description: '' })
+  )
   assert.equal(renamed.status, 204)
   assert.deepEqual(stored[0]?.icon, coin.icon)
   assert.equal(stored[0]?.name, '바뀐 재화')
 
   const reiconed = await request(
     'lab-currencies/1',
-    jsonRequest('PUT', { name: '바뀐 재화', icon: base64Of(WEBP_BYTES) })
+    jsonRequest('PUT', { name: '바뀐 재화', description: '', icon: base64Of(WEBP_BYTES) })
   )
   assert.equal(reiconed.status, 204)
   assert.deepEqual(stored[0]?.icon, { bytes: WEBP_BYTES, contentType: 'image/webp' })
 
-  const duplicate = await request('lab-currencies/2', jsonRequest('PUT', { name: '바뀐 재화' }))
+  const duplicate = await request(
+    'lab-currencies/2',
+    jsonRequest('PUT', { name: '바뀐 재화', description: '' })
+  )
   assert.equal(duplicate.status, 409)
   assert.deepEqual(await duplicate.json(), { error: { code: 'LAB_CURRENCY_DUPLICATE' } })
 
-  const missing = await request('lab-currencies/9', jsonRequest('PUT', { name: '합성 재화 C' }))
+  const missing = await request(
+    'lab-currencies/9',
+    jsonRequest('PUT', { name: '합성 재화 C', description: '' })
+  )
   assert.equal(missing.status, 404)
 
   const addedDuplicate = await request(
     'lab-currencies',
-    jsonRequest('POST', { name: '바뀐 재화', icon: base64Of(PNG_BYTES) })
+    jsonRequest('POST', { name: '바뀐 재화', description: '', icon: base64Of(PNG_BYTES) })
   )
   assert.equal(addedDuplicate.status, 409)
 })
 
-test('그림이 아니거나 64KiB를 넘는 아이콘, 빈 이름, 잘못된 id는 400으로 거절하고 저장하지 않는다', async (t) => {
+test('그림이 아니거나 64KiB를 넘는 아이콘, 빈 이름, 빠지거나 500자를 넘는 설명, 잘못된 id는 400으로 거절하고 저장하지 않는다', async (t) => {
   const { store, stored } = memoryStore()
   const request = await startOpsApp(t, store)
   const oversized = new Uint8Array(64 * 1024 + 1)
   oversized.set(PNG_BYTES)
   const bodies = [
-    { name: '합성 재화', icon: base64Of(new Uint8Array([0x3c, 0x73, 0x76, 0x67])) },
-    { name: '합성 재화', icon: base64Of(oversized) },
-    { name: '합성 재화', icon: '' },
-    { name: '합성 재화', icon: 'not base64!' },
-    { name: '  ', icon: base64Of(PNG_BYTES) },
-    { name: '합성 재화' }
+    {
+      name: '합성 재화',
+      description: '',
+      icon: base64Of(new Uint8Array([0x3c, 0x73, 0x76, 0x67]))
+    },
+    { name: '합성 재화', description: '', icon: base64Of(oversized) },
+    { name: '합성 재화', description: '', icon: '' },
+    { name: '합성 재화', description: '', icon: 'not base64!' },
+    { name: '  ', description: '', icon: base64Of(PNG_BYTES) },
+    { name: '합성 재화', description: '' },
+    { name: '합성 재화', icon: base64Of(PNG_BYTES) },
+    { name: '합성 재화', description: '가'.repeat(501), icon: base64Of(PNG_BYTES) }
   ]
 
   for (const body of bodies) {
@@ -319,7 +368,8 @@ test('그림이 아니거나 64KiB를 넘는 아이콘, 빈 이름, 잘못된 id
   }
 
   assert.equal(
-    (await request('lab-currencies/0', jsonRequest('PUT', { name: '합성 재화' }))).status,
+    (await request('lab-currencies/0', jsonRequest('PUT', { name: '합성 재화', description: '' })))
+      .status,
     400
   )
   assert.equal((await request('lab-currencies/abc/icon')).status, 400)
@@ -335,7 +385,7 @@ test('재화 경로만 아이콘을 담을 큰 본문을 받고, 다른 경로�
 
   const added = await request(
     'lab-currencies',
-    jsonRequest('POST', { name: '합성 재화', icon: base64Of(icon) })
+    jsonRequest('POST', { name: '합성 재화', description: '', icon: base64Of(icon) })
   )
   const items = await request(
     'lab-items',
