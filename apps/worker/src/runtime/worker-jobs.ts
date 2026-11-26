@@ -18,7 +18,10 @@ import {
   DatabaseItemDictionaryRepository
 } from '@dfragon/server-core/infrastructure/database/index.js'
 import { AuctionPriceService } from '@dfragon/server-core/application/auction-prices/index.js'
-import type { FetchLowestListing } from '@dfragon/server-core/application/auction-prices/ports.js'
+import type {
+  FetchLowestListing,
+  FindItem
+} from '@dfragon/server-core/application/auction-prices/ports.js'
 import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import { parseCharacterSkillStyle } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
@@ -81,6 +84,7 @@ export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
     createFetchRecordTimeline: CreateClearTimeline
     fetchItemDetails: FetchItemDetails
     fetchLowestListing: FetchLowestListing
+    findItem: FindItem
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
   }
 
@@ -96,6 +100,7 @@ export function createWorkerJobs(
     fetchSkillStyle,
     fetchItemDetails,
     fetchLowestListing,
+    findItem,
     readTargets,
     readTopFame,
     fetchFamePage,
@@ -146,7 +151,8 @@ export function createWorkerJobs(
   )
   const auctionPrices = new AuctionPriceService(
     new DatabaseAuctionPriceRepository(client),
-    fetchLowestListing
+    fetchLowestListing,
+    findItem
   )
   const scoreService = new ScoreCalculationService(
     new DatabaseScoreCalculationRepository(client, SCORE_CALCULATION_JOB_NAME),

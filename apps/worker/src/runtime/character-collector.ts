@@ -14,6 +14,7 @@ import {
 } from '#infrastructure/neople/index.js'
 import {
   createNeopleItemDetails,
+  createNeopleItemSearch,
   createNeopleLowestListing,
   parseCharacterBasic,
   parseCharacterSets
@@ -108,6 +109,7 @@ export async function startCharacterCollector(
     fetchSkillStyle: createNeopleSkillStyle(neople),
     fetchItemDetails: createNeopleItemDetails(neople),
     fetchLowestListing: createNeopleLowestListing(neople),
+    findItem: createNeopleItemSearch(neople),
     ...createNeopleFameSearch(neople),
     fetchLatestActivity: createNeopleLatestActivity(neople),
     fetchBasic,

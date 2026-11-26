@@ -12,6 +12,7 @@ export type WorkerNeople = Pick<
   | 'charactersFame'
   | 'jobs'
   | 'multiItems'
+  | 'searchItems'
   | 'servers'
 >
 
