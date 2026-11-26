@@ -1,12 +1,30 @@
 import { Tooltip } from '@dfragon/ui'
 import type { ReactElement } from 'react'
 import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
-import type { ItemDetail } from '#widgets/item-tooltip/model/item-detail'
+import type { ItemCard, ItemDetail } from '#widgets/item-tooltip/model/item-detail'
 import { ItemIcon, raritySolidOfName, rarityTextOfName } from '#entities/character'
 
 const FAME_STATUS = '모험가 명성'
 const FAILED = '아이템 정보를 받지 못했습니다.'
 const integer = new Intl.NumberFormat('ko-KR')
+
+function CardOptions({ card }: { card: ItemCard }): React.JSX.Element {
+  return (
+    <div className="flex flex-col gap-2 border-t border-line pt-2">
+      <p className="m-0 text-fg-muted">{`부여 부위 ${card.slots.join(', ')}`}</p>
+      {card.enchants.map(({ upgrade, status }) => (
+        <div key={upgrade} className="flex flex-col">
+          <b>{`+${upgrade}`}</b>
+          <ul className="m-0 flex list-none flex-col p-0">
+            {status.map(({ name, value }) => (
+              <li key={name}>{`${name} ${value}`}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function ItemDetailCard({ item }: { item: ItemDetail }): React.JSX.Element {
   const status = item.status.filter(({ name }) => name !== FAME_STATUS)
@@ -37,6 +55,7 @@ function ItemDetailCard({ item }: { item: ItemDetail }): React.JSX.Element {
           ))}
         </ul>
       )}
+      {item.card !== null && <CardOptions card={item.card} />}
       {item.explain !== null && (
         <p className="m-0 border-t border-line pt-2 whitespace-pre-line">{item.explain}</p>
       )}
