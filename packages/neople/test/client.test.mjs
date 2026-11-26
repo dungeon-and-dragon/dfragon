@@ -117,6 +117,12 @@ test('endpoint마다 고정 경로와 encode한 값, query로 한 번 부르고 
       url: 'http://neople.test/df/auction?itemName=%EB%A0%88%EC%96%B4+%EC%86%8C%EC%9A%B8+%EA%B2%B0%EC%A0%95&wordType=match&sort=unitPrice%3Aasc&limit=10'
     },
     {
+      call: (neople) =>
+        neople.searchItems({ itemName: '레어 소울 결정', wordType: 'match', limit: 10 }),
+      body: { rows: [{ itemId: 'item-1', itemName: '레어 소울 결정', itemRarity: '레어' }] },
+      url: 'http://neople.test/df/items?itemName=%EB%A0%88%EC%96%B4+%EC%86%8C%EC%9A%B8+%EA%B2%B0%EC%A0%95&wordType=match&limit=10'
+    },
+    {
       call: (neople) => neople.skill('job/1', 'skill 1', signal),
       body: { jobId: 'job/1', name: '스킬' },
       url: 'http://neople.test/df/skills/job%2F1/skill%201'
