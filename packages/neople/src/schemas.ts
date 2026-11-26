@@ -216,6 +216,18 @@ export const auctionSchema = z.object({
 
 export type NeopleAuctionRow = z.output<typeof auctionSchema>['rows'][number]
 
+export const itemSearchSchema = z.object({
+  rows: z.array(
+    z.looseObject({
+      itemId: nonblankString,
+      itemName: nonblankString,
+      itemRarity: nonblankString
+    })
+  )
+})
+
+export type NeopleItemSearchRow = z.output<typeof itemSearchSchema>['rows'][number]
+
 export const skillSchema = z.looseObject({
   jobId: z.string(),
   name: nonblankString,
