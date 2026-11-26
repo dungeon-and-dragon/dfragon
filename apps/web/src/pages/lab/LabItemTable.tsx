@@ -162,8 +162,8 @@ function CurrencyTooltip({ cost }: { cost: LabCurrencyCost }): React.JSX.Element
 function CurrencyCost({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
   return (
     <span className="inline-flex items-center gap-1 align-middle">
+      {integer.format(cost.count)}
       <CurrencyTooltip cost={cost} />
-      {`×${integer.format(cost.count)}`}
     </span>
   )
 }

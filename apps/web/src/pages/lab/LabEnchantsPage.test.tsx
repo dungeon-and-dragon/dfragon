@@ -103,7 +103,7 @@ it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이�
   expect(cellTexts(enchantTable())).toEqual([
     ['무기', '종결', '멸절의 폭룡왕 바칼 카드', '1,480,000,000'],
     ['준종결', '허망한 맹신, 호스디그 카드', '-'],
-    ['합성 무기 보주', '×5'],
+    ['합성 무기 보주', '5'],
     ['상의', '종결', '천해천 딜러 상의 카드 (최종 데미지 3%)', '268,000,000'],
     ['준종결', '중천 딜러 상의 카드 (최종 데미지 2%)', '41,500,000']
   ])
@@ -111,14 +111,15 @@ it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이�
   expect(weapon.getAttribute('rowspan')).toBe('3')
 })
 
-it('재화로 교환하는 아이템의 가격 칸은 경매장 가격 대신 재화 아이콘과 개수만 보인다', async () => {
+it('재화로 교환하는 아이템의 가격 칸은 경매장 가격 대신 개수와 그 뒤의 재화 아이콘만 보인다', async () => {
   await renderLoaded()
 
   const row = nameOf(enchantTable(), '합성 무기 보주').closest('tr')!
   const priceCell = row.querySelector('td:last-child')!
   const icon = priceCell.querySelector('img')!
 
-  expect(priceCell.textContent).toBe('×5')
+  expect(priceCell.textContent).toBe('5')
+  expect(icon.previousSibling?.textContent).toBe('5')
   expect(icon.getAttribute('src')).toBe(`/api${LAB_CURRENCY_ICON_PATH}`)
   expect(icon.getAttribute('alt')).toBe('합성 교환 주화')
 })
