@@ -1,0 +1,204 @@
+// @vitest-environment jsdom
+import { HttpResponse, http } from 'msw'
+import { act, useState } from 'react'
+import { createRoot, type Root } from 'react-dom/client'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { PageNoteTarget } from '#shared/ui/page-note-target'
+import { server } from '#testing/test-support/msw-server'
+import { TestQueryClient } from '#testing/test-support/test-query-client'
+import { TestRouter } from '#testing/test-support/test-router'
+import { LAB_ITEMS_URL, labItemsHandlers } from './api/lab-items.handlers'
+import type { LabItems } from './api/useLabItems'
+import { LabEnchantsPage } from './LabEnchantsPage'
+
+let container: HTMLDivElement
+let root: Root
+
+beforeEach(() => {
+  vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
+  // 2026-11-26 14:40 KST. 타이머는 그대로 두고 지금 시각만 고정한다.
+  vi.useFakeTimers({ now: new Date('2026-11-26T05:40:00.000Z'), toFake: ['Date'] })
+  container = document.createElement('div')
+  document.body.append(container)
+  root = createRoot(container)
+})
+
+afterEach(async () => {
+  await act(async () => root.unmount())
+  container.remove()
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
+
+function Screen(): React.JSX.Element {
+  const [noteTarget, setNoteTarget] = useState<HTMLElement | null>(null)
+
+  return (
+    <PageNoteTarget value={noteTarget}>
+      <LabEnchantsPage />
+      <div data-testid="page-note" ref={setNoteTarget} />
+    </PageNoteTarget>
+  )
+}
+
+async function render(): Promise<void> {
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <TestRouter path="/lab/enchants">
+          <Screen />
+        </TestRouter>
+      </TestQueryClient>
+    )
+  )
+}
+
+async function renderLoaded(): Promise<void> {
+  server.use(labItemsHandlers.items)
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+}
+
+function enchantTable(): HTMLTableElement {
+  return container.querySelector<HTMLTableElement>('table')!
+}
+
+function accessoryTable(): HTMLTableElement {
+  return container.querySelector<HTMLTableElement>(
+    'section[aria-label="칭호, 크리쳐, 오라"] table'
+  )!
+}
+
+function cellTexts(table: HTMLTableElement): string[][] {
+  return [...table.querySelectorAll('tbody tr')].map((row) =>
+    [...row.children].map((cell) => cell.textContent ?? '')
+  )
+}
+
+function nameOf(table: HTMLTableElement, itemName: string): HTMLElement {
+  return [...table.querySelectorAll<HTMLElement>('td span')].find(
+    (span) => span.textContent === itemName
+  )!
+}
+
+function roleChip(label: string): HTMLButtonElement {
+  return [...container.querySelectorAll<HTMLButtonElement>('[aria-label="역할"] button')].find(
+    (button) => button.textContent === label
+  )!
+}
+
+it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이고, 가격은 쉼표를 넣고 매물이 없으면 -로 보인다', async () => {
+  await renderLoaded()
+
+  expect(roleChip('딜러').getAttribute('aria-pressed')).toBe('true')
+  expect([...enchantTable().querySelectorAll('thead th')].map((th) => th.textContent)).toEqual([
+    '부위',
+    '등급',
+    '카드',
+    '최저가'
+  ])
+  expect(cellTexts(enchantTable())).toEqual([
+    ['무기', '종결', '멸절의 폭룡왕 바칼 카드', '1,480,000,000'],
+    ['준종결', '허망한 맹신, 호스디그 카드', '-'],
+    ['상의', '종결', '천해천 딜러 상의 카드 (최종 데미지 3%)', '268,000,000'],
+    ['준종결', '중천 딜러 상의 카드 (최종 데미지 2%)', '41,500,000']
+  ])
+  const weapon = enchantTable().querySelector('tbody th')!
+  expect(weapon.getAttribute('rowspan')).toBe('2')
+})
+
+it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, 크리쳐, 오라 표는 그대로다', async () => {
+  await renderLoaded()
+  const accessoryRows = [
+    ['칭호', '종결', '프로스트의 전설', '95,000,000'],
+    ['진정한 각성을 이룬 자', '120,000,000'],
+    ['크리쳐', '종결', '운명을 담는 재단사', '54,000,000'],
+    ['오라', '종결', '초월한 폭풍의 기세', '-']
+  ]
+  expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
+
+  await act(async () => roleChip('버퍼').click())
+
+  expect(roleChip('버퍼').getAttribute('aria-pressed')).toBe('true')
+  expect(cellTexts(enchantTable())).toEqual([
+    ['무기', '종결', '뒤쫓는 자 제논 카드', '612,000,000'],
+    ['준종결', '대천사 미카엘 카드', '88,000,000'],
+    ['혼돈의 천사 루치펠 카드', '-'],
+    ['상의', '종결', '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)', '233,000,000']
+  ])
+  expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
+})
+
+it('이름은 레전더리면 레전더리 색, 등급을 모르면 기본 글자색으로 보인다', async () => {
+  await renderLoaded()
+  await act(async () => roleChip('버퍼').click())
+
+  expect(nameOf(enchantTable(), '뒤쫓는 자 제논 카드').classList).toContain('text-rarity-legendary')
+  expect(nameOf(enchantTable(), '혼돈의 천사 루치펠 카드').classList).toContain('text-fg')
+})
+
+it('마지막 업데이트는 마법부여와 칭호 묶음을 통틀어 가장 늦은 확인 시각으로 보인다', async () => {
+  const item = (itemName: string, checkedAt: string | null) => ({
+    itemName,
+    itemId: null,
+    itemRarity: null,
+    unitPrice: null,
+    checkedAt
+  })
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '종결',
+            items: [item('합성 카드 1', '2026-11-26T05:20:00.000Z'), item('합성 카드 2', null)]
+          },
+          {
+            category: 'TITLE',
+            role: 'all',
+            tier: '종결',
+            items: [item('합성 칭호', '2026-11-26T05:35:00.000Z')]
+          }
+        ]
+      } satisfies LabItems)
+    )
+  )
+  await render()
+
+  const note = container.querySelector('[data-testid="page-note"]')!
+  await vi.waitFor(() => expect(note.textContent).toBe('마지막 업데이트 5분 전'))
+  expect(note.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-26T05:35:00.000Z')
+})
+
+it('받는 중에는 역할 칩 아래에 뼈대를 두고 표는 그리지 않는다', async () => {
+  server.use(labItemsHandlers.loading)
+  await render()
+
+  expect(roleChip('딜러')).toBeDefined()
+  expect(container.querySelector('[aria-busy="true"] .skeleton')).not.toBeNull()
+  expect(container.querySelector('table')).toBeNull()
+})
+
+it('받지 못하면 역할 칩 아래에 받지 못했다는 한 줄을 보인다', async () => {
+  server.use(labItemsHandlers.failure)
+  await render()
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+      '마법부여 카드를 받지 못했습니다.'
+    )
+  )
+  expect(roleChip('딜러')).toBeDefined()
+  expect(container.querySelector('table')).toBeNull()
+})
+
+it('묶음이 없으면 역할 칩 없이 카드가 없다는 한 줄만 보인다', async () => {
+  server.use(labItemsHandlers.empty)
+  await render()
+
+  await vi.waitFor(() => expect(container.textContent).toContain('마법부여 카드가 없습니다.'))
+  expect(container.querySelector('[aria-label="역할"]')).toBeNull()
+  expect(container.querySelector('table')).toBeNull()
+})
