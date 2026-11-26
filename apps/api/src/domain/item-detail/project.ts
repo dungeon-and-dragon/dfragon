@@ -5,9 +5,15 @@ export interface ItemStatus {
   value: string
 }
 
+export interface ItemReinforceSkill {
+  jobName: string
+  skills: ItemStatus[]
+}
+
 export interface ItemCardEnchant {
   upgrade: number
   status: ItemStatus[]
+  reinforceSkill: ItemReinforceSkill[]
 }
 
 export interface ItemCard {
@@ -52,7 +58,17 @@ const status = z
 const cardInfo = z
   .object({
     slots: z.array(z.object({ slotName: z.string() })),
-    enchant: z.array(z.object({ upgrade: z.number().int(), status: z.array(statusRow) }))
+    enchant: z.array(
+      z.object({
+        upgrade: z.number().int(),
+        status: z.array(statusRow),
+        // 버프 스킬을 올리지 않는 카드는 키가 없다.
+        reinforceSkill: z
+          .array(z.object({ jobName: z.string(), skills: z.array(statusRow) }))
+          .nullish()
+          .transform((rows) => rows ?? [])
+      })
+    )
   })
   .nullish()
   .transform((card): ItemCard | null => {
