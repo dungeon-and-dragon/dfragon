@@ -28,7 +28,8 @@ function row(
       itemRarity: null,
       unitPrice: null,
       checkedAt: null,
-      cost: null
+      cost: null,
+      detail: null
     }
   }
 
@@ -45,16 +46,22 @@ function row(
     itemRarity,
     unitPrice,
     checkedAt: new Date(CHECKED_AT),
-    cost: null
+    cost: null,
+    detail: null
   }
 }
 
 async function startApi(
   t: test.TestContext,
   rows: LabItemPriceRow[],
-  readCurrencyIcon: LabItemRepository['readCurrencyIcon'] = async () => null
+  readCurrencyIcon: LabItemRepository['readCurrencyIcon'] = async () => null,
+  readItemIcon: LabItemRepository['readItemIcon'] = async () => null
 ) {
-  const labItems: LabItemRepository = { readLabItemPrices: async () => rows, readCurrencyIcon }
+  const labItems: LabItemRepository = {
+    readLabItemPrices: async () => rows,
+    readCurrencyIcon,
+    readItemIcon
+  }
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
     details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
@@ -123,6 +130,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 카드 싼',
             itemId: 'synthetic-item',
             itemRarity: '레전더리',
+            iconPath: null,
+            description: null,
             unitPrice: 900,
             checkedAt: CHECKED_AT,
             cost: null
@@ -131,6 +140,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 카드 중간',
             itemId: 'synthetic-item',
             itemRarity: '레전더리',
+            iconPath: null,
+            description: null,
             unitPrice: 10_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -139,6 +150,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 카드 비싼',
             itemId: 'synthetic-item',
             itemRarity: '레전더리',
+            iconPath: null,
+            description: null,
             unitPrice: 3_000_000_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -147,6 +160,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 카드 가',
             itemId: null,
             itemRarity: null,
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -155,6 +170,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 카드 다',
             itemId: null,
             itemRarity: null,
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: null
@@ -170,6 +187,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemName: '합성 칭호 A',
             itemId: null,
             itemRarity: null,
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -236,6 +255,8 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
             itemName: '합성 보주',
             itemId: 'synthetic-item',
             itemRarity: '유니크',
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: {
@@ -276,4 +297,78 @@ test('재화 아이콘은 저장한 형식으로 오래 캐시하게 내고, 없
   assert.equal((await request('/lab/currencies/0/icon')).status, 404)
   assert.equal((await request('/lab/currencies/x/icon')).status, 404)
   assert.deepEqual(requested, [7, 8])
+})
+
+test('소유자가 넣은 등급, 설명, 아이콘은 Neople 등급보다 먼저 쓰고, 넣지 않은 값은 Neople 값을 쓴다', async (t) => {
+  const iconUpdatedAt = new Date('2026-11-27T03:04:05.006Z')
+  const itemName = '합성 상자 (보주, 선택)'
+  const response = await requestLabItems(t, [
+    {
+      ...row('TITLE', 'all', '종결', itemName, null, false),
+      detail: { description: '합성 설명', itemRarity: '태초', iconUpdatedAt }
+    },
+    {
+      ...row('TITLE', 'all', '종결', '합성 칭호', 900),
+      detail: { description: null, itemRarity: null, iconUpdatedAt: null }
+    }
+  ])
+
+  const { groups } = (await response.json()) as {
+    groups: { items: Record<string, unknown>[] }[]
+  }
+  const looks = groups[0]?.items.map(({ itemName, itemId, itemRarity, iconPath, description }) => ({
+    itemName,
+    itemId,
+    itemRarity,
+    iconPath,
+    description
+  }))
+  const iconUrl = new URL(String(looks?.[1]?.iconPath), 'http://api.test')
+
+  assert.deepEqual(looks, [
+    {
+      itemName: '합성 칭호',
+      itemId: 'synthetic-item',
+      itemRarity: '레전더리',
+      iconPath: null,
+      description: null
+    },
+    {
+      itemName,
+      itemId: null,
+      itemRarity: '태초',
+      iconPath: looks?.[1]?.iconPath,
+      description: '합성 설명'
+    }
+  ])
+  assert.equal(iconUrl.pathname, '/lab/item-icon')
+  assert.equal(iconUrl.searchParams.get('itemName'), itemName)
+  assert.equal(iconUrl.searchParams.get('v'), String(iconUpdatedAt.getTime()))
+})
+
+test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없는 이름과 빠진 이름은 404로 답한다', async (t) => {
+  // 합성 바이트다.
+  const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9])
+  const itemName = '합성 상자 (보주, 선택)'
+  const requested: string[] = []
+  const request = await startApi(t, [], undefined, async (name) => {
+    requested.push(name)
+
+    if (name !== itemName) {
+      return null
+    }
+
+    return { bytes, contentType: 'image/png' }
+  })
+
+  const icon = await request(`/lab/item-icon?${new URLSearchParams({ itemName, v: '1' })}`)
+
+  assert.equal(icon.status, 200)
+  assert.equal(icon.headers.get('content-type'), 'image/png')
+  assert.equal(icon.headers.get('cache-control'), 'public, max-age=31536000, immutable')
+  assert.equal(icon.headers.get('x-content-type-options'), 'nosniff')
+  assert.deepEqual(new Uint8Array(await icon.arrayBuffer()), bytes)
+  assert.equal((await request('/lab/item-icon?itemName=%ED%95%A9%EC%84%B1')).status, 404)
+  assert.equal((await request('/lab/item-icon')).status, 404)
+  assert.deepEqual(requested, [itemName, '합성'])
 })
