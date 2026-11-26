@@ -582,3 +582,33 @@ it('버퍼 탭에서 버퍼 카드에 마우스를 올리면 버프 패시브 �
   expect(cells[0]?.classList).toContain('text-game-enchant')
   expect(cells[1]?.classList).toContain('text-game-enchant')
 })
+
+it('API가 배럭 묶음을 주면 등급 열에 배럭으로 보인다', async () => {
+  const item = (itemName: string, unitPrice: number) => ({
+    itemName,
+    itemId: null,
+    itemRarity: null,
+    iconPath: null,
+    description: null,
+    unitPrice,
+    checkedAt: null,
+    cost: null
+  })
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          { category: 'WEAPON', role: 'dealer', tier: '준종결', items: [item('합성 카드', 200)] },
+          { category: 'WEAPON', role: 'dealer', tier: '배럭', items: [item('합성 배럭 카드', 100)] }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  expect(cellTexts(enchantTable())).toEqual([
+    ['무기', '준종결', '합성 카드', '200'],
+    ['배럭', '합성 배럭 카드', '100']
+  ])
+})

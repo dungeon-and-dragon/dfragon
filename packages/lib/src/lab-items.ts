@@ -1,8 +1,7 @@
 import {
   ENCHANT_GRADE_SLOTS,
   type EnchantGradeRole,
-  type EnchantGradeSlot,
-  type EnchantGradeTier
+  type EnchantGradeSlot
 } from './enchant-grades.js'
 
 export const LAB_ITEM_CATEGORIES = [...ENCHANT_GRADE_SLOTS, 'TITLE', 'CREATURE', 'AURA'] as const
@@ -13,7 +12,8 @@ export const LAB_ITEM_ROLES = ['dealer', 'buffer', 'all'] as const
 
 export type LabItemRole = (typeof LAB_ITEM_ROLES)[number]
 
-export const LAB_ITEM_TIERS = ['종결', '준종결'] as const satisfies readonly EnchantGradeTier[]
+// 배럭은 등급표에 없는 실험실 등급이라 등급표의 등급 타입과 묶지 않는다.
+export const LAB_ITEM_TIERS = ['종결', '준종결', '배럭'] as const
 
 export type LabItemTier = (typeof LAB_ITEM_TIERS)[number]
 

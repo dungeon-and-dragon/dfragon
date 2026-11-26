@@ -783,6 +783,29 @@ describe('실험실 아이템 패널', () => {
     )
   })
 
+  it('마법부여 부위와 역할마다, 칭호, 크리쳐, 오라마다 배럭 묶음이 준종결 뒤에 있고, 후보 파일의 배럭 묶음도 읽는다', async () => {
+    const api = new FakeOpsApi()
+    await openLabItems(api)
+
+    const titles = labGroupTitles()
+    expect(titles.slice(0, 6)).toEqual([
+      '무기 딜러 종결',
+      '무기 딜러 준종결',
+      '무기 딜러 배럭',
+      '무기 버퍼 종결',
+      '무기 버퍼 준종결',
+      '무기 버퍼 배럭'
+    ])
+    expect(titles).toEqual(expect.arrayContaining(['칭호 배럭', '크리쳐 배럭', '오라 배럭']))
+
+    await uploadCandidateFile({
+      version: 1,
+      groups: [{ category: 'AURA', role: 'all', tier: '배럭', itemNames: ['합성 오라'] }]
+    })
+
+    await waitFor(() => expect(checkedNames('오라 배럭')).toEqual([['합성 오라', false]]))
+  })
+
   it('두 묶음 가운데 한 묶음만 체크가 바뀌면 그 묶음의 PUT 한 번만 보낸다', async () => {
     const api = new FakeOpsApi()
     api.labItems = [
