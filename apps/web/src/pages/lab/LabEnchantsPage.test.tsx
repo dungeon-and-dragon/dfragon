@@ -416,14 +416,7 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
   expect(requestedItemIds).toEqual([])
 })
 
-function stageLines(box: Element, stage: string): string[] {
-  const label = [...box.querySelectorAll('b')].find((element) => element.textContent === stage)
-  const lines = label?.nextElementSibling?.querySelectorAll('li') ?? []
-
-  return [...lines].map((line) => line.textContent ?? '')
-}
-
-it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위와 강화 단계별 옵션을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
+it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
   server.use(itemDetailHandlers.detail)
   await renderLoaded()
   const card = nameOf(enchantTable(), '멸절의 폭룡왕 바칼 카드').parentElement!
@@ -432,22 +425,17 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위�
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('부여 부위 무기'))
 
-  const box = document.querySelector('.tooltip-item')!
+  const slots = [...document.querySelectorAll('.tooltip-item p')].find(
+    (paragraph) => paragraph.textContent === '부여 부위 무기'
+  )!
+  const lines = [...slots.parentElement!.querySelectorAll('li')].map((line) => line.textContent)
 
-  expect(stageLines(box, '+0')).toEqual([
-    '모든 속성 강화 13',
-    '물리 공격력 20',
-    '마법 공격력 20',
-    '독립 공격력 20',
-    '모험가 명성 196'
-  ])
-  expect(stageLines(box, '+1')).toContain('물리 공격력 25')
-  expect(stageLines(box, '+2')).toEqual([
-    '모든 속성 강화 15',
-    '물리 공격력 30',
-    '마법 공격력 30',
-    '독립 공격력 30',
-    '모험가 명성 210'
+  expect(lines).toEqual([
+    '모든 속성 강화 (13 / 14 / 15)',
+    '물리 공격력 (20 / 25 / 30)',
+    '마법 공격력 (20 / 25 / 30)',
+    '독립 공격력 (20 / 25 / 30)',
+    '모험가 명성 (196 / 196 / 210)'
   ])
 
   await leave(card)
