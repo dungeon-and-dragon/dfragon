@@ -12,6 +12,8 @@ import { FIELD_INPUT, panelClasses } from './panel-classes'
 
 const ICON_ACCEPT = 'image/png,image/jpeg,image/gif,image/webp'
 const ICON_SIZE = 28
+// 운영 app이 받는 설명 길이 상한과 같다.
+const DESCRIPTION_MAX_LENGTH = 500
 
 async function readIconBase64(file: File): Promise<string> {
   const bytes = new Uint8Array(await file.arrayBuffer())
@@ -66,9 +68,37 @@ function IconInput({
   )
 }
 
+function DescriptionInput({
+  label,
+  value,
+  onChange
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}): React.JSX.Element {
+  function handleChange(event: ChangeEvent<HTMLTextAreaElement>): void {
+    onChange(event.currentTarget.value)
+  }
+
+  return (
+    <div className="w-[320px] shrink-0">
+      <textarea
+        aria-label={label}
+        rows={2}
+        maxLength={DESCRIPTION_MAX_LENGTH}
+        value={value}
+        onChange={handleChange}
+        className={`${FIELD_INPUT} field-box-sm resize-y`}
+      />
+    </div>
+  )
+}
+
 function AddCurrencyForm(): React.JSX.Element {
   const addCurrency = useAddLabCurrency()
   const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
   const [icon, setIcon] = useState<string>()
   const [formKey, setFormKey] = useState(0)
   const message = failureMessage(addCurrency.error)
@@ -79,6 +109,11 @@ function AddCurrencyForm(): React.JSX.Element {
     addCurrency.reset()
   }
 
+  function handleDescriptionChange(next: string): void {
+    setDescription(next)
+    addCurrency.reset()
+  }
+
   function handleIconChange(next: string | undefined): void {
     setIcon(next)
     addCurrency.reset()
@@ -86,6 +121,7 @@ function AddCurrencyForm(): React.JSX.Element {
 
   function clear(): void {
     setName('')
+    setDescription('')
     setIcon(undefined)
     setFormKey((key) => key + 1)
   }
@@ -97,7 +133,7 @@ function AddCurrencyForm(): React.JSX.Element {
       return
     }
 
-    addCurrency.mutate({ name: trimmed, icon }, { onSuccess: clear })
+    addCurrency.mutate({ name: trimmed, description, icon }, { onSuccess: clear })
   }
 
   return (
@@ -117,6 +153,11 @@ function AddCurrencyForm(): React.JSX.Element {
           className={`${FIELD_INPUT} field-box-sm`}
         />
       </div>
+      <DescriptionInput
+        label="새 재화 설명"
+        value={description}
+        onChange={handleDescriptionChange}
+      />
       <IconInput label="새 재화 아이콘" onChange={handleIconChange} />
       <Button
         type="submit"
@@ -138,15 +179,23 @@ function AddCurrencyForm(): React.JSX.Element {
 function CurrencyRow({ currency }: { currency: LabCurrency }): React.JSX.Element {
   const updateCurrency = useUpdateLabCurrency()
   const iconUrl = useLabCurrencyIconUrl()
+  const savedDescription = currency.description ?? ''
   const [name, setName] = useState(currency.name)
+  const [description, setDescription] = useState(savedDescription)
   const [icon, setIcon] = useState<string>()
   const [formKey, setFormKey] = useState(0)
   const message = failureMessage(updateCurrency.error)
   const trimmed = name.trim()
-  const changed = trimmed !== currency.name || icon !== undefined
+  const changed =
+    trimmed !== currency.name || description.trim() !== savedDescription || icon !== undefined
 
   function handleNameChange(event: ChangeEvent<HTMLInputElement>): void {
     setName(event.currentTarget.value)
+    updateCurrency.reset()
+  }
+
+  function handleDescriptionChange(next: string): void {
+    setDescription(next)
     updateCurrency.reset()
   }
 
@@ -157,6 +206,7 @@ function CurrencyRow({ currency }: { currency: LabCurrency }): React.JSX.Element
 
   function clearIcon(): void {
     setName(trimmed)
+    setDescription(description.trim())
     setIcon(undefined)
     setFormKey((key) => key + 1)
   }
@@ -168,7 +218,10 @@ function CurrencyRow({ currency }: { currency: LabCurrency }): React.JSX.Element
       return
     }
 
-    updateCurrency.mutate({ id: currency.id, name: trimmed, icon }, { onSuccess: clearIcon })
+    updateCurrency.mutate(
+      { id: currency.id, name: trimmed, description, icon },
+      { onSuccess: clearIcon }
+    )
   }
 
   return (
@@ -195,6 +248,11 @@ function CurrencyRow({ currency }: { currency: LabCurrency }): React.JSX.Element
             className={`${FIELD_INPUT} field-box-sm`}
           />
         </div>
+        <DescriptionInput
+          label={`${currency.name} 설명`}
+          value={description}
+          onChange={handleDescriptionChange}
+        />
         <IconInput label={`${currency.name} 아이콘`} onChange={handleIconChange} />
         <Button
           type="submit"

@@ -104,6 +104,7 @@ export const labItemListSchema = z.object({ groups: z.array(labItemGroupSchema) 
 const labCurrencySchema = z.object({
   id: z.int().positive(),
   name: z.string(),
+  description: z.string().nullable(),
   updatedAt: timestamp
 })
 
