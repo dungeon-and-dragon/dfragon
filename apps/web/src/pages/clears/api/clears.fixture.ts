@@ -185,7 +185,14 @@ const adventures = [
   { characters: 5, adventures: 90 },
   { characters: 8, adventures: 40 },
   { characters: 12, adventures: 12 },
-  { characters: 20, adventures: 3 }
+  { characters: 16, adventures: 10 },
+  { characters: 18, adventures: 7 },
+  { characters: 20, adventures: 9 },
+  { characters: 24, adventures: 6 },
+  { characters: 28, adventures: 4 },
+  { characters: 36, adventures: 3 },
+  { characters: 44, adventures: 2 },
+  { characters: 120, adventures: 1 }
 ]
 
 function weekGroup(cleared: number, median: number) {

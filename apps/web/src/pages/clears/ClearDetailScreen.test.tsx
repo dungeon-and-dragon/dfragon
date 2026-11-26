@@ -180,7 +180,13 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
       { characters: 1, adventures: 40 },
       { characters: 16, adventures: 3 },
       { characters: 17, adventures: 2 },
-      { characters: 30, adventures: 1 }
+      { characters: 19, adventures: 4 },
+      { characters: 20, adventures: 5 },
+      { characters: 29, adventures: 8 },
+      { characters: 30, adventures: 1 },
+      { characters: 49, adventures: 2 },
+      { characters: 50, adventures: 3 },
+      { characters: 164, adventures: 7 }
     ],
     weeklyClears: weeks.map((item) => {
       const firstCleared = Math.min(item.cleared, 5)
@@ -477,13 +483,18 @@ it('클리어 캐릭터의 명성은 분포가 있는 그룹만 둔다', async (
   expect(names).toEqual(['잔존', '이탈', '신규'])
 })
 
-it('모험단 기준 클리어 횟수는 1명부터 16명과 17명 이상으로 센다', async () => {
+it('모험단 기준 클리어 횟수는 16명까지 1명씩, 17명부터 구간으로 묶고 50명 이상을 한 칸에 센다', async () => {
   await open({ contentKey: 'michaela' })
 
   const columns = await columnTooltips('모험단 기준 클리어 횟수')
-  expect(columns).toHaveLength(17)
+  expect(columns).toHaveLength(22)
   expect(columns.at(15)).toMatch(/^16명3 /)
-  expect(columns.at(16)).toMatch(/^17명 이상3 /)
+  expect(columns.at(16)).toMatch(/^17~19명6 /)
+  expect(columns.at(17)).toMatch(/^20~24명5 /)
+  expect(columns.at(18)).toMatch(/^25~29명8 /)
+  expect(columns.at(19)).toMatch(/^30~39명1 /)
+  expect(columns.at(20)).toMatch(/^40~49명2 /)
+  expect(columns.at(21)).toMatch(/^50명 이상10 /)
 })
 
 it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
