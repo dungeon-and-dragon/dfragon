@@ -608,6 +608,32 @@ try {
   await psql("DELETE FROM lab_items WHERE item_name = '합성 검증 보주'")
   await psql(`DELETE FROM lab_currencies WHERE id = ${currencyId}`)
 
+  stage = 'lab item details'
+  await psql(
+    "INSERT INTO lab_item_details (item_name, description, item_rarity) VALUES ('합성 검증 상자', '합성 검증 설명', '유니크')"
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT icon IS NULL, icon_content_type IS NULL, description, item_rarity, updated_at IS NOT NULL FROM lab_item_details WHERE item_name = '합성 검증 상자'"
+      )
+    ).stdout.trim(),
+    't|t|합성 검증 설명|유니크|t'
+  )
+  await psql(
+    "UPDATE lab_item_details SET icon = '\\x89504e47'::bytea, icon_content_type = 'image/png' WHERE item_name = '합성 검증 상자'"
+  )
+  await assert.rejects(psql("INSERT INTO lab_item_details (item_name) VALUES ('합성 검증 상자')"))
+  await assert.rejects(
+    psql("UPDATE lab_item_details SET icon = NULL WHERE item_name = '합성 검증 상자'")
+  )
+  await assert.rejects(
+    psql(
+      "INSERT INTO lab_item_details (item_name, icon_content_type) VALUES ('합성 검증 아이콘', 'image/png')"
+    )
+  )
+  await psql("DELETE FROM lab_item_details WHERE item_name = '합성 검증 상자'")
+
   stage = 'timeline tables'
   assert.equal(
     (
@@ -1388,6 +1414,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline sync request table and requests, lab item and auction price tables, lab currency cost, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, timeline sync requests, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline sync request table and requests, lab item and auction price tables, lab currency cost, lab item details, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, timeline sync requests, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
