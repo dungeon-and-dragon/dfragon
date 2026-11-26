@@ -59,6 +59,21 @@ export type LabCurrencyBody = {
   updatedAt: string
 }
 
+export type LabItemDetailBody = {
+  itemName: string
+  description: string | null
+  itemRarity: string | null
+  hasIcon: boolean
+  updatedAt: string
+}
+
+type LabItemDetailRequest = {
+  itemName: string
+  description: string
+  itemRarity: string | null
+  icon?: string | null
+}
+
 type LabCurrencyRequest = { name: string; description: string; icon?: string }
 
 /** 운영 app처럼 빈 설명은 설명 없음으로 둔다. */
@@ -147,6 +162,7 @@ export class FakeOpsApi {
   labItems: LabItemGroupBody[] = []
   labCurrencies: LabCurrencyBody[] = []
   labCurrencyIcons = new Map<number, string>()
+  labItemDetails: LabItemDetailBody[] = []
   now = () => new Date().toISOString()
   requests: RecordedRequest[] = []
   private nextRunId = 1000
@@ -223,6 +239,14 @@ export class FakeOpsApi {
 
     if (method === 'PUT' && path === 'lab-items') {
       return this.replaceLabItems(body as LabItemGroupBody)
+    }
+
+    if (method === 'GET' && path === 'lab-item-details') {
+      return json(200, { details: this.labItemDetails })
+    }
+
+    if (method === 'PUT' && path === 'lab-item-details') {
+      return this.saveLabItemDetail(body as LabItemDetailRequest)
     }
 
     if (method === 'GET' && path === 'lab-currencies') {
@@ -341,6 +365,31 @@ export class FakeOpsApi {
         category !== group.category || role !== group.role || tier !== group.tier
     )
     this.labItems = group.items.length > 0 ? [...others, group] : others
+
+    return new Response(null, { status: 204 })
+  }
+
+  /** 운영 app처럼 아이콘을 빼면 그대로 두고 null이면 지운다. 입력 검증은 운영 app 테스트가 맡는다. */
+  private saveLabItemDetail({
+    itemName,
+    description,
+    itemRarity,
+    icon
+  }: LabItemDetailRequest): Response {
+    const saved = this.labItemDetails.find((detail) => detail.itemName === itemName)
+    const hasIcon = icon === undefined ? (saved?.hasIcon ?? false) : icon !== null
+    const updatedAt = this.now()
+    const stored = storedDescription(description)
+    const detail = {
+      itemName,
+      description: stored,
+      itemRarity,
+      hasIcon,
+      updatedAt
+    }
+
+    const others = this.labItemDetails.filter((candidate) => candidate.itemName !== itemName)
+    this.labItemDetails = [...others, detail]
 
     return new Response(null, { status: 204 })
   }
