@@ -121,8 +121,12 @@ async function openTab(label: string): Promise<void> {
   await click(tab)
 }
 
-function typeInto(input: HTMLInputElement, value: string): void {
-  const setValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+function typeInto(input: HTMLInputElement | HTMLTextAreaElement, value: string): void {
+  const prototype =
+    input instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype
+  const setValue = Object.getOwnPropertyDescriptor(prototype, 'value')?.set
   act(() => {
     setValue?.call(input, value)
     input.dispatchEvent(new Event('input', { bubbles: true }))
@@ -825,12 +829,13 @@ const ICON_BYTES = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x00, 0xff])
 const ICON_BASE64 = 'iVBORwD/'
 
 describe('실험실 재화와 아이템 비용', () => {
-  it('재화 이름과 아이콘 파일을 넣어 추가하면 base64 아이콘과 함께 POST하고 목록에 보인다', async () => {
+  it('재화 이름, 설명과 아이콘 파일을 넣어 추가하면 base64 아이콘과 함께 POST하고 목록에 보인다', async () => {
     const api = new FakeOpsApi()
     await openLabItems(api)
     const currencies = section('실험실 재화')
 
     typeInto(labelled(currencies, '새 재화 이름'), ' 합성 재화 ')
+    typeInto(labelled(currencies, '새 재화 설명'), '합성 설명')
     await chooseFile(
       labelled(currencies, '새 재화 아이콘'),
       new File([ICON_BYTES], 'coin.png', { type: 'image/png' })
@@ -843,7 +848,7 @@ describe('실험실 재화와 아이템 비용', () => {
         method: 'POST',
         path: '/api/lab-currencies',
         contentType: 'application/json',
-        body: { name: '합성 재화', icon: ICON_BASE64 }
+        body: { name: '합성 재화', description: '합성 설명', icon: ICON_BASE64 }
       }
     ])
     await waitFor(() =>
@@ -856,11 +861,37 @@ describe('실험실 재화와 아이템 비용', () => {
     )
   })
 
+  it('재화 설명만 고쳐도 저장할 수 있고, 비운 설명도 그대로 보낸다', async () => {
+    const api = new FakeOpsApi()
+    api.labCurrencies = [
+      { id: 1, name: '합성 재화', description: '합성 설명', updatedAt: NOW.toISOString() }
+    ]
+    await openLabItems(api)
+    const row = labelled(section('실험실 재화'), '합성 재화 재화')
+    const description = labelled<HTMLTextAreaElement>(row, '합성 재화 설명')
+    expect(description.value).toBe('합성 설명')
+    expect(buttonIn(row, '저장').disabled).toBe(true)
+
+    typeInto(description, '바뀐 합성 설명')
+    await click(buttonIn(row, '저장'))
+    await waitFor(() => expect(api.labCurrencies[0]?.description).toBe('바뀐 합성 설명'))
+
+    // 저장하면 아이콘 파일 입력을 비우려고 form을 다시 그리므로 다시 찾는다.
+    const savedRow = labelled(section('실험실 재화'), '합성 재화 재화')
+    typeInto(labelled(savedRow, '합성 재화 설명'), '  ')
+    await click(buttonIn(savedRow, '저장'))
+    await waitFor(() => expect(api.writes()).toHaveLength(2))
+    expect(api.writes().map(({ body }) => body)).toEqual([
+      { name: '합성 재화', description: '바뀐 합성 설명' },
+      { name: '합성 재화', description: '  ' }
+    ])
+  })
+
   it('이미 있는 이름으로 재화를 고치면 겹친다는 문구를 보이고 바꾸지 않는다', async () => {
     const api = new FakeOpsApi()
     api.labCurrencies = [
-      { id: 1, name: '합성 재화 A', updatedAt: NOW.toISOString() },
-      { id: 2, name: '합성 재화 B', updatedAt: NOW.toISOString() }
+      { id: 1, name: '합성 재화 A', description: null, updatedAt: NOW.toISOString() },
+      { id: 2, name: '합성 재화 B', description: null, updatedAt: NOW.toISOString() }
     ]
     await openLabItems(api)
     const row = labelled(section('실험실 재화'), '합성 재화 B 재화')
@@ -876,7 +907,9 @@ describe('실험실 재화와 아이템 비용', () => {
 
   it('아이템 줄에서 재화와 개수를 고르면 그 묶음을 비용과 함께 PUT하고, 경매장으로 되돌리면 비용을 지운다', async () => {
     const api = new FakeOpsApi()
-    api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: NOW.toISOString() }]
+    api.labCurrencies = [
+      { id: 1, name: '합성 재화', description: null, updatedAt: NOW.toISOString() }
+    ]
     api.labItems = [
       { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 보주'), unpriced('합성 카드 A')] }
     ]
@@ -913,7 +946,9 @@ describe('실험실 재화와 아이템 비용', () => {
 
   it('재화 개수가 1 이상의 정수가 아니면 저장 버튼을 막는다', async () => {
     const api = new FakeOpsApi()
-    api.labCurrencies = [{ id: 1, name: '합성 재화', updatedAt: NOW.toISOString() }]
+    api.labCurrencies = [
+      { id: 1, name: '합성 재화', description: null, updatedAt: NOW.toISOString() }
+    ]
     api.labItems = [{ ...TITLE_FINAL, items: [unpriced('합성 칭호 A')] }]
     await openLabItems(api)
     const group = labGroup('칭호 종결')
