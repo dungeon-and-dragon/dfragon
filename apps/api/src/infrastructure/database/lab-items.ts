@@ -3,6 +3,7 @@ import {
   type LabCurrencyIcon,
   type LabItemPriceRow,
   readLabCurrencyIcon,
+  readLabItemDetailIcon,
   readLabItemPrices
 } from '@dfragon/database'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
@@ -16,5 +17,9 @@ export class DatabaseLabItemRepository implements LabItemRepository {
 
   readCurrencyIcon(id: number): Promise<LabCurrencyIcon | null> {
     return readLabCurrencyIcon(this.client, id)
+  }
+
+  readItemIcon(itemName: string): Promise<LabCurrencyIcon | null> {
+    return readLabItemDetailIcon(this.client, itemName)
   }
 }

@@ -968,3 +968,80 @@ describe('실험실 재화와 아이템 비용', () => {
     expect(api.writes()).toEqual([])
   })
 })
+
+describe('실험실 아이템 상세', () => {
+  function detailRow(itemName: string): HTMLElement {
+    return labelled(section('실험실 아이템 상세'), `${itemName} 상세`)
+  }
+
+  it('고른 아이템 이름마다 한 줄을 두고, 등급, 설명, 아이콘을 넣어 저장하면 이름과 함께 PUT한다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [
+      { ...WEAPON_DEALER_FINAL, items: [unpriced('합성 상자'), unpriced('합성 카드 A')] },
+      { ...TITLE_FINAL, items: [unpriced('합성 상자')] }
+    ]
+    await openLabItems(api)
+    await waitFor(() => expect(detailRow('합성 카드 A')).toBeDefined())
+    const items = section('실험실 아이템 상세').querySelectorAll('form')
+    expect([...items].map((form) => form.getAttribute('aria-label'))).toEqual([
+      '합성 상자 상세',
+      '합성 카드 A 상세'
+    ])
+
+    const row = detailRow('합성 상자')
+    expect(buttonIn(row, '저장').disabled).toBe(true)
+    selectOption(labelled(row, '합성 상자 등급'), '태초')
+    typeInto(labelled(row, '합성 상자 설명'), '합성 설명')
+    await chooseFile(
+      labelled(row, '합성 상자 아이콘'),
+      new File([ICON_BYTES], 'box.png', { type: 'image/png' })
+    )
+    await click(buttonIn(row, '저장'))
+
+    await waitFor(() => expect(api.labItemDetails).toHaveLength(1))
+    expect(api.writes()).toMatchObject([
+      {
+        method: 'PUT',
+        path: '/api/lab-item-details',
+        body: {
+          itemName: '합성 상자',
+          description: '합성 설명',
+          itemRarity: '태초',
+          icon: ICON_BASE64
+        }
+      }
+    ])
+  })
+
+  it('아이콘을 고르지 않고 저장하면 icon 없이 보내고, 아이콘 지우기를 고르면 icon을 null로 보내며, Neople을 고르면 등급을 비운다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [{ ...TITLE_FINAL, items: [unpriced('합성 상자')] }]
+    api.labItemDetails = [
+      {
+        itemName: '합성 상자',
+        description: '합성 설명',
+        itemRarity: '유니크',
+        hasIcon: true,
+        updatedAt: NOW.toISOString()
+      }
+    ]
+    await openLabItems(api)
+    await waitFor(() => expect(detailRow('합성 상자')).toBeDefined())
+    expect(detailRow('합성 상자').querySelector('img')?.getAttribute('src')).toBe(
+      `http://ops.test/api/lab-item-details/icon?itemName=%ED%95%A9%EC%84%B1+%EC%83%81%EC%9E%90&v=${NOW.getTime()}`
+    )
+
+    selectOption(labelled(detailRow('합성 상자'), '합성 상자 등급'), '')
+    await click(buttonIn(detailRow('합성 상자'), '저장'))
+    await waitFor(() => expect(api.writes()).toHaveLength(1))
+
+    await click(labelled(detailRow('합성 상자'), '합성 상자 아이콘 지우기'))
+    await click(buttonIn(detailRow('합성 상자'), '저장'))
+    await waitFor(() => expect(api.labItemDetails[0]?.hasIcon).toBe(false))
+
+    expect(api.writes().map(({ body }) => body)).toEqual([
+      { itemName: '합성 상자', description: '합성 설명', itemRarity: null },
+      { itemName: '합성 상자', description: '합성 설명', itemRarity: null, icon: null }
+    ])
+  })
+})

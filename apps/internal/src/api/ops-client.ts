@@ -10,10 +10,12 @@ import {
   type JobList,
   jobListSchema,
   type LabCurrencyList,
+  type LabItemDetailList,
   type LabItemGroup,
   type LabItemList,
   labCurrencyAdditionSchema,
   labCurrencyListSchema,
+  labItemDetailListSchema,
   labItemListSchema,
   type QueueList,
   queueListSchema,
@@ -39,6 +41,14 @@ export class OpsRequestFailure extends Error {
 
 export type LabCurrencyDraft = { name: string; description: string }
 
+// icon을 빼면 저장한 아이콘을 그대로 두고, null이면 지운다.
+export type LabItemDetailDraft = {
+  itemName: string
+  description: string
+  itemRarity: string | null
+  icon?: string | null
+}
+
 export type OpsClient = {
   readJobs: () => Promise<JobList>
   readRuns: (before: number | undefined) => Promise<RunPage>
@@ -61,6 +71,9 @@ export type OpsClient = {
     icon: string | undefined
   ) => Promise<void>
   labCurrencyIconUrl: (id: number, updatedAt: Date) => string
+  readLabItemDetails: () => Promise<LabItemDetailList>
+  saveLabItemDetail: (detail: LabItemDetailDraft) => Promise<void>
+  labItemIconUrl: (itemName: string, updatedAt: Date) => string
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -168,6 +181,16 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
       await expectNoContent(await http.put(`lab-currencies/${id}`, { json }))
     },
     labCurrencyIconUrl: (id, updatedAt) =>
-      new URL(`lab-currencies/${id}/icon?v=${updatedAt.getTime()}`, baseUrl).href
+      new URL(`lab-currencies/${id}/icon?v=${updatedAt.getTime()}`, baseUrl).href,
+    readLabItemDetails: async () =>
+      readBody(await http.get('lab-item-details'), labItemDetailListSchema),
+    saveLabItemDetail: async (detail) => {
+      await expectNoContent(await http.put('lab-item-details', { json: detail }))
+    },
+    labItemIconUrl: (itemName, updatedAt) => {
+      const query = new URLSearchParams({ itemName, v: String(updatedAt.getTime()) })
+
+      return new URL(`lab-item-details/icon?${query}`, baseUrl).href
+    }
   }
 }

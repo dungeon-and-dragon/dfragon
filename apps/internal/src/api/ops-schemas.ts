@@ -110,6 +110,16 @@ const labCurrencySchema = z.object({
 
 export const labCurrencyListSchema = z.object({ currencies: z.array(labCurrencySchema) })
 
+const labItemDetailSchema = z.object({
+  itemName: z.string(),
+  description: z.string().nullable(),
+  itemRarity: z.string().nullable(),
+  hasIcon: z.boolean(),
+  updatedAt: timestamp
+})
+
+export const labItemDetailListSchema = z.object({ details: z.array(labItemDetailSchema) })
+
 export const labCurrencyAdditionSchema = z.object({ id: z.int().positive() })
 
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
@@ -130,4 +140,6 @@ export type LabItem = z.infer<typeof labItemSchema>
 export type LabItemGroup = z.infer<typeof labItemGroupSchema>
 export type LabCurrency = z.infer<typeof labCurrencySchema>
 export type LabCurrencyList = z.infer<typeof labCurrencyListSchema>
+export type LabItemDetail = z.infer<typeof labItemDetailSchema>
+export type LabItemDetailList = z.infer<typeof labItemDetailListSchema>
 export type LabItemList = z.infer<typeof labItemListSchema>

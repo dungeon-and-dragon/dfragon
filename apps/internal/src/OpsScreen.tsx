@@ -4,6 +4,7 @@ import { BatchKeyPanel } from '#ops-components/BatchKeyPanel'
 import { CollectionPanel } from '#ops-components/CollectionPanel'
 import { JobTable } from '#ops-components/JobTable'
 import { LabCurrencyPanel } from '#ops-components/LabCurrencyPanel'
+import { LabItemDetailPanel } from '#ops-components/LabItemDetailPanel'
 import { LabItemPanel } from '#ops-components/LabItemPanel'
 import { OpsHeader } from '#ops-components/OpsHeader'
 import { panelClasses } from '#ops-components/panel-classes'
@@ -79,6 +80,7 @@ export function OpsScreen(): React.JSX.Element {
           <Tabs.Panel value="lab-items" className={TAB_PANEL}>
             <LabCurrencyPanel />
             <LabItemPanel />
+            <LabItemDetailPanel />
           </Tabs.Panel>
         </Tabs.Root>
       </main>

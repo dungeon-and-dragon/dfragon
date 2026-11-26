@@ -1,4 +1,11 @@
-import { ItemIcon, itemRarityOfGrade, rarityTextClasses } from '#entities/character'
+import {
+  ItemIcon,
+  type ItemRarity,
+  itemPartClasses,
+  itemRarityOfGrade,
+  raritySolidOf,
+  rarityTextClasses
+} from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { Tooltip } from '@dfragon/ui'
 import { ItemTooltip } from '#widgets/item-tooltip'
@@ -113,49 +120,103 @@ export function LabItemTable({
   )
 }
 
-function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
-  const rarity = itemRarityOfGrade(item.itemRarity)
-  const name = (
-    <div className="inline-flex max-w-full items-center gap-3 align-middle">
-      <ItemIcon itemId={item.itemId} rarity={rarity} />
-      <span className={`min-w-0 truncate font-semibold ${rarityTextClasses[rarity ?? 'unknown']}`}>
-        {item.itemName}
-      </span>
-    </div>
-  )
-
-  if (item.itemId === null) {
-    return name
+function LabItemIcon({
+  item,
+  rarity
+}: {
+  item: LabItem
+  rarity: ItemRarity | null
+}): React.JSX.Element {
+  if (item.iconUrl === null) {
+    return <ItemIcon itemId={item.itemId} rarity={rarity} />
   }
 
-  return <ItemTooltip itemId={item.itemId}>{name}</ItemTooltip>
+  return (
+    <img
+      src={item.iconUrl}
+      alt=""
+      loading="lazy"
+      className={`${itemPartClasses.icon} size-game-icon ${raritySolidOf(rarity)}`}
+    />
+  )
 }
 
-// 재화는 Neople 아이템이 아니어서 아이템 정보 대신 운영 화면에서 넣은 이름과 설명을 같은 모양의 상자로 보인다.
-function CurrencyTooltip({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
+// Neople 아이템 정보가 없는 재화와 아이템은 운영 화면에서 넣은 이름과 설명을 아이템 정보 tooltip과 같은 모양의 상자로 보인다.
+function InfoTooltip({
+  trigger,
+  side,
+  iconUrl,
+  name,
+  nameClassName,
+  description
+}: {
+  trigger: React.JSX.Element
+  side: 'left' | 'right'
+  iconUrl: string | null
+  name: string
+  nameClassName: string
+  description: string | null
+}): React.JSX.Element {
   return (
     <Tooltip.Root>
-      <Tooltip.Trigger
-        delay={0}
-        closeDelay={0}
-        render={<img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />}
-      />
-      <Tooltip.Popup side="left" align="start" sideOffset={8}>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={trigger} />
+      <Tooltip.Popup side={side} align="start" sideOffset={8}>
         <div className="tooltip-item">
           <div className="flex max-w-[280px] flex-col gap-2 text-fg">
             <div className="flex items-center gap-2">
-              <img src={cost.iconUrl} alt="" className="size-[24px]" />
-              <b className="min-w-0 grow text-sm">{cost.currencyName}</b>
+              {iconUrl !== null && <img src={iconUrl} alt="" className="size-[24px]" />}
+              <b className={`min-w-0 grow text-sm ${nameClassName}`}>{name}</b>
             </div>
-            {cost.description !== null && (
-              <p className="m-0 border-t border-line pt-2 whitespace-pre-line">
-                {cost.description}
-              </p>
+            {description !== null && (
+              <p className="m-0 border-t border-line pt-2 whitespace-pre-line">{description}</p>
             )}
           </div>
         </div>
       </Tooltip.Popup>
     </Tooltip.Root>
+  )
+}
+
+function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
+  const rarity = itemRarityOfGrade(item.itemRarity)
+  const nameClassName = rarityTextClasses[rarity ?? 'unknown']
+  const name = (
+    <div className="inline-flex max-w-full items-center gap-3 align-middle">
+      <LabItemIcon item={item} rarity={rarity} />
+      <span className={`min-w-0 truncate font-semibold ${nameClassName}`}>{item.itemName}</span>
+    </div>
+  )
+
+  if (item.itemId !== null) {
+    return <ItemTooltip itemId={item.itemId}>{name}</ItemTooltip>
+  }
+
+  if (item.description === null) {
+    return name
+  }
+
+  return (
+    <InfoTooltip
+      trigger={name}
+      side="right"
+      iconUrl={item.iconUrl}
+      name={item.itemName}
+      nameClassName={nameClassName}
+      description={item.description}
+    />
+  )
+}
+
+function CurrencyTooltip({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
+  return (
+    <InfoTooltip
+      trigger={<img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />}
+      side="left"
+      iconUrl={cost.iconUrl}
+      name={cost.currencyName}
+      nameClassName=""
+      description={cost.description}
+    />
   )
 }
 

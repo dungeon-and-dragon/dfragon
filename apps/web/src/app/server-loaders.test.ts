@@ -117,7 +117,7 @@ it('길드 loader는 받지 못하면 이름 없이 끝나 화면을 그리게 �
   await expect(loadGuild()).resolves.toEqual({ guildName: null })
 })
 
-it('실험실 loader가 서버에서 받아 둔 재화 아이콘 주소는 내부 API 주소가 아니라 같은 origin의 /api 경로다', async () => {
+it('실험실 loader가 서버에서 받아 둔 재화와 아이템 아이콘 주소는 내부 API 주소가 아니라 같은 origin의 /api 경로다', async () => {
   const iconPath = '/lab/currencies/1/icon?v=1'
   server.use(
     http.get(LAB_ITEMS_URL, () =>
@@ -132,6 +132,8 @@ it('실험실 loader가 서버에서 받아 둔 재화 아이콘 주소는 내�
                 itemName: '합성 보주',
                 itemId: null,
                 itemRarity: null,
+                iconPath: '/lab/item-icon?itemName=x&v=1',
+                description: null,
                 unitPrice: null,
                 checkedAt: null,
                 cost: { currencyName: '합성 주화', description: null, count: 5, iconPath }
@@ -150,7 +152,13 @@ it('실험실 loader가 서버에서 받아 둔 재화 아이콘 주소는 내�
 
   const cached = queryClient.getQueryData(labItemsQuery.queryKey)
   expect(cached).toMatchObject({
-    groups: [{ items: [{ cost: { iconUrl: `/api${iconPath}` } }] }]
+    groups: [
+      {
+        items: [
+          { iconUrl: '/api/lab/item-icon?itemName=x&v=1', cost: { iconUrl: `/api${iconPath}` } }
+        ]
+      }
+    ]
   })
   expect(JSON.stringify(cached)).not.toContain(API_ORIGIN)
 })

@@ -3,7 +3,7 @@ import { bodyLimit } from 'hono/body-limit'
 import { OpsFailure } from '#domain/failure.js'
 
 const BODY_LIMIT_BYTES = 16 * 1024
-// 재화 아이콘은 base64로 JSON에 실어 받으므로 아이콘 상한(64KiB)의 4/3배와 이름을 담을 만큼 둔다.
+// 재화와 아이템 아이콘은 base64로 JSON에 실어 받으므로 아이콘 상한(64KiB)의 4/3배와 이름을 담을 만큼 둔다.
 const ICON_BODY_LIMIT_BYTES = 96 * 1024
 const SAFE_METHODS = new Set(['GET', 'HEAD'])
 

@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
 import type { LabCurrencyRepository } from '../src/application/lab-currencies/repository.js'
+import type { LabItemDetailRepository } from '../src/application/lab-item-details/repository.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 
@@ -19,6 +20,11 @@ const unusedLabItems = async () =>
 const unusedLabItemStore: LabItemRepository = {
   readGroups: unusedLabItems,
   replaceGroup: unusedLabItems
+}
+const unusedLabItemDetailStore: LabItemDetailRepository = {
+  readDetails: unusedLabItems,
+  readIcon: unusedLabItems,
+  save: unusedLabItems
 }
 const unusedLabCurrencyStore: LabCurrencyRepository = {
   readCurrencies: unusedLabItems,
@@ -90,6 +96,7 @@ async function startOpsApp(
     batchNeopleKeys,
     labItems: unusedLabItemStore,
     labCurrencies: unusedLabCurrencyStore,
+    labItemDetails: unusedLabItemDetailStore,
     writeAccessLog: (line) => logs.push(line)
   })
   t.after(() => app.close())

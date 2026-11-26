@@ -156,6 +156,15 @@ function filledApi(): FakeOpsApi {
       updatedAt: minutesAgo(30)
     }
   ]
+  api.labItemDetails = [
+    {
+      itemName: '합성 보주',
+      description: '합성 교환처에서 받는 상자.',
+      itemRarity: '유니크',
+      hasIcon: false,
+      updatedAt: minutesAgo(10)
+    }
+  ]
   api.labItems = [
     {
       category: 'WEAPON',

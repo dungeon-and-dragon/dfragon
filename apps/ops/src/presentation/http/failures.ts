@@ -11,6 +11,7 @@ const failureResponses = {
   batchNeopleKeyDuplicate: { status: 409, body: { error: { code: 'BATCH_NEOPLE_KEY_DUPLICATE' } } },
   labCurrencyNotFound: { status: 404, body: { error: { code: 'LAB_CURRENCY_NOT_FOUND' } } },
   labCurrencyDuplicate: { status: 409, body: { error: { code: 'LAB_CURRENCY_DUPLICATE' } } },
+  labItemIconNotFound: { status: 404, body: { error: { code: 'LAB_ITEM_ICON_NOT_FOUND' } } },
   internal: { status: 500, body: { error: { code: 'INTERNAL_SERVER_ERROR' } } }
 } as const satisfies Record<OpsFailureKind, FailureResponse>
 

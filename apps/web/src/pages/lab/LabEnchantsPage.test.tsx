@@ -159,6 +159,8 @@ it('마지막 업데이트는 마법부여와 칭호 묶음을 통틀어 가장 
     itemName,
     itemId: null,
     itemRarity: null,
+    iconPath: null,
+    description: null,
     unitPrice: null,
     checkedAt,
     cost: null
@@ -233,6 +235,8 @@ function exchangedItems(): LabItemsResponse {
             itemName: '합성 보주',
             itemId: 'synthetic-orb',
             itemRarity: '유니크',
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: null,
             cost: {
@@ -246,6 +250,8 @@ function exchangedItems(): LabItemsResponse {
             itemName: '합성 카드',
             itemId: null,
             itemRarity: null,
+            iconPath: null,
+            description: null,
             unitPrice: null,
             checkedAt: null,
             cost: {
@@ -324,5 +330,88 @@ it('재화 아이콘에 마우스를 올리면 아이템 정보를 받지 않고
   await hover(currencyIconOf('합성 카드'))
 
   expect(openTooltips()).toEqual(['합성 동전'])
+  expect(requestedItemIds).toEqual([])
+})
+
+it('올린 아이콘이 있으면 Neople 아이콘 대신 같은 origin의 /api 주소로 그리고, 이름과 테두리는 합친 등급 색이다', async () => {
+  const iconPath = '/lab/item-icon?itemName=x&v=1'
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'TITLE',
+            role: 'all',
+            tier: '종결',
+            items: [
+              {
+                itemName: '합성 칭호',
+                itemId: 'synthetic-title',
+                itemRarity: '유니크',
+                iconPath,
+                description: null,
+                unitPrice: 100,
+                checkedAt: null,
+                cost: null
+              }
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  const name = nameOf(accessoryTable(), '합성 칭호')
+  const icon = name.parentElement!.querySelector('img')!
+
+  expect(icon.getAttribute('src')).toBe(`/api${iconPath}`)
+  expect(icon.classList).toContain('text-rarity-unique')
+  expect(name.classList).toContain('text-rarity-unique')
+})
+
+it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면 아이템 정보를 받지 않고 아이콘, 등급 색 이름, 설명을 보인다', async () => {
+  const requestedItemIds: string[] = []
+  const iconPath = '/lab/item-icon?itemName=y&v=2'
+  server.use(
+    http.get(ITEM_DETAIL_URL, ({ params }) => {
+      requestedItemIds.push(String(params.itemId))
+
+      return HttpResponse.json(storyItemDetail(String(params.itemId)))
+    }),
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'TITLE',
+            role: 'all',
+            tier: '종결',
+            items: [
+              {
+                itemName: '합성 상자',
+                itemId: null,
+                itemRarity: '유니크',
+                iconPath,
+                description: '합성 설명\n둘째 줄',
+                unitPrice: null,
+                checkedAt: null,
+                cost: null
+              }
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  await hover(nameOf(accessoryTable(), '합성 상자').parentElement!)
+
+  expect(openTooltips()).toEqual(['합성 상자합성 설명\n둘째 줄'])
+  const box = document.querySelector('.tooltip-item')!
+  expect(box.querySelector('img')?.getAttribute('src')).toBe(`/api${iconPath}`)
+  expect(box.querySelector('b')?.classList).toContain('text-rarity-unique')
   expect(requestedItemIds).toEqual([])
 })

@@ -8,6 +8,7 @@ export type OpsFailureKind =
   | 'batchNeopleKeyDuplicate'
   | 'labCurrencyNotFound'
   | 'labCurrencyDuplicate'
+  | 'labItemIconNotFound'
   | 'internal'
 
 export class OpsFailure extends Error {
