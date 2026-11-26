@@ -115,6 +115,7 @@ const PAGE_CACHE_RULES = {
   '/stats/**': AGGREGATE_PAGE_CACHE,
   '/clears': AGGREGATE_PAGE_CACHE,
   '/clears/**': AGGREGATE_PAGE_CACHE,
+  '/lab/**': AGGREGATE_PAGE_CACHE,
   '/guilds/**': CHARACTER_LIST_PAGE_CACHE
 }
 

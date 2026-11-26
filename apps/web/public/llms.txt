@@ -15,6 +15,7 @@
 - [무기 통계](https://dfragon.com/stats/weapons): 무기 종류별 착용 비율
 - [스킬 통계](https://dfragon.com/stats/skills): 전직별 스킬 레벨, 개화, 강화 채택률과 스킬 체인 조합
 - [클리어 집계](https://dfragon.com/clears): 레이드, 레기온 등 컨텐츠의 주간 클리어율과 클리어 캐릭터의 명성, 점수 분포
+- [실험실 마법부여](https://dfragon.com/lab/enchants): 부위, 역할별 종결, 준종결 마법부여 카드와 칭호, 크리쳐, 오라의 경매장 최저가
 
 ## 주소 형식
 
