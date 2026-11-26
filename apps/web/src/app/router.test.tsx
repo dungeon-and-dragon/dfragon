@@ -296,7 +296,6 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
@@ -331,7 +330,6 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
 
@@ -362,7 +360,6 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
@@ -395,7 +392,6 @@ it.each([
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
 })
@@ -501,7 +497,6 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
 })
@@ -554,7 +549,6 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
 
@@ -592,12 +586,11 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', 'page'],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
 })
 
-it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸고, 전역 메뉴의 실험실을 지금 항목으로 둔다', async () => {
+it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸고, 전역 메뉴에는 지금 항목을 두지 않는다', async () => {
   server.use(labItemsHandlers.items)
   window.history.replaceState(null, '', '/lab')
   const historyLength = window.history.length
@@ -613,7 +606,6 @@ it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
-    ['실험실', 'page'],
     ['즐겨찾기', null]
   ])
 })
@@ -667,7 +659,6 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['통계', null],
     ['모험단', 'page'],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
   expect(adventureRequests()).toEqual([
@@ -1693,7 +1684,6 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     ['통계', null],
     ['모험단', 'page'],
     ['장비 시뮬레이터', null],
-    ['실험실', null],
     ['즐겨찾기', null]
   ])
   const form = container.querySelector<HTMLFormElement>('main form')!

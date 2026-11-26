@@ -16,7 +16,6 @@ type GlobalMenuItem = {
 
 const CLEARS_PATH = /^\/clears(\/|$)/
 const CHARACTER_SIMULATOR_PATH = /^\/c\/[^/]+\/[^/]+\/simulator$/
-const LAB_PATH = /^\/lab(\/|$)/
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '멀티서치', to: '/multisearch' },
@@ -24,7 +23,6 @@ const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '통계', to: '/stats', currentOn: CLEARS_PATH },
   { label: '모험단', to: '/adventures' },
   { label: '장비 시뮬레이터', to: '/simulator', currentOn: CHARACTER_SIMULATOR_PATH },
-  { label: '실험실', to: '/lab/enchants', currentOn: LAB_PATH },
   { label: '즐겨찾기', to: '/favorites' }
 ]
 
