@@ -8,6 +8,7 @@ import { server } from '#testing/test-support/msw-server'
 const API_ORIGIN = 'http://api.internal.test:3000'
 const CHARACTER_URL = `${API_ORIGIN}/characters/prey/buffer-1`
 const GUILD_URL = `${API_ORIGIN}/guilds/guild-1`
+const LAB_ITEMS_URL = `${API_ORIGIN}/lab/items`
 
 type Loader = (match: {
   context: { queryClient: QueryClient }
@@ -114,6 +115,44 @@ it('길드 loader는 받지 못하면 이름 없이 끝나 화면을 그리게 �
   server.use(http.get(GUILD_URL, () => HttpResponse.error()))
 
   await expect(loadGuild()).resolves.toEqual({ guildName: null })
+})
+
+it('실험실 loader가 서버에서 받아 둔 재화 아이콘 주소는 내부 API 주소가 아니라 같은 origin의 /api 경로다', async () => {
+  const iconPath = '/lab/currencies/1/icon?v=1'
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '준종결',
+            items: [
+              {
+                itemName: '합성 보주',
+                itemId: null,
+                itemRarity: null,
+                unitPrice: null,
+                checkedAt: null,
+                cost: { currencyName: '합성 주화', description: null, count: 5, iconPath }
+              }
+            ]
+          }
+        ]
+      })
+    )
+  )
+  const { Route } = await import('./routes/lab.enchants')
+  const { labItemsQuery } = await import('#pages/lab')
+  const loader = Route.options.loader as Loader
+
+  await loader({ context: { queryClient }, params: {}, deps: {} })
+
+  const cached = queryClient.getQueryData(labItemsQuery.queryKey)
+  expect(cached).toMatchObject({
+    groups: [{ items: [{ cost: { iconUrl: `/api${iconPath}` } }] }]
+  })
+  expect(JSON.stringify(cached)).not.toContain(API_ORIGIN)
 })
 
 function requestedSearches(): string[] {

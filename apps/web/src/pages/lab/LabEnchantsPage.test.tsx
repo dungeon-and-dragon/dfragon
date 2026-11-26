@@ -4,7 +4,6 @@ import { act, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { PageNoteTarget } from '#shared/ui/page-note-target'
-import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -120,7 +119,7 @@ it('재화로 교환하는 아이템의 가격 칸은 경매장 가격 대신 �
   const icon = priceCell.querySelector('img')!
 
   expect(priceCell.textContent).toBe('×5')
-  expect(icon.getAttribute('src')).toBe(`${API_BASE_URL}${LAB_CURRENCY_ICON_PATH}`)
+  expect(icon.getAttribute('src')).toBe(`/api${LAB_CURRENCY_ICON_PATH}`)
   expect(icon.getAttribute('alt')).toBe('합성 교환 주화')
 })
 
@@ -317,9 +316,7 @@ it('재화 아이콘에 마우스를 올리면 아이템 정보를 받지 않고
 
   expect(openTooltips()).toEqual(['합성 주화합성 설명\n둘째 줄'])
   const box = document.querySelector('.tooltip-item')!
-  expect(box.querySelector('img')?.getAttribute('src')).toBe(
-    `${API_BASE_URL}${LAB_CURRENCY_ICON_PATH}`
-  )
+  expect(box.querySelector('img')?.getAttribute('src')).toBe(`/api${LAB_CURRENCY_ICON_PATH}`)
 
   await leave(currencyIconOf('합성 보주'))
   await vi.waitFor(() => expect(openTooltips()).toEqual([]))
