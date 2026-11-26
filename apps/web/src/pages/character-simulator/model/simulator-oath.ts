@@ -66,11 +66,12 @@ export type SimulatorOathCrystal = ItemView &
 
 /**
  * setId는 응답에 서약 세트가 없으면 inferOathSetId로 찾은 세트다. null이면 선택 목록에 없거나 찾을 수 없는 서약 세트라
- * 세트를 고르기 전에는 결정 선택지가 없다. rarity는 상세 응답이 준 서약 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
+ * 세트를 고르기 전에는 결정 선택지가 없다. rarity, point는 상세 응답이 준 서약 세트의 등급과 세트 포인트다.
  */
 export type SimulatorOath = Readonly<{
   setId: number | null
   rarity: ItemView['rarity']
+  point: number | null
   sets: readonly OathSet[]
   body: SimulatorOathBody | null
   upgrade: SimulatorOathUpgrade | null
@@ -251,17 +252,18 @@ export function toSimulatorOath(detail: Pick<CharacterDetailView, 'oath'>): Simu
     const body = emptyBody()
     const crystals = withEmptyCrystals([], null)
 
-    return { setId: null, rarity: null, sets, body, upgrade: null, crystals }
+    return { setId: null, rarity: null, point: null, sets, body, upgrade: null, crystals }
   }
 
   const setId = wornSetIdOf(oath)
   const rarity = itemRarityOfGrade(oath.setInfo?.setRarityName ?? null)
+  const point = oath.setInfo?.active?.setPoint?.current ?? null
   const worn = oath.crystal.flatMap((crystal) => toOathCrystal(crystal, setId))
   const crystals = withEmptyCrystals(worn, setId)
   const body = toOathBody(oath.info, setId)
   const upgrade = toSimulatorOathUpgrade(detail)
 
-  return { setId, rarity, sets, body, upgrade, crystals }
+  return { setId, rarity, point, sets, body, upgrade, crystals }
 }
 
 function choiceOf(choices: readonly OathChoice[], id: string | null): OathChoice | undefined {

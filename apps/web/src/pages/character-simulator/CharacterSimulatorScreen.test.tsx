@@ -1082,7 +1082,7 @@ it('서약 구획은 세트, 서약, 결정을 slotNo 순서로 두고, 조율�
 
   const rows = rowsIn('서약')
   expect(rows.map((row) => row.querySelectorAll('td')[1]?.textContent)).toEqual([
-    '야망의 용투 서약',
+    '야망의 용투 서약2,780',
     '세계를 태우는 용투 서약',
     ...Array.from({ length: 6 }, () => '용투 : 완전한 광휘 결정III'),
     '용투 : 완전한 광휘 결정I',
@@ -1282,7 +1282,7 @@ it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열�
   await render(characterDetailFixture('dealer'))
   await waitForScores(UNCHANGED_SCORES)
 
-  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('소울 페어리 세트')
+  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('소울 페어리 세트2,615')
 
   await choose('세트')
 
@@ -1297,7 +1297,7 @@ it('장비 세트 줄을 고르면 주 세트가 선택된 세트 선택을 열�
     ['차이', '+1,000']
   ])
   expect(bodies.at(-1)).toEqual({ equipmentSet: SHADOW_SET, equipment: [] })
-  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('그림자에 숨은 죽음 세트')
+  expect(rowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('그림자에 숨은 죽음 세트2,615')
   expect(rowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.primordial)
 
   await choose('상의')
@@ -1336,7 +1336,9 @@ it('서약 세트 줄에서 다른 세트를 고르면 세트만 요청하고 �
   await press('서약 세트', '어둠에 잠긴 그림자 서약')
 
   await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], oathSet: SHADOW_OATH_SET }))
-  expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe('어둠에 잠긴 그림자 서약')
+  expect(oathRowOf('세트').querySelectorAll('td')[1]!.textContent).toBe(
+    '어둠에 잠긴 그림자 서약2,780'
+  )
   expect(oathRowOf('세트').querySelector('b')!.className).toContain(rarityTextClasses.primordial)
   expect(oathRowOf('서약').querySelectorAll('td')[1]!.textContent).toBe(
     '태초의 어둠 속 그림자 서약'

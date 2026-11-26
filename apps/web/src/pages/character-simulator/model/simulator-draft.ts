@@ -141,7 +141,8 @@ export type WeaponTypeChoice = Readonly<{
  * wornVariantId, wornTune, wornPotency, wornRelease는 지금 기준의 아이템, 조율, 정밀도, 해방 수치다. 장비 세트를 고르면 그
  * 세트로 옮긴 값이고, wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율
  * 상한이다(무기). empty는 비어 있는 부위이고, 선택지의 아이템을 고른 뒤에만 강화, 증폭, 마법부여를 고를 수 있다. weaponTypes는 비어
- * 있는 무기 줄에만 있고, variants는 그 종류들의 선택지를 모두 담는다.
+ * 있는 무기 줄에만 있고, variants는 그 종류들의 선택지를 모두 담는다. wornSetPoint, wornSetItemId는 착용 아이템의 세트 포인트와
+ * 세트이고, 선택지에 없는 착용 아이템의 세트 포인트를 셀 때 쓴다.
  */
 export type SimulatorSlot = ItemView &
   Readonly<{
@@ -159,6 +160,8 @@ export type SimulatorSlot = ItemView &
     wornPotency: number | null
     wornRelease: number | null
     wornMaxTune: number
+    wornSetPoint: number | null
+    wornSetItemId: string | null
     empty: boolean
     weaponTypes: readonly WeaponTypeChoice[]
   }>
@@ -184,11 +187,12 @@ export type SimulatorRow =
 
 /**
  * 장비 세트 줄이다. mainSetId는 캐릭터의 주 세트이고, 세트를 고르지 않았을 때 선택된 세트다. 주 세트가 없으면(장비가 비었거나
- * 선택 목록 밖 세트) null이다. rarity는 상세 응답이 준 주 세트의 등급이라 다른 세트를 골라도 바꾸지 않는다.
+ * 선택 목록 밖 세트) null이다. rarity, point는 상세 응답이 준 주 세트의 등급과 세트 포인트다.
  */
 export type SimulatorEquipmentSet = Readonly<{
   mainSetId: string | null
   rarity: ItemView['rarity']
+  point: number | null
   sets: readonly EquipmentSet[]
 }>
 
@@ -508,6 +512,7 @@ function toSimulatorSlot(
   const wornPotency = wornPotencyOf(item, variants, wornVariantId)
   const wornRelease = wornReleaseOf(item, variants, wornVariantId)
   const wornMaxTune = item.slotId === WEAPON_SLOT_ID ? weaponMaxTuneLevelOf(item.itemName ?? '') : 0
+  const wornSetPoint = item.tune[0]?.setPoint ?? null
 
   return {
     ...itemView,
@@ -525,6 +530,8 @@ function toSimulatorSlot(
     wornPotency,
     wornRelease,
     wornMaxTune,
+    wornSetPoint,
+    wornSetItemId: item.setItemId,
     empty: false,
     weaponTypes: []
   }
@@ -573,6 +580,8 @@ function emptySlot(
     wornPotency: null,
     wornRelease: null,
     wornMaxTune: 0,
+    wornSetPoint: null,
+    wornSetItemId: null,
     empty: true,
     weaponTypes
   }
@@ -624,13 +633,14 @@ export function toEquipmentSet(
   )
 
   if (mainSetId === undefined) {
-    return { mainSetId: null, rarity: null, sets }
+    return { mainSetId: null, rarity: null, point: null, sets }
   }
 
   const mainSet = detail.equipment.setItemInfo.find(({ setItemId }) => setItemId === mainSetId)
   const rarity = itemRarityOfGrade(mainSet?.setItemRarityName ?? null)
+  const point = mainSet?.active?.setPoint?.current ?? null
 
-  return { mainSetId, rarity, sets }
+  return { mainSetId, rarity, point, sets }
 }
 
 export function equipmentSetIdOf(
