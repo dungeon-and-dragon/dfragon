@@ -9,6 +9,8 @@ const failureResponses = {
   jobNotScheduled: { status: 400, body: { error: { code: 'JOB_NOT_SCHEDULED' } } },
   batchNeopleKeyNotFound: { status: 404, body: { error: { code: 'BATCH_NEOPLE_KEY_NOT_FOUND' } } },
   batchNeopleKeyDuplicate: { status: 409, body: { error: { code: 'BATCH_NEOPLE_KEY_DUPLICATE' } } },
+  labCurrencyNotFound: { status: 404, body: { error: { code: 'LAB_CURRENCY_NOT_FOUND' } } },
+  labCurrencyDuplicate: { status: 409, body: { error: { code: 'LAB_CURRENCY_DUPLICATE' } } },
   internal: { status: 500, body: { error: { code: 'INTERNAL_SERVER_ERROR' } } }
 } as const satisfies Record<OpsFailureKind, FailureResponse>
 

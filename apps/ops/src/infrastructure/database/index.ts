@@ -1,5 +1,6 @@
 export { DatabaseBatchNeopleKeyRepository } from './batch-neople-keys.js'
 export { DatabaseCollectionRepository } from './collection.js'
 export { DatabaseJobRepository } from './jobs.js'
+export { DatabaseLabCurrencyRepository } from './lab-currencies.js'
 export { DatabaseLabItemRepository } from './lab-items.js'
 export { DatabaseQueueRepository } from './queues.js'

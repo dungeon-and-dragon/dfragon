@@ -3,6 +3,7 @@ import {
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
   DatabaseJobRepository,
+  DatabaseLabCurrencyRepository,
   DatabaseLabItemRepository,
   DatabaseQueueRepository
 } from '#infrastructure/database/index.js'
@@ -18,6 +19,7 @@ export function createOpsRuntime(database: DatabaseConfiguration) {
     collection: new DatabaseCollectionRepository(client),
     batchNeopleKeys: new DatabaseBatchNeopleKeyRepository(client),
     labItems: new DatabaseLabItemRepository(client),
+    labCurrencies: new DatabaseLabCurrencyRepository(client),
     close: () => client.$disconnect()
   })
 }
