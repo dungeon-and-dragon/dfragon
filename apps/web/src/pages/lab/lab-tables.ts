@@ -1,7 +1,8 @@
 import { isEnchantCategory, type LabItemCategory } from '@dfragon/lib/lab-items'
+import type { EnchantRole } from '#entities/character'
 import type { LabItem, LabItemGroup } from './api/useLabItems'
 
-export type EnchantRole = 'dealer' | 'buffer'
+export type { EnchantRole }
 
 export type LabTierRows = Readonly<{ tier: LabItemGroup['tier']; items: readonly LabItem[] }>
 

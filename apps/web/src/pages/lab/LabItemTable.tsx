@@ -11,7 +11,7 @@ import { Tooltip } from '@dfragon/ui'
 import { ItemTooltip } from '#widgets/item-tooltip'
 import type { LabItemCategory } from '@dfragon/lib/lab-items'
 import type { LabCurrencyCost, LabItem } from './api/useLabItems'
-import type { LabCategoryRows } from './lab-tables'
+import type { EnchantRole, LabCategoryRows } from './lab-tables'
 
 const CATEGORY_NAMES: Readonly<Record<LabItemCategory, string>> = {
   WEAPON: '무기',
@@ -49,11 +49,13 @@ function priceOf(unitPrice: number | null): string {
 export function LabItemTable({
   categoryLabel,
   itemLabel,
-  rows
+  rows,
+  role
 }: {
   categoryLabel: string
   itemLabel: string
   rows: readonly LabCategoryRows[]
+  role?: EnchantRole
 }): React.JSX.Element {
   return (
     <div className="table-scroll">
@@ -105,7 +107,7 @@ export function LabItemTable({
                     </td>
                   )}
                   <td className={MERGED_ROW_CELL}>
-                    <LabItemName item={item} />
+                    <LabItemName item={item} role={role} />
                   </td>
                   <td className="table-num font-semibold">
                     <LabItemPrice item={item} />
@@ -177,7 +179,13 @@ function InfoTooltip({
   )
 }
 
-function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
+function LabItemName({
+  item,
+  role
+}: {
+  item: LabItem
+  role: EnchantRole | undefined
+}): React.JSX.Element {
   const rarity = itemRarityOfGrade(item.itemRarity)
   const nameClassName = rarityTextClasses[rarity ?? 'unknown']
   const name = (
@@ -188,7 +196,11 @@ function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
   )
 
   if (item.itemId !== null) {
-    return <ItemTooltip itemId={item.itemId}>{name}</ItemTooltip>
+    return (
+      <ItemTooltip itemId={item.itemId} role={role}>
+        {name}
+      </ItemTooltip>
+    )
   }
 
   if (item.description === null) {
