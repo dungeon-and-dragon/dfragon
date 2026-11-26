@@ -3,7 +3,7 @@ import { after, before, test } from 'node:test'
 import {
   applyMigrations,
   createDatabaseClient,
-  readLabItemNames,
+  readLabItemPriceTargets,
   recordAuctionPrice
 } from '../dist/index.js'
 
@@ -64,18 +64,30 @@ const readPrices = () =>
     orderBy: { itemName: 'asc' }
   })
 
-test('두 묶음에 겹친 실험실 아이템 이름은 한 번만 읽는다', {
+test('두 묶음에 겹친 이름은 한 번만 읽고, 한 묶음에서라도 재화 비용이 있으면 교환 아이템으로 읽는다', {
   skip: port === undefined
 }, async () => {
+  const currency = await client.labCurrency.create({
+    data: { name: '합성 재화', icon: new Uint8Array([1]), iconContentType: 'image/png' }
+  })
+  const cost = { currencyId: currency.id, currencyCount: 5 }
   await client.labItem.createMany({
     data: [
-      { category: 'WEAPON', role: 'dealer', tier: 'semi', itemName: shared },
+      { category: 'WEAPON', role: 'dealer', tier: 'semi', itemName: shared, ...cost },
       { category: 'WEAPON', role: 'buffer', tier: 'end', itemName: shared },
       { category: 'TITLE', role: 'all', tier: 'end', itemName: single }
     ]
   })
 
-  assert.deepEqual((await readLabItemNames(client)).toSorted(), [shared, single].toSorted())
+  const targets = await readLabItemPriceTargets(client)
+
+  assert.deepEqual(
+    targets.toSorted((left, right) => left.itemName.localeCompare(right.itemName)),
+    [
+      { itemName: shared, exchanged: true },
+      { itemName: single, exchanged: false }
+    ].toSorted((left, right) => left.itemName.localeCompare(right.itemName))
+  )
 })
 
 test('가격을 다시 받으면 그 이름의 행만 바꾸고, 매물이 없으면 가격을 비운 채 확인 시각을 갱신한다', {
