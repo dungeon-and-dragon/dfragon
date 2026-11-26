@@ -1,4 +1,9 @@
-import type { LabCurrencyIcon, LabItemPriceCost, LabItemPriceRow } from '@dfragon/database'
+import type {
+  LabCurrencyIcon,
+  LabItemPriceCost,
+  LabItemPriceDetail,
+  LabItemPriceRow
+} from '@dfragon/database'
 import {
   LAB_ITEM_CATEGORIES,
   LAB_ITEM_TIERS,
@@ -16,10 +21,13 @@ export interface LabItemCurrencyCost {
   iconPath: string
 }
 
+// itemId는 Neople 아이템이고, itemRarity, iconPath, description은 소유자가 넣은 값을 Neople 값보다 먼저 쓴 결과다.
 export interface LabItemPrice {
   itemName: string
   itemId: string | null
   itemRarity: string | null
+  iconPath: string | null
+  description: string | null
   unitPrice: number | null
   checkedAt: Date | null
   cost: LabItemCurrencyCost | null
@@ -38,12 +46,45 @@ export interface LabItems {
 
 export const emptyLabItemRepository: LabItemRepository = {
   readLabItemPrices: async () => [],
-  readCurrencyIcon: async () => null
+  readCurrencyIcon: async () => null,
+  readItemIcon: async () => null
 }
 
 // 아이콘을 바꾸면 주소의 v가 바뀌어, 아이콘 응답을 오래 캐시해도 바꾼 아이콘이 보인다.
 function currencyIconPath(currencyId: number, updatedAt: Date): string {
   return `/lab/currencies/${currencyId}/icon?v=${updatedAt.getTime()}`
+}
+
+// 아이템 이름에 쉼표, 괄호, 공백이 들어가 경로 대신 query로 넘긴다.
+function itemIconPath(itemName: string, updatedAt: Date): string {
+  const query = new URLSearchParams({ itemName, v: String(updatedAt.getTime()) })
+
+  return `/lab/item-icon?${query}`
+}
+
+function uploadedIconPath(itemName: string, { iconUpdatedAt }: LabItemPriceDetail): string | null {
+  if (iconUpdatedAt === null) {
+    return null
+  }
+
+  return itemIconPath(itemName, iconUpdatedAt)
+}
+
+type ItemLook = Pick<LabItemPrice, 'itemRarity' | 'iconPath' | 'description'>
+
+function lookOf(
+  itemName: string,
+  neopleRarity: string | null,
+  detail: LabItemPriceDetail | null
+): ItemLook {
+  if (detail === null) {
+    return { itemRarity: neopleRarity, iconPath: null, description: null }
+  }
+
+  const itemRarity = detail.itemRarity ?? neopleRarity
+  const iconPath = uploadedIconPath(itemName, detail)
+
+  return { itemRarity, iconPath, description: detail.description }
 }
 
 function toCurrencyCost({
@@ -81,15 +122,18 @@ function toPrice({
   itemRarity,
   unitPrice,
   checkedAt,
-  cost
+  cost,
+  detail
 }: LabItemPriceRow): LabItemPrice {
+  const look = lookOf(itemName, itemRarity, detail)
+
   if (cost !== null) {
     const currencyCost = toCurrencyCost(cost)
 
-    return { itemName, itemId, itemRarity, unitPrice: null, checkedAt, cost: currencyCost }
+    return { itemName, itemId, ...look, unitPrice: null, checkedAt, cost: currencyCost }
   }
 
-  return { itemName, itemId, itemRarity, unitPrice, checkedAt, cost: null }
+  return { itemName, itemId, ...look, unitPrice, checkedAt, cost: null }
 }
 
 export class LabItemService {
@@ -117,5 +161,9 @@ export class LabItemService {
 
   readCurrencyIcon(id: number): Promise<LabCurrencyIcon | null> {
     return this.repository.readCurrencyIcon(id)
+  }
+
+  readItemIcon(itemName: string): Promise<LabCurrencyIcon | null> {
+    return this.repository.readItemIcon(itemName)
   }
 }
