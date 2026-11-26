@@ -392,3 +392,26 @@ test('등급표에 없는 벨트 버퍼 준종결 묶음도 아이템이 있으�
     [['WAIST', 'buffer', '준종결', ['합성 벨트 카드']]]
   )
 })
+
+test('배럭 묶음은 같은 부위와 역할에서 종결, 준종결 뒤에 온다', async (t) => {
+  const response = await requestLabItems(t, [
+    row('WEAPON', 'dealer', '배럭', '합성 배럭 카드', 100),
+    row('TITLE', 'all', '배럭', '합성 배럭 칭호', 50),
+    row('WEAPON', 'dealer', '준종결', '합성 카드 B', 200),
+    row('WEAPON', 'dealer', '종결', '합성 카드 A', 300)
+  ])
+
+  const { groups } = (await response.json()) as {
+    groups: { category: string; role: string; tier: string }[]
+  }
+
+  assert.deepEqual(
+    groups.map(({ category, role, tier }) => [category, role, tier]),
+    [
+      ['WEAPON', 'dealer', '종결'],
+      ['WEAPON', 'dealer', '준종결'],
+      ['WEAPON', 'dealer', '배럭'],
+      ['TITLE', 'all', '배럭']
+    ]
+  )
+})
