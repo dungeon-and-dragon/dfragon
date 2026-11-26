@@ -38,3 +38,18 @@ export function labItemRolesOf(category: LabItemCategory): readonly LabItemRole[
 
   return OTHER_ROLES
 }
+
+// 웹이 이름과 아이콘 테두리에 칠하는 게임 아이템 등급과 같은 목록이다.
+export const LAB_ITEM_RARITIES = [
+  '커먼',
+  '언커먼',
+  '레어',
+  '유니크',
+  '레전더리',
+  '에픽',
+  '크로니클',
+  '태초',
+  '신화'
+] as const
+
+export type LabItemRarity = (typeof LAB_ITEM_RARITIES)[number]

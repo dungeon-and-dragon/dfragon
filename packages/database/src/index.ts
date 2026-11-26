@@ -36,12 +36,23 @@ export type {
   LabCurrencySummary,
   LabCurrencyUpdate
 } from './lab-currency.js'
+export {
+  readLabItemDetailIcon,
+  readLabItemDetails,
+  saveLabItemDetail
+} from './lab-item-detail.js'
+export type {
+  LabItemDetailIconChange,
+  LabItemDetailInput,
+  LabItemDetailSummary
+} from './lab-item-detail.js'
 export { readLabItemGroups, readLabItemPrices, replaceLabItemGroup } from './lab-item.js'
 export type {
   LabItemCost,
   LabItemEntry,
   LabItemGroup,
   LabItemPriceCost,
+  LabItemPriceDetail,
   LabItemPriceRow
 } from './lab-item.js'
 export {
