@@ -39,6 +39,7 @@ function recordingNeople(name: string, sent: string[]): WorkerNeople {
     charactersFame: unexpected,
     jobs: unexpected,
     multiItems: unexpected,
+    auction: unexpected,
     servers: unexpected
   }
 }

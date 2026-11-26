@@ -5,3 +5,4 @@ export {
 } from './character-timeline.js'
 export { DatabaseClearStatsRepository } from './clear-stats.js'
 export { DatabaseItemDictionaryRepository } from './item-dictionary.js'
+export { DatabaseAuctionPriceRepository } from './auction-prices.js'

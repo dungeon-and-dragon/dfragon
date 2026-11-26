@@ -16,3 +16,4 @@ export {
   DatabaseCharacterActivityRepository
 } from './character-activity.js'
 export { DatabaseTimelineSyncRequestRepository } from './timeline-sync-request.js'
+export { DatabaseLabItemRepository } from './lab-items.js'

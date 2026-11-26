@@ -23,5 +23,6 @@ export const NEOPLE_APIS = {
       '/df/multi/items'
     ]
   },
-  items: { group: DETAIL_GROUP, endpoints: ['/df/multi/items'] }
+  items: { group: DETAIL_GROUP, endpoints: ['/df/multi/items'] },
+  auction: { group: '경매장', endpoints: ['/df/auction'] }
 } as const satisfies Record<string, JobNeopleApi>

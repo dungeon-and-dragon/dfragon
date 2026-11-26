@@ -1,7 +1,4 @@
-export interface AuctionListing {
-  itemId: string
-  itemRarity: string | null
-  unitPrice: number
-}
-
-export type FetchLowestListing = (itemName: string) => Promise<AuctionListing | null>
+export type {
+  AuctionListing,
+  FetchLowestListing
+} from '@dfragon/server-core/application/auction-prices/ports.js'

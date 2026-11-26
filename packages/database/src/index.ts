@@ -14,6 +14,8 @@ export type {
   BatchNeopleKeySummary,
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
+export { readLabItemNames, recordAuctionPrice } from './auction-price.js'
+export type { AuctionPriceEntry } from './auction-price.js'
 export {
   readItemDictionary,
   readUnlistedAcquisitionItemIds,
