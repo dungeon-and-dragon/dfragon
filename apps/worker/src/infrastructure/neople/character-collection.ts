@@ -4,6 +4,7 @@ import { CharacterCollectionFailure } from '#domain/character-collection/index.j
 
 export type WorkerNeople = Pick<
   NeopleClient,
+  | 'auction'
   | 'character'
   | 'characterBasic'
   | 'characterSkillStyle'

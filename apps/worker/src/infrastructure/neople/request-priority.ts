@@ -16,6 +16,7 @@ export type PrioritizedNeople = {
 
 export function dispatchNeople(dispatch: NeopleDispatch): WorkerNeople {
   return {
+    auction: (query) => dispatch((neople) => neople.auction(query)),
     character: (identity, section, signal) =>
       dispatch((neople) => neople.character(identity, section, signal)),
     characterBasic: (identity) => dispatch((neople) => neople.characterBasic(identity)),

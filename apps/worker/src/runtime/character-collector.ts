@@ -14,6 +14,7 @@ import {
 } from '#infrastructure/neople/index.js'
 import {
   createNeopleItemDetails,
+  createNeopleLowestListing,
   parseCharacterBasic,
   parseCharacterSets
 } from '@dfragon/server-core/infrastructure/neople/index.js'
@@ -106,6 +107,7 @@ export async function startCharacterCollector(
     createFetchRecordTimeline: createNeopleClearRecordTimeline(neople),
     fetchSkillStyle: createNeopleSkillStyle(neople),
     fetchItemDetails: createNeopleItemDetails(neople),
+    fetchLowestListing: createNeopleLowestListing(neople),
     ...createNeopleFameSearch(neople),
     fetchLatestActivity: createNeopleLatestActivity(neople),
     fetchBasic,

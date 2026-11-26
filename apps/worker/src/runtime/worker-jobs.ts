@@ -13,13 +13,17 @@ import {
   ClearWeekSampleService
 } from '#application/content-clears/index.js'
 import {
+  DatabaseAuctionPriceRepository,
   DatabaseClearStatsRepository,
   DatabaseItemDictionaryRepository
 } from '@dfragon/server-core/infrastructure/database/index.js'
+import { AuctionPriceService } from '@dfragon/server-core/application/auction-prices/index.js'
+import type { FetchLowestListing } from '@dfragon/server-core/application/auction-prices/ports.js'
 import { ItemDictionaryService } from '@dfragon/server-core/application/item-dictionary/index.js'
 import { parseCharacterSkillStyle } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
 import { createItemDictionaryFillJob } from '#application/item-dictionary/index.js'
+import { createAuctionPriceJob } from '#application/auction-prices/index.js'
 import {
   DatabaseAcquisitionItemRepository,
   DatabaseCharacterActivityRepository,
@@ -30,6 +34,7 @@ import {
   DatabaseSkillStyleCollectionRepository,
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
+  DatabaseLabItemRepository,
   DatabaseScoreCalculationRepository
 } from '#infrastructure/database/index.js'
 import type { SkillStyleCollectionPorts } from '#application/ranking-stats/ports.js'
@@ -75,6 +80,7 @@ export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
   Omit<CharacterActivityPorts, ClockKey> & {
     createFetchRecordTimeline: CreateClearTimeline
     fetchItemDetails: FetchItemDetails
+    fetchLowestListing: FetchLowestListing
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
   }
 
@@ -89,6 +95,7 @@ export function createWorkerJobs(
     createFetchRecordTimeline,
     fetchSkillStyle,
     fetchItemDetails,
+    fetchLowestListing,
     readTargets,
     readTopFame,
     fetchFamePage,
@@ -137,6 +144,10 @@ export function createWorkerJobs(
     new DatabaseItemDictionaryRepository(client),
     fetchItemDetails
   )
+  const auctionPrices = new AuctionPriceService(
+    new DatabaseAuctionPriceRepository(client),
+    fetchLowestListing
+  )
   const scoreService = new ScoreCalculationService(
     new DatabaseScoreCalculationRepository(client, SCORE_CALCULATION_JOB_NAME),
     { ...score, ...clock }
@@ -157,6 +168,7 @@ export function createWorkerJobs(
     createSetAdoptionJob(statsService),
     createItemAdoptionJob(statsService),
     createScoreCalculationJob(scoreService, scoreSchedule),
-    createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary)
+    createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary),
+    createAuctionPriceJob(new DatabaseLabItemRepository(client), auctionPrices)
   ]
 }
