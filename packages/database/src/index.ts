@@ -32,6 +32,7 @@ export {
 export type {
   LabCurrencyAddition,
   LabCurrencyIcon,
+  LabCurrencyInput,
   LabCurrencySummary,
   LabCurrencyUpdate
 } from './lab-currency.js'
