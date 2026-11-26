@@ -1,7 +1,8 @@
 import { ItemIcon, itemRarityOfGrade, rarityTextClasses } from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
+import { ItemTooltip } from '#widgets/item-tooltip'
 import type { LabItemCategory } from '@dfragon/lib/lab-items'
-import type { LabItem } from './api/useLabItems'
+import type { LabCurrencyCost, LabItem } from './api/useLabItems'
 import type { LabCategoryRows } from './lab-tables'
 
 const CATEGORY_NAMES: Readonly<Record<LabItemCategory, string>> = {
@@ -98,7 +99,9 @@ export function LabItemTable({
                   <td className={MERGED_ROW_CELL}>
                     <LabItemName item={item} />
                   </td>
-                  <td className="table-num font-semibold">{priceOf(item.unitPrice)}</td>
+                  <td className="table-num font-semibold">
+                    <LabItemPrice item={item} />
+                  </td>
                 </tr>
               ))
             )
@@ -111,13 +114,35 @@ export function LabItemTable({
 
 function LabItemName({ item }: { item: LabItem }): React.JSX.Element {
   const rarity = itemRarityOfGrade(item.itemRarity)
-
-  return (
-    <div className="flex min-w-0 items-center gap-3">
+  const name = (
+    <div className="inline-flex max-w-full items-center gap-3 align-middle">
       <ItemIcon itemId={item.itemId} rarity={rarity} />
       <span className={`min-w-0 truncate font-semibold ${rarityTextClasses[rarity ?? 'unknown']}`}>
         {item.itemName}
       </span>
     </div>
   )
+
+  if (item.itemId === null) {
+    return name
+  }
+
+  return <ItemTooltip itemId={item.itemId}>{name}</ItemTooltip>
+}
+
+function CurrencyCost({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
+  return (
+    <span className="inline-flex items-center gap-1 align-middle">
+      <img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />
+      {`×${integer.format(cost.count)}`}
+    </span>
+  )
+}
+
+function LabItemPrice({ item }: { item: LabItem }): React.JSX.Element {
+  if (item.cost !== null) {
+    return <CurrencyCost cost={item.cost} />
+  }
+
+  return <>{priceOf(item.unitPrice)}</>
 }

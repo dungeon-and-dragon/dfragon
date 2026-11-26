@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
+import { itemDetailHandlers } from '#widgets/item-tooltip/api/item-detail.handlers'
 import { labItemsHandlers } from './api/lab-items.handlers'
 import { LabEnchantsPage } from './LabEnchantsPage'
 
@@ -24,7 +25,9 @@ function Screen(): React.JSX.Element {
 }
 
 export const 마법부여: Story = {
-  parameters: { msw: [labItemsHandlers.items] },
+  parameters: {
+    msw: [labItemsHandlers.items, labItemsHandlers.currencyIcon, itemDetailHandlers.detail]
+  },
   render: () => <Screen />
 }
 
