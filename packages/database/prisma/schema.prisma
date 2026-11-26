@@ -508,6 +508,17 @@ model LabCurrency {
   @@map("lab_currencies")
 }
 
+model LabItemDetail {
+  itemName        String   @id @map("item_name")
+  icon            Bytes?
+  iconContentType String?  @map("icon_content_type")
+  description     String?
+  itemRarity      String?  @map("item_rarity")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("lab_item_details")
+}
+
 model AuctionPrice {
   itemName   String   @id @map("item_name")
   itemId     String?  @map("item_id")
