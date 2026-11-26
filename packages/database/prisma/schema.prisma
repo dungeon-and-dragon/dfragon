@@ -481,15 +481,30 @@ model Item {
 }
 
 model LabItem {
-  id        BigInt   @id @default(autoincrement())
-  category  String
-  role      String
-  tier      String
-  itemName  String   @map("item_name")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id            BigInt       @id @default(autoincrement())
+  category      String
+  role          String
+  tier          String
+  itemName      String       @map("item_name")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  currencyId    BigInt?      @map("currency_id")
+  currencyCount Int?         @map("currency_count")
+  currency      LabCurrency? @relation(fields: [currencyId], references: [id], onDelete: Restrict)
 
   @@unique([category, role, tier, itemName])
+  @@index([currencyId])
   @@map("lab_items")
+}
+
+model LabCurrency {
+  id              BigInt    @id @default(autoincrement())
+  name            String    @unique
+  icon            Bytes
+  iconContentType String    @map("icon_content_type")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  items           LabItem[]
+
+  @@map("lab_currencies")
 }
 
 model AuctionPrice {
