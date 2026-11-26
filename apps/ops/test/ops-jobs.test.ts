@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { JobOverview, JobRunRecord } from '@dfragon/database'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 
 type StoredJob = Omit<JobOverview, 'activeRun' | 'lastFinishedRun'>
@@ -105,12 +106,19 @@ const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   delete: unusedBatchNeopleKeys
 }
 
+const unusedLabItems = async () => assert.fail('job 경로 테스트는 실험실 아이템을 다루면 안 된다')
+const unusedLabItemStore: LabItemRepository = {
+  readGroups: unusedLabItems,
+  replaceGroup: unusedLabItems
+}
+
 async function startOpsApp(t: test.TestContext, store: JobRepository, logs: string[] = []) {
   const app = await createOpsHttpApp({
     jobs: store,
     readQueueCounts: () => assert.fail('job 경로 테스트는 queue를 읽으면 안 된다'),
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
+    labItems: unusedLabItemStore,
     writeAccessLog: (line) => logs.push(line)
   })
   t.after(() => app.close())
