@@ -26,7 +26,12 @@ function Screen(): React.JSX.Element {
 
 export const 마법부여: Story = {
   parameters: {
-    msw: [labItemsHandlers.items, labItemsHandlers.currencyIcon, itemDetailHandlers.detail]
+    msw: [
+      labItemsHandlers.items,
+      labItemsHandlers.currencyIcon,
+      labItemsHandlers.itemIcon,
+      itemDetailHandlers.detail
+    ]
   },
   render: () => <Screen />
 }

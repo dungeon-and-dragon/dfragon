@@ -20,6 +20,14 @@ const currencyCostSchema = z
     return { currencyName, description, count, iconUrl }
   })
 
+function browserApiUrl(path: string | null): string | null {
+  if (path === null) {
+    return null
+  }
+
+  return `${BROWSER_API_PATH}${path}`
+}
+
 const labItemsSchema = z.object({
   groups: z.array(
     z.object({
@@ -27,14 +35,22 @@ const labItemsSchema = z.object({
       role: z.enum(LAB_ITEM_ROLES),
       tier: z.enum(LAB_ITEM_TIERS),
       items: z.array(
-        z.object({
-          itemName: z.string(),
-          itemId: z.string().nullable(),
-          itemRarity: z.string().nullable(),
-          unitPrice: z.number().int().positive().nullable(),
-          checkedAt: z.iso.datetime().nullable(),
-          cost: currencyCostSchema.nullable()
-        })
+        z
+          .object({
+            itemName: z.string(),
+            itemId: z.string().nullable(),
+            itemRarity: z.string().nullable(),
+            iconPath: z.string().nullable(),
+            description: z.string().nullable(),
+            unitPrice: z.number().int().positive().nullable(),
+            checkedAt: z.iso.datetime().nullable(),
+            cost: currencyCostSchema.nullable()
+          })
+          .transform(({ iconPath, ...item }) => {
+            const iconUrl = browserApiUrl(iconPath)
+
+            return { ...item, iconUrl }
+          })
       )
     })
   )
