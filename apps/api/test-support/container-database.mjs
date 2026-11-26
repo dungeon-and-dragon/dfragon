@@ -587,10 +587,15 @@ try {
   assert.equal(
     (
       await psql(
-        "SELECT i.currency_count, c.name, c.icon_content_type, length(c.icon), c.updated_at IS NOT NULL FROM lab_items i JOIN lab_currencies c ON c.id = i.currency_id WHERE i.item_name = '합성 검증 보주'"
+        "SELECT i.currency_count, c.name, c.icon_content_type, length(c.icon), c.updated_at IS NOT NULL, c.description IS NULL FROM lab_items i JOIN lab_currencies c ON c.id = i.currency_id WHERE i.item_name = '합성 검증 보주'"
       )
     ).stdout.trim(),
-    '5|합성 검증 재화|image/png|4|t'
+    '5|합성 검증 재화|image/png|4|t|t'
+  )
+  await psql(`UPDATE lab_currencies SET description = '합성 검증 설명' WHERE id = ${currencyId}`)
+  assert.equal(
+    (await psql(`SELECT description FROM lab_currencies WHERE id = ${currencyId}`)).stdout.trim(),
+    '합성 검증 설명'
   )
   for (const cost of [`${currencyId}, NULL`, 'NULL, 5', `${currencyId}, 0`, '-1, 5']) {
     await assert.rejects(
