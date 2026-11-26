@@ -735,7 +735,7 @@ describe('실험실 아이템 패널', () => {
     )
     expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 A', false]])
     expect(labGroupTitles()).toContain('벨트 딜러 준종결')
-    expect(labGroupTitles()).not.toContain('벨트 버퍼 준종결')
+    expect(checkedNames('벨트 버퍼 준종결')).toEqual([['합성 카드 C', false]])
     expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true)
     expect(api.writes()).toEqual([])
   })
@@ -766,6 +766,21 @@ describe('실험실 아이템 패널', () => {
     ])
     await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
     expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 새 이름', true]])
+  })
+
+  it('등급표에 없는 벨트 버퍼 준종결 묶음에도 이름을 넣어 저장할 수 있다', async () => {
+    const api = new FakeOpsApi()
+    await openLabItems(api)
+
+    const input = labGroup('벨트 버퍼 준종결').querySelector<HTMLInputElement>('input[type="text"]')
+    typeInto(input as HTMLInputElement, '합성 벨트 카드')
+    await click(buttonIn(labGroup('벨트 버퍼 준종결'), '추가'))
+    await click(buttonIn(section('실험실 아이템'), '저장'))
+
+    const waistBuffer = { category: 'WAIST', role: 'buffer', tier: '준종결' }
+    await waitFor(() =>
+      expect(api.labItems).toEqual([{ ...waistBuffer, items: [unpriced('합성 벨트 카드')] }])
+    )
   })
 
   it('두 묶음 가운데 한 묶음만 체크가 바뀌면 그 묶음의 PUT 한 번만 보낸다', async () => {

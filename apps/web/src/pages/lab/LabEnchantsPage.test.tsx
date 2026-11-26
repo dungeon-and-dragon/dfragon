@@ -525,3 +525,39 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
 
   expect(await emphasizedCells()).toEqual(['힘', '100'])
 })
+
+it('등급표에 없는 벨트 버퍼 준종결 묶음도 DB에 아이템이 있으면 버퍼 표에 보인다', async () => {
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WAIST',
+            role: 'buffer',
+            tier: '준종결',
+            items: [
+              {
+                itemName: '합성 벨트 카드',
+                itemId: null,
+                itemRarity: null,
+                iconPath: null,
+                description: null,
+                unitPrice: 300,
+                checkedAt: null,
+                cost: null
+              }
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(roleChip('버퍼')).toBeDefined())
+
+  await act(async () => roleChip('버퍼').click())
+
+  await vi.waitFor(() =>
+    expect(cellTexts(enchantTable())).toEqual([['벨트', '준종결', '합성 벨트 카드', '300']])
+  )
+})
