@@ -501,6 +501,7 @@ model LabCurrency {
   name            String    @unique
   icon            Bytes
   iconContentType String    @map("icon_content_type")
+  description     String?
   updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
   items           LabItem[]
 
