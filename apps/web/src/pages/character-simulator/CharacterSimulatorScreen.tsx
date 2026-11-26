@@ -20,6 +20,7 @@ import {
 } from './model/simulator-draft'
 import { hasAvatarPreset } from './model/simulator-avatar'
 import { oathInSet, toSimulatorOath } from './model/simulator-oath'
+import { simulatorSetPointsOf } from './model/simulator-set-points'
 import {
   sectionOf,
   selectedTargetOf,
@@ -115,6 +116,10 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     [wornRows, changes.equipmentSet]
   )
   const oath = useMemo(() => oathInSet(wornOath, changes.oath.set), [wornOath, changes.oath.set])
+  const setPoints = useMemo(
+    () => simulatorSetPointsOf(rows, equipmentSet, oath, changes),
+    [rows, equipmentSet, oath, changes]
+  )
   const targets = useMemo(
     () => toSimulatorTargets(equipmentSet, rows, avatarPresetAvailable, switching, oath),
     [equipmentSet, rows, avatarPresetAvailable, switching, oath]
@@ -195,6 +200,7 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
               rows={rows}
               targets={targets}
               changes={changes}
+              setPoint={setPoints.equipment}
               selectedKey={selected?.key}
               onSelect={select}
             />
@@ -207,6 +213,7 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
               <OathList
                 targets={targets}
                 changes={changes}
+                setPoint={setPoints.oath}
                 selectedKey={selected?.key}
                 onSelect={select}
               />

@@ -32,6 +32,7 @@ import {
   oathSetNameOf,
   type SimulatorOathBody
 } from '#pages/character-simulator/model/simulator-oath'
+import type { SetPointView } from '#pages/character-simulator/model/simulator-set-points'
 import type { SimulatorTarget } from '#pages/character-simulator/model/simulator-target'
 import { EnchantText } from './SlotControls'
 
@@ -45,12 +46,14 @@ export function EquipmentList({
   rows,
   targets,
   changes,
+  setPoint,
   selectedKey,
   onSelect
 }: {
   rows: readonly SimulatorRow[]
   targets: readonly SimulatorTarget[]
   changes: SimulatorChanges
+  setPoint: SetPointView | null
   selectedKey: string | undefined
   onSelect: SelectTarget
 }): React.JSX.Element {
@@ -84,6 +87,7 @@ export function EquipmentList({
                   target={target.key}
                   equipmentSet={target.equipmentSet}
                   changes={changes}
+                  setPoint={setPoint}
                   selected={selected}
                   onSelect={onSelect}
                 />
@@ -129,12 +133,14 @@ function EquipmentSetRow({
   target,
   equipmentSet,
   changes,
+  setPoint,
   selected,
   onSelect
 }: {
   target: string
   equipmentSet: SimulatorEquipmentSet
   changes: SimulatorChanges
+  setPoint: SetPointView | null
   selected: boolean
   onSelect: SelectTarget
 }): React.JSX.Element {
@@ -143,10 +149,9 @@ function EquipmentSetRow({
       <td className={`${SLOT} max-sm:hidden`}>세트</td>
       <td>
         <PickButton selected={selected}>
-          <ItemName
+          <SetText
             name={equipmentSetNameOf(equipmentSet, changes) ?? EMPTY_SLOT_NAME}
-            rarity={equipmentSet.rarity}
-            weight="normal"
+            setPoint={setPoint}
           />
         </PickButton>
       </td>
@@ -190,6 +195,23 @@ function PickButton({
     <button type="button" aria-pressed={selected} className={PICK}>
       {children}
     </button>
+  )
+}
+
+function SetText({
+  name,
+  setPoint
+}: {
+  name: string
+  setPoint: SetPointView | null
+}): React.JSX.Element {
+  return (
+    <span className="flex min-w-0 flex-wrap items-center gap-2">
+      <ItemName name={name} rarity={setPoint?.rarity ?? null} weight="normal" />
+      {setPoint !== null && (
+        <span className="num text-xs text-fg-subtle">{setPoint.point.toLocaleString()}</span>
+      )}
+    </span>
   )
 }
 
@@ -303,11 +325,13 @@ function SlotItemRow({
 export function OathList({
   targets,
   changes,
+  setPoint,
   selectedKey,
   onSelect
 }: {
   targets: readonly SimulatorTarget[]
   changes: SimulatorChanges
+  setPoint: SetPointView | null
   selectedKey: string | undefined
   onSelect: SelectTarget
 }): React.JSX.Element {
@@ -327,10 +351,9 @@ export function OathList({
                   selected={selected}
                   onSelect={onSelect}
                 >
-                  <ItemName
+                  <SetText
                     name={oathSetNameOf(target.oath) ?? EMPTY_SLOT_NAME}
-                    rarity={target.oath.rarity}
-                    weight="normal"
+                    setPoint={setPoint}
                   />
                 </LabelRow>
               )
