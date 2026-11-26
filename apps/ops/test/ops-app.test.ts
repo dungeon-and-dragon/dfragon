@@ -4,6 +4,7 @@ import { get } from 'node:http'
 import test from 'node:test'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
 import type { LabCurrencyRepository } from '../src/application/lab-currencies/repository.js'
+import type { LabItemDetailRepository } from '../src/application/lab-item-details/repository.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { type OpsHttpAppOptions, createOpsHttpApp } from '../src/runtime/ops-app.js'
@@ -86,6 +87,11 @@ const unusedLabItemStore: LabItemRepository = {
   readGroups: unusedLabItems,
   replaceGroup: unusedLabItems
 }
+const unusedLabItemDetailStore: LabItemDetailRepository = {
+  readDetails: unusedLabItems,
+  readIcon: unusedLabItems,
+  save: unusedLabItems
+}
 const unusedLabCurrencyStore: LabCurrencyRepository = {
   readCurrencies: unusedLabItems,
   readIcon: unusedLabItems,
@@ -101,6 +107,7 @@ function opsApp(options: Partial<OpsHttpAppOptions>) {
     batchNeopleKeys: unusedBatchNeopleKeyStore,
     labItems: unusedLabItemStore,
     labCurrencies: unusedLabCurrencyStore,
+    labItemDetails: unusedLabItemDetailStore,
     writeAccessLog: () => undefined,
     ...options
   })
