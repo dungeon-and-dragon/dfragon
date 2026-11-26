@@ -3,10 +3,15 @@ import test from 'node:test'
 import type { AuctionPriceEntry } from '@dfragon/database'
 import { createNeopleClientForTest, NeopleRequestFailure } from '@dfragon/neople'
 import { AuctionPriceService } from '../src/application/auction-prices/index.js'
-import { createNeopleLowestListing } from '../src/infrastructure/neople/index.js'
+import {
+  createNeopleItemSearch,
+  createNeopleLowestListing
+} from '../src/infrastructure/neople/index.js'
 
 const SAVES_LOWEST_EXACT_LISTING =
-  '이름이 정확히 같은 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 매물이 없으면 가격을 비운다'
+  '이름이 정확히 같은 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 매물이 없으면 가격을 비우고 아이템 검색의 itemId, 등급을 저장한다'
+const EXCHANGED_SKIPS_AUCTION =
+  '재화로 교환하는 아이템은 경매장을 부르지 않고 아이템 검색에서 이름이 같은 아이템의 itemId, 등급만 저장하며, 검색에도 없으면 모두 비운다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -25,18 +30,46 @@ function jsonResponse(body: unknown, status = 200): Response {
   })
 }
 
-function auctionNeople(respond: (itemName: string) => Response) {
+function auctionNeople(
+  respond: (itemName: string) => Response,
+  respondSearch: (itemName: string) => Response = () => jsonResponse({ rows: [] })
+) {
   const requested: string[] = []
+  const searched: string[] = []
   const neople = createNeopleClientForTest('synthetic-auction-key', {
     fetch: async (request) => {
-      const itemName = new URL(request.url).searchParams.get('itemName') ?? ''
+      const url = new URL(request.url)
+      const itemName = url.searchParams.get('itemName') ?? ''
+
+      if (url.pathname === '/df/items') {
+        searched.push(itemName)
+
+        return respondSearch(itemName)
+      }
+
       requested.push(itemName)
 
       return respond(itemName)
     }
   })
 
-  return { neople, requested }
+  return { neople, requested, searched }
+}
+
+function priceService(
+  neople: ReturnType<typeof auctionNeople>['neople'],
+  repository: ReturnType<typeof memoryPrices>['repository']
+) {
+  return new AuctionPriceService(
+    repository,
+    createNeopleLowestListing(neople),
+    createNeopleItemSearch(neople),
+    () => checkedAt
+  )
+}
+
+function listed(itemName: string) {
+  return { itemName, exchanged: false }
 }
 
 function memoryPrices() {
@@ -76,23 +109,22 @@ test(SAVES_LOWEST_EXACT_LISTING, async () => {
       }
     ]
   }
-  const { neople, requested } = auctionNeople((itemName) =>
-    jsonResponse({ rows: rows[itemName] ?? [] })
+  const { neople, requested, searched } = auctionNeople(
+    (itemName) => jsonResponse({ rows: rows[itemName] ?? [] }),
+    (itemName) =>
+      jsonResponse({ rows: [{ itemId: 'f'.repeat(32), itemName, itemRarity: '유니크' }] })
   )
   const { saved, repository } = memoryPrices()
-  const service = new AuctionPriceService(
-    repository,
-    createNeopleLowestListing(neople),
-    () => checkedAt
-  )
+  const service = priceService(neople, repository)
   const progress: [number, number][] = []
 
-  const checked = await service.refresh(Object.values(names), (done, total) =>
+  const checked = await service.refresh(Object.values(names).map(listed), (done, total) =>
     progress.push([done, total])
   )
 
   assert.equal(checked, 3)
   assert.deepEqual(requested, Object.values(names))
+  assert.deepEqual(searched, [names.unlisted])
   assert.deepEqual(progress, [
     [1, 3],
     [2, 3],
@@ -114,6 +146,46 @@ test(SAVES_LOWEST_EXACT_LISTING, async () => {
   })
   assert.deepEqual(saved.get(names.unlisted), {
     itemName: names.unlisted,
+    itemId: 'f'.repeat(32),
+    itemRarity: '유니크',
+    unitPrice: null,
+    checkedAt
+  })
+})
+
+test(EXCHANGED_SKIPS_AUCTION, async () => {
+  const exchanged = { itemName: names.first, exchanged: true }
+  const unknown = { itemName: names.comma, exchanged: true }
+  const { neople, requested, searched } = auctionNeople(
+    () => jsonResponse({ rows: [] }),
+    (itemName) => {
+      if (itemName !== names.first) {
+        return jsonResponse({ rows: [] })
+      }
+
+      return jsonResponse({
+        rows: [
+          { itemId: 'c'.repeat(32), itemName: `${names.first} 상자`, itemRarity: '에픽' },
+          { itemId: 'a'.repeat(32), itemName: names.first, itemRarity: '유니크' }
+        ]
+      })
+    }
+  )
+  const { saved, repository } = memoryPrices()
+
+  await priceService(neople, repository).refresh([exchanged, unknown])
+
+  assert.deepEqual(requested, [])
+  assert.deepEqual(searched, [names.first, names.comma])
+  assert.deepEqual(saved.get(names.first), {
+    itemName: names.first,
+    itemId: 'a'.repeat(32),
+    itemRarity: '유니크',
+    unitPrice: null,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(names.comma), {
+    itemName: names.comma,
     itemId: null,
     itemRarity: null,
     unitPrice: null,
@@ -133,12 +205,8 @@ test(KEEPS_SAVED_PRICES_ON_FAILURE, async () => {
     })
   })
   const { saved, repository } = memoryPrices()
-  const service = new AuctionPriceService(
-    repository,
-    createNeopleLowestListing(neople),
-    () => checkedAt
-  )
+  const service = priceService(neople, repository)
 
-  await assert.rejects(service.refresh(itemNames), NeopleRequestFailure)
+  await assert.rejects(service.refresh(itemNames.map(listed)), NeopleRequestFailure)
   assert.deepEqual([...saved.keys()], [names.first, names.comma])
 })

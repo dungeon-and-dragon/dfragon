@@ -1027,6 +1027,9 @@ test('새 캐릭터 대기열이 차 있는 동안에도 클리어 수집 요청
     auction: async () => {
       throw new Error('이 테스트는 경매장을 부르지 않는다')
     },
+    searchItems: async () => {
+      throw new Error('이 테스트는 아이템 검색을 부르지 않는다')
+    },
     servers: async () => {
       throw new Error('이 테스트는 서버 목록을 부르지 않는다')
     },
@@ -1142,6 +1145,9 @@ function fakeBatchKeys(
     },
     auction: async () => {
       throw new Error('이 테스트는 경매장을 부르지 않는다')
+    },
+    searchItems: async () => {
+      throw new Error('이 테스트는 아이템 검색을 부르지 않는다')
     },
     servers: async () => {
       throw new Error('이 테스트는 서버 목록을 부르지 않는다')
