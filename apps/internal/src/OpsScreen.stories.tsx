@@ -147,6 +147,11 @@ function filledApi(): FakeOpsApi {
   api.addBatchKey('batch-1', 'synthetic-0000-a1b2')
   api.addBatchKey('batch-2', 'synthetic-0000-c3d4', { enabled: false })
   api.addBatchKey('batch-3', 'synthetic-0000-e5f6', { enabled: false, rejectedAt })
+  // 실험실 아이템 이름은 지어낸 이름이다.
+  api.labItems = [
+    { category: 'WEAPON', role: 'dealer', tier: '종결', itemNames: ['합성 카드 A', '합성 카드 B'] },
+    { category: 'TITLE', role: 'all', tier: '종결', itemNames: ['합성 칭호 A'] }
+  ]
 
   return api
 }

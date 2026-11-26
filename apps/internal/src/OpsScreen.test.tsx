@@ -620,3 +620,172 @@ describe('batch key 패널', () => {
     ])
   })
 })
+
+// 실험실 아이템 이름은 모두 지어낸 이름이다.
+const WEAPON_DEALER_FINAL = { category: 'WEAPON', role: 'dealer', tier: '종결' }
+const TITLE_FINAL = { category: 'TITLE', role: 'all', tier: '종결' }
+
+function labGroup(title: string): HTMLFieldSetElement {
+  const group = [...section('실험실 아이템').querySelectorAll('fieldset')].find(
+    (candidate) => candidate.querySelector('legend')?.textContent === title
+  )
+  if (group === undefined) {
+    throw new Error(`${title} 묶음이 없습니다.`)
+  }
+
+  return group
+}
+
+function labGroupTitles(): string[] {
+  return [...section('실험실 아이템').querySelectorAll('legend')].map(
+    (legend) => legend.textContent ?? ''
+  )
+}
+
+function labCheckbox(title: string, name: string): HTMLElement {
+  const checkbox = labGroup(title).querySelector<HTMLElement>(
+    `[role="checkbox"][aria-label="${name}"]`
+  )
+  if (checkbox === null) {
+    throw new Error(`${title}에 ${name} 줄이 없습니다.`)
+  }
+
+  return checkbox
+}
+
+function checkedNames(title: string): [string | null, boolean][] {
+  const boxes = labGroup(title).querySelectorAll<HTMLElement>('[role="checkbox"]')
+
+  return [...boxes].map((box) => [
+    box.getAttribute('aria-label'),
+    box.getAttribute('aria-checked') === 'true'
+  ])
+}
+
+async function uploadCandidateFile(content: unknown): Promise<void> {
+  const input = section('실험실 아이템').querySelector<HTMLInputElement>('input[type="file"]')
+  if (input === null) {
+    throw new Error('후보 파일 입력이 없습니다.')
+  }
+  const text = typeof content === 'string' ? content : JSON.stringify(content)
+  const file = new File([text], 'candidates.json', { type: 'application/json' })
+  Object.defineProperty(input, 'files', { configurable: true, value: [file] })
+  act(() => input.dispatchEvent(new Event('change', { bubbles: true })))
+  await flush()
+}
+
+async function openLabItems(api: FakeOpsApi): Promise<void> {
+  await renderScreen(api)
+  await openTab('실험실 아이템')
+  await waitFor(() => expect(labGroupTitles()).toContain('칭호 종결'))
+}
+
+describe('실험실 아이템 패널', () => {
+  it('후보 파일을 올리면 묶음별 후보가 보이고 DB에 있는 이름만 체크되며 쓰기 요청은 가지 않는다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [{ ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 A', '합성 카드 DB'] }]
+    await openLabItems(api)
+
+    await uploadCandidateFile({
+      version: 1,
+      groups: [
+        { ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 A', '합성 카드 B', '합성 카드 B'] },
+        { ...TITLE_FINAL, itemNames: ['합성 칭호 A'] },
+        { category: 'WAIST', role: 'buffer', tier: '준종결', itemNames: ['합성 카드 C'] }
+      ]
+    })
+
+    await waitFor(() =>
+      expect(checkedNames('무기 딜러 종결')).toEqual([
+        ['합성 카드 A', true],
+        ['합성 카드 DB', true],
+        ['합성 카드 B', false]
+      ])
+    )
+    expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 A', false]])
+    expect(labGroupTitles()).toContain('벨트 딜러 준종결')
+    expect(labGroupTitles()).not.toContain('벨트 버퍼 준종결')
+    expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true)
+    expect(api.writes()).toEqual([])
+  })
+
+  it('칭호 종결 묶음에 이름을 직접 넣어 저장하면 그 묶음만 PUT으로 보내 DB에 들어간다', async () => {
+    const api = new FakeOpsApi()
+    await openLabItems(api)
+
+    const input = labGroup('칭호 종결').querySelector<HTMLInputElement>('input[type="text"]')
+    typeInto(input as HTMLInputElement, ' 합성 칭호 새 이름 ')
+    await click(buttonIn(labGroup('칭호 종결'), '추가'))
+
+    expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 새 이름', true]])
+    expect(api.writes()).toEqual([])
+
+    await click(buttonIn(section('실험실 아이템'), '저장'))
+
+    await waitFor(() =>
+      expect(api.labItems).toEqual([{ ...TITLE_FINAL, itemNames: ['합성 칭호 새 이름'] }])
+    )
+    expect(api.writes()).toMatchObject([
+      {
+        method: 'PUT',
+        path: '/api/lab-items',
+        contentType: 'application/json',
+        body: { ...TITLE_FINAL, itemNames: ['합성 칭호 새 이름'] }
+      }
+    ])
+    await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
+    expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 새 이름', true]])
+  })
+
+  it('두 묶음 가운데 한 묶음만 체크가 바뀌면 그 묶음의 PUT 한 번만 보낸다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [
+      { ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 A', '합성 카드 B'] },
+      { ...TITLE_FINAL, itemNames: ['합성 칭호 A'] }
+    ]
+    await openLabItems(api)
+
+    await click(labCheckbox('칭호 종결', '합성 칭호 A'))
+    await click(labCheckbox('칭호 종결', '합성 칭호 A'))
+    await click(labCheckbox('무기 딜러 종결', '합성 카드 A'))
+    await click(buttonIn(section('실험실 아이템'), '저장'))
+
+    await waitFor(() => expect(buttonIn(section('실험실 아이템'), '저장').disabled).toBe(true))
+    expect(api.writes()).toHaveLength(1)
+    expect(api.writes()[0]?.body).toEqual({ ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 B'] })
+    expect(api.labItems).toEqual([
+      { ...TITLE_FINAL, itemNames: ['합성 칭호 A'] },
+      { ...WEAPON_DEALER_FINAL, itemNames: ['합성 카드 B'] }
+    ])
+  })
+
+  it('형식이 틀린 후보 파일은 오류 문구만 보이고 먼저 올린 후보를 그대로 둔다', async () => {
+    const api = new FakeOpsApi()
+    await openLabItems(api)
+    await uploadCandidateFile({
+      version: 1,
+      groups: [{ ...TITLE_FINAL, itemNames: ['합성 칭호 A'] }]
+    })
+    await waitFor(() => expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 A', false]]))
+
+    const invalidFiles = [
+      '{',
+      { version: 2, groups: [] },
+      { version: 1, groups: [{ ...TITLE_FINAL, role: 'dealer', itemNames: ['합성 칭호 B'] }] },
+      { version: 1, groups: [{ ...TITLE_FINAL, itemNames: ['  '] }] }
+    ]
+
+    for (const invalid of invalidFiles) {
+      await uploadCandidateFile(invalid)
+
+      await waitFor(() =>
+        expect(section('실험실 아이템').querySelector('[role="alert"]')?.textContent).toBe(
+          '후보 파일 형식이 맞지 않습니다.'
+        )
+      )
+      expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 A', false]])
+    }
+
+    expect(api.writes()).toEqual([])
+  })
+})

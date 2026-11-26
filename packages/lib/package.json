@@ -28,6 +28,10 @@
       "types": "./dist/enchant-grades.d.ts",
       "import": "./dist/enchant-grades.js"
     },
+    "./lab-items": {
+      "types": "./dist/lab-items.d.ts",
+      "import": "./dist/lab-items.js"
+    },
     "./port": {
       "types": "./dist/port.d.ts",
       "import": "./dist/port.js"

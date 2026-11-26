@@ -88,6 +88,15 @@ export const batchKeyListSchema = z.object({ keys: z.array(batchKeySchema) })
 
 export const batchKeyAdditionSchema = z.object({ id: z.int().positive() })
 
+const labItemGroupSchema = z.object({
+  category: z.string(),
+  role: z.string(),
+  tier: z.string(),
+  itemNames: z.array(z.string())
+})
+
+export const labItemListSchema = z.object({ groups: z.array(labItemGroupSchema) })
+
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
 
 export type RunTrigger = z.infer<typeof runTriggerSchema>
@@ -101,3 +110,5 @@ export type QueueList = z.infer<typeof queueListSchema>
 export type Collection = z.infer<typeof collectionSchema>
 export type BatchKey = z.infer<typeof batchKeySchema>
 export type BatchKeyList = z.infer<typeof batchKeyListSchema>
+export type LabItemGroup = z.infer<typeof labItemGroupSchema>
+export type LabItemList = z.infer<typeof labItemListSchema>

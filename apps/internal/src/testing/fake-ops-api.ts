@@ -40,6 +40,13 @@ export type BatchKeyBody = {
   rejectedAt: string | null
 }
 
+export type LabItemGroupBody = {
+  category: string
+  role: string
+  tier: string
+  itemNames: string[]
+}
+
 export type RecordedRequest = {
   method: string
   path: string
@@ -111,6 +118,7 @@ export class FakeOpsApi {
   ]
   collection: CollectionBody = { waiting: 0, oldestQueuedAt: null, failures: [] }
   batchKeys: BatchKeyBody[] = []
+  labItems: LabItemGroupBody[] = []
   requests: RecordedRequest[] = []
   private nextRunId = 1000
   private nextBatchKeyId = 100
@@ -178,6 +186,14 @@ export class FakeOpsApi {
 
     if (method === 'POST' && path === 'batch-neople-keys') {
       return this.addBatchKeyRequest(body)
+    }
+
+    if (method === 'GET' && path === 'lab-items') {
+      return json(200, { groups: this.labItems })
+    }
+
+    if (method === 'PUT' && path === 'lab-items') {
+      return this.replaceLabItems(body as LabItemGroupBody)
     }
 
     if (BATCH_KEY_PATH_PATTERN.test(path)) {
@@ -273,6 +289,17 @@ export class FakeOpsApi {
     })
 
     return json(201, { id: added.id })
+  }
+
+  /** 운영 app처럼 묶음 하나만 바꾸고, 비운 묶음은 목록에서 뺀다. 입력 검증은 운영 app 테스트가 맡는다. */
+  private replaceLabItems(group: LabItemGroupBody): Response {
+    const others = this.labItems.filter(
+      ({ category, role, tier }) =>
+        category !== group.category || role !== group.role || tier !== group.tier
+    )
+    this.labItems = group.itemNames.length > 0 ? [...others, group] : others
+
+    return new Response(null, { status: 204 })
   }
 
   private changeBatchKey(method: string, path: string): Response {

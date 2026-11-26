@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { CollectionSummary } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import type { CollectionRepository } from '../src/application/collection/repository.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
 
@@ -16,6 +17,13 @@ const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   delete: unusedBatchNeopleKeys
 }
 
+const unusedLabItems = async () =>
+  assert.fail('queue, 수집 대기열 경로 테스트는 실험실 아이템을 다루면 안 된다')
+const unusedLabItemStore: LabItemRepository = {
+  readGroups: unusedLabItems,
+  replaceGroup: unusedLabItems
+}
+
 async function startOpsApp(
   t: test.TestContext,
   options: Pick<OpsHttpAppOptions, 'readQueueCounts' | 'collection'>
@@ -28,6 +36,7 @@ async function startOpsApp(
       setPaused: unusedJobs
     },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
+    labItems: unusedLabItemStore,
     writeAccessLog: () => undefined,
     ...options
   })

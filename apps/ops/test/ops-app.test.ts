@@ -3,6 +3,7 @@ import { once } from 'node:events'
 import { get } from 'node:http'
 import test from 'node:test'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import type { JobRepository } from '../src/application/jobs/repository.js'
 import { type OpsHttpAppOptions, createOpsHttpApp } from '../src/runtime/ops-app.js'
 
@@ -79,12 +80,19 @@ const unusedBatchNeopleKeyStore: BatchNeopleKeyRepository = {
   delete: unusedBatchNeopleKeys
 }
 
+const unusedLabItems = async () => assert.fail('이 테스트는 실험실 아이템을 다루면 안 된다')
+const unusedLabItemStore: LabItemRepository = {
+  readGroups: unusedLabItems,
+  replaceGroup: unusedLabItems
+}
+
 function opsApp(options: Partial<OpsHttpAppOptions>) {
   return createOpsHttpApp({
     jobs: statsOnlyJobs,
     readQueueCounts: async () => [],
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
+    labItems: unusedLabItemStore,
     writeAccessLog: () => undefined,
     ...options
   })

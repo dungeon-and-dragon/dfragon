@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 
 // 합성 key다. 실제 Neople key가 아니다.
@@ -11,6 +12,13 @@ const KEY_SUFFIX = '7f3a'
 const unusedJobs = async () => assert.fail('batch key 경로 테스트는 job을 다루면 안 된다')
 const unusedCollection = async () =>
   assert.fail('batch key 경로 테스트는 수집 대기열을 다루면 안 된다')
+
+const unusedLabItems = async () =>
+  assert.fail('batch key 경로 테스트는 실험실 아이템을 다루면 안 된다')
+const unusedLabItemStore: LabItemRepository = {
+  readGroups: unusedLabItems,
+  replaceGroup: unusedLabItems
+}
 
 // 중복, 끝 4자 자르기, 켜고 끄기는 DB 함수 테스트가 실제 DB로 확인한다. 이 fake는 경로가 받은 값과 돌려줄 결과만 다룬다.
 function memoryStore() {
@@ -73,6 +81,7 @@ async function startOpsApp(
     readQueueCounts: () => assert.fail('batch key 경로 테스트는 queue를 읽으면 안 된다'),
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys,
+    labItems: unusedLabItemStore,
     writeAccessLog: (line) => logs.push(line)
   })
   t.after(() => app.close())
