@@ -372,3 +372,23 @@ test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없
   assert.equal((await request('/lab/item-icon')).status, 404)
   assert.deepEqual(requested, [itemName, '합성'])
 })
+
+test('등급표에 없는 벨트 버퍼 준종결 묶음도 아이템이 있으면 응답에 낸다', async (t) => {
+  const response = await requestLabItems(t, [
+    row('WAIST', 'buffer', '준종결', '합성 벨트 카드', 300)
+  ])
+
+  const { groups } = (await response.json()) as {
+    groups: { category: string; role: string; tier: string; items: { itemName: string }[] }[]
+  }
+
+  assert.deepEqual(
+    groups.map(({ category, role, tier, items }) => [
+      category,
+      role,
+      tier,
+      items.map(({ itemName }) => itemName)
+    ]),
+    [['WAIST', 'buffer', '준종결', ['합성 벨트 카드']]]
+  )
+})

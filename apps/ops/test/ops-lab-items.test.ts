@@ -143,7 +143,7 @@ test('고른 아이템을 재화 비용과 함께 묶음별로 응답한다', as
   assert.deepEqual(await response.json(), { groups })
 })
 
-test('묶음의 아이템을 이름 앞뒤 공백을 지우고 비용과 함께 넘기고 204로 답하며, 빈 목록도 넘긴다', async (t) => {
+test('묶음의 아이템을 이름 앞뒤 공백을 지우고 비용과 함께 넘기고 204로 답하며, 빈 목록과 등급표에 없는 묶음도 넘긴다', async (t) => {
   const { store, replaced } = memoryStore([], [coin])
   const request = await startOpsApp(t, store)
   const bodies = [
@@ -156,7 +156,13 @@ test('묶음의 아이템을 이름 앞뒤 공백을 지우고 비용과 함께 
         { itemName: '합성 보주', cost: { currencyId: 1, count: 5 } }
       ]
     },
-    { category: 'AURA', role: 'all', tier: '준종결', items: [] }
+    { category: 'AURA', role: 'all', tier: '준종결', items: [] },
+    {
+      category: 'WAIST',
+      role: 'buffer',
+      tier: '준종결',
+      items: [{ itemName: '합성 벨트 카드', cost: null }]
+    }
   ]
 
   for (const body of bodies) {
@@ -174,7 +180,13 @@ test('묶음의 아이템을 이름 앞뒤 공백을 지우고 비용과 함께 
         { itemName: '합성 보주', cost: { currencyId: 1, count: 5 } }
       ]
     },
-    { category: 'AURA', role: 'all', tier: '준종결', items: [] }
+    { category: 'AURA', role: 'all', tier: '준종결', items: [] },
+    {
+      category: 'WAIST',
+      role: 'buffer',
+      tier: '준종결',
+      items: [{ itemName: '합성 벨트 카드', cost: null }]
+    }
   ])
 })
 
