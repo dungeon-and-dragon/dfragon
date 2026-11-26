@@ -141,7 +141,8 @@ it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, �
     ['무기', '종결', '뒤쫓는 자 제논 카드', '612,000,000'],
     ['준종결', '대천사 미카엘 카드', '88,000,000'],
     ['혼돈의 천사 루치펠 카드', '-'],
-    ['상의', '종결', '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)', '233,000,000']
+    ['상의', '종결', '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)', '233,000,000'],
+    ['준종결', '합성 여신 카드', '51,000,000']
   ])
   expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
 })
@@ -491,7 +492,8 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
               status: [
                 { name: '힘', value: '100' },
                 { name: '모든 속성 강화', value: '10' }
-              ]
+              ],
+              reinforceSkill: []
             }
           ]
         }
@@ -560,4 +562,23 @@ it('등급표에 없는 벨트 버퍼 준종결 묶음도 DB에 아이템이 있
   await vi.waitFor(() =>
     expect(cellTexts(enchantTable())).toEqual([['벨트', '준종결', '합성 벨트 카드', '300']])
   )
+})
+
+it('버퍼 탭에서 버퍼 카드에 마우스를 올리면 버프 패시브 스킬 줄을 단계별 값과 함께 맨 위에 강조해 보인다', async () => {
+  server.use(itemDetailHandlers.detail)
+  await renderLoaded()
+  await act(async () => roleChip('버퍼').click())
+
+  await hover(nameOf(enchantTable(), '합성 여신 카드').parentElement!)
+
+  await vi.waitFor(() =>
+    expect(document.querySelector('.tooltip-item [data-card-option]')).not.toBeNull()
+  )
+
+  const [buffRow] = document.querySelectorAll('.tooltip-item [data-card-option]')
+  const cells = [...buffRow!.children]
+
+  expect(cells.map((cell) => cell.textContent).join(' ')).toBe('버프 패시브 스킬 4 | 4 | 4')
+  expect(cells[0]?.classList).toContain('text-game-enchant')
+  expect(cells[1]?.classList).toContain('text-game-enchant')
 })
