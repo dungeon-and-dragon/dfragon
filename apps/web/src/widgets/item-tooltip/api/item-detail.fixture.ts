@@ -56,9 +56,50 @@ export function storyCardDetail(itemId: string): ItemDetail {
     card: {
       slots: ['무기'],
       enchants: [
-        { upgrade: 0, status: firstOptions },
-        { upgrade: 1, status: secondOptions },
-        { upgrade: 2, status: thirdOptions }
+        { upgrade: 0, status: firstOptions, reinforceSkill: [] },
+        { upgrade: 1, status: secondOptions, reinforceSkill: [] },
+        { upgrade: 2, status: thirdOptions, reinforceSkill: [] }
+      ]
+    }
+  }
+}
+
+export const STORY_BUFF_CARD_ITEM_ID = 'synthetic-buff-card'
+
+// 카드와 직업, 스킬 이름은 지어낸 값이고, 단계별 옵션과 버프 스킬 값은 Neople 버퍼 카드 응답의 값을 따랐다.
+export function storyBuffCardDetail(itemId: string): ItemDetail {
+  const option = (stat: number, fame: number) => [
+    { name: '힘', value: String(stat) },
+    { name: '지능', value: String(stat) },
+    { name: '체력', value: String(stat) },
+    { name: '정신력', value: String(stat) },
+    { name: '모험가 명성', value: String(fame) }
+  ]
+  const reinforceSkill = [
+    { jobName: '합성 직업 A', skills: [{ name: '합성 버프 A', value: '4' }] },
+    { jobName: '합성 직업 B', skills: [{ name: '합성 버프 B', value: '4' }] }
+  ]
+  const firstOptions = option(105, 210)
+  const secondOptions = option(115, 221)
+  const thirdOptions = option(125, 240)
+
+  return {
+    itemId,
+    name: '합성 여신 카드',
+    rarity: '레전더리',
+    itemType: '카드',
+    typeDetail: null,
+    availableLevel: null,
+    fame: null,
+    status: [{ name: '모험가 명성', value: '240' }],
+    explain: null,
+    flavorText: null,
+    card: {
+      slots: ['상의'],
+      enchants: [
+        { upgrade: 0, status: firstOptions, reinforceSkill },
+        { upgrade: 1, status: secondOptions, reinforceSkill },
+        { upgrade: 2, status: thirdOptions, reinforceSkill }
       ]
     }
   }
