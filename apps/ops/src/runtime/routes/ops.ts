@@ -8,6 +8,8 @@ import type { JobRepository } from '#application/jobs/repository.js'
 import { JobService } from '#application/jobs/index.js'
 import type { LabCurrencyRepository } from '#application/lab-currencies/repository.js'
 import { LabCurrencyService } from '#application/lab-currencies/index.js'
+import type { LabItemDetailRepository } from '#application/lab-item-details/repository.js'
+import { LabItemDetailService } from '#application/lab-item-details/index.js'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
 import { LabItemService } from '#application/lab-items/index.js'
 import type { QueueRepository } from '#application/queues/repository.js'
@@ -21,10 +23,12 @@ import {
   requireJsonContentType
 } from '#presentation/http/json-request.js'
 import { LabCurrencyController } from '#presentation/http/lab-currencies/index.js'
+import { LabItemDetailController } from '#presentation/http/lab-item-details/index.js'
 import { LabItemController } from '#presentation/http/lab-items/index.js'
 import { QueueController } from '#presentation/http/queues/index.js'
 
-const LAB_CURRENCY_PATH = '/api/lab-currencies/*'
+// 아이콘을 base64로 받는 경로다.
+const ICON_PATHS = ['/api/lab-currencies/*', '/api/lab-item-details/*']
 
 export interface OpsRouteOptions {
   readonly jobs: JobRepository
@@ -33,6 +37,7 @@ export interface OpsRouteOptions {
   readonly batchNeopleKeys: BatchNeopleKeyRepository
   readonly labItems: LabItemRepository
   readonly labCurrencies: LabCurrencyRepository
+  readonly labItemDetails: LabItemDetailRepository
 }
 
 export function createOpsRoutes({
@@ -41,7 +46,8 @@ export function createOpsRoutes({
   collection,
   batchNeopleKeys,
   labItems,
-  labCurrencies
+  labCurrencies,
+  labItemDetails
 }: OpsRouteOptions): Hono {
   const queues: QueueRepository = { readCounts: readQueueCounts }
   const jobController = new JobController(new JobService(jobs))
@@ -52,16 +58,24 @@ export function createOpsRoutes({
   )
   const labItemController = new LabItemController(new LabItemService(labItems, labCurrencies))
   const labCurrencyController = new LabCurrencyController(new LabCurrencyService(labCurrencies))
+  const labItemDetailController = new LabItemDetailController(
+    new LabItemDetailService(labItemDetails)
+  )
   const routes = new Hono()
 
-  routes.use(requireJsonContentType, except(LAB_CURRENCY_PATH, limitJsonBody))
-  routes.use(LAB_CURRENCY_PATH, limitIconJsonBody)
+  routes.use(requireJsonContentType, except(ICON_PATHS, limitJsonBody))
+
+  for (const path of ICON_PATHS) {
+    routes.use(path, limitIconJsonBody)
+  }
+
   routes.route('/api/jobs', jobController.routes())
   routes.route('/api/queues', queueController.routes())
   routes.route('/api/collection', collectionController.routes())
   routes.route('/api/batch-neople-keys', batchNeopleKeyController.routes())
   routes.route('/api/lab-items', labItemController.routes())
   routes.route('/api/lab-currencies', labCurrencyController.routes())
+  routes.route('/api/lab-item-details', labItemDetailController.routes())
 
   return routes
 }
