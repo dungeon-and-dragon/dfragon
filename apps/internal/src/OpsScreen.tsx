@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { BatchKeyPanel } from '#ops-components/BatchKeyPanel'
 import { CollectionPanel } from '#ops-components/CollectionPanel'
 import { JobTable } from '#ops-components/JobTable'
+import { LabItemPanel } from '#ops-components/LabItemPanel'
 import { OpsHeader } from '#ops-components/OpsHeader'
 import { panelClasses } from '#ops-components/panel-classes'
 import { QueuePanel } from '#ops-components/QueuePanel'
@@ -62,6 +63,7 @@ export function OpsScreen(): React.JSX.Element {
               <Tabs.Tab value="jobs">Job</Tabs.Tab>
               <Tabs.Tab value="queues">타임라인 queue</Tabs.Tab>
               <Tabs.Tab value="batch-keys">batch key</Tabs.Tab>
+              <Tabs.Tab value="lab-items">실험실 아이템</Tabs.Tab>
             </Tabs.List>
           </div>
           <Tabs.Panel value="jobs" className={TAB_PANEL}>
@@ -72,6 +74,9 @@ export function OpsScreen(): React.JSX.Element {
           </Tabs.Panel>
           <Tabs.Panel value="batch-keys" className={TAB_PANEL}>
             <BatchKeyPanel />
+          </Tabs.Panel>
+          <Tabs.Panel value="lab-items" className={TAB_PANEL}>
+            <LabItemPanel />
           </Tabs.Panel>
         </Tabs.Root>
       </main>

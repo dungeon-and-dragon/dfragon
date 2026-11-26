@@ -9,6 +9,9 @@ import {
   failureSchema,
   type JobList,
   jobListSchema,
+  type LabItemGroup,
+  type LabItemList,
+  labItemListSchema,
   type QueueList,
   queueListSchema,
   requeueSchema,
@@ -42,6 +45,8 @@ export type OpsClient = {
   addBatchKey: (label: string, key: string) => Promise<void>
   setBatchKeyEnabled: (id: number, enabled: boolean) => Promise<void>
   deleteBatchKey: (id: number) => Promise<void>
+  readLabItems: () => Promise<LabItemList>
+  replaceLabItems: (group: LabItemGroup) => Promise<void>
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -131,6 +136,10 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
     deleteBatchKey: async (id) => {
       const path = batchKeyPath(id)
       await expectNoContent(await http.delete(path, { json: {} }))
+    },
+    readLabItems: async () => readBody(await http.get('lab-items'), labItemListSchema),
+    replaceLabItems: async (group) => {
+      await expectNoContent(await http.put('lab-items', { json: group }))
     }
   }
 }

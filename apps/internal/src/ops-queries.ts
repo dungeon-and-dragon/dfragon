@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query'
 import { createContext, use } from 'react'
 import type { OpsClient } from '#ops-api/ops-client'
+import type { LabItemGroup } from '#ops-api/ops-schemas'
 
 export const REFRESH_INTERVAL_MS = 1_000
 
@@ -14,6 +15,7 @@ const JOBS_KEY = ['jobs'] as const
 const QUEUES_KEY = ['queues'] as const
 const COLLECTION_KEY = ['collection'] as const
 const BATCH_KEYS_KEY = ['batch-keys'] as const
+const LAB_ITEMS_KEY = ['lab-items'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -76,6 +78,13 @@ export function useBatchKeys() {
     queryFn: client.readBatchKeys,
     refetchInterval: REFRESH_INTERVAL_MS
   })
+}
+
+// 소유자가 체크를 바꾸는 동안 목록이 바뀌지 않게 주기적으로 다시 읽지 않는다.
+export function useLabItems() {
+  const client = useOpsClient()
+
+  return useQuery({ queryKey: LAB_ITEMS_KEY, queryFn: client.readLabItems })
 }
 
 type RunRequest = { name: string; args: Record<string, unknown> }
@@ -143,5 +152,15 @@ export function useDeleteBatchKey(): UseMutationResult<void, Error, number> {
   return useMutation({
     mutationFn: (id: number) => client.deleteBatchKey(id),
     onSettled: () => queryClient.invalidateQueries({ queryKey: BATCH_KEYS_KEY })
+  })
+}
+
+export function useReplaceLabItems(): UseMutationResult<void, Error, LabItemGroup> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (group: LabItemGroup) => client.replaceLabItems(group),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_ITEMS_KEY })
   })
 }
