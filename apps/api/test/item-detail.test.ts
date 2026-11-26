@@ -104,11 +104,11 @@ test('상세 설명이 없거나 비어 있으면 짧은 설명을 쓰고, 없�
   })
 })
 
-// 카드 이름은 등급표에 있는 이름이고, cardInfo 모양은 Neople 실제 응답과 같다. 옵션 값은 그 응답의 값이다.
+// 카드 이름과 부위는 지어낸 값이고, cardInfo 모양과 숫자, 문자열이 섞인 옵션 값은 Neople 실제 응답을 따랐다.
 const cardId = '0239b1478c2a8214e70eac57581cddd2'
 const cardRow = {
   itemId: cardId,
-  itemName: '안개신의 무의식 카드',
+  itemName: '합성 버퍼 카드',
   itemRarity: '레전더리',
   itemType: '카드',
   itemStatus: [{ name: '모험가 명성', value: 210 }],
