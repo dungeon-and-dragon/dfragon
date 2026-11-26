@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { BatchNeopleKeySummary } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabCurrencyRepository } from '../src/application/lab-currencies/repository.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 
@@ -18,6 +19,12 @@ const unusedLabItems = async () =>
 const unusedLabItemStore: LabItemRepository = {
   readGroups: unusedLabItems,
   replaceGroup: unusedLabItems
+}
+const unusedLabCurrencyStore: LabCurrencyRepository = {
+  readCurrencies: unusedLabItems,
+  readIcon: unusedLabItems,
+  add: unusedLabItems,
+  update: unusedLabItems
 }
 
 // 중복, 끝 4자 자르기, 켜고 끄기는 DB 함수 테스트가 실제 DB로 확인한다. 이 fake는 경로가 받은 값과 돌려줄 결과만 다룬다.
@@ -82,6 +89,7 @@ async function startOpsApp(
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys,
     labItems: unusedLabItemStore,
+    labCurrencies: unusedLabCurrencyStore,
     writeAccessLog: (line) => logs.push(line)
   })
   t.after(() => app.close())

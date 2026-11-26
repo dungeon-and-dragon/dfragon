@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { CollectionSummary } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
+import type { LabCurrencyRepository } from '../src/application/lab-currencies/repository.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import type { CollectionRepository } from '../src/application/collection/repository.js'
 import { createOpsHttpApp, type OpsHttpAppOptions } from '../src/runtime/ops-app.js'
@@ -23,6 +24,12 @@ const unusedLabItemStore: LabItemRepository = {
   readGroups: unusedLabItems,
   replaceGroup: unusedLabItems
 }
+const unusedLabCurrencyStore: LabCurrencyRepository = {
+  readCurrencies: unusedLabItems,
+  readIcon: unusedLabItems,
+  add: unusedLabItems,
+  update: unusedLabItems
+}
 
 async function startOpsApp(
   t: test.TestContext,
@@ -37,6 +44,7 @@ async function startOpsApp(
     },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
     labItems: unusedLabItemStore,
+    labCurrencies: unusedLabCurrencyStore,
     writeAccessLog: () => undefined,
     ...options
   })
