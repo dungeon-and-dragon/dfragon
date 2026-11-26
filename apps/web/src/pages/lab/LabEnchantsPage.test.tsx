@@ -416,7 +416,7 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
   expect(requestedItemIds).toEqual([])
 })
 
-it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
+it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이며 딜러 탭에서는 딜러 옵션만 강조하고, 카드가 아니면 보이지 않는다', async () => {
   server.use(itemDetailHandlers.detail)
   await renderLoaded()
   const card = nameOf(enchantTable(), '멸절의 폭룡왕 바칼 카드').parentElement!
@@ -425,18 +425,23 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위�
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('부여 부위 무기'))
 
-  const slots = [...document.querySelectorAll('.tooltip-item p')].find(
-    (paragraph) => paragraph.textContent === '부여 부위 무기'
-  )!
-  const lines = [...slots.parentElement!.querySelectorAll('li')].map((line) => line.textContent)
+  const rows = [...document.querySelectorAll('.tooltip-item [data-card-option]')]
+  const lines = rows.map((row) => [...row.children].map((cell) => cell.textContent).join(' '))
+  const emphasized = rows
+    .filter((row) => row.firstElementChild?.classList.contains('text-game-enchant'))
+    .map((row) => row.firstElementChild?.textContent)
+  const separator = rows[0]?.children[2]
 
   expect(lines).toEqual([
-    '모든 속성 강화 (13 / 14 / 15)',
-    '물리 공격력 (20 / 25 / 30)',
-    '마법 공격력 (20 / 25 / 30)',
-    '독립 공격력 (20 / 25 / 30)',
-    '모험가 명성 (196 / 196 / 210)'
+    '모든 속성 강화 13 | 14 | 15',
+    '물리 공격력 20 | 25 | 30',
+    '마법 공격력 20 | 25 | 30',
+    '독립 공격력 20 | 25 | 30',
+    '모험가 명성 196 | 196 | 210'
   ])
+  expect(emphasized).toEqual(['모든 속성 강화'])
+  expect(separator?.classList).toContain('text-fg-subtle')
+  expect(separator?.classList).not.toContain('text-game-enchant')
 
   await leave(card)
   await vi.waitFor(() => expect(document.querySelector('.tooltip-item')).toBeNull())
@@ -444,4 +449,72 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 부여 부위�
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
   expect(document.body.textContent).not.toContain('부여 부위')
+})
+
+it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화를, 버퍼 탭은 올스탯 묶음을 이름과 값 모두 강조한다', async () => {
+  const itemId = 'synthetic-dual-card'
+  const card = (role: 'dealer' | 'buffer') => ({
+    category: 'WEAPON' as const,
+    role,
+    tier: '종결' as const,
+    items: [
+      {
+        itemName: '합성 양용 카드',
+        itemId,
+        itemRarity: '유니크',
+        iconPath: null,
+        description: null,
+        unitPrice: 100,
+        checkedAt: null,
+        cost: null
+      }
+    ]
+  })
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [card('dealer'), card('buffer')]
+      } satisfies LabItemsResponse)
+    ),
+    http.get(ITEM_DETAIL_URL, () =>
+      HttpResponse.json({
+        ...storyItemDetail(itemId),
+        card: {
+          slots: ['무기'],
+          enchants: [
+            {
+              upgrade: 0,
+              status: [
+                { name: '힘', value: '100' },
+                { name: '모든 속성 강화', value: '10' }
+              ]
+            }
+          ]
+        }
+      })
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  const emphasizedCells = async () => {
+    const name = nameOf(enchantTable(), '합성 양용 카드').parentElement!
+    await hover(name)
+    await vi.waitFor(() =>
+      expect(document.querySelector('.tooltip-item [data-card-option]')).not.toBeNull()
+    )
+    const cells = [...document.querySelectorAll('.tooltip-item [data-card-option] > span')]
+      .filter((cell) => cell.classList.contains('text-game-enchant'))
+      .map((cell) => cell.textContent)
+    await leave(name)
+    await vi.waitFor(() => expect(document.querySelector('.tooltip-item')).toBeNull())
+
+    return cells
+  }
+
+  expect(await emphasizedCells()).toEqual(['모든 속성 강화', '10'])
+
+  await act(async () => roleChip('버퍼').click())
+
+  expect(await emphasizedCells()).toEqual(['힘', '100'])
 })
