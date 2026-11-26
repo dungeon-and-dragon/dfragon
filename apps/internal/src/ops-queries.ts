@@ -16,6 +16,7 @@ const QUEUES_KEY = ['queues'] as const
 const COLLECTION_KEY = ['collection'] as const
 const BATCH_KEYS_KEY = ['batch-keys'] as const
 const LAB_ITEMS_KEY = ['lab-items'] as const
+const LAB_CURRENCIES_KEY = ['lab-currencies'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -162,5 +163,39 @@ export function useReplaceLabItems(): UseMutationResult<void, Error, LabItemGrou
   return useMutation({
     mutationFn: (group: LabItemGroup) => client.replaceLabItems(group),
     onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_ITEMS_KEY })
+  })
+}
+
+export function useLabCurrencies() {
+  const client = useOpsClient()
+
+  return useQuery({ queryKey: LAB_CURRENCIES_KEY, queryFn: client.readLabCurrencies })
+}
+
+export function useLabCurrencyIconUrl(): OpsClient['labCurrencyIconUrl'] {
+  return useOpsClient().labCurrencyIconUrl
+}
+
+type LabCurrencyAddition = { name: string; icon: string }
+
+export function useAddLabCurrency(): UseMutationResult<void, Error, LabCurrencyAddition> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ name, icon }: LabCurrencyAddition) => client.addLabCurrency(name, icon),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CURRENCIES_KEY })
+  })
+}
+
+type LabCurrencyUpdate = { id: number; name: string; icon: string | undefined }
+
+export function useUpdateLabCurrency(): UseMutationResult<void, Error, LabCurrencyUpdate> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, name, icon }: LabCurrencyUpdate) => client.updateLabCurrency(id, name, icon),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CURRENCIES_KEY })
   })
 }

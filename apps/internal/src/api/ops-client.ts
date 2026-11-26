@@ -9,8 +9,11 @@ import {
   failureSchema,
   type JobList,
   jobListSchema,
+  type LabCurrencyList,
   type LabItemGroup,
   type LabItemList,
+  labCurrencyAdditionSchema,
+  labCurrencyListSchema,
   labItemListSchema,
   type QueueList,
   queueListSchema,
@@ -22,6 +25,7 @@ import {
 
 export const JOB_ALREADY_RUNNING = 'JOB_ALREADY_RUNNING'
 export const BATCH_NEOPLE_KEY_DUPLICATE = 'BATCH_NEOPLE_KEY_DUPLICATE'
+export const LAB_CURRENCY_DUPLICATE = 'LAB_CURRENCY_DUPLICATE'
 
 export class OpsRequestFailure extends Error {
   constructor(
@@ -47,6 +51,10 @@ export type OpsClient = {
   deleteBatchKey: (id: number) => Promise<void>
   readLabItems: () => Promise<LabItemList>
   replaceLabItems: (group: LabItemGroup) => Promise<void>
+  readLabCurrencies: () => Promise<LabCurrencyList>
+  addLabCurrency: (name: string, icon: string) => Promise<void>
+  updateLabCurrency: (id: number, name: string, icon: string | undefined) => Promise<void>
+  labCurrencyIconUrl: (id: number, updatedAt: Date) => string
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -140,6 +148,19 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
     readLabItems: async () => readBody(await http.get('lab-items'), labItemListSchema),
     replaceLabItems: async (group) => {
       await expectNoContent(await http.put('lab-items', { json: group }))
-    }
+    },
+    readLabCurrencies: async () =>
+      readBody(await http.get('lab-currencies'), labCurrencyListSchema),
+    addLabCurrency: async (name, icon) => {
+      await readBody(
+        await http.post('lab-currencies', { json: { name, icon } }),
+        labCurrencyAdditionSchema
+      )
+    },
+    updateLabCurrency: async (id, name, icon) => {
+      await expectNoContent(await http.put(`lab-currencies/${id}`, { json: { name, icon } }))
+    },
+    labCurrencyIconUrl: (id, updatedAt) =>
+      new URL(`lab-currencies/${id}/icon?v=${updatedAt.getTime()}`, baseUrl).href
   }
 }
