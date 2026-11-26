@@ -3,3 +3,4 @@ export { createNeopleCatalog, createNeopleItemDetails } from './character-catalo
 export { parseCharacterSets } from './character-sets.js'
 export { createNeopleCharacterDetails } from './character-detail.js'
 export { createNeopleCharacterTimeline } from './character-timeline.js'
+export { createNeopleLowestListing } from './auction.js'
