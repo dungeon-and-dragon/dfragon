@@ -1,6 +1,14 @@
+import { type EnchantRole, enchantGroup, isEmphasizedEnchant } from '#entities/character'
 import type { ItemCard } from './item-detail'
 
 const MISSING_STAGE_VALUE = '-'
+const ALL_ROLES: readonly EnchantRole[] = ['dealer', 'buffer']
+
+export type CardOptionRow = Readonly<{
+  name: string
+  values: readonly string[]
+  emphasized: boolean
+}>
 
 function optionNames(card: ItemCard): string[] {
   const names = card.enchants.flatMap(({ status }) => status.map(({ name }) => name))
@@ -18,14 +26,22 @@ function stageValue(status: ItemCard['enchants'][number]['status'], name: string
   return option.value
 }
 
-export function cardOptionLines(card: ItemCard): string[] {
+function rolesOf(role: EnchantRole | undefined): readonly EnchantRole[] {
+  if (role === undefined) {
+    return ALL_ROLES
+  }
+
+  return [role]
+}
+
+export function cardOptionRows(card: ItemCard, role: EnchantRole | undefined): CardOptionRow[] {
+  const roles = rolesOf(role)
+
   return optionNames(card).map((name) => {
     const values = card.enchants.map(({ status }) => stageValue(status, name))
+    const group = enchantGroup(name)
+    const emphasized = roles.some((candidate) => isEmphasizedEnchant(group, candidate))
 
-    if (values.length === 1) {
-      return `${name} ${values[0]}`
-    }
-
-    return `${name} (${values.join(' / ')})`
+    return { name, values, emphasized }
   })
 }
