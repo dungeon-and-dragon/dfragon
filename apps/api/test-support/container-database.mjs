@@ -570,6 +570,39 @@ try {
   await psql("DELETE FROM lab_items WHERE item_name = '합성 검증 카드'")
   await psql("DELETE FROM auction_prices WHERE item_name LIKE '합성 검증 %'")
 
+  stage = 'lab currency cost'
+  const currencyId = (
+    await psql(
+      "WITH inserted AS (INSERT INTO lab_currencies (name, icon, icon_content_type) VALUES ('합성 검증 재화', '\\x89504e47'::bytea, 'image/png') RETURNING id) SELECT id FROM inserted"
+    )
+  ).stdout.trim()
+  await assert.rejects(
+    psql(
+      "INSERT INTO lab_currencies (name, icon, icon_content_type) VALUES ('합성 검증 재화', '\\x00'::bytea, 'image/png')"
+    )
+  )
+  await psql(
+    `INSERT INTO lab_items (category, role, tier, item_name, currency_id, currency_count) VALUES ('WEAPON', 'dealer', '준종결', '합성 검증 보주', ${currencyId}, 5)`
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT i.currency_count, c.name, c.icon_content_type, length(c.icon), c.updated_at IS NOT NULL FROM lab_items i JOIN lab_currencies c ON c.id = i.currency_id WHERE i.item_name = '합성 검증 보주'"
+      )
+    ).stdout.trim(),
+    '5|합성 검증 재화|image/png|4|t'
+  )
+  for (const cost of [`${currencyId}, NULL`, 'NULL, 5', `${currencyId}, 0`, '-1, 5']) {
+    await assert.rejects(
+      psql(
+        `INSERT INTO lab_items (category, role, tier, item_name, currency_id, currency_count) VALUES ('WEAPON', 'dealer', '종결', '합성 검증 비용', ${cost})`
+      )
+    )
+  }
+  await assert.rejects(psql(`DELETE FROM lab_currencies WHERE id = ${currencyId}`))
+  await psql("DELETE FROM lab_items WHERE item_name = '합성 검증 보주'")
+  await psql(`DELETE FROM lab_currencies WHERE id = ${currencyId}`)
+
   stage = 'timeline tables'
   assert.equal(
     (
@@ -1350,6 +1383,6 @@ try {
 }
 if (process.exitCode === undefined) {
   process.stdout.write(
-    'PASS: api image migration on startup, timeline sync request table and requests, lab item and auction price tables, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, timeline sync requests, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
+    'PASS: api image migration on startup, timeline sync request table and requests, lab item and auction price tables, lab currency cost, timeline replacement, old season backfill and read, character records, adventure and guild reads, fame ranking and stats reads, stats snapshot tables and jobs, set adoption job, item adoption job, job run uniqueness, character collector job registration, requested runs, timeline sync requests, start and stop, ops image job, queue, collection and batch Neople key routes, HTTP and database input rejection, ops image build info and database requirement, worker image build info\n'
   )
 }
