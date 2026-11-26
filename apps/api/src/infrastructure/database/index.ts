@@ -6,4 +6,5 @@ export {
   DatabaseCharacterTimelineRepository,
   DatabaseTimelineSyncRequestRepository
 } from './character-timeline.js'
+export { DatabaseLabItemRepository } from './lab-items.js'
 export { DatabaseRankingStatsRepository } from './ranking-stats.js'

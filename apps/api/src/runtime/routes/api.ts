@@ -10,6 +10,7 @@ import { EquipmentSimulationController } from '#presentation/http/equipment-simu
 import { ClearStatsController } from '#presentation/http/content-clears/index.js'
 import { HealthController } from '#presentation/http/health/index.js'
 import { ItemDetailController } from '#presentation/http/item-detail/index.js'
+import { LabItemController } from '#presentation/http/lab-items/index.js'
 import { RankingStatsController } from '#presentation/http/ranking-stats/index.js'
 import { SoulPriceController } from '#presentation/http/soul-prices/index.js'
 import { TodayGradeController } from '#presentation/http/today-grade/index.js'
@@ -32,6 +33,7 @@ export function createApiRoutes(services: ApiServices): Hono<AccessLogEnv> {
   routes.route('/', new AdventureGuildController(services.adventureGuild).routes())
   routes.route('/', new RankingStatsController(services.rankingStats).routes())
   routes.route('/stats/clears', new ClearStatsController(services.clearStats).routes())
+  routes.route('/lab', new LabItemController(services.labItems).routes())
   routes.route('/items', new TodayGradeController(services.todayGrade).routes())
   routes.route('/items', new SoulPriceController(services.soulPrices).routes())
   // Hono는 먼저 붙인 route부터 맞추므로, `today-grade`, `soul-prices`를 itemId로 받지 않게 그 뒤에 붙인다.
