@@ -53,7 +53,9 @@ import { clearClasses } from './components/clear-classes'
 import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { useClearContentStats, useClearStats } from './api/useClearStats'
 
-const DETAIL_LAST_ADVENTURE_SIZE = 17
+// 운영에서 17명 이상 모험단이 164명까지 길게 퍼져 있어 한 칸으로 몰지 않고 구간으로 나눈다.
+const DETAIL_LAST_SINGLE_ADVENTURE_SIZE = 16
+const DETAIL_ADVENTURE_RANGE_STARTS = [17, 20, 25, 30, 40, 50]
 const WIDE_PANEL = 2
 // 1440×900 창에서 스크롤 없이 첫 줄 차트의 아래 끝까지 보이게 공용 기본 높이보다 낮춘다.
 const FIRST_ROW_CHART_HEIGHT = 180
@@ -297,7 +299,11 @@ function DetailStats({
   const streaks = streakColumns(stats.streaks)
   const ratios = ratioBars(content, week)
   const stages = stageBars(stats.stages)
-  const adventures = adventureColumns(stats.adventures, DETAIL_LAST_ADVENTURE_SIZE)
+  const adventures = adventureColumns(
+    stats.adventures,
+    DETAIL_LAST_SINGLE_ADVENTURE_SIZE,
+    DETAIL_ADVENTURE_RANGE_STARTS
+  )
   const hasAdventures = stats.adventures.length > 0
   // 챌린지 기록의 시각은 보스를 잡은 때가 아니라 보상 상자를 연 때다.
   const hasTimes = stats.kind !== 'challenge' && hasClearTimes(stats)

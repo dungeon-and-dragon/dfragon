@@ -422,19 +422,36 @@ export function hasClearTimes({ weekdays }: ClearTimes): boolean {
 // 마지막 칸은 그 인원 이상을 모두 센다.
 export function adventureColumns(
   adventures: readonly ClearAdventureSize[],
-  lastSize: number
+  singleUntil: number,
+  rangeStarts: readonly number[]
 ): ColumnBar[] {
-  const sizes = Array.from({ length: lastSize }, (_, index) => index + 1)
+  const singles = Array.from({ length: singleUntil }, (_, index) => index + 1)
+  const starts = [...singles, ...rangeStarts]
 
   return columnsOf(
-    sizes.map((size) => {
-      const last = size === lastSize
+    starts.map((from, index) => {
+      const next = starts[index + 1]
+      const to = next !== undefined ? next - 1 : undefined
       const cleared = adventures
-        .filter(({ characters }) => (last ? characters >= size : characters === size))
+        .filter(({ characters }) => characters >= from && (to === undefined || characters <= to))
         .reduce((sum, { adventures: count }) => sum + count, 0)
-      const key = String(size)
-      const label = last ? `${size}+` : key
-      const range = last ? `${size}명 이상` : `${size}명`
+      const key = String(from)
+
+      if (to === undefined) {
+        const label = `${from}+`
+        const range = `${from}명 이상`
+
+        return { key, label, range, cleared }
+      }
+
+      if (to === from) {
+        const range = `${from}명`
+
+        return { key, label: key, range, cleared }
+      }
+
+      const label = `${from}~${to}`
+      const range = `${from}~${to}명`
 
       return { key, label, range, cleared }
     })

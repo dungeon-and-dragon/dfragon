@@ -43,7 +43,8 @@ import {
 } from './clear-scores'
 import { clearContentsOf } from './clear-groups'
 
-const OVERVIEW_LAST_ADVENTURE_SIZE = 13
+const OVERVIEW_LAST_SINGLE_ADVENTURE_SIZE = 12
+const OVERVIEW_ADVENTURE_RANGE_STARTS = [13]
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -404,7 +405,13 @@ function AdventureStats({
       )}
       {result.status === 'success' && (
         <Columns
-          groups={[adventureColumns(result.value.adventures, OVERVIEW_LAST_ADVENTURE_SIZE)]}
+          groups={[
+            adventureColumns(
+              result.value.adventures,
+              OVERVIEW_LAST_SINGLE_ADVENTURE_SIZE,
+              OVERVIEW_ADVENTURE_RANGE_STARTS
+            )
+          ]}
         />
       )}
     </Panel>
