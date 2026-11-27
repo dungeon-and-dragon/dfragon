@@ -24,11 +24,27 @@ export type LabCandidateBatch = {
   items: LabCandidateInput[]
 }
 
+export type LabCandidateBatchResult = {
+  saved: number
+  skipped: string[]
+}
+
 export async function upsertLabCandidates(
   client: DatabaseClient,
   { versionId, importedAt, items }: LabCandidateBatch
-): Promise<void> {
-  const writes = items.map((item) => {
+): Promise<LabCandidateBatchResult> {
+  const itemNames = items.map(({ itemName }) => itemName)
+  const exclusions = await client.labCandidateExclusion.findMany({
+    where: { itemName: { in: itemNames } },
+    select: { itemName: true }
+  })
+  const excluded = new Set(exclusions.map(({ itemName }) => itemName))
+  const kept = items.filter(({ itemName }) => !excluded.has(itemName))
+  const skipped = items
+    .filter(({ itemName }) => excluded.has(itemName))
+    .map(({ itemName }) => itemName)
+
+  const writes = kept.map((item) => {
     const options = JSON.stringify(item.options)
     const buffLines = JSON.stringify(item.buffLines)
     const card = item.card !== null ? JSON.stringify(item.card) : null
@@ -55,6 +71,8 @@ export async function upsertLabCandidates(
   })
 
   await client.$transaction(writes)
+
+  return { saved: kept.length, skipped }
 }
 
 export async function saveLabCandidateIcon(

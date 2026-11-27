@@ -33,7 +33,10 @@ const unusedLabCandidateStore: LabCandidateRepository = {
   deleteOtherVersions: unusedLabItems,
   readCandidates: unusedLabItems,
   readIcon: unusedLabItems,
-  readPriceHistory: unusedLabItems
+  readPriceHistory: unusedLabItems,
+  exclude: unusedLabItems,
+  include: unusedLabItems,
+  readExclusions: unusedLabItems
 }
 const unusedLabCurrencyStore: LabCurrencyRepository = {
   readCurrencies: unusedLabItems,

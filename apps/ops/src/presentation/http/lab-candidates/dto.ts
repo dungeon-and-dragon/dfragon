@@ -1,5 +1,6 @@
 import type {
   AuctionPriceHistoryEntry,
+  LabCandidateExclusion,
   LabCandidateKind,
   LabCandidateQuery
 } from '@dfragon/database'
@@ -93,6 +94,8 @@ export const iconBody = z.object({ itemName: itemNameField, icon: iconField })
 
 export const finishBody = z.object({ snapshotId: snapshotIdField })
 
+export const exclusionBody = z.object({ itemName: itemNameField })
+
 const listQuery = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.enum(['TITLE', 'CREATURE', 'AURA']) }),
   z.strictObject({
@@ -130,4 +133,14 @@ export function toLabCandidatePriceHistoryResponse(
   history: AuctionPriceHistoryEntry[]
 ): LabCandidatePriceHistoryResponse {
   return { history }
+}
+
+export type LabCandidateExclusionListResponse = {
+  exclusions: LabCandidateExclusion[]
+}
+
+export function toLabCandidateExclusionListResponse(
+  exclusions: LabCandidateExclusion[]
+): LabCandidateExclusionListResponse {
+  return { exclusions }
 }

@@ -44,16 +44,17 @@ const icon = <span aria-hidden="true" className="block size-[24px] rounded-badge
 type ItemDetailCardStoryProps = {
   item: ItemDetail
   card: ItemDetailCardOptions | null
+  buffs?: readonly string[]
 }
 
-function ItemDetailCardStory({ item, card }: ItemDetailCardStoryProps) {
+function ItemDetailCardStory({ item, card, buffs }: ItemDetailCardStoryProps) {
   return (
     <Tooltip.Provider>
       <Tooltip.Root defaultOpen>
         <Tooltip.Trigger render={<Button size="sm" />}>{item.name}</Tooltip.Trigger>
         <Tooltip.Popup side="right" align="start" sideOffset={8}>
           <div className="tooltip-item">
-            <ItemDetailCard item={item} icon={icon} card={card} />
+            <ItemDetailCard item={item} icon={icon} card={card} buffs={buffs} />
           </div>
         </Tooltip.Popup>
       </Tooltip.Root>
@@ -86,4 +87,8 @@ export const EnchantCard: Story = {
 
 export const Mythic: Story = {
   args: { item: { ...equipment, name: '합성 신화 무기', rarity: '신화' } }
+}
+
+export const BuffLines: Story = {
+  args: { buffs: ['1~95레벨 스킬 / Lv +1', '[버프 강화] 50레벨 액티브 스킬 / Lv +2'] }
 }

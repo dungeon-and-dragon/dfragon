@@ -8,6 +8,7 @@
       "@dfragon/ui": ["../../packages/ui/src/index.tsx"],
       "@dfragon/lib": ["../../packages/lib/src/index.ts"],
       "@dfragon/lib/enchant-grades": ["../../packages/lib/src/enchant-grades.ts"],
+      "@dfragon/lib/enchant-options": ["../../packages/lib/src/enchant-options.ts"],
       "@dfragon/lib/lab-items": ["../../packages/lib/src/lab-items.ts"]
     }
   }

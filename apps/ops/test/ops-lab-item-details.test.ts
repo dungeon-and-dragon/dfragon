@@ -45,7 +45,10 @@ async function startOpsApp(t: test.TestContext, labItemDetails: LabItemDetailRep
       deleteOtherVersions: unused,
       readCandidates: unused,
       readIcon: unused,
-      readPriceHistory: unused
+      readPriceHistory: unused,
+      exclude: unused,
+      include: unused,
+      readExclusions: unused
     },
     writeAccessLog: () => undefined
   })

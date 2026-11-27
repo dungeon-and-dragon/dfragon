@@ -50,6 +50,7 @@ import {
 import { CATEGORY_NAMES, ROLE_NAMES } from './lab-item-names'
 import { ICON_SIZE } from './lab-fields'
 import { PriceHistoryRow } from './LabCandidatePriceHistory'
+import { LabCandidateTooltip } from './LabCandidateTooltip'
 import { panelClasses } from './panel-classes'
 
 const PRICE_JOB_NAME = 'lab-candidate-price-refresh'
@@ -233,7 +234,15 @@ function SortHeader({
   )
 }
 
-function CandidateIcon({ candidate }: { candidate: LabCandidate }): React.JSX.Element {
+const ICON_SIZE_CLASSES = { md: 'size-game-icon', sm: 'size-[24px]' } as const
+
+function CandidateIcon({
+  candidate,
+  size
+}: {
+  candidate: LabCandidate
+  size: keyof typeof ICON_SIZE_CLASSES
+}): React.JSX.Element {
   const iconUrl = useLabCandidateIconUrl()
   const { icon } = rarityClassesOf(candidate.itemRarity)
   const { hasIcon, iconUpdatedAt, itemName } = candidate
@@ -241,7 +250,7 @@ function CandidateIcon({ candidate }: { candidate: LabCandidate }): React.JSX.El
   return (
     <span
       aria-hidden="true"
-      className={`relative size-game-icon shrink-0 select-none box-border overflow-hidden rounded-control border bg-inset ${icon}`}
+      className={`relative ${ICON_SIZE_CLASSES[size]} shrink-0 select-none box-border overflow-hidden rounded-control border bg-inset ${icon}`}
       style={{ borderColor: 'currentColor' }}
     >
       {hasIcon && iconUpdatedAt !== null && (
@@ -356,6 +365,7 @@ function TierSelect({
 
 type CandidateRowProps = {
   candidate: LabCandidate
+  role: EnchantGradeRole
   tier: LabItemTier | null
   pending: boolean
   locked: boolean
@@ -368,6 +378,7 @@ type CandidateRowProps = {
 
 function CandidateRow({
   candidate,
+  role,
   tier,
   pending,
   locked,
@@ -388,13 +399,19 @@ function CandidateRow({
   return (
     <tr>
       <td>
-        <div className="flex min-w-0 items-center gap-3">
-          <CandidateIcon candidate={candidate} />
-          <span className="flex min-w-0 flex-col">
-            <span className={`min-w-0 truncate font-semibold ${name}`}>{candidate.itemName}</span>
-            <span className="text-2xs text-fg-subtle">{detailOf(candidate)}</span>
-          </span>
-        </div>
+        <LabCandidateTooltip
+          candidate={candidate}
+          role={role}
+          icon={<CandidateIcon candidate={candidate} size="sm" />}
+        >
+          <div tabIndex={0} className="flex min-w-0 items-center gap-3 focus-ring-inset">
+            <CandidateIcon candidate={candidate} size="md" />
+            <span className="flex min-w-0 flex-col">
+              <span className={`min-w-0 truncate font-semibold ${name}`}>{candidate.itemName}</span>
+              <span className="text-2xs text-fg-subtle">{detailOf(candidate)}</span>
+            </span>
+          </div>
+        </LabCandidateTooltip>
       </td>
       <td className="table-num">
         {candidate.fame !== null ? formatCount(candidate.fame) : MISSING_VALUE}
@@ -502,6 +519,7 @@ function EnchantFilters({
 
 type CandidateTableProps = {
   candidates: readonly LabCandidate[]
+  role: EnchantGradeRole
   sort: Sort
   expanded: string | null
   tierOf: (itemName: string) => LabItemTier | null
@@ -516,6 +534,7 @@ type CandidateTableProps = {
 
 function CandidateTable({
   candidates,
+  role,
   sort,
   expanded,
   tierOf,
@@ -567,6 +586,7 @@ function CandidateTable({
               <Fragment key={itemName}>
                 <CandidateRow
                   candidate={candidate}
+                  role={role}
                   tier={tierOf(itemName)}
                   pending={isPending(itemName)}
                   locked={locked}
@@ -761,6 +781,7 @@ export function LabCandidatePanel(): React.JSX.Element {
     return (
       <CandidateTable
         candidates={candidates.data.candidates}
+        role={role}
         sort={sort}
         expanded={expanded}
         tierOf={tierOf}
