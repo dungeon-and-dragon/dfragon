@@ -11,9 +11,18 @@
   - 시즌 9 선계, 시즌 9 Act 4. 안개신 레이드: https://bbscdn.df.nexon.com/data6/commu/202404/5f551fc0-95b0-da3e-7d32-3e3dba38f74f.jpg, `8aa5f61a2310d6c9434f2d1941b11edd4165be5e496a1b05f28da8af090ba857`
   - 시즌 10 중천, 시즌 10 Act 2. RAID : 만들어진 신, 나벨: https://bbscdn.df.nexon.com/data6/commu/202504/0a536ffe-b27e-f519-88ec-41f7679cd035.jpg, `43d4bc97d9c035094a89d6115539c19544b6d2dad857380c378d47e24e02d68d`
   - 시즌 11 천해천, 시즌 11 Act 3. 무너진 성자 미카엘라: https://bbscdn.df.nexon.com/data6/commu/202608/05f32bfc-be16-c9fc-af00-70e9663729ed.jpg, `8f73710bfc518c840fa9477d872859842b3a03dd02cfccba19e5e6cec0740064`
-- 클리어 집계 배경 이미지(`apps/web/src/shared/assets/clear-content-backgrounds/{apocalypse,diregie,inae,nightmare,venus}.webp`): 위 월페이퍼 게시판에서 받은 1920×1080 JPEG 원본(아포칼립스, 베누스는 2560×1440)을 너비 1600px WebP로 줄인 것입니다. 권리와 사용 조건은 시즌 배경과 같고, `/clears` 요약의 컨텐츠 배경에만 어둡게 깔아 씁니다. 무너진 성자 미카엘라와 만들어진 신 나벨은 시즌 11, 시즌 10 배경을 그대로 씁니다. 원본의 SHA-256은 아래와 같습니다.
+- 클리어 컨텐츠 배경 이미지(`apps/web/src/shared/assets/clear-content-backgrounds/*.webp`): 위 월페이퍼 게시판에서 받은 1920×1080이나 2560×1440 JPEG 원본을 1600×900 WebP로 줄인 것입니다. 안톤은 1280×1024 원본의 가운데를 16:9로 잘라 썼습니다. 권리와 사용 조건은 시즌 배경과 같고, `/clears` 요약의 컨텐츠 배경과 모험단 활동의 이번 시즌 클리어 줄 배경에만 어둡게 깔아 씁니다. 무너진 성자 미카엘라, 만들어진 신 나벨, 기계 혁명, 혼돈의 오즈마, 프레이-이시스는 시즌 11, 10, 8, 7, 6 배경을 그대로 씁니다. 원본의 SHA-256은 아래와 같습니다.
   - 디레지에 레이드, 시즌 10 Act 5. 검은 질병의 디레지에: https://bbscdn.df.nexon.com/data6/commu/202512/7aeac868-9928-d7b5-30d2-e104a81d7b32.jpg, `36ea96c8f36ed4c943410fe0b8d646a54006a58c11995315f85531d09ad2a945`
   - 이내 황혼전, 시즌 10 Act 4. 이내 황혼전: https://bbscdn.df.nexon.com/data6/commu/202508/1144f587-f8b2-e5df-24f4-48f1a2aaef04.jpg, `5e470e5d0c729b74d45b517aff97314953660d478eed55f8f4b79987f6150d24`
   - 각인된 악몽 챌린지, 시즌 11 Act 3 외전. 각인된 악몽: https://bbscdn.df.nexon.com/data6/commu/202611/4f327972-c271-d5d3-1250-c17fe3540041.jpg, `ae58639cac5386f76a6af0765949adda97923e689982b5b184c4f663b1f30770`
   - 레기온 아포칼립스: https://bbscdn.df.nexon.com/data6/commu/202604/31f10ad3-993f-3f70-38a6-87148435120d.jpg, `ac3a030f3eb3d00db69141a8a40f7133748f40524b1f90e767a0eb7ba6825626`
   - 레기온 베누스: https://bbscdn.df.nexon.com/data6/commu/202502/c79631f8-2b07-7370-bb82-ed1daf659643.jpg, `88aa98bf61f1c859fcbde477bb9b6cd163c48bf72b82f5bb7d69299fb39f4c7f`
+  - 아스라한, 안개신 레이드: https://bbscdn.df.nexon.com/data6/commu/202404/8780f70e-4cd6-c919-2905-09ec0c8d9b63.jpg, `ce5bbd0203fa3677960515f8942bece61717d694912a1a894263c6abdf487121`
+  - 무형의 시로코: https://bbscdn.df.nexon.com/data6/commu/202005/122154_5ebb67d2d68f8.jpg, `633e78cbb0923bdb1547580a19fbb9396820052e1f45367af4142ae552bd8dc8`
+  - 루크: https://bbscdn.df.nexon.com/data6/commu/201804/190535_5ac351ef5ac52.jpg, `3fc9c60bb379c7ee9693f7bbb81a8522c8e3a5d2884ed0ed7895b828a1903f77`
+  - 안톤: https://bbscdn.df.nexon.com/data6/download/17/10/0/337_2.jpg, `8b9d553584eaf41a5c5d3a1287354f7e78b6691ed1520e6b1fa69953b0e4cc0f`
+  - 코드네임 게이볼그: https://bbscdn.df.nexon.com/data6/commu/202305/110319_645afb6733523.jpg, `60828874ca45db6e16005f83d6a84335b66a2b8fe3e3ed02a4f7d1bf193b25be`
+  - 레기온 깨어난 숲: https://bbscdn.df.nexon.com/data6/commu/202407/cb4a84a4-537b-5dd7-1e08-4f60c62b53a6.jpg, `598918b1e61e976a63c3e7d6b41847ef9088941b3f657055f5a9364348acc731`
+  - 레기온 어둑섬: https://bbscdn.df.nexon.com/data6/commu/202311/7b8a63a6-706f-52ca-aa6a-dd6a104d6e65.jpg, `1728e70b6b43ee45c06d4aedc8c43d226a84b09aad9451b6aed877018d5ffd99`
+  - 레기온 차원회랑: https://bbscdn.df.nexon.com/data6/commu/202212/160610_63aa996221135.jpg, `611b63cc99005447179638caf58d604891b63e22e7e2cdc3ab2855badab2d12b`
+  - 레기온 이스핀즈: https://bbscdn.df.nexon.com/data6/commu/202207/200840_62c41bb8e1df6.jpg, `04216a1345125f7c4ed9a7b3c96d313fcb7de016ae2e21b743a7a431bbd6f40f`
