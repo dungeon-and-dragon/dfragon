@@ -665,6 +665,33 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
   expect(heights[1]).toContain('50%')
 })
 
+it('장비 점수 구간별 클리어율은 캐릭터가 5% 이상 처음 몰리는 구간 아래를 한 막대로 접고 그 위는 사람이 적어도 구간마다 그린다', async () => {
+  await open(
+    { contentKey: 'michaela' },
+    {
+      contentStats: (contentId, weekStart) => {
+        const stats = scoredStatsOf(contentId, weekStart)
+        const equipment = [
+          { score: 0, population: 10, cleared: 1 },
+          { score: 50000, population: 10, cleared: 0 },
+          { score: 300000, population: 900, cleared: 90 },
+          { score: 350000, population: 70, cleared: 35 },
+          { score: 400000, population: 10, cleared: 10 }
+        ]
+
+        return HttpResponse.json({ ...stats, scoreBands: { ...stats.scoreBands, equipment } })
+      }
+    }
+  )
+
+  expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
+    '~300,0001  5.0%',
+    '300,000~90  10.0%',
+    '350,000~35  50.0%',
+    '400,000~10  100.0%'
+  ])
+})
+
 it('전직 표는 전직 점수가 있으면 명성, 장비 점수 전환을 두고 장비 점수로 바꾸면 그 축을 쓴다', async () => {
   await open(
     { contentKey: 'michaela' },
