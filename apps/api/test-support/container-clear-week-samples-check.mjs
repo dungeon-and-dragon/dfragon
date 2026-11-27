@@ -29,7 +29,7 @@ try {
         jobId: 'synthetic-clear-job',
         jobGrowId: 'synthetic-clear-grow',
         jobName: '합성직업',
-        jobGrowName: '합성전직',
+        jobGrowName: '眞 합성전직',
         count: 1000
       }
     ],
