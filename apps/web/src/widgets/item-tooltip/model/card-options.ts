@@ -4,6 +4,7 @@ import {
   type EnchantRole,
   enchantGroup,
   enchantOrderRank,
+  enchantStatGroup,
   isEmphasizedEnchant
 } from '#entities/character'
 import type { ItemCard } from './item-detail'
@@ -17,20 +18,29 @@ export type CardOptionRow = Readonly<{
   emphasized: boolean
 }>
 
-function optionNames(card: ItemCard): string[] {
-  const names = card.enchants.flatMap(({ status }) => status.map(({ name }) => name))
+type StageValues = (string | null)[]
 
-  return [...new Set(names)]
+function isLarger(value: string, current: string | null): boolean {
+  return current === null || Number.parseFloat(value) > Number.parseFloat(current)
 }
 
-function stageValue(status: ItemCard['enchants'][number]['status'], name: string): string {
-  const option = status.find((candidate) => candidate.name === name)
+function groupedStageValues(card: ItemCard): Map<string, StageValues> {
+  const groups = new Map<string, StageValues>()
 
-  if (option === undefined) {
-    return MISSING_STAGE_VALUE
-  }
+  card.enchants.forEach(({ status }, stage) => {
+    for (const { name, value } of status) {
+      const group = enchantStatGroup(name)
+      const values = groups.get(group) ?? card.enchants.map(() => null)
 
-  return option.value
+      if (isLarger(value, values[stage] ?? null)) {
+        values[stage] = value
+      }
+
+      groups.set(group, values)
+    }
+  })
+
+  return groups
 }
 
 function rolesOf(role: EnchantRole | undefined): readonly EnchantRole[] {
@@ -41,8 +51,9 @@ function rolesOf(role: EnchantRole | undefined): readonly EnchantRole[] {
   return [role]
 }
 
-function isEmphasized(group: string, roles: readonly EnchantRole[]): boolean {
-  return roles.some((role) => isEmphasizedEnchant(group, role))
+// 단일 속성 강화는 이름을 그대로 보이되, 강조와 순서는 장비 탭처럼 모든 속성 강화로 따진다.
+function isEmphasized(name: string, roles: readonly EnchantRole[]): boolean {
+  return roles.some((role) => isEmphasizedEnchant(enchantGroup(name), role))
 }
 
 function levelText(level: number | null): string {
@@ -53,8 +64,7 @@ function levelText(level: number | null): string {
   return String(level)
 }
 
-// 캐릭터 상세 장비 탭처럼 직업별 버프 스킬을 단계마다 가장 큰 값 하나로 묶는다.
-function buffSkillRow(card: ItemCard, roles: readonly EnchantRole[]): CardOptionRow | null {
+function buffSkillValues(card: ItemCard): StageValues | null {
   const levels = card.enchants.map(({ reinforceSkill }) =>
     buffSkillLevel({ status: [], reinforceSkill })
   )
@@ -63,38 +73,34 @@ function buffSkillRow(card: ItemCard, roles: readonly EnchantRole[]): CardOption
     return null
   }
 
-  const values = levels.map(levelText)
-  const emphasized = isEmphasized(BUFF_PASSIVE_SKILL, roles)
-
-  return { name: BUFF_PASSIVE_SKILL, values, emphasized }
+  return levels.map(levelText)
 }
 
-// 버프 스킬 줄만 장비 탭의 옵션 순서로 끼워 넣고, 나머지 줄은 가장 낮은 단계의 옵션 순서를 지킨다.
-function withBuffSkillRow(rows: CardOptionRow[], buffRow: CardOptionRow | null): CardOptionRow[] {
-  if (buffRow === null) {
-    return rows
+function byEmphasisAndOrder(a: CardOptionRow, b: CardOptionRow): number {
+  const emphasisOrder = Number(b.emphasized) - Number(a.emphasized)
+
+  if (emphasisOrder !== 0) {
+    return emphasisOrder
   }
 
-  const buffRank = enchantOrderRank(BUFF_PASSIVE_SKILL)
-  const index = rows.findIndex(({ name }) => enchantOrderRank(enchantGroup(name)) > buffRank)
-
-  if (index === -1) {
-    return [...rows, buffRow]
-  }
-
-  return [...rows.slice(0, index), buffRow, ...rows.slice(index)]
+  return enchantOrderRank(enchantGroup(a.name)) - enchantOrderRank(enchantGroup(b.name))
 }
 
 export function cardOptionRows(card: ItemCard, role: EnchantRole | undefined): CardOptionRow[] {
   const roles = rolesOf(role)
-  const rows = optionNames(card).map((name) => {
-    const values = card.enchants.map(({ status }) => stageValue(status, name))
-    const emphasized = isEmphasized(enchantGroup(name), roles)
+  const groups = groupedStageValues(card)
+  const buffValues = buffSkillValues(card)
+
+  if (buffValues !== null) {
+    groups.set(BUFF_PASSIVE_SKILL, buffValues)
+  }
+
+  const rows = [...groups].map(([name, stageValues]) => {
+    const values = stageValues.map((value) => value ?? MISSING_STAGE_VALUE)
+    const emphasized = isEmphasized(name, roles)
 
     return { name, values, emphasized }
   })
 
-  const buffRow = buffSkillRow(card, roles)
-
-  return withBuffSkillRow(rows, buffRow)
+  return rows.toSorted(byEmphasisAndOrder)
 }
