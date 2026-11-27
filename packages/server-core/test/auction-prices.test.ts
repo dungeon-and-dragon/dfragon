@@ -19,6 +19,8 @@ const SAVES_MIDDLE_LEVEL_TAG_LISTING =
   '이름 전체의 앞부분 검색에 꼬리표 매물이 없으면 마지막 단어를 뺀 앞부분으로 다시 찾아, `이름[숫자Lv] 알`처럼 꼬리표가 중간에 낀 매물 가운데 꼬리표 하나를 뺀 이름이 같은 것의 최저가를 저장하고, 둘 다 없으면 아이템 검색으로 넘어간다'
 const SAVES_CREATURE_EGG_LISTING =
   '크리쳐는 정확한 이름 매물이 없으면 앞부분 검색에서 `이름 알`, `이름의 알`과 꼬리표 없는 이름의 `이름[숫자Lv] 알` 크리쳐 매물 가운데 최저가를 저장하고, 꼬리표가 있는 이름은 같은 꼬리표의 알만, 크리쳐가 아닌 알과 칭호의 알은 받지 않는다'
+const SAVES_AURA_BOX_LISTING =
+  '오라는 정확한 이름 매물과 꼬리표 매물이 없으면 이름이 정확히 `이름 오라 상자`인 매물 가운데 최저가를 저장하고, 다른 상자와 칭호의 오라 상자는 받지 않으며, 정확한 이름 매물이 있으면 상자를 찾지 않는다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -43,6 +45,11 @@ const leveledEggCreature = '합성 거북'
 const taggedCreature = '합성 여우[80Lv]'
 const possessiveEggCreature = '합성 고래'
 const eggTitle = '합성 표식'
+// 경매장에 오라 상자로만 오르는 오라와 오라 상자 매물만 있는 칭호를 흉내 낸 지어낸 이름이다.
+const boxedAura = '합성 별빛'
+const packagedAura = '합성 달빛'
+const exactAura = '합성 햇빛'
+const boxTitle = '합성 표지'
 const checkedAt = new Date('2026-11-26T12:00:00+09:00')
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -459,6 +466,80 @@ test(SAVES_CREATURE_EGG_LISTING, async () => {
   })
   assert.deepEqual(saved.get(eggTitle), {
     itemName: eggTitle,
+    itemId: null,
+    itemRarity: null,
+    unitPrice: null,
+    checkedAt
+  })
+})
+
+test(SAVES_AURA_BOX_LISTING, async () => {
+  const listing = (id: string, itemName: string, itemRarity: string, unitPrice: number) => {
+    const itemId = id.repeat(32)
+
+    return { itemId, itemName, itemRarity, itemTypeDetail: '오라 상자', unitPrice }
+  }
+
+  const matchRows: Record<string, unknown[]> = {
+    [`${boxedAura} 오라 상자`]: [
+      listing('a', `${boxedAura} 오라 상자`, '에픽', 60_000),
+      listing('b', `${boxedAura} 오라 상자`, '레전더리', 55_000),
+      listing('c', `${boxedAura} 오라 상자 패키지`, '에픽', 100)
+    ],
+    [`${packagedAura} 오라 상자`]: [listing('d', `${packagedAura} 오라 상자 패키지`, '에픽', 200)],
+    [exactAura]: [listing('e', exactAura, '유니크', 70_000)],
+    [`${boxTitle} 오라 상자`]: [listing('f', `${boxTitle} 오라 상자`, '에픽', 300)]
+  }
+
+  const { neople, requested, searched } = auctionNeople((itemName, wordType) => {
+    if (wordType === 'front') {
+      return jsonResponse({ rows: [] })
+    }
+
+    return jsonResponse({ rows: matchRows[itemName] ?? [] })
+  })
+
+  const { saved, repository } = memoryPrices()
+
+  await priceService(neople, repository).refresh([
+    listed(boxedAura, ['AURA']),
+    listed(packagedAura, ['AURA']),
+    listed(exactAura, ['AURA']),
+    listed(boxTitle, ['TITLE'])
+  ])
+
+  assert.deepEqual(requested, [
+    boxedAura,
+    `${boxedAura} 오라 상자`,
+    packagedAura,
+    `${packagedAura} 오라 상자`,
+    exactAura,
+    boxTitle
+  ])
+  assert.deepEqual(searched, [packagedAura, boxTitle])
+  assert.deepEqual(saved.get(boxedAura), {
+    itemName: boxedAura,
+    itemId: 'b'.repeat(32),
+    itemRarity: '레전더리',
+    unitPrice: 55_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(packagedAura), {
+    itemName: packagedAura,
+    itemId: null,
+    itemRarity: null,
+    unitPrice: null,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(exactAura), {
+    itemName: exactAura,
+    itemId: 'e'.repeat(32),
+    itemRarity: '유니크',
+    unitPrice: 70_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(boxTitle), {
+    itemName: boxTitle,
     itemId: null,
     itemRarity: null,
     unitPrice: null,
