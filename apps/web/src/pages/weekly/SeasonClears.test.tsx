@@ -97,6 +97,30 @@ it('레이드 이름과 단계를 보내지 않는 API의 레이드는 이름 �
   )
 })
 
+it('깨어난 숲처럼 이름 뒤 괄호에 극, 일반을 적은 레기온은 한 줄에 모으고 극을 하드처럼 붉은 배지로 보인다', async () => {
+  await renderClears(
+    activityWith({
+      raids: [],
+      legions: [
+        { name: '깨어난 숲(극)', count: 5 },
+        { name: '깨어난 숲(일반)', count: 3 },
+        { name: '어둑섬', count: 2 }
+      ]
+    })
+  )
+
+  await vi.waitFor(() =>
+    expect(rows()).toEqual([
+      ['레기온', '깨어난 숲', '극', '5', '일반', '3'],
+      ['레기온', '어둑섬', '2']
+    ])
+  )
+  expect([...container.querySelectorAll('li .badge')].map((badge) => badge.textContent)).toEqual([
+    '극'
+  ])
+  expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
+})
+
 it('클리어가 없는 시즌은 제목과 빈 상태 한 줄을 보인다', async () => {
   await renderClears(activityWith({ raids: [], legions: [] }))
 
