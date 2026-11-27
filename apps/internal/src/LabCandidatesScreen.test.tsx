@@ -190,6 +190,34 @@ function labItemPuts(api: FakeOpsApi): unknown[] {
     .map(({ body }) => body)
 }
 
+async function hoverName(name: string): Promise<HTMLElement> {
+  const target = rowOf(name).querySelector('td:first-child [tabindex="0"]')
+
+  if (target === null) {
+    throw new Error(`${name} 이름 칸이 없습니다.`)
+  }
+
+  await act(async () => {
+    target.dispatchEvent(new MouseEvent('mouseenter'))
+  })
+  await waitFor(() => expect(document.querySelector('.tooltip-item')).not.toBeNull())
+
+  return document.querySelector<HTMLElement>('.tooltip-item')!
+}
+
+async function leaveName(name: string): Promise<void> {
+  const target = rowOf(name).querySelector('td:first-child [tabindex="0"]')!
+
+  await act(async () => {
+    target.dispatchEvent(new MouseEvent('mouseleave'))
+  })
+  await waitFor(() => expect(document.querySelector('.tooltip-item')).toBeNull())
+}
+
+function textsOf(scope: ParentNode, selector: string): string[] {
+  return [...scope.querySelectorAll(selector)].map((element) => element.textContent ?? '')
+}
+
 const TITLE = { category: 'TITLE', role: 'all' }
 
 describe('실험실 후보 페이지', () => {
@@ -363,6 +391,125 @@ describe('실험실 후보 페이지', () => {
       '힘 100, 최종 데미지 증가 3%',
       '-'
     ])
+  })
+
+  it('칭호 이름에 마우스를 올리면 등급 색 이름, 등급, 레벨제한, 종류, 명성, 옵션 줄, 구분선 아래 버프 줄, 설명을 tooltip으로 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({
+        itemName: '합성 칭호 A',
+        fame: 1123,
+        availableLevel: 1,
+        itemTypeDetail: '칭호',
+        options: [
+          { name: '공격력 증폭', value: '20%' },
+          { name: '힘', value: '100' }
+        ],
+        buffLines: ['1~95레벨 스킬 / Lv +1', '[버프 강화] 50레벨 액티브 스킬 / Lv +2'],
+        description: '<합성 왕국>'
+      })
+    ]
+    await openCandidates(api)
+
+    const box = await hoverName('합성 칭호 A')
+    const name = box.querySelector<HTMLElement>('b')!
+    const blocks = [...box.querySelector('.item-card')!.children].map(
+      (block) => block.textContent ?? ''
+    )
+
+    expect(name.textContent).toBe('합성 칭호 A')
+    expect(name.dataset.rarity).toBe('rare')
+    expect(blocks).toEqual([
+      '합성 칭호 A',
+      '레어레벨제한 1칭호',
+      '모험가 명성 1,123',
+      '공격력 증폭 20%힘 100',
+      '1~95레벨 스킬 / Lv +1[버프 강화] 50레벨 액티브 스킬 / Lv +2',
+      '<합성 왕국>'
+    ])
+    expect(box.querySelector('[data-buff-lines]')?.classList).toContain('item-card-section')
+    expect(textsOf(box, '[data-buff-lines] li')).toEqual([
+      '1~95레벨 스킬 / Lv +1',
+      '[버프 강화] 50레벨 액티브 스킬 / Lv +2'
+    ])
+  })
+
+  it('설명, 레벨제한, 아이템 종류가 없고 버프 줄이 빈 후보는 그 줄과 버프 블록 없이 tooltip을 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 칭호 B', options: [{ name: '힘', value: '10' }] })
+    ]
+    await openCandidates(api)
+
+    const box = await hoverName('합성 칭호 B')
+    const blocks = [...box.querySelector('.item-card')!.children].map(
+      (block) => block.textContent ?? ''
+    )
+
+    expect(blocks).toEqual(['합성 칭호 B', '레어', '모험가 명성 100', '힘 10'])
+    expect(box.querySelector('[data-buff-lines]')).toBeNull()
+  })
+
+  it('마법부여 카드 이름에 마우스를 올리면 옵션 줄 대신 부위와 카드 단계별 옵션을 보이고, 딜러와 버퍼 역할에서 강조하는 줄이 다르다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({
+        itemName: '합성 양용 카드',
+        kind: 'ENCHANT',
+        itemRarity: '레전더리',
+        categories: ['WEAPON'],
+        roles: ['dealer', 'buffer'],
+        options: [{ name: '무시', value: '0' }],
+        card: {
+          slots: ['무기'],
+          enchants: [
+            {
+              upgrade: 0,
+              status: [
+                { name: '힘', value: '90' },
+                { name: '최종 데미지 증가', value: '2%' }
+              ]
+            },
+            {
+              upgrade: 1,
+              status: [
+                { name: '지능', value: '100' },
+                { name: '최종 데미지 증가', value: '3%' }
+              ]
+            }
+          ]
+        }
+      })
+    ]
+    await renderPage(api, '/lab-candidates')
+    await openTab('마법부여')
+    await waitFor(() => expect(rowNames()).toEqual(['합성 양용 카드']))
+
+    const emphasizedCells = async (): Promise<string[]> => {
+      const box = await hoverName('합성 양용 카드')
+      const cells = textsOf(box, '[data-card-option] > [data-emphasized]')
+
+      await leaveName('합성 양용 카드')
+
+      return cells
+    }
+
+    const box = await hoverName('합성 양용 카드')
+    const lines = [...box.querySelectorAll('[data-card-option]')].map((row) =>
+      [...row.children].map((cell) => cell.textContent).join(' ')
+    )
+
+    expect(box.querySelector('[data-card-slots]')?.textContent).toBe('무기')
+    expect(lines).toEqual(['최종 데미지 증가 2% | 3%', '올스탯 90 | 100'])
+    expect(box.textContent).not.toContain('무시')
+    await leaveName('합성 양용 카드')
+
+    expect(await emphasizedCells()).toEqual(['최종 데미지 증가', '2%', '3%'])
+
+    await choose('역할', '버퍼')
+    await waitFor(() => expect(rowNames()).toEqual(['합성 양용 카드']))
+
+    expect(await emphasizedCells()).toEqual(['올스탯', '90', '100'])
   })
 
   it('응답의 미조회, 검색 없음, 매물 없음 배지를 tone과 함께 보이고 검색 없음은 danger로 구분한다', async () => {
