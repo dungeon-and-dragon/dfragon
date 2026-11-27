@@ -65,13 +65,20 @@ it('고른 시즌에 나온 컨텐츠만 보이고, 그 전에 나온 컨텐츠�
           name: '무너진 성자 미카엘라 (하드)',
           raid: '무너진 성자 미카엘라',
           stage: '하드',
-          count: 3
+          count: 3,
+          releasedAt: '2026-08-06T03:10:00.000Z'
         },
-        { name: '디레지에 레이드 (하드)', raid: '디레지에 레이드', stage: '하드', count: 15 }
+        {
+          name: '디레지에 레이드 (하드)',
+          raid: '디레지에 레이드',
+          stage: '하드',
+          count: 15,
+          releasedAt: '2025-12-04T01:25:00.000Z'
+        }
       ],
       legions: [
-        { name: '아포칼립스', count: 2 },
-        { name: '베누스', count: 12 }
+        { name: '아포칼립스', count: 2, releasedAt: '2026-04-23T01:03:00.000Z' },
+        { name: '베누스', count: 12, releasedAt: '2025-02-06T01:23:00.000Z' }
       ]
     })
   )
@@ -142,8 +149,8 @@ it('깨어난 숲의 극과 일반은 한 줄에 모여 극이 하드 칸의 붉
     activityWith({
       raids: [],
       legions: [
-        { name: '깨어난 숲(극)', count: 5 },
-        { name: '깨어난 숲(일반)', count: 3 }
+        { name: '깨어난 숲(극)', count: 5, releasedAt: '2024-07-18T03:59:00.000Z' },
+        { name: '깨어난 숲(일반)', count: 3, releasedAt: '2024-07-18T02:39:00.000Z' }
       ]
     })
   )
@@ -160,7 +167,7 @@ it('깨어난 숲의 극과 일반은 한 줄에 모여 극이 하드 칸의 붉
   expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
 })
 
-it('레이드 이름과 단계를 보내지 않는 API의 레이드와 출시일을 모르는 이름은 숨기지 않고 이름마다 한 줄로 보인다', async () => {
+it('레이드 이름, 단계, 처음 본 클리어 시각을 보내지 않는 API의 레이드는 숨기지 않고 이름마다 한 줄로 보인다', async () => {
   await renderClears(
     activityWith({
       raids: [
@@ -178,6 +185,77 @@ it('레이드 이름과 단계를 보내지 않는 API의 레이드와 출시일
     ])
   )
   expect(button()).toBeNull()
+})
+
+it('처음 본 클리어 시각이 시즌 시작보다 앞인 줄만 접고, 레이드는 단계 가운데 가장 이른 시각으로 가리며 null이거나 없으면 보인다', async () => {
+  await renderClears(
+    activityWith({
+      raids: [
+        {
+          name: '합성 옛 레이드 (하드)',
+          raid: '합성 옛 레이드',
+          stage: '하드',
+          count: 1,
+          releasedAt: null
+        },
+        {
+          name: '합성 옛 레이드 (일반)',
+          raid: '합성 옛 레이드',
+          stage: '일반',
+          count: 2,
+          releasedAt: '2026-03-25T20:59:00.000Z'
+        },
+        {
+          name: '합성 늦은 단계 먼저 레이드 (하드)',
+          raid: '합성 늦은 단계 먼저 레이드',
+          stage: '하드',
+          count: 1,
+          releasedAt: '2026-04-01T00:00:00.000Z'
+        },
+        {
+          name: '합성 늦은 단계 먼저 레이드 (일반)',
+          raid: '합성 늦은 단계 먼저 레이드',
+          stage: '일반',
+          count: 1,
+          releasedAt: '2026-03-01T00:00:00.000Z'
+        },
+        {
+          name: '합성 이른 단계 먼저 레이드 (하드)',
+          raid: '합성 이른 단계 먼저 레이드',
+          stage: '하드',
+          count: 1,
+          releasedAt: '2026-03-01T00:00:00.000Z'
+        },
+        {
+          name: '합성 이른 단계 먼저 레이드 (일반)',
+          raid: '합성 이른 단계 먼저 레이드',
+          stage: '일반',
+          count: 1,
+          releasedAt: '2026-04-01T00:00:00.000Z'
+        },
+        {
+          name: '합성 새 레이드 (하드)',
+          raid: '합성 새 레이드',
+          stage: '하드',
+          count: 3,
+          releasedAt: '2026-03-25T21:00:00.000Z'
+        }
+      ],
+      legions: [
+        { name: '합성 시각 모름 레기온', count: 4, releasedAt: null },
+        { name: '합성 필드 없는 레기온', count: 5 }
+      ]
+    })
+  )
+
+  await vi.waitFor(() =>
+    expect(rows().map((row) => row[1])).toEqual([
+      '합성 새 레이드',
+      '합성 시각 모름 레기온',
+      '합성 필드 없는 레기온'
+    ])
+  )
+  expect(button()?.getAttribute('aria-label')).toBe('지난 시즌 컨텐츠 3개 보기')
 })
 
 it('클리어가 없는 시즌은 제목 없이 빈 상태 한 줄만 보인다', async () => {

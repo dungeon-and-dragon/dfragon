@@ -56,30 +56,6 @@ const BACKGROUNDS = new Map<string, string>([
   ['이스핀즈', ispins]
 ])
 
-// 운영 DB 클리어 기록(code 201, 209, 210)에서 그 이름이 처음 나온 날이다(2026-11-28). 루크와 안톤은 Neople이
-// 타임라인을 주는 첫날 다음 날이라 실제 출시는 더 앞이다. 고른 시즌 시작 전에 나온 컨텐츠를 지난 시즌 컨텐츠로 본다.
-const RELEASED_AT = new Map<string, number>(
-  [
-    ['무너진 성자 미카엘라', '2026-08-06'],
-    ['아포칼립스', '2026-04-23'],
-    ['디레지에 레이드', '2025-12-04'],
-    ['이내 황혼전', '2025-08-21'],
-    ['만들어진 신 나벨', '2025-04-17'],
-    ['베누스', '2025-02-06'],
-    ['깨어난 숲', '2024-07-18'],
-    ['아스라한', '2024-02-22'],
-    ['어둑섬', '2023-11-09'],
-    ['차원회랑', '2022-12-29'],
-    ['기계 혁명', '2022-09-22'],
-    ['이스핀즈', '2022-07-07'],
-    ['혼돈의 오즈마', '2021-05-27'],
-    ['무형의 시로코', '2020-05-14'],
-    ['프레이-이시스', '2019-02-14'],
-    ['루크', '2017-09-22'],
-    ['안톤', '2017-09-22']
-  ].map(([name, date]) => [name!, Date.parse(`${date}T00:00:00+09:00`)])
-)
-
 const KIND_LABELS = { raid: '레이드', legion: '레기온' } as const
 
 const PAST_TOGGLE =
@@ -97,10 +73,31 @@ type ClearRow = Readonly<{
   kind: keyof typeof KIND_LABELS
   name: string
   stages: readonly StageCount[]
+  releasedAt: number | null
 }>
 
 // 레기온은 단계 없이 `깨어난 숲(극)`처럼 이름 뒤 괄호에 단계를 적는다.
 const LEGION_STAGE = /^(.+)\((극|일반)\)$/
+
+function toReleasedAt(releasedAt: string | null | undefined): number | null {
+  if (releasedAt == null) {
+    return null
+  }
+
+  return Date.parse(releasedAt)
+}
+
+function earlierReleasedAt(a: number | null, b: number | null): number | null {
+  if (a === null) {
+    return b
+  }
+
+  if (b === null) {
+    return a
+  }
+
+  return Math.min(a, b)
+}
 
 function splitLegionName(name: string): { name: string; stage: string | null } {
   const match = LEGION_STAGE.exec(name)
@@ -112,34 +109,45 @@ function splitLegionName(name: string): { name: string; stage: string | null } {
   return { name: match[1]!, stage: match[2]! }
 }
 
+type ClearRowDraft = Omit<ClearRow, 'stages' | 'releasedAt'> & {
+  stages: StageCount[]
+  releasedAt: number | null
+}
+
 // API가 출시 순서와 단계 순서로 정렬해 주므로, 같은 컨텐츠의 단계를 나온 순서대로 한 줄에 모은다.
 function toClearRows({ raids, legions }: ActivitySummary): ClearRow[] {
-  const rows = new Map<string, ClearRow & { stages: StageCount[] }>()
+  const rows = new Map<string, ClearRowDraft>()
 
-  function add(kind: ClearRow['kind'], name: string, stage: string | null, count: number): void {
+  function add(
+    kind: ClearRow['kind'],
+    name: string,
+    stage: string | null,
+    count: number,
+    releasedAt: string | null | undefined
+  ): void {
     const key = `${kind}/${name}`
-    const row = rows.get(key) ?? { key, kind, name, stages: [] }
+    const row = rows.get(key) ?? { key, kind, name, stages: [], releasedAt: null }
 
     row.stages.push({ stage, count })
+    row.releasedAt = earlierReleasedAt(row.releasedAt, toReleasedAt(releasedAt))
     rows.set(key, row)
   }
 
-  for (const { name, raid = name, stage = null, count } of raids) {
-    add('raid', raid, stage, count)
+  for (const { name, raid = name, stage = null, count, releasedAt } of raids) {
+    add('raid', raid, stage, count, releasedAt)
   }
 
   for (const legion of legions) {
     const { name, stage } = splitLegionName(legion.name)
-    add('legion', name, stage, legion.count)
+    add('legion', name, stage, legion.count, legion.releasedAt)
   }
 
   return [...rows.values()]
 }
 
-function isPastSeasonContent({ name }: ClearRow, seasonStartsAt: number): boolean {
-  const releasedAt = RELEASED_AT.get(name)
-
-  return releasedAt !== undefined && releasedAt < seasonStartsAt
+// 같은 줄의 단계 가운데 가장 이른 처음 본 클리어 시각이 고른 시즌 시작보다 앞이면 지난 시즌 컨텐츠로 본다.
+function isPastSeasonContent({ releasedAt }: ClearRow, seasonStartsAt: number): boolean {
+  return releasedAt !== null && releasedAt < seasonStartsAt
 }
 
 function stageSlotOf(stage: string | null): number {
