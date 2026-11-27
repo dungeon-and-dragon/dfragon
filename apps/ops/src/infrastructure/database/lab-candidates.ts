@@ -2,11 +2,16 @@ import {
   type AuctionPriceHistoryEntry,
   type DatabaseClient,
   type LabCandidateBatch,
+  type LabCandidateBatchResult,
+  type LabCandidateExclusion,
   type LabCandidateQuery,
   type LabCandidateSummary,
   type LabCurrencyIcon,
   deleteLabCandidatesOtherVersions,
+  excludeLabCandidate,
+  includeLabCandidate,
   readAuctionPriceHistory,
+  readLabCandidateExclusions,
   readLabCandidateIcon,
   readLabCandidates,
   saveLabCandidateIcon,
@@ -17,7 +22,7 @@ import type { LabCandidateRepository } from '#application/lab-candidates/reposit
 export class DatabaseLabCandidateRepository implements LabCandidateRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  upsert(batch: LabCandidateBatch): Promise<void> {
+  upsert(batch: LabCandidateBatch): Promise<LabCandidateBatchResult> {
     return upsertLabCandidates(this.client, batch)
   }
 
@@ -39,5 +44,17 @@ export class DatabaseLabCandidateRepository implements LabCandidateRepository {
 
   readPriceHistory(itemName: string): Promise<AuctionPriceHistoryEntry[]> {
     return readAuctionPriceHistory(this.client, itemName)
+  }
+
+  exclude(itemName: string): Promise<{ status: 'excluded' | 'labItem' }> {
+    return excludeLabCandidate(this.client, itemName)
+  }
+
+  include(itemName: string): Promise<void> {
+    return includeLabCandidate(this.client, itemName)
+  }
+
+  readExclusions(): Promise<LabCandidateExclusion[]> {
+    return readLabCandidateExclusions(this.client)
   }
 }

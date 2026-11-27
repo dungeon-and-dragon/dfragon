@@ -12,6 +12,7 @@ export type OpsFailureKind =
   | 'labCandidateNotFound'
   | 'labCandidateSnapshotNotFound'
   | 'labCandidateIconNotFound'
+  | 'labCandidateInLabItems'
   | 'internal'
 
 export class OpsFailure extends Error {

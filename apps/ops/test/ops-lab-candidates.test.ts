@@ -3,6 +3,7 @@ import test from 'node:test'
 import type {
   AuctionPriceHistoryEntry,
   LabCandidateBatch,
+  LabCandidateExclusion,
   LabCandidateInput,
   LabCandidateQuery,
   LabCandidateSummary,
@@ -14,19 +15,30 @@ import { createOpsHttpApp } from '../src/runtime/ops-app.js'
 const unused = async () => assert.fail('실험실 후보 경로 테스트는 다른 저장소를 다루면 안 된다')
 
 // 판마다 줄을 지우는 규칙과 가격 join은 DB 함수 테스트가 실제 DB로 확인한다. 이 fake는 이름과 판 id만 따른다.
-function memoryStore(candidates: LabCandidateSummary[] = []) {
+function memoryStore(candidates: LabCandidateSummary[] = [], labItemNames: string[] = []) {
   const batches: LabCandidateBatch[] = []
   const queries: LabCandidateQuery[] = []
   const versions = new Map<string, string>()
   const icons = new Map<string, LabCurrencyIcon>()
   const history = new Map<string, AuctionPriceHistoryEntry[]>()
+  const exclusions = new Map<string, LabCandidateExclusion>()
   const store: LabCandidateRepository = {
     upsert: async (batch) => {
+      const skipped: string[] = []
+
       batches.push(batch)
 
       for (const { itemName } of batch.items) {
-        versions.set(itemName, batch.versionId)
+        if (exclusions.has(itemName)) {
+          skipped.push(itemName)
+        } else {
+          versions.set(itemName, batch.versionId)
+        }
       }
+
+      const saved = batch.items.length - skipped.length
+
+      return { saved, skipped }
     },
     saveIcon: async (itemName, icon) => {
       if (!versions.has(itemName)) {
@@ -59,10 +71,27 @@ function memoryStore(candidates: LabCandidateSummary[] = []) {
       return candidates
     },
     readIcon: async (itemName) => icons.get(itemName) ?? null,
-    readPriceHistory: async (itemName) => history.get(itemName) ?? []
+    readPriceHistory: async (itemName) => history.get(itemName) ?? [],
+    exclude: async (itemName) => {
+      if (labItemNames.includes(itemName)) {
+        return { status: 'labItem' }
+      }
+
+      if (!exclusions.has(itemName)) {
+        exclusions.set(itemName, { itemName, excludedAt: new Date('2026-11-28T02:00:00.000Z') })
+      }
+
+      versions.delete(itemName)
+
+      return { status: 'excluded' }
+    },
+    include: async (itemName) => {
+      exclusions.delete(itemName)
+    },
+    readExclusions: async () => [...exclusions.values()]
   }
 
-  return { store, batches, queries, versions, icons, history }
+  return { store, batches, queries, versions, icons, history, exclusions }
 }
 
 async function startOpsApp(t: test.TestContext, labCandidates: LabCandidateRepository) {
@@ -140,7 +169,7 @@ function candidate(overrides: Partial<LabCandidateSummary>): LabCandidateSummary
   }
 }
 
-test('batch는 후보 이름의 앞뒤 공백을 잘라 판 id와 함께 넘기고 204로 답한다', async (t) => {
+test('batch는 후보 이름의 앞뒤 공백을 잘라 판 id와 함께 넘기고 저장한 수와 건너뛴 이름으로 답한다', async (t) => {
   const { store, batches } = memoryStore()
   const request = await startOpsApp(t, store)
 
@@ -152,7 +181,8 @@ test('batch는 후보 이름의 앞뒤 공백을 잘라 판 id와 함께 넘기�
     })
   )
 
-  assert.equal(response.status, 204)
+  assert.equal(response.status, 200)
+  assert.deepEqual(await response.json(), { saved: 2, skipped: [] })
   assert.equal(batches.length, 1)
   assert.equal(batches[0].versionId, 'synthetic-v1')
   assert.deepEqual(
@@ -396,4 +426,79 @@ test('가격 이력은 이름을 query로 받아 저장소가 준 순서의 앞 
   assert.equal(body.history[0].checkedAt, '2026-11-28T00:00:00.000Z')
   assert.equal(body.history[199].id, 6)
   assert.equal((await request('/history')).status, 400)
+})
+
+test('제외는 이름을 잘라 204로 답하고, batch는 건너뛴 이름을 내며, 제외 목록은 이름과 제외 시각을 낸다', async (t) => {
+  const { store, versions } = memoryStore()
+  const request = await startOpsApp(t, store)
+  await request('/batch', jsonRequest('PUT', { snapshotId: 'synthetic-v1', items: [title] }))
+
+  const excluded = await request('/exclusions', jsonRequest('POST', { itemName: ' 합성 칭호 ' }))
+  const batch = await request(
+    '/batch',
+    jsonRequest('PUT', { snapshotId: 'synthetic-v2', items: [title, enchantCard] })
+  )
+  const icon = await request(
+    '/icon',
+    jsonRequest('PUT', { itemName: '합성 칭호', icon: base64Of(PNG_BYTES) })
+  )
+  const listed = await request('/exclusions')
+
+  assert.equal(excluded.status, 204)
+  assert.deepEqual(await batch.json(), { saved: 1, skipped: ['합성 칭호'] })
+  assert.deepEqual([...versions.keys()], ['합성 카드'])
+  assert.equal(icon.status, 404)
+  assert.deepEqual(await icon.json(), { error: { code: 'LAB_CANDIDATE_NOT_FOUND' } })
+  assert.equal(listed.status, 200)
+  assert.deepEqual(await listed.json(), {
+    exclusions: [{ itemName: '합성 칭호', excludedAt: '2026-11-28T02:00:00.000Z' }]
+  })
+})
+
+test('실험실 아이템 묶음에 든 이름을 제외하면 409이고 후보와 제외 목록이 그대로다', async (t) => {
+  const { store, versions, exclusions } = memoryStore([], ['합성 칭호'])
+  const request = await startOpsApp(t, store)
+  await request('/batch', jsonRequest('PUT', { snapshotId: 'synthetic-v1', items: [title] }))
+
+  const response = await request('/exclusions', jsonRequest('POST', { itemName: '합성 칭호' }))
+
+  assert.equal(response.status, 409)
+  assert.deepEqual(await response.json(), { error: { code: 'LAB_CANDIDATE_IN_LAB_ITEMS' } })
+  assert.deepEqual([...versions.keys()], ['합성 칭호'])
+  assert.equal(exclusions.size, 0)
+})
+
+test('해제하면 제외 목록에서 빠지고 다음 batch에서 다시 저장한다', async (t) => {
+  const { store, versions, exclusions } = memoryStore()
+  const request = await startOpsApp(t, store)
+  await request('/exclusions', jsonRequest('POST', { itemName: '합성 칭호' }))
+
+  const included = await request('/exclusions', jsonRequest('DELETE', { itemName: '합성 칭호' }))
+  const batch = await request(
+    '/batch',
+    jsonRequest('PUT', { snapshotId: 'synthetic-v1', items: [title] })
+  )
+
+  assert.equal(included.status, 204)
+  assert.equal(exclusions.size, 0)
+  assert.deepEqual(await batch.json(), { saved: 1, skipped: [] })
+  assert.deepEqual([...versions.keys()], ['합성 칭호'])
+})
+
+test('제외와 해제는 이름이 비었거나 JSON이 아니면 거절하고 제외 목록을 바꾸지 않는다', async (t) => {
+  const { store, exclusions } = memoryStore()
+  const request = await startOpsApp(t, store)
+
+  const blank = await request('/exclusions', jsonRequest('POST', { itemName: '  ' }))
+  const missing = await request('/exclusions', jsonRequest('DELETE', {}))
+  const form = await request('/exclusions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'itemName=합성 칭호'
+  })
+
+  assert.equal(blank.status, 400)
+  assert.equal(missing.status, 400)
+  assert.equal(form.status, 415)
+  assert.equal(exclusions.size, 0)
 })
