@@ -5,6 +5,7 @@ import { CharacterDetailController } from '#presentation/http/character-detail/i
 import { CharacterHistoryController } from '#presentation/http/character-history/index.js'
 import { CharacterImageController } from '#presentation/http/character-image/index.js'
 import { CharacterSearchController } from '#presentation/http/character-search/index.js'
+import { EpicSoulRecoveryController } from '#presentation/http/epic-soul-recovery/index.js'
 import { EquipmentSimulationController } from '#presentation/http/equipment-simulation/index.js'
 import { ClearStatsController } from '#presentation/http/content-clears/index.js'
 import { HealthController } from '#presentation/http/health/index.js'
@@ -26,6 +27,7 @@ export function createApiRoutes(services: ApiServices): Hono<AccessLogEnv> {
     '/characters',
     new EquipmentSimulationController(services.equipmentSimulation).routes()
   )
+  routes.route('/characters', new EpicSoulRecoveryController(services.epicSoulRecovery).routes())
   routes.route('/characters', new CharacterImageController(services.characterImage).routes())
   routes.route('/characters', new CharacterHistoryController(services.characterHistory).routes())
   routes.route('/', new AdventureGuildController(services.adventureGuild).routes())
