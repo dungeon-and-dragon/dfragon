@@ -348,6 +348,15 @@ model ClearRecordCursor {
   @@map("clear_record_cursors")
 }
 
+model ContentFirstClear {
+  kind           String
+  name           String
+  firstClearedAt DateTime @map("first_cleared_at") @db.Timestamptz(3)
+
+  @@id([kind, name])
+  @@map("content_first_clears")
+}
+
 model Job {
   name            String    @id
   displayName     String    @map("display_name")
