@@ -7,9 +7,10 @@ import type {
 
 // 문서가 unitPrice 정렬 값의 형식을 예시로 보여 주지 않아, 정렬이 무시돼도 최저가를 고르게 여러 행을 받아 직접 비교한다.
 const LISTING_LIMIT = 50
-// 앞부분 검색에는 꼬리표 없는 같은 이름 매물도 섞여 나와, Neople이 받는 최대 행 수를 받는다.
+// 앞부분 검색에는 같은 앞부분을 쓰는 다른 아이템도 섞여 나와, Neople이 받는 최대 행 수를 받는다.
 const LEVEL_LISTING_LIMIT = 400
-const LEVEL_SUFFIX_PATTERN = /^\[\d+Lv\]$/
+const LEVEL_TAG_PATTERN = /\[\d+Lv\]/g
+const WHITESPACE_RUN_PATTERN = /\s+/g
 
 type AuctionRow = Awaited<ReturnType<NeopleClient['auction']>>['rows'][number]
 
@@ -34,12 +35,31 @@ function selectLowestListing(
   return { itemId: lowest.itemId, itemRarity, unitPrice: lowest.unitPrice }
 }
 
+// 꼬리표는 칭호처럼 이름 끝(`이름[45Lv]`)에도, 크리쳐처럼 마지막 단어 앞(`이름[45Lv] 알`)에도 붙는다.
 function isLevelVariant(rowName: string, itemName: string): boolean {
-  if (!rowName.startsWith(itemName)) {
+  const tags = rowName.match(LEVEL_TAG_PATTERN) ?? []
+
+  if (tags.length !== 1) {
     return false
   }
 
-  return LEVEL_SUFFIX_PATTERN.test(rowName.slice(itemName.length))
+  const untagged = rowName
+    .replace(LEVEL_TAG_PATTERN, ' ')
+    .replace(WHITESPACE_RUN_PATTERN, ' ')
+    .trim()
+
+  return untagged === itemName
+}
+
+// 앞부분 검색어는 꼬리표 앞까지여야 해서, 이름 전체로 찾지 못하면 마지막 단어를 뺀 앞부분으로 한 번 더 찾는다.
+function levelSearchWords(itemName: string): string[] {
+  const lastSpace = itemName.lastIndexOf(' ')
+
+  if (lastSpace === -1) {
+    return [itemName]
+  }
+
+  return [itemName, itemName.slice(0, lastSpace)]
 }
 
 function isLevelTarget(
@@ -73,13 +93,23 @@ export function createNeopleLowestLevelListing(
   neople: Pick<NeopleClient, 'auction'>
 ): FetchLowestLevelListing {
   return async (itemName, itemTypeDetails) => {
-    const { rows } = await neople.auction({
-      itemName,
-      wordType: 'front',
-      sort: 'unitPrice:asc',
-      limit: LEVEL_LISTING_LIMIT
-    })
+    for (const searchWord of levelSearchWords(itemName)) {
+      const { rows } = await neople.auction({
+        itemName: searchWord,
+        wordType: 'front',
+        sort: 'unitPrice:asc',
+        limit: LEVEL_LISTING_LIMIT
+      })
 
-    return selectLowestListing(rows, (row) => isLevelTarget(row, itemName, itemTypeDetails))
+      const listing = selectLowestListing(rows, (row) =>
+        isLevelTarget(row, itemName, itemTypeDetails)
+      )
+
+      if (listing !== null) {
+        return listing
+      }
+    }
+
+    return null
   }
 }

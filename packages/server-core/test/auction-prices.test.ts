@@ -15,6 +15,8 @@ const EXCHANGED_SKIPS_AUCTION =
   '재화로 교환하는 아이템은 경매장을 부르지 않고 아이템 검색에서 이름이 같은 아이템의 itemId, 등급만 저장하며, 검색에도 없으면 모두 비운다'
 const SAVES_LOWEST_LEVEL_LISTING =
   '이름이 정확히 같은 매물이 있으면 그 매물을 저장하고, 칭호, 크리쳐, 오라는 그 매물이 없을 때만 앞부분 검색에서 아이템 종류가 같은 `이름[숫자Lv]` 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 다른 꼬리표와 다른 종류는 받지 않는다'
+const SAVES_MIDDLE_LEVEL_TAG_LISTING =
+  '이름 전체의 앞부분 검색에 꼬리표 매물이 없으면 마지막 단어를 뺀 앞부분으로 다시 찾아, `이름[숫자Lv] 알`처럼 꼬리표가 중간에 낀 매물 가운데 꼬리표 하나를 뺀 이름이 같은 것의 최저가를 저장하고, 둘 다 없으면 아이템 검색으로 넘어간다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -29,6 +31,10 @@ const leveledTitle = '합성 칭호 플래티넘'
 const leveledAura = '합성 오라'
 const leveledCreature = '합성 크리쳐'
 const exactTitle = '합성 칭호'
+// 꼬리표가 마지막 단어 앞에 끼는 크리쳐 알을 흉내 낸 지어낸 이름이다.
+const platinumEgg = '합성 재단사 플래티넘 알'
+const plainEgg = '합성 응원단 알'
+const unlistedEgg = '합성 빈 알'
 const checkedAt = new Date('2026-11-26T12:00:00+09:00')
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -293,6 +299,78 @@ test(SAVES_LOWEST_LEVEL_LISTING, async () => {
     itemId: '5'.repeat(32),
     itemRarity: '레어',
     unitPrice: 8_000,
+    checkedAt
+  })
+})
+
+test(SAVES_MIDDLE_LEVEL_TAG_LISTING, async () => {
+  const listing = (id: string, itemName: string, unitPrice: number) => ({
+    itemId: id.repeat(32),
+    itemName,
+    itemRarity: '레어',
+    itemTypeDetail: '크리쳐',
+    unitPrice
+  })
+
+  const frontRows: Record<string, unknown[]> = {
+    '합성 재단사 플래티넘': [
+      listing('a', '합성 재단사 플래티넘[45Lv] 알', 12_000),
+      listing('b', '합성 재단사 플래티넘[95Lv] 알', 11_000),
+      listing('c', '합성 재단사 플래티넘 알', 50),
+      listing('d', '합성 재단사 플래티넘[95Lv] 상자', 100),
+      listing('e', '합성 재단사 플래티넘[95Lv] 알 상자', 200),
+      listing('f', '합성 재단사 플래티넘[95Lv] 알[95Lv]', 300)
+    ],
+    '합성 응원단': [
+      listing('1', '합성 응원단 2[45Lv] 알', 400),
+      listing('2', '합성 응원단[45Lv] 알', 6_000)
+    ]
+  }
+
+  const { neople, frontRequested, searched } = auctionNeople((itemName, wordType) => {
+    if (wordType === 'front') {
+      return jsonResponse({ rows: frontRows[itemName] ?? [] })
+    }
+
+    return jsonResponse({ rows: [] })
+  })
+
+  const { saved, repository } = memoryPrices()
+
+  await priceService(neople, repository).refresh([
+    listed(platinumEgg, ['CREATURE']),
+    listed(plainEgg, ['CREATURE']),
+    listed(unlistedEgg, ['CREATURE'])
+  ])
+
+  assert.deepEqual(frontRequested, [
+    platinumEgg,
+    '합성 재단사 플래티넘',
+    plainEgg,
+    '합성 응원단',
+    unlistedEgg,
+    '합성 빈'
+  ])
+  assert.deepEqual(searched, [unlistedEgg])
+  assert.deepEqual(saved.get(platinumEgg), {
+    itemName: platinumEgg,
+    itemId: 'b'.repeat(32),
+    itemRarity: '레어',
+    unitPrice: 11_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(plainEgg), {
+    itemName: plainEgg,
+    itemId: '2'.repeat(32),
+    itemRarity: '레어',
+    unitPrice: 6_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(unlistedEgg), {
+    itemName: unlistedEgg,
+    itemId: null,
+    itemRarity: null,
+    unitPrice: null,
     checkedAt
   })
 })
