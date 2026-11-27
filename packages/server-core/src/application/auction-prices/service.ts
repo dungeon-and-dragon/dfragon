@@ -1,6 +1,18 @@
 import type { LabItemPriceTarget } from '@dfragon/database'
-import type { FetchLowestListing, FindItem } from './ports.js'
+import type {
+  AuctionListing,
+  FetchLowestLevelListing,
+  FetchLowestListing,
+  FindItem
+} from './ports.js'
 import type { AuctionPriceRepository } from './repository.js'
+
+// 레벨 꼬리표 매물은 실험실 종류와 같은 아이템 종류만 받는다. 마법부여 카드와 보주는 레벨 꼬리표 매물이 없어 찾지 않는다.
+const LEVEL_LISTING_TYPE_DETAILS: ReadonlyMap<string, string> = new Map([
+  ['TITLE', '칭호'],
+  ['CREATURE', '크리쳐'],
+  ['AURA', '오라']
+])
 
 type ItemPrice = {
   itemId: string | null
@@ -12,14 +24,41 @@ export class AuctionPriceService {
   constructor(
     private readonly repository: AuctionPriceRepository,
     private readonly fetchLowestListing: FetchLowestListing,
+    private readonly fetchLowestLevelListing: FetchLowestLevelListing,
     private readonly findItem: FindItem,
     private readonly now: () => Date = () => new Date()
   ) {}
 
+  private async lowestListing(
+    itemName: string,
+    categories: readonly string[]
+  ): Promise<AuctionListing | null> {
+    const listing = await this.fetchLowestListing(itemName)
+    const itemTypeDetails = categories.flatMap((category) => {
+      const typeDetail = LEVEL_LISTING_TYPE_DETAILS.get(category)
+
+      if (typeDetail === undefined) {
+        return []
+      }
+
+      return [typeDetail]
+    })
+
+    if (listing !== null || itemTypeDetails.length === 0) {
+      return listing
+    }
+
+    return this.fetchLowestLevelListing(itemName, itemTypeDetails)
+  }
+
   // 재화로 교환하는 아이템은 경매장을 부르지 않고, 경매장 매물이 없는 아이템과 함께 아이템 검색으로 아이콘만 찾는다.
-  private async priceOf({ itemName, exchanged }: LabItemPriceTarget): Promise<ItemPrice> {
+  private async priceOf({
+    itemName,
+    exchanged,
+    categories
+  }: LabItemPriceTarget): Promise<ItemPrice> {
     if (!exchanged) {
-      const listing = await this.fetchLowestListing(itemName)
+      const listing = await this.lowestListing(itemName, categories)
 
       if (listing !== null) {
         return listing

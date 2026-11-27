@@ -15,6 +15,7 @@ import {
 import {
   createNeopleItemDetails,
   createNeopleItemSearch,
+  createNeopleLowestLevelListing,
   createNeopleLowestListing,
   parseCharacterBasic,
   parseCharacterSets
@@ -109,6 +110,7 @@ export async function startCharacterCollector(
     fetchSkillStyle: createNeopleSkillStyle(neople),
     fetchItemDetails: createNeopleItemDetails(neople),
     fetchLowestListing: createNeopleLowestListing(neople),
+    fetchLowestLevelListing: createNeopleLowestLevelListing(neople),
     findItem: createNeopleItemSearch(neople),
     ...createNeopleFameSearch(neople),
     fetchLatestActivity: createNeopleLatestActivity(neople),

@@ -19,6 +19,7 @@ import {
 } from '@dfragon/server-core/infrastructure/database/index.js'
 import { AuctionPriceService } from '@dfragon/server-core/application/auction-prices/index.js'
 import type {
+  FetchLowestLevelListing,
   FetchLowestListing,
   FindItem
 } from '@dfragon/server-core/application/auction-prices/ports.js'
@@ -84,6 +85,7 @@ export type WorkerJobDependencies = Omit<ClearCollectionPorts, ClockKey> &
     createFetchRecordTimeline: CreateClearTimeline
     fetchItemDetails: FetchItemDetails
     fetchLowestListing: FetchLowestListing
+    fetchLowestLevelListing: FetchLowestLevelListing
     findItem: FindItem
     score: Omit<ScoreCalculationPorts, ClockKey> & { schedule?: string }
   }
@@ -100,6 +102,7 @@ export function createWorkerJobs(
     fetchSkillStyle,
     fetchItemDetails,
     fetchLowestListing,
+    fetchLowestLevelListing,
     findItem,
     readTargets,
     readTopFame,
@@ -152,6 +155,7 @@ export function createWorkerJobs(
   const auctionPrices = new AuctionPriceService(
     new DatabaseAuctionPriceRepository(client),
     fetchLowestListing,
+    fetchLowestLevelListing,
     findItem
   )
   const scoreService = new ScoreCalculationService(

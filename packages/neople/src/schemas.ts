@@ -209,6 +209,7 @@ export const auctionSchema = z.object({
       itemId: nonblankString,
       itemName: nonblankString,
       itemRarity: nonblankString.optional(),
+      itemTypeDetail: nonblankString.optional(),
       unitPrice: z.int().positive()
     })
   )
