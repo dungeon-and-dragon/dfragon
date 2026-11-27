@@ -35,7 +35,7 @@ CREATE INDEX "lab_candidates_kind_fame_idx" ON "lab_candidates"("kind", "fame" D
 CREATE INDEX "lab_candidates_version_id_idx" ON "lab_candidates"("version_id");
 
 CREATE TABLE "auction_price_history" (
-    "id" BIGSERIAL NOT NULL,
+    "id" BIGINT GENERATED ALWAYS AS IDENTITY,
     "item_name" TEXT NOT NULL,
     "item_id" TEXT,
     "unit_price" BIGINT,
