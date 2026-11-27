@@ -28,6 +28,7 @@ export type ItemDetailCardProps = Readonly<{
   item: ItemDetail
   icon: ReactNode
   card: ItemDetailCardOptions | null
+  buffs?: readonly string[]
 }>
 
 const FAME_STATUS = '모험가 명성'
@@ -85,7 +86,12 @@ function CardOptions({ card }: { card: ItemDetailCardOptions }): React.JSX.Eleme
   )
 }
 
-export function ItemDetailCard({ item, icon, card }: ItemDetailCardProps): React.JSX.Element {
+export function ItemDetailCard({
+  item,
+  icon,
+  card,
+  buffs = []
+}: ItemDetailCardProps): React.JSX.Element {
   const status = item.status.filter(({ name }) => name !== FAME_STATUS)
   const rarity = item.rarity !== null ? RARITY_BY_NAME[item.rarity] : undefined
 
@@ -119,6 +125,13 @@ export function ItemDetailCard({ item, icon, card }: ItemDetailCardProps): React
         </ul>
       )}
       {card !== null && <CardOptions card={card} />}
+      {buffs.length > 0 && (
+        <ul data-buff-lines="" className="item-card-section item-card-status">
+          {buffs.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      )}
       {item.explain !== null && (
         <p className="item-card-section item-card-explain">{item.explain}</p>
       )}
