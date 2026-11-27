@@ -1,3 +1,4 @@
+import type { EnchantGradeRole, EnchantGradeSlot } from '@dfragon/lib/enchant-grades'
 import ky, { type KyInstance, type KyResponse } from 'ky'
 import type { z } from 'zod'
 import {
@@ -9,6 +10,11 @@ import {
   failureSchema,
   type JobList,
   jobListSchema,
+  type LabCandidateKind,
+  type LabCandidateList,
+  type LabCandidatePriceHistory,
+  labCandidateListSchema,
+  labCandidatePriceHistorySchema,
   type LabCurrencyList,
   type LabItemCard,
   type LabItemDetailList,
@@ -54,6 +60,10 @@ export type LabItemDetailDraft = {
   icon?: string | null
 }
 
+export type LabCandidateQuery =
+  | { kind: Exclude<LabCandidateKind, 'ENCHANT'> }
+  | { kind: 'ENCHANT'; category: EnchantGradeSlot; role: EnchantGradeRole }
+
 export type OpsClient = {
   readJobs: () => Promise<JobList>
   readRuns: (before: number | undefined) => Promise<RunPage>
@@ -79,6 +89,9 @@ export type OpsClient = {
   readLabItemDetails: () => Promise<LabItemDetailList>
   saveLabItemDetail: (detail: LabItemDetailDraft) => Promise<void>
   labItemIconUrl: (itemName: string, updatedAt: Date) => string
+  readLabCandidates: (query: LabCandidateQuery) => Promise<LabCandidateList>
+  readLabCandidatePriceHistory: (itemName: string) => Promise<LabCandidatePriceHistory>
+  labCandidateIconUrl: (itemName: string, updatedAt: Date) => string
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -196,6 +209,19 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
       const query = new URLSearchParams({ itemName, v: String(updatedAt.getTime()) })
 
       return new URL(`lab-item-details/icon?${query}`, baseUrl).href
+    },
+    readLabCandidates: async (query) =>
+      readBody(await http.get('lab-candidates', { searchParams: query }), labCandidateListSchema),
+    readLabCandidatePriceHistory: async (itemName) =>
+      readBody(
+        await http.get('lab-candidates/history', { searchParams: { itemName } }),
+        labCandidatePriceHistorySchema
+      ),
+    labCandidateIconUrl: (itemName, updatedAt) => {
+      const version = String(updatedAt.getTime())
+      const query = new URLSearchParams({ itemName, v: version })
+
+      return new URL(`lab-candidates/icon?${query}`, baseUrl).href
     }
   }
 }

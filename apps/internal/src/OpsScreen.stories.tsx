@@ -3,7 +3,8 @@ import { QueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { createOpsClient } from '#ops-api/ops-client'
 import { OpsApp } from './OpsApp'
-import { FakeOpsApi, job, type RunBody, run } from '#ops-testing/fake-ops-api'
+import { FakeOpsApi, job, labCandidate, type RunBody, run } from '#ops-testing/fake-ops-api'
+import type { OpsPageId } from './pages'
 
 const meta = {
   title: 'Screens/운영',
@@ -202,6 +203,147 @@ function filledApi(): FakeOpsApi {
   return api
 }
 
+const TITLE_OPTIONS = [
+  { name: '공격력 증폭', value: '20%' },
+  { name: '모든 속성 강화', value: '10' },
+  { name: '힘', value: '100' },
+  { name: '지능', value: '100' }
+]
+const TITLE_BUFF = ['50레벨 액티브 스킬 Lv +2', '1~95레벨 모든 스킬 Lv +1']
+
+// 후보 이름과 옵션, 가격은 지어낸 값이다.
+function candidatesApi(): FakeOpsApi {
+  const api = new FakeOpsApi()
+  const checkedAt = minutesAgo(12)
+  const previousCheckedAt = minutesAgo(1_440)
+  const previous = (unitPrice: number) => ({
+    itemId: 'synthetic-item',
+    unitPrice,
+    checkedAt: previousCheckedAt
+  })
+  const lastFinishedRun = finishedRun(50, 'succeeded', 12)
+
+  api.workerSeenAt = minutesAgo(1)
+  api.jobs = [job({ name: 'lab-candidate-price-refresh', schedule: '0 * * * *', lastFinishedRun })]
+  api.labCandidates = [
+    labCandidate({
+      itemName: '합성 칭호 플래티넘[80Lv]',
+      fame: 1123,
+      options: TITLE_OPTIONS,
+      buffLines: TITLE_BUFF,
+      unitPrice: 2_150_000_000,
+      previousPrice: previous(2_063_000_000),
+      checkedAt,
+      wearCount: 1284,
+      recommendedTier: '종결'
+    }),
+    labCandidate({
+      itemName: '합성 칭호',
+      fame: 1123,
+      options: TITLE_OPTIONS,
+      buffLines: TITLE_BUFF,
+      unitPrice: 1_240_000_000,
+      previousPrice: previous(1_254_000_000),
+      checkedAt,
+      wearCount: 6902,
+      recommendedTier: '종결'
+    }),
+    labCandidate({
+      itemName: '합성 기사단 칭호',
+      fame: 1123,
+      options: TITLE_OPTIONS,
+      buffLines: TITLE_BUFF,
+      itemId: null,
+      unitPrice: null,
+      checkedAt,
+      recommendedTier: '종결',
+      badge: '검색 없음'
+    }),
+    labCandidate({
+      itemName: '합성 각성 칭호',
+      fame: 849,
+      options: TITLE_OPTIONS.slice(0, 2),
+      buffLines: TITLE_BUFF.slice(0, 1),
+      unitPrice: 218_000_000,
+      previousPrice: previous(216_000_000),
+      checkedAt,
+      wearCount: 3417,
+      recommendedTier: '준종결'
+    }),
+    labCandidate({
+      itemName: '합성 수호자 칭호',
+      fame: 849,
+      options: TITLE_OPTIONS.slice(0, 2),
+      buffLines: TITLE_BUFF.slice(0, 1),
+      unitPrice: null,
+      checkedAt,
+      wearCount: 412,
+      recommendedTier: '준종결',
+      badge: '매물 없음'
+    }),
+    labCandidate({
+      itemName: '합성 길잡이 칭호',
+      fame: 731,
+      options: TITLE_OPTIONS.slice(0, 1),
+      buffLines: ['50레벨 액티브 스킬 Lv +1'],
+      itemId: null,
+      unitPrice: null,
+      checkedAt: null,
+      badge: '미조회'
+    }),
+    labCandidate({
+      itemName: '합성 딜러 상의 카드',
+      kind: 'ENCHANT',
+      itemRarity: '레전더리',
+      categories: ['JACKET', 'PANTS'],
+      roles: ['dealer'],
+      fame: 232,
+      card: {
+        slots: ['상의', '하의'],
+        enchants: [
+          {
+            upgrade: 0,
+            status: [
+              { name: '최종 데미지 증가', value: '3%' },
+              { name: '힘', value: '90' }
+            ]
+          }
+        ]
+      },
+      unitPrice: 4_800_000,
+      checkedAt,
+      recommendedTier: '종결'
+    })
+  ]
+  const history = [1_240, 1_254, 1_254, 1_195, 1_180].map((millions, index) => ({
+    id: 5 - index,
+    itemName: '합성 칭호',
+    itemId: 'synthetic-item',
+    unitPrice: millions * 1_000_000,
+    checkedAt: minutesAgo(12 + index * 900)
+  }))
+  api.labCandidateHistory = { '합성 칭호': history }
+  api.labItems = [
+    {
+      category: 'TITLE',
+      role: 'all',
+      tier: '종결',
+      items: [
+        { itemName: '합성 칭호 플래티넘[80Lv]', cost: null },
+        { itemName: '합성 칭호', cost: null }
+      ]
+    },
+    {
+      category: 'TITLE',
+      role: 'all',
+      tier: '준종결',
+      items: [{ itemName: '합성 각성 칭호', cost: null }]
+    }
+  ]
+
+  return api
+}
+
 function emptyApi(): FakeOpsApi {
   const api = new FakeOpsApi()
   api.workerSeenAt = null
@@ -215,13 +357,19 @@ const failingFetch: typeof fetch = async () =>
     headers: { 'Content-Type': 'application/json' }
   })
 
-function Screen({ fetch }: { fetch: typeof globalThis.fetch }): React.JSX.Element {
+function Screen({
+  fetch,
+  page = 'ops'
+}: {
+  fetch: typeof globalThis.fetch
+  page?: OpsPageId
+}): React.JSX.Element {
   const [client] = useState(() => createOpsClient('http://ops.story/api/', fetch))
   const [queryClient] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: false } } })
   )
 
-  return <OpsApp client={client} queryClient={queryClient} />
+  return <OpsApp client={client} queryClient={queryClient} page={page} />
 }
 
 export const 전체: Story = {
@@ -234,4 +382,16 @@ export const 빈목록: Story = {
 
 export const 받지못함: Story = {
   render: () => <Screen fetch={failingFetch} />
+}
+
+export const 실험실후보: Story = {
+  render: () => <Screen fetch={candidatesApi().fetch} page="lab-candidates" />
+}
+
+export const 실험실후보빈목록: Story = {
+  render: () => <Screen fetch={emptyApi().fetch} page="lab-candidates" />
+}
+
+export const 실험실후보받지못함: Story = {
+  render: () => <Screen fetch={failingFetch} page="lab-candidates" />
 }

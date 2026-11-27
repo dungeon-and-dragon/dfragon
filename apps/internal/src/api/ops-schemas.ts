@@ -1,3 +1,4 @@
+import { LAB_ITEM_CATEGORIES, LAB_ITEM_TIERS } from '@dfragon/lib/lab-items'
 import { z } from 'zod'
 
 const timestamp = z.iso.datetime().transform((value) => new Date(value))
@@ -136,6 +137,38 @@ export const labItemDetailListSchema = z.object({ details: z.array(labItemDetail
 
 export const labCurrencyAdditionSchema = z.object({ id: z.int().positive() })
 
+const statusLineSchema = z.object({ name: z.string(), value: z.string() })
+
+const labCandidateSchema = z.object({
+  itemName: z.string(),
+  kind: z.enum(['TITLE', 'CREATURE', 'AURA', 'ENCHANT']),
+  categories: z.array(z.enum(LAB_ITEM_CATEGORIES)),
+  itemRarity: z.string().nullable(),
+  fame: z.int().nullable(),
+  options: z.array(statusLineSchema),
+  buffLines: z.array(z.string()),
+  card: labItemCardSchema.nullable(),
+  hasIcon: z.boolean(),
+  iconUpdatedAt: timestamp.nullable(),
+  unitPrice: z.number().nullable(),
+  previousPrice: z.object({ unitPrice: z.number().nullable() }).nullable(),
+  wearCount: z.int().nullable(),
+  recommendedTier: z.enum(LAB_ITEM_TIERS).nullable(),
+  badge: z.enum(['미조회', '검색 없음', '매물 없음']).nullable()
+})
+
+export const labCandidateListSchema = z.object({ candidates: z.array(labCandidateSchema) })
+
+const priceHistoryEntrySchema = z.object({
+  id: z.int(),
+  unitPrice: z.number().nullable(),
+  checkedAt: timestamp
+})
+
+export const labCandidatePriceHistorySchema = z.object({
+  history: z.array(priceHistoryEntrySchema)
+})
+
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
 
 export type RunTrigger = z.infer<typeof runTriggerSchema>
@@ -158,3 +191,9 @@ export type LabItemCard = z.infer<typeof labItemCardSchema>
 export type LabItemDetail = z.infer<typeof labItemDetailSchema>
 export type LabItemDetailList = z.infer<typeof labItemDetailListSchema>
 export type LabItemList = z.infer<typeof labItemListSchema>
+export type LabCandidate = z.infer<typeof labCandidateSchema>
+export type LabCandidateKind = LabCandidate['kind']
+export type LabCandidateBadge = NonNullable<LabCandidate['badge']>
+export type LabCandidateList = z.infer<typeof labCandidateListSchema>
+export type PriceHistoryEntry = z.infer<typeof priceHistoryEntrySchema>
+export type LabCandidatePriceHistory = z.infer<typeof labCandidatePriceHistorySchema>

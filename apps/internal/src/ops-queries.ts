@@ -6,7 +6,12 @@ import {
   type UseMutationResult
 } from '@tanstack/react-query'
 import { createContext, use } from 'react'
-import type { LabCurrencyDraft, LabItemDetailDraft, OpsClient } from '#ops-api/ops-client'
+import type {
+  LabCandidateQuery,
+  LabCurrencyDraft,
+  LabItemDetailDraft,
+  OpsClient
+} from '#ops-api/ops-client'
 import type { LabItemGroup } from '#ops-api/ops-schemas'
 
 export const REFRESH_INTERVAL_MS = 1_000
@@ -18,6 +23,7 @@ const BATCH_KEYS_KEY = ['batch-keys'] as const
 const LAB_ITEMS_KEY = ['lab-items'] as const
 const LAB_CURRENCIES_KEY = ['lab-currencies'] as const
 const LAB_ITEM_DETAILS_KEY = ['lab-item-details'] as const
+const LAB_CANDIDATES_KEY = ['lab-candidates'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -221,4 +227,26 @@ export function useSaveLabItemDetail(): UseMutationResult<void, Error, LabItemDe
     mutationFn: (detail: LabItemDetailDraft) => client.saveLabItemDetail(detail),
     onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_ITEM_DETAILS_KEY })
   })
+}
+
+export function useLabCandidates(query: LabCandidateQuery) {
+  const client = useOpsClient()
+
+  return useQuery({
+    queryKey: [...LAB_CANDIDATES_KEY, query],
+    queryFn: () => client.readLabCandidates(query)
+  })
+}
+
+export function useLabCandidatePriceHistory(itemName: string) {
+  const client = useOpsClient()
+
+  return useQuery({
+    queryKey: [...LAB_CANDIDATES_KEY, 'history', itemName],
+    queryFn: () => client.readLabCandidatePriceHistory(itemName)
+  })
+}
+
+export function useLabCandidateIconUrl(): OpsClient['labCandidateIconUrl'] {
+  return useOpsClient().labCandidateIconUrl
 }
