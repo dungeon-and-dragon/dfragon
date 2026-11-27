@@ -63,7 +63,7 @@ export function WeeklyScreen({
         />
       </div>
       <ActivityHeatmap adventureName={adventureName} season={season} />
-      <SeasonClears adventureName={adventureName} season={season} />
+      <SeasonClears key={season} adventureName={adventureName} season={season} />
       <WeeklyClearList adventureName={adventureName} />
     </div>
   )

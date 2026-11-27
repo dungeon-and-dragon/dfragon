@@ -129,7 +129,7 @@ export function storyAdventureActivity(
         raidCount('무너진 성자 미카엘라', '일반', 64, false),
         raidCount('무너진 성자 미카엘라', '싱글/매칭', 41, false),
         raidCount('디레지에 레이드', '하드', 120, true),
-        raidCount('디레지에 레이드', '일반', 292, false),
+        raidCount('디레지에 레이드', '일반', 1292, false),
         raidCount('디레지에 레이드', '매칭', 37, false),
         raidCount('이내 황혼전', null, 186, false),
         raidCount('만들어진 신 나벨', '하드', 9, true),
