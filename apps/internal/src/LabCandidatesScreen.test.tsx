@@ -625,4 +625,183 @@ describe('실험실 후보 페이지', () => {
       )
     )
   })
+
+  it('실험실 아이템 묶음을 읽는 중이거나 다시 읽지 못하면 바꾼 등급이 있어도 추천 적용과 저장을 막는다', async () => {
+    const loading = new FakeOpsApi()
+    loading.labCandidates = [labCandidate({ itemName: '합성 칭호 A', recommendedTier: '종결' })]
+    const neverAnswers: typeof fetch = (input, init) => {
+      const request = new Request(input, init)
+
+      if (new URL(request.url).pathname === '/api/lab-items') {
+        return new Promise<Response>(() => undefined)
+      }
+
+      return loading.fetch(request)
+    }
+    await renderPage(loading, '/lab-candidates', neverAnswers)
+    await waitFor(() => expect(loading.labCandidateQueries).toHaveLength(1))
+    await flush()
+
+    expect(panel().querySelector('[role="status"].state-pending')).not.toBeNull()
+    expect(buttonIn(panel(), '추천 적용').disabled).toBe(true)
+    expect(buttonIn(panel(), '저장').disabled).toBe(true)
+    act(() => root?.unmount())
+    root = undefined
+
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A', recommendedTier: '종결' })]
+    let labItemsFail = false
+    const transport = failing(
+      api,
+      ({ url }) => labItemsFail && new URL(url).pathname === '/api/lab-items'
+    )
+    await openCandidates(api, transport)
+    await choose('합성 칭호 A 등급', '배럭')
+    expect(buttonIn(panel(), '저장').disabled).toBe(false)
+
+    labItemsFail = true
+    await click(container.querySelector<HTMLButtonElement>('button[aria-label="다시 읽기"]')!)
+
+    await waitFor(() =>
+      expect(panel().querySelector('[role="alert"]')?.textContent).toBe(
+        '실험실 아이템을 읽지 못했습니다.'
+      )
+    )
+    expect(buttonIn(panel(), '추천 적용').disabled).toBe(true)
+    expect(buttonIn(panel(), '저장').disabled).toBe(true)
+  })
+
+  it('등급을 옮기는 저장에서 새 묶음 PUT만 실패한 뒤 다시 저장해도 옮긴 아이템의 재화 비용을 그대로 보낸다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A' })]
+    api.labItems = [
+      {
+        ...TITLE,
+        tier: '종결',
+        items: [{ itemName: '합성 칭호 A', cost: { currencyId: 1, count: 3 } }]
+      }
+    ]
+    let failNextSemiFinal = true
+    const transport: typeof fetch = async (input, init) => {
+      const request = new Request(input, init)
+      const body: unknown = request.method === 'PUT' ? await request.clone().json() : undefined
+
+      if (failNextSemiFinal && (body as { tier?: string } | undefined)?.tier === '준종결') {
+        failNextSemiFinal = false
+
+        return new Response(JSON.stringify({ error: { code: 'INTERNAL_SERVER_ERROR' } }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        })
+      }
+
+      return api.fetch(request)
+    }
+    await openCandidates(api, transport)
+
+    await choose('합성 칭호 A 등급', '준종결')
+    await click(buttonIn(panel(), '저장'))
+    await waitFor(() => expect(panel().textContent).toContain('저장하지 못했습니다.'))
+    await waitFor(() => expect(api.labItems).toEqual([]))
+
+    await click(buttonIn(panel(), '저장'))
+
+    await waitFor(() =>
+      expect(api.labItems).toEqual([
+        {
+          ...TITLE,
+          tier: '준종결',
+          items: [{ itemName: '합성 칭호 A', cost: { currencyId: 1, count: 3 } }]
+        }
+      ])
+    )
+  })
+
+  it('저장하는 동안에는 등급 선택과 추천 적용을 막는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A', recommendedTier: '종결' })]
+    let finishPut: () => void = () => undefined
+    const transport: typeof fetch = async (input, init) => {
+      const request = new Request(input, init)
+
+      if (request.method === 'PUT') {
+        await new Promise<void>((resolve) => {
+          finishPut = resolve
+        })
+      }
+
+      return api.fetch(request)
+    }
+    await openCandidates(api, transport)
+
+    await choose('합성 칭호 A 등급', '종결')
+    await click(buttonIn(panel(), '저장'))
+
+    expect(trigger('합성 칭호 A 등급').hasAttribute('data-disabled')).toBe(true)
+    expect(buttonIn(panel(), '추천 적용').disabled).toBe(true)
+
+    await act(async () => finishPut())
+    await waitFor(() =>
+      expect(trigger('합성 칭호 A 등급').hasAttribute('data-disabled')).toBe(false)
+    )
+    expect(tierOf('합성 칭호 A')).toBe('종결')
+    expect(pendingDot('합성 칭호 A')).toBeNull()
+  })
+
+  it('가격 이력은 값이 이어지는 구간마다 가장 오래된 줄만 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A' })]
+    const entry = (id: number, unitPrice: number, checkedAt: string) => ({
+      id,
+      itemName: '합성 칭호 A',
+      itemId: 'synthetic-item',
+      unitPrice,
+      checkedAt
+    })
+    api.labCandidateHistory = {
+      '합성 칭호 A': [
+        entry(4, 100, '2026-11-10T05:00:00.000Z'),
+        entry(3, 120, '2026-11-09T05:00:00.000Z'),
+        entry(2, 100, '2026-11-08T05:00:00.000Z'),
+        entry(1, 100, '2026-11-07T05:00:00.000Z')
+      ]
+    }
+    await openCandidates(api)
+
+    await click(rowOf('합성 칭호 A').querySelector<HTMLButtonElement>('button[aria-expanded]')!)
+    await waitFor(() => expect(panel().querySelector('dl')).not.toBeNull())
+
+    const entries = [...panel().querySelectorAll('dl > div')].map((item) =>
+      [...item.children].map((part) => part.textContent)
+    )
+    expect(entries).toEqual([
+      ['11-07 14:00', '100'],
+      ['11-09 14:00', '120'],
+      ['11-10 14:00', '100']
+    ])
+  })
+
+  it('후보 가격 job의 새 실행이 끝나면 후보를 다시 읽어 바뀐 최저가를 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.jobs = [job({ name: PRICE_JOB, lastFinishedRun: run({ id: 10 }) })]
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A', unitPrice: 1_000 })]
+    const transport: typeof fetch = async (input, init) => {
+      const request = new Request(input, init)
+      const response = await api.fetch(request)
+
+      if (request.method === 'POST') {
+        api.jobs = [job({ name: PRICE_JOB, lastFinishedRun: run({ id: 11 }) })]
+        api.labCandidates = [labCandidate({ itemName: '합성 칭호 A', unitPrice: 2_000 })]
+      }
+
+      return response
+    }
+    await openCandidates(api, transport)
+    expect(cellsOf('합성 칭호 A')[4]).toBe('1,000')
+
+    await click(buttonIn(panel(), '지금 받기'))
+
+    await waitFor(() => expect(cellsOf('합성 칭호 A')[4]).toBe('2,000'))
+    expect(api.labCandidateQueries).toHaveLength(2)
+  })
 })
