@@ -3,8 +3,6 @@ import { z } from 'zod'
 const nullableText = z.string().nullable()
 const occurredAt = z.iso.datetime()
 export const clearKind = z.enum(['raid', 'legion'])
-// cursor를 보내기 전의 API 응답은 이어 받을 기록이 없는 것으로 읽는다.
-const timelineCursor = z.string().nullable().default(null)
 
 export const timelineEnhancementSchema = z.object({
   kind: z.enum(['reinforce', 'amplify', 'refine']),
@@ -27,33 +25,4 @@ export const timelineAcquisitionSchema = z.object({
   occurredAt
 })
 
-export const characterTimelineSchema = z.object({
-  seasonClears: z.array(
-    z.object({
-      kind: clearKind,
-      name: z.string(),
-      hard: z.boolean().default(false),
-      count: z.number().int().positive()
-    })
-  ),
-  enhancements: z.array(timelineEnhancementSchema),
-  enhancementsCursor: timelineCursor,
-  acquisitions: z.array(timelineAcquisitionSchema),
-  acquisitionsCursor: timelineCursor
-})
-
-export const timelineEnhancementPageSchema = z.object({
-  items: z.array(timelineEnhancementSchema),
-  nextCursor: timelineCursor
-})
-
-export const timelineAcquisitionPageSchema = z.object({
-  items: z.array(timelineAcquisitionSchema),
-  nextCursor: timelineCursor
-})
-
-export type CharacterTimeline = z.infer<typeof characterTimelineSchema>
-export type TimelineClearCount = CharacterTimeline['seasonClears'][number]
-export type TimelineEnhancement = CharacterTimeline['enhancements'][number]
-export type TimelineAcquisition = CharacterTimeline['acquisitions'][number]
-export type TimelinePage<Item> = Readonly<{ items: Item[]; nextCursor: string | null }>
+export type TimelineEnhancement = z.infer<typeof timelineEnhancementSchema>

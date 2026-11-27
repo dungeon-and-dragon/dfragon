@@ -8,8 +8,7 @@ import {
   storyBuffSkillWindowCatalog,
   storyCharacterDetail,
   storyHistory,
-  storySkillWindowCatalog,
-  storyTimeline
+  storySkillWindowCatalog
 } from './character.fixture'
 import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { SKILL_STATS_URL } from '#entities/ranking/api/skill-stats.handlers'
@@ -26,9 +25,6 @@ export function characterDetailHandlers(
 
   return [
     http.get(characterUrl(identity), () => HttpResponse.json(detail)),
-    http.get(characterUrl(identity, '/timeline'), () => HttpResponse.json(storyTimeline)),
-    http.get(characterUrl(identity, '/timeline/enhancements'), loadingResponse),
-    http.get(characterUrl(identity, '/timeline/acquisitions'), loadingResponse),
     http.get(characterUrl(identity, '/history'), () => HttpResponse.json(history)),
     http.get(characterUrl(identity, '/history/snapshot'), () => HttpResponse.json(detail)),
     http.get(SKILL_STATS_URL, loadingResponse),

@@ -7,7 +7,6 @@ import type { NeopleStageTimings } from '@dfragon/server-core/application/charac
 import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
-import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/index.js'
 import { CharacterDetailService } from '../src/application/character-detail/service.js'
 import { TimelineSyncRequestService } from '../src/application/character-timeline/sync-requests.js'
 import { emptyAdventureGuildRepository } from '../src/application/adventure-guild/service.js'
@@ -33,24 +32,7 @@ function gate() {
   return { promise, release }
 }
 
-// 쉰 만큼 시계를 넘기는 가짜 시계다. 쉴 때마다 afterPause를 불러 그 사이 worker가 한 일을 흉내 낸다.
-function fakeClock(afterPause: (paused: number[]) => void = () => undefined) {
-  let at = now.getTime()
-  const paused: number[] = []
-
-  return {
-    paused,
-    ports: {
-      now: () => new Date(at),
-      pause: async (milliseconds: number) => {
-        paused.push(milliseconds)
-        at += milliseconds
-        afterPause(paused)
-        await nextTurn()
-      }
-    }
-  }
-}
+const clock = { now: () => now }
 
 const state = (
   characterId: string,
@@ -73,7 +55,7 @@ test('1시간 안에 동기화에 성공한 캐릭터는 정기 동기화를, �
     state('backfilled', { enhancementBackfilledUntil: new Date('2025-01-09T05:59:00+09:00') }),
     state('partial', { enhancementBackfilledUntil: new Date('2024-06-20T05:59:00+09:00') })
   ])
-  const service = new TimelineSyncRequestService(requests.repository, fakeClock().ports)
+  const service = new TimelineSyncRequestService(requests.repository, clock)
   const characters = ['recent', 'stale', 'backfilled', 'partial', 'unseen'].map((characterId) => ({
     serverId: 'siroco',
     characterId
@@ -85,81 +67,24 @@ test('1시간 안에 동기화에 성공한 캐릭터는 정기 동기화를, �
   })
 
   assert.deepEqual(
-    requests.inserted.map(({ kind, characterId, awaited }) => `${kind}:${characterId}:${awaited}`),
+    requests.inserted.map(({ kind, characterId }) => `${kind}:${characterId}`),
     [
-      'enhancement-backfill:recent:false',
-      'sync:stale:false',
-      'enhancement-backfill:stale:false',
-      'sync:backfilled:false',
-      'sync:partial:false',
-      'enhancement-backfill:partial:false',
-      'sync:unseen:false',
-      'enhancement-backfill:unseen:false',
-      'sync:adventure:false'
+      'enhancement-backfill:recent',
+      'sync:stale',
+      'enhancement-backfill:stale',
+      'sync:backfilled',
+      'sync:partial',
+      'enhancement-backfill:partial',
+      'sync:unseen',
+      'enhancement-backfill:unseen',
+      'sync:adventure'
     ]
   )
 })
 
-test('타임라인 조회의 동기화는 기다리는 요청으로 넣고, worker가 행을 지우면 다음 확인에서 돌아간다', async () => {
-  const requests = memoryTimelineRequests()
-  const clock = fakeClock((paused) => {
-    if (paused.length === 2) {
-      requests.remove(syncOf(character.characterId))
-    }
-  })
-  const service = new TimelineSyncRequestService(requests.repository, clock.ports)
-
-  await service.syncAndWait(character)
-
-  assert.deepEqual(requests.inserted, [{ ...syncOf(character.characterId), awaited: true }])
-  assert.deepEqual(clock.paused, [250, 250])
-})
-
-test('행이 남아 있으면 10초까지 기다린 뒤 동기화가 끝나지 않은 채 돌아간다', async () => {
-  const requests = memoryTimelineRequests()
-  const clock = fakeClock()
-  const service = new TimelineSyncRequestService(requests.repository, clock.ports)
-
-  await service.syncAndWait(character)
-
-  assert.equal(
-    clock.paused.reduce((sum, paused) => sum + paused, 0),
-    10_000
-  )
-  assert.deepEqual(requests.keys(), ['sync/siroco/timeline-fixture/0'])
-})
-
-test('1시간 안에 동기화에 성공한 캐릭터의 타임라인 조회는 요청을 넣지 않고 기다리지 않는다', async () => {
-  const lastSucceededAt = new Date(now.getTime() - 30 * MINUTE_MS)
-  const requests = memoryTimelineRequests([state(character.characterId, { lastSucceededAt })])
-  const clock = fakeClock()
-  const service = new TimelineSyncRequestService(requests.repository, clock.ports)
-
-  await service.syncAndWait(character)
-
-  assert.deepEqual(requests.inserted, [])
-  assert.deepEqual(clock.paused, [])
-})
-
-test('닫으면 기다리던 동기화는 다음 확인에서 돌아간다', async () => {
-  const requests = memoryTimelineRequests()
-  let service!: TimelineSyncRequestService
-  const clock = fakeClock((paused) => {
-    if (paused.length === 1) {
-      service.close()
-    }
-  })
-  service = new TimelineSyncRequestService(requests.repository, clock.ports)
-
-  await service.syncAndWait(character)
-
-  assert.deepEqual(clock.paused, [250])
-  assert.deepEqual(requests.keys(), ['sync/siroco/timeline-fixture/0'])
-})
-
 test('옛 시즌 받기 요청을 넣으면 그 시즌만 받는 중이고, 행이 없어지면 받는 중이 아니다', async () => {
   const requests = memoryTimelineRequests()
-  const service = new TimelineSyncRequestService(requests.repository, fakeClock().ports)
+  const service = new TimelineSyncRequestService(requests.repository, clock)
   const range = {
     start: new Date('2023-09-14T06:00:00+09:00'),
     end: new Date('2025-01-09T05:59:00+09:00')
@@ -236,13 +161,11 @@ test('상세 조회는 요청 넣기를 기다리지 않고 응답하고, 그 �
       catalog: new CatalogService(async () => new Map())
     },
     timeline: {
-      read: async () => assert.fail('타임라인을 읽으면 안 된다'),
-      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
       requests: {
         ...requests.repository,
-        request: async (inserted, options) => {
+        request: async (inserted) => {
           await inserting.promise
-          await requests.repository.request(inserted, options)
+          await requests.repository.request(inserted)
         }
       },
       close: async () => undefined
@@ -274,47 +197,6 @@ test('상세 조회는 요청 넣기를 기다리지 않고 응답하고, 그 �
   ])
 })
 
-// 닫기가 10초 상한까지 기다리면 이 테스트의 timeout 안에 끝나지 않는다.
-test('앱을 닫으면 동기화를 기다리던 타임라인 조회가 그때 저장된 값으로 200을 답하고 타임라인 저장소를 닫는다', {
-  timeout: 5_000
-}, async () => {
-  const requests = memoryTimelineRequests()
-  let closed = 0
-  const { app } = await createApiHttpApp({
-    search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
-    details: {
-      fetchDetails: async () => payloads,
-      catalog: new CatalogService(async () => new Map())
-    },
-    timeline: {
-      read: async () => EMPTY_CHARACTER_TIMELINE,
-      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
-      requests: requests.repository,
-      close: async () => {
-        closed++
-      }
-    },
-    todayGrade: { fetchShopGrade: async () => assert.fail('오늘의 등급을 부르면 안 된다') },
-    writeAccessLog: () => undefined
-  })
-  await app.listen(0, '127.0.0.1')
-  const origin = await app.getUrl()
-
-  const timeline = fetch(new URL(`/characters/siroco/${character.characterId}/timeline`, origin))
-
-  while (requests.inserted.length === 0) {
-    await nextTurn()
-  }
-
-  const closing = app.close()
-  const response = await timeline
-  await closing
-
-  assert.equal(response.status, 200)
-  assert.deepEqual(await response.json(), EMPTY_CHARACTER_TIMELINE)
-  assert.equal(closed, 1)
-})
-
 test('모험단 화면은 캐릭터마다 정기 동기화만 넣고 강화 백필은 넣지 않는다', async (t) => {
   const requests = memoryTimelineRequests()
   const characters = ['a', 'b'].map((characterId) => ({ serverId: 'siroco', characterId }))
@@ -332,8 +214,6 @@ test('모험단 화면은 캐릭터마다 정기 동기화만 넣고 강화 백�
       })
     },
     timeline: {
-      read: async () => assert.fail('타임라인을 읽으면 안 된다'),
-      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
       requests: requests.repository,
       close: async () => undefined
     },

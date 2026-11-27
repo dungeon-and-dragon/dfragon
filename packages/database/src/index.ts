@@ -87,7 +87,6 @@ export {
   claimTimelineSyncRequests,
   countTimelineSyncRequests,
   deleteTimelineSyncRequest,
-  hasTimelineSyncRequest,
   readSeasonBackfillRequestSeasons,
   releaseStartedTimelineSyncRequests,
   releaseTimelineSyncRequest,
@@ -351,7 +350,6 @@ export type {
 export {
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
-  readCurrentSeasonStart,
   readEnhancementBackfilledUntil,
   readRecentTimelineEvents,
   readRecentTimelineItems,

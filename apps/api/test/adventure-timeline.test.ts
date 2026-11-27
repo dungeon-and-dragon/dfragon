@@ -306,8 +306,6 @@ async function listen(
       readAdventureSeasonBackfill: unusedRead
     },
     timeline: {
-      read: unused,
-      readPage: unused,
       requests: syncRequestRecorder(sync),
       close: async () => undefined
     },

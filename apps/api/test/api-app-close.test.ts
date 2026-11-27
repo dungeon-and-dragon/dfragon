@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
-import { EMPTY_CHARACTER_TIMELINE } from '@dfragon/server-core/domain/character-timeline/index.js'
 import type { ScoreWorker } from '@dfragon/server-core/infrastructure/score/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 import { memoryTimelineRequests } from './timeline-request-fixtures.js'
@@ -15,8 +14,6 @@ function scoreWorker(terminate: () => Promise<void>): ScoreWorker {
 
 function timelineClosedBy(close: () => Promise<void>): ApiHttpAppOptions['timeline'] {
   return {
-    read: async () => EMPTY_CHARACTER_TIMELINE,
-    readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
     requests: memoryTimelineRequests().repository,
     close
   }

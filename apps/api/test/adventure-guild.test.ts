@@ -62,8 +62,6 @@ async function listen(
     todayGrade: { fetchShopGrade: unused },
     adventureGuild,
     timeline: syncTimeline && {
-      read: unused,
-      readPage: unused,
       requests: syncRequestRecorder(syncTimeline),
       close: async () => undefined
     },

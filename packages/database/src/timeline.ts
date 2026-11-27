@@ -363,19 +363,6 @@ export async function recordTimelineSyncFailure(
   })
 }
 
-export async function readCurrentSeasonStart(
-  client: DatabaseClient,
-  now: Date
-): Promise<Date | undefined> {
-  const season = await client.season.findFirst({
-    where: { startsAt: { lte: now } },
-    orderBy: { startsAt: 'desc' },
-    select: { startsAt: true }
-  })
-
-  return season?.startsAt
-}
-
 export function readSeasons(client: DatabaseClient): Promise<StoredSeason[]> {
   return client.season.findMany({
     orderBy: { startsAt: 'asc' },

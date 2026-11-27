@@ -1,4 +1,3 @@
-import { setTimeout } from 'node:timers/promises'
 import type { TimelineCharacter } from '@dfragon/database'
 import type { NeopleStageTimings } from '@dfragon/server-core/application/character-detail/index.js'
 import type { ReportCode } from '@dfragon/http-server'
@@ -31,16 +30,10 @@ import {
   emptyCharacterSearchRepository
 } from '#application/character-search/index.js'
 import {
-  CharacterTimelineService,
   type RequestTimelineSync,
-  TimelineSyncRequestService,
-  emptyCharacterTimelineRepository,
-  noTimelineSync
+  TimelineSyncRequestService
 } from '#application/character-timeline/index.js'
-import type {
-  CharacterTimelineRepository,
-  TimelineSyncRequestRepository
-} from '#application/character-timeline/repository.js'
+import type { TimelineSyncRequestRepository } from '#application/character-timeline/repository.js'
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearStatsService, emptyClearStatsRepository } from '#application/content-clears/index.js'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
@@ -69,9 +62,7 @@ import {
 } from '@dfragon/server-core/infrastructure/score/index.js'
 
 export interface TimelineSyncOptions {
-  readonly read: CharacterTimelineRepository['readTimeline']
-  readonly readPage: CharacterTimelineRepository['readPage']
-  // 동기화는 캐릭터 목록 worker가 하고, API는 요청 테이블에 넣고 행이 없어지기를 기다린다(ADR 0091).
+  // 동기화는 캐릭터 목록 worker가 하고, API는 요청 테이블에 넣는다(ADR 0091).
   readonly requests: TimelineSyncRequestRepository
   readonly close: () => Promise<void>
 }
@@ -117,8 +108,7 @@ const noLowestListing: FetchLowestListing = async () => {
 
 function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCode) {
   const requests = new TimelineSyncRequestService(timeline.requests, {
-    now: () => new Date(),
-    pause: setTimeout
+    now: () => new Date()
   })
 
   const requestInBackground = (
@@ -130,13 +120,7 @@ function createTimelineSync(timeline: TimelineSyncOptions, reportCode: ReportCod
     })
   }
 
-  const repository: CharacterTimelineRepository = {
-    readTimeline: timeline.read,
-    readPage: timeline.readPage
-  }
-  const service = new CharacterTimelineService(repository, requests)
-
-  return { requests, requestInBackground, service }
+  return { requests, requestInBackground }
 }
 
 type TimelineSync = ReturnType<typeof createTimelineSync>
@@ -260,9 +244,6 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   const characterImage = new CharacterImageService(
     options.fetchCharacterImage ?? createNeopleCharacterImage()
   )
-  const timelineService =
-    timelineSync?.service ??
-    new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
   const adventureGuild = createAdventureGuild(options.adventureGuild, timelineSync)
   const rankingStats = new RankingStatsService(options.rankingStats ?? emptyRankingStatsRepository)
   const clearStats = new ClearStatsService(options.clearStats ?? emptyClearStatsRepository, () =>
@@ -277,7 +258,6 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       equipmentSimulation,
       characterHistory,
       characterImage,
-      timeline: timelineService,
       adventureGuild,
       rankingStats,
       clearStats,
@@ -297,8 +277,6 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
         () => details.close(),
         () => todayGrade.close(),
         () => clearStats.close(),
-        // server는 열린 요청이 끝나야 닫히므로, 동기화를 기다리던 타임라인 조회가 저장된 값으로 바로 답하게 한다.
-        () => timelineSync?.requests.close(),
         closeServer,
         // worker를 멈추면 기다리던 계산이 점수 없이 끝나므로, 상세 조회가 진행 중인 요청을 취소한 뒤에 멈춘다.
         () => engine.close(),

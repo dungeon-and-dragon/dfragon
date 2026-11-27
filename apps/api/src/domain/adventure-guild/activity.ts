@@ -117,6 +117,8 @@ export type NameCount = {
 }
 
 export type RaidCount = NameCount & {
+  raid: string
+  stage: string | null
   hard: number
   normal: number
 }
@@ -381,18 +383,18 @@ function countName(counts: Map<string, NameCount>, name: string): void {
   counts.set(name, counted)
 }
 
-function toRaidCountName(clear: TimelineClear): string {
-  const label = toRaidStageLabel(clear)
-  if (label === null) {
-    return clear.name
+function toRaidCountName(raid: string, stage: string | null): string {
+  if (stage === null) {
+    return raid
   }
 
-  return `${clear.name} (${label})`
+  return `${raid} (${stage})`
 }
 
 function countRaid(counts: Map<string, RaidCount>, clear: TimelineClear): void {
-  const name = toRaidCountName(clear)
-  const raid = counts.get(name) ?? { name, count: 0, hard: 0, normal: 0 }
+  const stage = toRaidStageLabel(clear)
+  const name = toRaidCountName(clear.name, stage)
+  const raid = counts.get(name) ?? { name, raid: clear.name, stage, count: 0, hard: 0, normal: 0 }
   raid.count++
   if (clear.hard) {
     raid.hard++

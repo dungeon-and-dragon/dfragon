@@ -73,8 +73,6 @@ export const 버프강화: Story = tabStory('buff', 'buffer')
 
 export const 스탯: Story = tabStory('status')
 
-export const 타임라인: Story = tabStory('timeline')
-
 export const 이력: Story = tabStory('history')
 
 export const 이력하나: Story = tabStory('history', 'dealer', storySingleHistory)
