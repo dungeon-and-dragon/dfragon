@@ -19,6 +19,7 @@ import {
   type CharacterDetailDependencies,
   CharacterDetailService
 } from '#application/character-detail/index.js'
+import { EpicSoulRecoveryService } from '#application/epic-soul-recovery/index.js'
 import { EquipmentSimulationService } from '#application/equipment-simulation/index.js'
 import type { FetchCharacterImage } from '#application/character-image/ports.js'
 import { CharacterImageService } from '#application/character-image/index.js'
@@ -234,6 +235,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     engine.calculate,
     async (signal) => (await labItems.enchantOptions(signal)).slots
   )
+  const epicSoulRecovery = new EpicSoulRecoveryService(equipmentSimulation)
   const characterHistory = new CharacterHistoryService(
     options.characterHistory ?? emptyCharacterHistoryRepository,
     options.details.catalog
@@ -256,6 +258,7 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
       search,
       details,
       equipmentSimulation,
+      epicSoulRecovery,
       characterHistory,
       characterImage,
       adventureGuild,
