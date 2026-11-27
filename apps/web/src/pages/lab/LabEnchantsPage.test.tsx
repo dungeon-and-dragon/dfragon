@@ -112,6 +112,7 @@ it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이�
     '종류',
     '등급',
     '아이템',
+    '명성',
     '최저가'
   ])
   const weapon = enchantTable().querySelector('tbody th')!
@@ -134,10 +135,10 @@ it('재화로 교환하는 아이템의 가격 칸은 경매장 가격 대신 �
 it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, 크리쳐, 오라 표는 그대로다', async () => {
   await renderLoaded()
   const accessoryRows = [
-    ['칭호', '종결', '프로스트의 전설', '95,000,000'],
-    ['진정한 각성을 이룬 자', '120,000,000'],
-    ['크리쳐', '종결', '운명을 담는 재단사', '54,000,000'],
-    ['오라', '종결', '초월한 폭풍의 기세', '-']
+    ['칭호', '종결', '프로스트의 전설', '980', '95,000,000'],
+    ['진정한 각성을 이룬 자', '910', '120,000,000'],
+    ['크리쳐', '종결', '운명을 담는 재단사', '830', '54,000,000'],
+    ['오라', '종결', '초월한 폭풍의 기세', '720', '-']
   ]
   expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
 
@@ -458,6 +459,49 @@ it('itemId가 없고 운영 화면에서 넣은 상세가 있는 아이템은 �
   expect(emphasized).toEqual(['모든 속성 강화'])
   expect(box.textContent).toContain('합성 설명\n둘째 줄')
   expect(requestedItemIds).toEqual([])
+})
+
+it('itemId가 있어도 실험실 상세를 tooltip에 먼저 표시하고 올린 아이콘이 없으면 Neople 아이콘을 쓴다', async () => {
+  server.use(
+    itemDetailHandlers.detail,
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'TITLE',
+            role: 'all',
+            tier: '종결',
+            items: [
+              {
+                itemName: '합성 후보 칭호',
+                itemId: 'synthetic-title',
+                itemRarity: '유니크',
+                iconPath: null,
+                description: '합성 후보 설명',
+                fame: 980,
+                tooltip: { typeDetail: '칭호', availableLevel: 100, fame: 980, card: null },
+                unitPrice: 100,
+                checkedAt: null,
+                cost: null
+              }
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  await hover(nameOf(accessoryTable(), '합성 후보 칭호').parentElement!)
+
+  const tooltip = document.querySelector('.tooltip-item')
+
+  expect(tooltip?.textContent).toContain('합성 후보 설명')
+  expect(tooltip?.textContent).toContain('모험가 명성 980')
+  expect(tooltip?.querySelector('img')?.getAttribute('src')).toBe(
+    'https://img-api.neople.co.kr/df/items/synthetic-title'
+  )
 })
 
 it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 부여 부위와 공격력처럼 묶은 옵션마다 단계별 값을 모은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
