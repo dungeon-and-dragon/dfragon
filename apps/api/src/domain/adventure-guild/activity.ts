@@ -1,4 +1,9 @@
-import type { ItemDictionaryEntry, StoredSeason, TimelineRange } from '@dfragon/database'
+import type {
+  ContentFirstClear,
+  ItemDictionaryEntry,
+  StoredSeason,
+  TimelineRange
+} from '@dfragon/database'
 import { addHours } from 'date-fns'
 import { z } from 'zod'
 import {
@@ -129,9 +134,13 @@ export type EnhancementTarget = {
   successes: number
 }
 
+type Released = {
+  releasedAt: Date | null
+}
+
 export type ActivitySummary = {
-  raids: RaidCount[]
-  legions: NameCount[]
+  raids: (RaidCount & Released)[]
+  legions: (NameCount & Released)[]
   items: Record<ItemRarity, number>
   oaths: Record<SplitRarity, number>
   enhancement: {
@@ -177,6 +186,11 @@ export type ActivityItem = {
   itemRarity: string | null
   data: unknown
   enhancements: TimelineEnhancement[]
+}
+
+export type ContentReleases = {
+  raids: ReadonlyMap<string, Date>
+  legions: ReadonlyMap<string, Date>
 }
 
 export type ActivityItemDictionary = ReadonlyMap<string, ItemDictionaryEntry>
@@ -446,9 +460,24 @@ function isHighEnhancement({ kind, after }: TimelineEnhancement): boolean {
   return kind === 'reinforce' && after >= HIGH_REINFORCE_TARGET
 }
 
+export function toContentReleases(firstClears: readonly ContentFirstClear[]): ContentReleases {
+  const releasesOf = (kind: string) =>
+    new Map(
+      firstClears
+        .filter((firstClear) => firstClear.kind === kind)
+        .map(({ name, firstClearedAt }) => [name, firstClearedAt])
+    )
+
+  const raids = releasesOf('raid')
+  const legions = releasesOf('legion')
+
+  return { raids, legions }
+}
+
 export function toSeasonActivity(
   season: ActivitySeasonRange,
-  records: ActivityRecords
+  records: ActivityRecords,
+  releases: ContentReleases
 ): SeasonActivity {
   const inSeason = (record: { occurredAt: Date }) => occursIn(season, record)
   const summary = emptySummary()
@@ -529,8 +558,16 @@ export function toSeasonActivity(
     }
   }
 
-  summary.raids = toNameCounts(raids, RAID_RELEASE_ORDER)
-  summary.legions = toNameCounts(legions, LEGION_RELEASE_ORDER)
+  summary.raids = toNameCounts(raids, RAID_RELEASE_ORDER).map((raid) => {
+    const releasedAt = releases.raids.get(raid.raid) ?? null
+
+    return { ...raid, releasedAt }
+  })
+  summary.legions = toNameCounts(legions, LEGION_RELEASE_ORDER).map((legion) => {
+    const releasedAt = releases.legions.get(legion.name) ?? null
+
+    return { ...legion, releasedAt }
+  })
   enhancement.amplify = toTargets(amplify)
   enhancement.reinforce = toTargets(reinforce)
 

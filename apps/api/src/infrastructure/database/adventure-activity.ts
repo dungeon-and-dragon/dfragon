@@ -1,5 +1,6 @@
 import {
   type CharacterTimelineItemRow,
+  type ContentFirstClear,
   type DatabaseClient,
   type ItemDictionaryEntry,
   type TimelineCharacter,
@@ -8,6 +9,7 @@ import {
   readAdventureCharacters,
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
+  readContentFirstClears,
   readItemDictionary,
   readSeasonBackfillStates,
   readSeasons
@@ -27,6 +29,7 @@ import {
   findActivitySeason,
   toActivityDayDetail,
   toActivitySeasons,
+  toContentReleases,
   toSeasonActivity,
   toSeasonBackfillRanges,
   toSeasonDays,
@@ -65,9 +68,10 @@ function parseActivityRecords(records: ActivityRecords): ParsedActivityRecords {
 
 export function parseSeasonActivity(
   season: ActivitySeasonRange,
-  records: ActivityRecords
+  records: ActivityRecords,
+  firstClears: readonly ContentFirstClear[]
 ): SeasonActivity {
-  return toSeasonActivity(season, parseActivityRecords(records))
+  return toSeasonActivity(season, parseActivityRecords(records), toContentReleases(firstClears))
 }
 
 export function parseActivityDayDetail(
@@ -110,14 +114,12 @@ async function readSeasonActivity(
   characters: readonly TimelineCharacter[],
   season: ActivitySeasonRange
 ): Promise<SeasonActivity> {
-  const records = await readActivityRecords(
-    client,
-    characters,
-    season.startsAt,
-    season.endsAt ?? undefined
-  )
+  const [records, firstClears] = await Promise.all([
+    readActivityRecords(client, characters, season.startsAt, season.endsAt ?? undefined),
+    readContentFirstClears(client)
+  ])
 
-  return parseSeasonActivity(season, records)
+  return parseSeasonActivity(season, records, firstClears)
 }
 
 async function readSeasonBackfills(
