@@ -24,6 +24,7 @@ import { Route as ClearsContentRouteImport } from './routes/clears.$content'
 import { Route as GuildsGuildIdRouteImport } from './routes/guilds.$guildId'
 import { Route as LabIndexRouteImport } from './routes/lab.index'
 import { Route as LabEnchantsRouteImport } from './routes/lab.enchants'
+import { Route as LabEpicSoulsRouteImport } from './routes/lab.epic-souls'
 import { Route as LabMultisearchRouteImport } from './routes/lab.multisearch'
 import { Route as StatsIndexRouteImport } from './routes/stats.index'
 import { Route as StatsCombosRouteImport } from './routes/stats.combos'
@@ -111,6 +112,11 @@ const LabEnchantsRoute = LabEnchantsRouteImport.update({
   path: '/lab/enchants',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LabEpicSoulsRoute = LabEpicSoulsRouteImport.update({
+  id: '/lab/epic-souls',
+  path: '/lab/epic-souls',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LabMultisearchRoute = LabMultisearchRouteImport.update({
   id: '/lab/multisearch',
   path: '/lab/multisearch',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/lab/enchants': typeof LabEnchantsRoute
+  '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/lab/enchants': typeof LabEnchantsRoute
+  '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/clears/$content': typeof ClearsContentRoute
   '/guilds/$guildId': typeof GuildsGuildIdRoute
   '/lab/enchants': typeof LabEnchantsRoute
+  '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
   '/stats/sets': typeof StatsSetsRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/clears/$content'
     | '/guilds/$guildId'
     | '/lab/enchants'
+    | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
     | '/stats/sets'
@@ -299,6 +309,7 @@ export interface FileRouteTypes {
     | '/clears/$content'
     | '/guilds/$guildId'
     | '/lab/enchants'
+    | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
     | '/stats/sets'
@@ -327,6 +338,7 @@ export interface FileRouteTypes {
     | '/clears/$content'
     | '/guilds/$guildId'
     | '/lab/enchants'
+    | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
     | '/stats/sets'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   ClearsContentRoute: typeof ClearsContentRoute
   GuildsGuildIdRoute: typeof GuildsGuildIdRoute
   LabEnchantsRoute: typeof LabEnchantsRoute
+  LabEpicSoulsRoute: typeof LabEpicSoulsRoute
   LabMultisearchRoute: typeof LabMultisearchRoute
   StatsCombosRoute: typeof StatsCombosRoute
   StatsSetsRoute: typeof StatsSetsRoute
@@ -479,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LabEnchantsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lab/epic-souls': {
+      id: '/lab/epic-souls'
+      path: '/lab/epic-souls'
+      fullPath: '/lab/epic-souls'
+      preLoaderRoute: typeof LabEpicSoulsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lab/multisearch': {
       id: '/lab/multisearch'
       path: '/lab/multisearch'
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClearsContentRoute: ClearsContentRoute,
   GuildsGuildIdRoute: GuildsGuildIdRoute,
   LabEnchantsRoute: LabEnchantsRoute,
+  LabEpicSoulsRoute: LabEpicSoulsRoute,
   LabMultisearchRoute: LabMultisearchRoute,
   StatsCombosRoute: StatsCombosRoute,
   StatsSetsRoute: StatsSetsRoute,

@@ -2,7 +2,8 @@ import { Link } from '@tanstack/react-router'
 
 const LAB_TABS = [
   { to: '/lab/enchants', label: '마법부여' },
-  { to: '/lab/multisearch', label: '멀티서치' }
+  { to: '/lab/multisearch', label: '멀티서치' },
+  { to: '/lab/epic-souls', label: '숨은 에소찾기' }
 ] as const
 
 export function LabTabs(): React.JSX.Element {

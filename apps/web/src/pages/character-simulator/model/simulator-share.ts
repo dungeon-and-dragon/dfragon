@@ -1,5 +1,6 @@
 import type { BuffSwitching } from '@dfragon/lib/buff-switching'
 import { z } from 'zod'
+import { fromBase64Url, toBase64Url } from '#shared/lib/base64url'
 import { BEST_AVATAR_PRESET } from './simulator-avatar'
 import {
   draftOf,
@@ -48,8 +49,6 @@ const searchSchema = z.object({
   changes: z.string().optional().catch(undefined)
 })
 
-const BASE64_PADDING = /=+$/
-
 type SavedChanges = z.infer<typeof savedChangesSchema>
 type SavedSlotDraft = z.infer<typeof slotDraftSchema>
 type SavedUpgrade = NonNullable<SavedChanges['oath']['upgrade']>
@@ -69,19 +68,6 @@ export function parseSimulatorSearch(search: Record<string, unknown>): Simulator
   const { changes } = searchSchema.parse(search)
 
   return { changes }
-}
-
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text)
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')
-
-  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(BASE64_PADDING, '')
-}
-
-function fromBase64Url(value: string): string {
-  const binary = atob(value.replaceAll('-', '+').replaceAll('_', '/'))
-
-  return new TextDecoder().decode(Uint8Array.from(binary, (char) => char.charCodeAt(0)))
 }
 
 export function encodeChanges(changes: SimulatorChanges): string | undefined {

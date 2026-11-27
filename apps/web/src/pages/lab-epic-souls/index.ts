@@ -1,0 +1,1 @@
+export { LabEpicSoulsPage } from './LabEpicSoulsPage'

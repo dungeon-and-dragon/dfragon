@@ -15,7 +15,7 @@ import {
 import { ChoiceField } from '#shared/ui/ChoiceField'
 import { LoadingLine } from '#shared/ui/LoadingLine'
 import { RelativeTime } from '#shared/ui/RelativeTime'
-import { AdventureTabsForm } from './AdventureNameForm'
+import { AdventureTabsForm } from './AdventureTabsForm'
 import { AdventureTabs } from './AdventureTabs'
 import { type AdventureTimelinePages, useAdventureTimeline } from './api/useAdventureTimeline'
 import { adventureTabsHeight } from './sticky-head'
