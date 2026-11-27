@@ -33,7 +33,10 @@ const unusedLabCandidateStore: LabCandidateRepository = {
   deleteOtherVersions: unusedLabItemDetails,
   readCandidates: unusedLabItemDetails,
   readIcon: unusedLabItemDetails,
-  readPriceHistory: unusedLabItemDetails
+  readPriceHistory: unusedLabItemDetails,
+  exclude: unusedLabItemDetails,
+  include: unusedLabItemDetails,
+  readExclusions: unusedLabItemDetails
 }
 
 // 묶음 교체, 재화 이름 중복, 아이콘 저장은 DB 함수 테스트가 실제 DB로 확인한다. 이 fake는 경로가 넘긴 값만 남긴다.
