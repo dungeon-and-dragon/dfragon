@@ -14,7 +14,7 @@ const SAVES_LOWEST_EXACT_LISTING =
 const EXCHANGED_SKIPS_AUCTION =
   '재화로 교환하는 아이템은 경매장을 부르지 않고 아이템 검색에서 이름이 같은 아이템의 itemId, 등급만 저장하며, 검색에도 없으면 모두 비운다'
 const SAVES_LOWEST_LEVEL_LISTING =
-  '칭호, 크리쳐, 오라는 이름이 정확히 같은 매물이 있으면 그 매물을, 없을 때만 앞부분 검색에서 아이템 종류가 같은 `이름[숫자Lv]` 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 다른 꼬리표와 다른 종류는 받지 않는다'
+  '이름이 정확히 같은 매물이 있으면 그 매물을 저장하고, 칭호, 크리쳐, 오라는 그 매물이 없을 때만 앞부분 검색에서 아이템 종류가 같은 `이름[숫자Lv]` 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 다른 꼬리표와 다른 종류는 받지 않는다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -24,7 +24,7 @@ const names = {
   comma: '허망한 맹신, 호스디그 카드',
   unlisted: '광포의 마흐나발 카드'
 }
-// 레벨 꼬리표가 붙어야만 경매장에 오르는 칭호, 오라를 흉내 낸 지어낸 이름이다.
+// 레벨 꼬리표가 붙어야만 경매장에 오르는 칭호, 크리쳐, 오라와 정확한 이름으로 오르는 칭호를 흉내 낸 지어낸 이름이다.
 const leveledTitle = '합성 칭호 플래티넘'
 const leveledAura = '합성 오라'
 const leveledCreature = '합성 크리쳐'
@@ -220,6 +220,7 @@ test(SAVES_LOWEST_LEVEL_LISTING, async () => {
     itemTypeDetail,
     unitPrice
   })
+
   const frontRows: Record<string, unknown[]> = {
     [leveledTitle]: [
       listing('a', `${leveledTitle}[45Lv]`, '칭호', 30_000),
@@ -241,6 +242,7 @@ test(SAVES_LOWEST_LEVEL_LISTING, async () => {
       listing('5', `${leveledAura}[90Lv]`, '오라', 8_000)
     ]
   }
+
   const { neople, requested, frontRequested, searched } = auctionNeople((itemName, wordType) => {
     if (wordType === 'front') {
       return jsonResponse({ rows: frontRows[itemName] ?? [] })
@@ -252,6 +254,7 @@ test(SAVES_LOWEST_LEVEL_LISTING, async () => {
 
     return jsonResponse({ rows: [] })
   })
+
   const { saved, repository } = memoryPrices()
 
   await priceService(neople, repository).refresh([
