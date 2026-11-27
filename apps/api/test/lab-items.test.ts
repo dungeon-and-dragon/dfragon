@@ -132,6 +132,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: '레전더리',
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: 900,
             checkedAt: CHECKED_AT,
             cost: null
@@ -142,6 +143,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: '레전더리',
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: 10_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -152,6 +154,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: '레전더리',
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: 3_000_000_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -162,6 +165,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: null,
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -172,6 +176,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: null,
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: null
@@ -189,6 +194,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             itemRarity: null,
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -257,6 +263,7 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
             itemRarity: '유니크',
             iconPath: null,
             description: null,
+            tooltip: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: {
@@ -302,14 +309,15 @@ test('재화 아이콘은 저장한 형식으로 오래 캐시하게 내고, 없
 test('소유자가 넣은 등급, 설명, 아이콘은 Neople 등급보다 먼저 쓰고, 넣지 않은 값은 Neople 값을 쓴다', async (t) => {
   const iconUpdatedAt = new Date('2026-11-27T03:04:05.006Z')
   const itemName = '합성 상자 (보주, 선택)'
+  const noTooltip = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
   const response = await requestLabItems(t, [
     {
       ...row('TITLE', 'all', '종결', itemName, null, false),
-      detail: { description: '합성 설명', itemRarity: '태초', iconUpdatedAt }
+      detail: { description: '합성 설명', itemRarity: '태초', iconUpdatedAt, ...noTooltip }
     },
     {
       ...row('TITLE', 'all', '종결', '합성 칭호', 900),
-      detail: { description: null, itemRarity: null, iconUpdatedAt: null }
+      detail: { description: null, itemRarity: null, iconUpdatedAt: null, ...noTooltip }
     }
   ])
 
@@ -344,6 +352,68 @@ test('소유자가 넣은 등급, 설명, 아이콘은 Neople 등급보다 먼�
   assert.equal(iconUrl.pathname, '/lab/item-icon')
   assert.equal(iconUrl.searchParams.get('itemName'), itemName)
   assert.equal(iconUrl.searchParams.get('v'), String(iconUpdatedAt.getTime()))
+})
+
+test('소유자가 넣은 tooltip 값은 아이템 상세와 같은 이름과 카드 모양으로 내고, 상세가 없는 아이템은 null로 낸다', async (t) => {
+  const stages = [
+    { upgrade: 0, status: [{ name: '힘', value: '90' }] },
+    { upgrade: 1, status: [{ name: '힘', value: '100' }] }
+  ]
+  const response = await requestLabItems(t, [
+    {
+      ...row('TITLE', 'all', '종결', '합성 상자', null, false),
+      detail: {
+        description: null,
+        itemRarity: null,
+        iconUpdatedAt: null,
+        itemTypeDetail: '합성 재료',
+        availableLevel: 115,
+        fame: 232,
+        card: { slots: ['상의'], enchants: stages }
+      }
+    },
+    {
+      ...row('TITLE', 'all', '종결', '합성 칭호', null, false),
+      detail: {
+        description: '합성 설명',
+        itemRarity: null,
+        iconUpdatedAt: null,
+        itemTypeDetail: null,
+        availableLevel: null,
+        fame: null,
+        card: null
+      }
+    },
+    row('TITLE', 'all', '종결', '합성 카드', null, false)
+  ])
+
+  const { groups } = (await response.json()) as {
+    groups: { items: { itemName: string; tooltip: unknown }[] }[]
+  }
+  const tooltips = groups[0]?.items.map(({ itemName, tooltip }) => ({ itemName, tooltip }))
+
+  assert.deepEqual(tooltips, [
+    {
+      itemName: '합성 상자',
+      tooltip: {
+        typeDetail: '합성 재료',
+        availableLevel: 115,
+        fame: 232,
+        card: {
+          slots: ['상의'],
+          enchants: [
+            { upgrade: 0, status: [{ name: '힘', value: '90' }], reinforceSkill: [] },
+            { upgrade: 1, status: [{ name: '힘', value: '100' }], reinforceSkill: [] }
+          ]
+        }
+      }
+    },
+    {
+      itemName: '합성 칭호',
+      tooltip: { typeDetail: null, availableLevel: null, fame: null, card: null }
+    },
+    { itemName: '합성 카드', tooltip: null }
+  ])
 })
 
 test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없는 이름과 빠진 이름은 404로 답한다', async (t) => {
