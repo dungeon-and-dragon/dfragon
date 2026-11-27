@@ -14,6 +14,7 @@
       "@dfragon/lib/avatar-presets": ["../../packages/lib/src/avatar-presets.ts"],
       "@dfragon/lib/buff-switching": ["../../packages/lib/src/buff-switching.ts"],
       "@dfragon/lib/enchant-grades": ["../../packages/lib/src/enchant-grades.ts"],
+      "@dfragon/lib/enchant-options": ["../../packages/lib/src/enchant-options.ts"],
       "@dfragon/lib/equipment-variants": ["../../packages/lib/src/equipment-variants.ts"],
       "@dfragon/lib/lab-items": ["../../packages/lib/src/lab-items.ts"],
       "@dfragon/lib/slot-items": ["../../packages/lib/src/slot-items.ts"],

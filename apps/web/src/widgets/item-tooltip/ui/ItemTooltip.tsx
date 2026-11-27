@@ -1,14 +1,9 @@
+import { cardOptionRows, type EnchantRole } from '@dfragon/lib/enchant-options'
 import { Tooltip } from '@dfragon/ui'
 import { Fragment, type ReactElement, type ReactNode } from 'react'
 import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
-import { cardOptionRows } from '#widgets/item-tooltip/model/card-options'
 import type { ItemCard, ItemTooltipDetail } from '#widgets/item-tooltip/model/item-detail'
-import {
-  type EnchantRole,
-  ItemIcon,
-  raritySolidOfName,
-  rarityTextOfName
-} from '#entities/character'
+import { ItemIcon, raritySolidOfName, rarityTextOfName } from '#entities/character'
 
 const FAME_STATUS = '모험가 명성'
 const FAILED = '아이템 정보를 받지 못했습니다.'
