@@ -4,8 +4,11 @@ import test from 'node:test'
 import {
   addLabCurrency,
   createDatabaseClient,
+  excludeLabCandidate,
+  includeLabCandidate,
   deleteLabCandidatesOtherVersions,
   readLabCandidateIcon,
+  readLabCandidateExclusions,
   readLabCandidatePriceTargets,
   readLabCandidates,
   readLabCurrencies,
@@ -36,7 +39,8 @@ const MIGRATIONS = [
   '20261127200000_add_lab_item_details',
   '20261128100000_add_lab_item_tooltip_fields',
   '20261128200000_add_lab_candidates_auction_price_history',
-  '20261128210000_add_lab_candidate_wear_counts'
+  '20261128210000_add_lab_candidate_wear_counts',
+  '20261128230000_add_lab_candidate_exclusions'
 ]
 
 const noTooltip = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
@@ -83,7 +87,7 @@ async function connectWithEmptyTables(t) {
 
   t.after(() => client.$disconnect())
   await client.$executeRawUnsafe(
-    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details", "lab_candidates", "auction_price_history", "lab_candidate_wear_counts"'
+    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details", "lab_candidates", "auction_price_history", "lab_candidate_wear_counts", "lab_candidate_exclusions"'
   )
 
   for (const name of MIGRATIONS) {
@@ -611,6 +615,113 @@ test('후보 가격 대상은 고른 이름을 빼고, 고른 아이템의 가�
     ]
   )
   assert.ok(rows.every(({ detail }) => detail === null))
+})
+
+test('제외하면 후보 줄을 지우고 목록에 남기며, 같은 이름을 다시 batch로 보내면 저장하지 않고 건너뛴 이름을 알린다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [candidate('합성 제외 후보'), candidate('합성 남는 후보')]
+  })
+
+  assert.deepEqual(await excludeLabCandidate(client, '합성 제외 후보'), { status: 'excluded' })
+  assert.deepEqual(await excludeLabCandidate(client, '합성 후보 없는 이름'), {
+    status: 'excluded'
+  })
+
+  const result = await upsertLabCandidates(client, {
+    versionId: 'second',
+    importedAt,
+    items: [candidate('합성 제외 후보'), candidate('합성 남는 후보')]
+  })
+  const candidates = await readLabCandidates(client, { kind: 'TITLE' })
+  const exclusions = await readLabCandidateExclusions(client)
+
+  assert.deepEqual(result, { saved: 1, skipped: ['합성 제외 후보'] })
+  assert.deepEqual(
+    candidates.map(({ itemName, versionId }) => [itemName, versionId]),
+    [['합성 남는 후보', 'second']]
+  )
+  assert.deepEqual(exclusions.map(({ itemName }) => itemName).sort(), [
+    '합성 제외 후보',
+    '합성 후보 없는 이름'
+  ])
+  assert.deepEqual(await readLabCandidatePriceTargets(client), [
+    { itemName: '합성 남는 후보', exchanged: false, categories: ['TITLE'] }
+  ])
+  assert.deepEqual(await saveLabCandidateIcon(client, '합성 제외 후보', pngIcon), {
+    status: 'notFound'
+  })
+})
+
+test('제외 목록은 최근에 제외한 이름부터 내고, 다시 제외해도 처음 제외한 시각을 지킨다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await excludeLabCandidate(client, '합성 먼저 제외')
+  const [{ excludedAt: first }] = await readLabCandidateExclusions(client)
+  await new Promise((resolve) => setTimeout(resolve, 5))
+  await excludeLabCandidate(client, '합성 하나 제외')
+  await excludeLabCandidate(client, '합성 먼저 제외')
+
+  const exclusions = await readLabCandidateExclusions(client)
+
+  assert.deepEqual(
+    exclusions.map(({ itemName }) => itemName),
+    ['합성 하나 제외', '합성 먼저 제외']
+  )
+  assert.deepEqual(exclusions[1].excludedAt, first)
+})
+
+test('실험실 아이템 묶음에 든 이름은 제외하지 않고 후보 줄과 제외 목록을 그대로 둔다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [candidate('합성 고른 후보')]
+  })
+  await replaceLabItemGroup(client, { ...titleFinal, items: [unpriced('합성 고른 후보')] })
+
+  assert.deepEqual(await excludeLabCandidate(client, '합성 고른 후보'), { status: 'labItem' })
+  assert.deepEqual(
+    (await readLabCandidates(client, { kind: 'TITLE' })).map(({ itemName }) => itemName),
+    ['합성 고른 후보']
+  )
+  assert.deepEqual(await readLabCandidateExclusions(client), [])
+})
+
+test('해제하면 제외 목록에서 빠지고 후보 줄은 다음 batch에서 다시 저장된다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [candidate('합성 해제 후보')]
+  })
+  await excludeLabCandidate(client, '합성 해제 후보')
+
+  await includeLabCandidate(client, '합성 해제 후보')
+
+  assert.deepEqual(await readLabCandidateExclusions(client), [])
+  assert.deepEqual(await readLabCandidates(client, { kind: 'TITLE' }), [])
+
+  const result = await upsertLabCandidates(client, {
+    versionId: 'second',
+    importedAt,
+    items: [candidate('합성 해제 후보')]
+  })
+
+  assert.deepEqual(result, { saved: 1, skipped: [] })
+  assert.deepEqual(
+    (await readLabCandidates(client, { kind: 'TITLE' })).map(({ itemName }) => itemName),
+    ['합성 해제 후보']
+  )
 })
 
 test('후보 CHECK는 일반 종류의 목록과 아이콘 쌍을 지키고 잘못된 묶음은 모두 rollback한다', {
