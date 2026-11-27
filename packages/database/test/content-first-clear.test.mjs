@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import { readdir, readFile } from 'node:fs/promises'
 import test from 'node:test'
-import { createDatabaseClient } from '../dist/index.js'
+import {
+  createDatabaseClient,
+  readContentFirstClears,
+  replaceSeasonBackfillRange,
+  replaceTimelineRange
+} from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_CONTENT_FIRST_CLEAR_PORT
 const newMigration = '20261128220000_add_content_first_clears'
@@ -137,4 +142,78 @@ test('종류는 레이드와 레기온만 받고 같은 종류, 이름은 한 �
   assert.equal(await insert('legion', '합성 레이드'), 1)
   await assert.rejects(insert('raid', '합성 레이드'), /content_first_clears_pkey/)
   await assert.rejects(insert('challenge', '합성 도전'), /content_first_clears_kind_check/)
+})
+
+test('타임라인 구간을 저장하면 처음 보는 이름은 그 기록 시각으로 넣고, 더 이른 기록만 시각을 앞당긴다', {
+  skip: port === undefined
+}, async (t) => {
+  const database = 'content_first_clear_record'
+
+  await recreateDatabase(database)
+
+  const client = connect(database)
+  t.after(() => client.$disconnect())
+  await runMigrationsBefore(client, newMigration)
+  await runMigration(client, newMigration)
+
+  const clear = (code, time, raidName, data = {}) => {
+    const occurredAt = at(time)
+
+    return { code, occurredAt, name: '합성 기록', raidName, data }
+  }
+
+  const firstClears = async () =>
+    (await readContentFirstClears(client))
+      .map(({ kind, name, firstClearedAt }) => `${kind}|${name}|${firstClearedAt.toISOString()}`)
+      .toSorted()
+
+  const rangeStart = at('2026-11-19T00:00:00')
+  const rangeEnd = at('2026-11-23T00:00:00')
+  const range = { start: rangeStart, end: rangeEnd }
+
+  await replaceTimelineRange(
+    client,
+    { serverId: 'cain', characterId: 'record-a' },
+    range,
+    [
+      clear(201, '2026-11-20T10:00:00', '합성 새 레이드'),
+      clear(209, '2026-11-20T11:00:00', null, { regionName: '합성 새 레기온' })
+    ],
+    []
+  )
+  assert.deepEqual(await firstClears(), [
+    `legion|합성 새 레기온|${at('2026-11-20T11:00:00').toISOString()}`,
+    `raid|합성 새 레이드|${at('2026-11-20T10:00:00').toISOString()}`
+  ])
+
+  await replaceTimelineRange(
+    client,
+    { serverId: 'cain', characterId: 'record-b' },
+    range,
+    [
+      clear(201, '2026-11-21T10:00:00', '합성 새 레이드'),
+      clear(209, '2026-11-19T11:00:00', null, { regionName: '합성 새 레기온' })
+    ],
+    []
+  )
+  assert.deepEqual(await firstClears(), [
+    `legion|합성 새 레기온|${at('2026-11-19T11:00:00').toISOString()}`,
+    `raid|합성 새 레이드|${at('2026-11-20T10:00:00').toISOString()}`
+  ])
+
+  const oldSeasonStart = at('2026-03-26T06:00:00')
+  const oldSeasonEnd = at('2026-06-24T06:00:00')
+  const oldSeason = { start: oldSeasonStart, end: oldSeasonEnd }
+  await replaceSeasonBackfillRange(
+    client,
+    { serverId: 'cain', characterId: 'record-b' },
+    11,
+    oldSeason,
+    [clear(210, '2026-03-27T10:00:00', '합성 새 레이드')],
+    []
+  )
+  assert.deepEqual(await firstClears(), [
+    `legion|합성 새 레기온|${at('2026-11-19T11:00:00').toISOString()}`,
+    `raid|합성 새 레이드|${at('2026-03-27T10:00:00').toISOString()}`
+  ])
 })
