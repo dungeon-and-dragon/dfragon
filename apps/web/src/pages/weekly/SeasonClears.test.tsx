@@ -137,7 +137,7 @@ it('레이드 단계를 한 줄에 모으고, 단계가 없는 횟수는 클리�
   expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
 })
 
-it('깨어난 숲의 극과 일반은 다른 레기온처럼 이름마다 한 줄이고, 모두 지난 시즌 컨텐츠면 빈 상태 문구 없이 펼치기 버튼만 둔다', async () => {
+it('깨어난 숲의 극과 일반은 한 줄에 모여 극이 하드 칸의 붉은 배지이고, 모두 지난 시즌 컨텐츠면 빈 상태 문구 없이 펼치기 버튼만 둔다', async () => {
   await renderClears(
     activityWith({
       raids: [],
@@ -153,10 +153,11 @@ it('깨어난 숲의 극과 일반은 다른 레기온처럼 이름마다 한 �
 
   await togglePast()
 
-  expect(rows()).toEqual([
-    ['레기온', '깨어난 숲(극)', '클리어', '5'],
-    ['레기온', '깨어난 숲(일반)', '클리어', '3']
+  expect(rows()).toEqual([['레기온', '깨어난 숲', '극', '5', '일반', '3']])
+  expect([...container.querySelectorAll('li .badge')].map((badge) => badge.textContent)).toEqual([
+    '극'
   ])
+  expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
 })
 
 it('레이드 이름과 단계를 보내지 않는 API의 레이드와 출시일을 모르는 이름은 숨기지 않고 이름마다 한 줄로 보인다', async () => {
