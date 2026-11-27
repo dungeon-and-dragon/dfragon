@@ -10,7 +10,8 @@ import {
   type EnchantRole,
   enchantRowsOf,
   hasLabItems,
-  lastCheckedAtOf
+  lastCheckedAtOf,
+  platinumRowsOf
 } from './lab-tables'
 
 const ROLE_CHOICES = [
@@ -19,6 +20,7 @@ const ROLE_CHOICES = [
 ] as const
 
 const ACCESSORY_TITLE = '칭호, 크리쳐, 오라'
+const PLATINUM_TITLE = '플래티넘'
 
 export function LabEnchantsPage(): React.JSX.Element {
   const [role, setRole] = useState<EnchantRole>('dealer')
@@ -73,6 +75,7 @@ function LabEnchantsBody({
 
       const enchantRows = enchantRowsOf(groups, role)
       const accessoryRows = accessoryRowsOf(groups)
+      const platinumRows = platinumRowsOf(groups)
       const lastCheckedAt = lastCheckedAtOf(groups)
 
       return (
@@ -91,6 +94,12 @@ function LabEnchantsBody({
             <section aria-label={ACCESSORY_TITLE}>
               <h2 className="section-title">{ACCESSORY_TITLE}</h2>
               <LabItemTable categoryLabel="종류" itemLabel="아이템" rows={accessoryRows} withFame />
+            </section>
+          )}
+          {platinumRows.length > 0 && (
+            <section aria-label={PLATINUM_TITLE}>
+              <h2 className="section-title">{PLATINUM_TITLE}</h2>
+              <LabItemTable categoryLabel="종류" itemLabel="아이템" rows={platinumRows} withFame />
             </section>
           )}
           {lastCheckedAt !== null && (

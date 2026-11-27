@@ -45,6 +45,27 @@ export function accessoryRowsOf(groups: readonly LabItemGroup[]): LabCategoryRow
   return categoryRowsOf(groups.filter((group) => !isEnchantCategory(group.category)))
 }
 
+// 플래티넘 표의 이름과 tooltip은 일반 표와 같은 기본 이름 줄의 값이고, 가격만 플래티넘 변형의 최저가다.
+function platinumItemOf({ platinum, ...item }: LabItem): LabItem[] {
+  if (platinum === null) {
+    return []
+  }
+
+  const { unitPrice, checkedAt } = platinum
+
+  return [{ ...item, unitPrice, checkedAt, cost: null, platinum: null }]
+}
+
+export function platinumRowsOf(groups: readonly LabItemGroup[]): LabCategoryRows[] {
+  const platinumGroups = groups.map((group) => {
+    const items = group.items.flatMap(platinumItemOf)
+
+    return { ...group, items }
+  })
+
+  return categoryRowsOf(platinumGroups)
+}
+
 export function hasLabItems(groups: readonly LabItemGroup[]): boolean {
   return groups.some((group) => group.items.length > 0)
 }
@@ -53,9 +74,11 @@ export function lastCheckedAtOf(groups: readonly LabItemGroup[]): string | null 
   let last: string | null = null
 
   for (const group of groups) {
-    for (const { checkedAt } of group.items) {
-      if (checkedAt !== null && (last === null || Date.parse(checkedAt) > Date.parse(last))) {
-        last = checkedAt
+    for (const { checkedAt, platinum } of group.items) {
+      for (const at of [checkedAt, platinum?.checkedAt ?? null]) {
+        if (at !== null && (last === null || Date.parse(at) > Date.parse(last))) {
+          last = at
+        }
       }
     }
   }
