@@ -447,13 +447,13 @@ it('itemId가 없고 운영 화면에서 넣은 상세가 있는 아이템은 �
     expect(box.textContent).toContain(text)
   }
   expect(box.querySelector('[data-card-slots]')?.textContent).toBe('무기, 보조장비')
-  expect(lines).toEqual(['모든 속성 강화 13 | 15', '힘 90 | -'])
+  expect(lines).toEqual(['모든 속성 강화 13 | 15', '올스탯 90 | -'])
   expect(emphasized).toEqual(['모든 속성 강화'])
   expect(box.textContent).toContain('합성 설명\n둘째 줄')
   expect(requestedItemIds).toEqual([])
 })
 
-it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 부여 부위와 옵션마다 단계별 값을 묶은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
+it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 부여 부위와 공격력처럼 묶은 옵션마다 단계별 값을 모은 줄을 모험가 명성까지 보이고, 카드가 아니면 보이지 않는다', async () => {
   server.use(itemDetailHandlers.detail)
   await renderLoaded()
   const card = nameOf(enchantTable(), '멸절의 폭룡왕 바칼 카드').parentElement!
@@ -473,9 +473,7 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 �
 
   expect(lines).toEqual([
     '모든 속성 강화 13 | 14 | 15',
-    '물리 공격력 20 | 25 | 30',
-    '마법 공격력 20 | 25 | 30',
-    '독립 공격력 20 | 25 | 30',
+    '공격력 20 | 25 | 30',
     '모험가 명성 196 | 196 | 210'
   ])
   expect(emphasized).toEqual(['모든 속성 강화'])
@@ -561,7 +559,7 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
 
   await act(async () => roleChip('버퍼').click())
 
-  expect(await emphasizedCells()).toEqual(['힘', '100'])
+  expect(await emphasizedCells()).toEqual(['올스탯', '100'])
 })
 
 it('등급표에 없는 벨트 버퍼 준종결 묶음도 DB에 아이템이 있으면 버퍼 표에 보인다', async () => {
