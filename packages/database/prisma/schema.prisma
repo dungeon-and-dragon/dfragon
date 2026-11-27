@@ -587,3 +587,10 @@ model LabCandidateWearCount {
   @@id([itemName, slotId])
   @@map("lab_candidate_wear_counts")
 }
+
+model LabCandidateExclusion {
+  itemName   String   @id @map("item_name")
+  excludedAt DateTime @map("excluded_at") @db.Timestamptz(3)
+
+  @@map("lab_candidate_exclusions")
+}
