@@ -355,7 +355,6 @@ export type {
 export {
   readCharactersTimelineEvents,
   readCharactersTimelineItems,
-  readCurrentSeasonStart,
   readEnhancementBackfilledUntil,
   readRecentTimelineEvents,
   readRecentTimelineItems,

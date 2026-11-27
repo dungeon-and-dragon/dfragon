@@ -5,10 +5,10 @@ import {
   type TimelineItemCursor,
   type TimelineItemRow,
   type RecentTimelineItemQuery,
-  readCurrentSeasonStart,
   readRecentTimelineItems,
   readTimelineEvents
 } from '@dfragon/database'
+import { TIMELINE_COLLECTION_START } from '@dfragon/server-core/application/character-timeline/index.js'
 import { z } from 'zod'
 import {
   ACQUISITION_CODES,
@@ -72,8 +72,7 @@ export function parseCharacterTimelineRows(
     enhancements: readonly TimelineItemRow[]
     acquisitions: readonly TimelineItemRow[]
   },
-  weekStart: Date,
-  seasonStart: Date
+  weekStart: Date
 ): CharacterTimeline {
   const timeline = toCharacterTimeline(
     {
@@ -82,7 +81,7 @@ export function parseCharacterTimelineRows(
       acquisitions: records.acquisitions
     },
     weekStart,
-    seasonStart
+    TIMELINE_COLLECTION_START
   )
   const seasonClears = sortClearCountsByRelease(timeline.seasonClears)
 
@@ -108,18 +107,13 @@ export async function readCharacterTimeline(
   now: Date
 ): Promise<CharacterTimeline> {
   const weekStart = startOfResetWeek(now)
-  const seasonStart = await readCurrentSeasonStart(client, now)
-  if (seasonStart === undefined) {
-    throw new Error('No season has started')
-  }
-  const since = new Date(Math.min(weekStart.getTime(), seasonStart.getTime()))
   const [clears, enhancements, acquisitions] = await Promise.all([
-    readTimelineEvents(client, character, CLEAR_CODES, since),
+    readTimelineEvents(client, character, CLEAR_CODES, TIMELINE_COLLECTION_START),
     readPageRows(client, character, 'enhancements'),
     readPageRows(client, character, 'acquisitions')
   ])
 
-  return parseCharacterTimelineRows({ clears, enhancements, acquisitions }, weekStart, seasonStart)
+  return parseCharacterTimelineRows({ clears, enhancements, acquisitions }, weekStart)
 }
 
 export async function readTimelinePage(
