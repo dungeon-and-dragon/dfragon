@@ -429,6 +429,101 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
   assert.equal(await readCharacterHistorySnapshot(client, key, nov10At215959), null)
 })
 
+const strippedEquipment = { equipment: [] }
+const upgradedEquipment = { equipment: [{ slotId: 'WEAPON', itemId: 'item-a', reinforce: 13 }] }
+const scoreOf = (score, scoreEngine = engine) => ({
+  kind: 'equipment',
+  score,
+  engine: scoreEngine,
+  approximate: null
+})
+
+test('명성이 직전 기록보다 낮은 결과는 기본 정보, 섹션, 점수를 저장하지 않고 last_seen_at만 옮긴다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-fame-lowered')
+  await recordCharacterHistory(client, historyOf(key, nov16At2200))
+  const stripped = {
+    basic: { ...basic, fame: 13100, guildId: 'guild-a', guildName: '합성길드' },
+    sections: { ...sections, equipment: strippedEquipment },
+    score: scoreOf(0)
+  }
+
+  await recordCharacterHistory(client, historyOf(key, nov17At0900, stripped))
+
+  assert.deepEqual(await countRows(key), { basic: 1, section: 10, score: 1 })
+  const { basics } = await readCharacterHistory(client, key)
+  assert.deepEqual(
+    basics.map(({ observedAt, lastSeenAt, fame }) => ({ observedAt, lastSeenAt, fame })),
+    [{ observedAt: nov16At2200, lastSeenAt: nov17At0900, fame: basic.fame }]
+  )
+
+  await recordCharacterHistory(
+    client,
+    historyOf(key, nov17At1000, {
+      basic: { ...basic, fame: 99000 },
+      sections: { ...sections, equipment: upgradedEquipment },
+      score: scoreOf(1800)
+    })
+  )
+
+  const raised = await readCharacterHistory(client, key)
+  assert.deepEqual(
+    raised.basics.map(({ fame }) => fame),
+    [basic.fame, 99000]
+  )
+  assert.deepEqual(
+    raised.scores.map(({ score }) => score),
+    [1741, 1800]
+  )
+  assert.deepEqual(await sectionCounts(key), { ...oneEach, equipment: 2 })
+})
+
+test('명성이 같아도 같은 종류, 엔진 버전, 근사 방식의 직전 점수보다 낮은 결과는 저장하지 않고, 같은 시각을 점수 없이 다시 저장해도 그대로다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-score-lowered')
+  await recordCharacterHistory(client, historyOf(key, nov16At2200))
+  const weaker = { sections: { ...sections, equipment: strippedEquipment }, score: scoreOf(1500) }
+
+  await recordCharacterHistory(client, historyOf(key, nov17At0900, weaker))
+  await recordCharacterHistory(client, historyOf(key, nov17At0900, { ...weaker, score: null }))
+
+  assert.deepEqual(await countRows(key), { basic: 1, section: 10, score: 1 })
+})
+
+test('엔진 버전이나 근사 방식이 직전 점수와 다르면 낮은 점수도 저장한다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-score-incomparable')
+  const nextEngine = { ...engine, bundleId: 'phase33-rev15a' }
+  const approximate = {
+    source: 'slot_contributions',
+    warning: '일부 장비를 뺀 근사값입니다.',
+    skipped: { kind: 'input_incomplete', message: '입력이 부족합니다.' }
+  }
+
+  await recordCharacterHistory(client, historyOf(key, nov16At2200))
+  await recordCharacterHistory(
+    client,
+    historyOf(key, nov17At0900, { score: scoreOf(1500, nextEngine) })
+  )
+  await recordCharacterHistory(
+    client,
+    historyOf(key, nov17At1000, { score: { ...scoreOf(1200, nextEngine), approximate } })
+  )
+
+  const { scores } = await readCharacterHistory(client, key)
+  assert.deepEqual(
+    scores.map(({ observedAt, score }) => ({ observedAt, score })),
+    [
+      { observedAt: nov16At2200, score: 1741 },
+      { observedAt: nov17At0900, score: 1500 },
+      { observedAt: nov17At1000, score: 1200 }
+    ]
+  )
+})
+
 test('characters에 없는 캐릭터는 FK 오류로 실패하고, 캐릭터를 지우면 이력도 지워진다', {
   skip: port === undefined
 }, async () => {
