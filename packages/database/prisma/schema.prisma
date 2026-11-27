@@ -568,3 +568,13 @@ model AuctionPriceHistory {
   @@index([itemName, checkedAt(sort: Desc)])
   @@map("auction_price_history")
 }
+
+model LabCandidateWearCount {
+  itemName   String   @map("item_name")
+  slotId     String   @map("slot_id")
+  count      Int
+  computedAt DateTime @map("computed_at") @db.Timestamptz(3)
+
+  @@id([itemName, slotId])
+  @@map("lab_candidate_wear_counts")
+}
