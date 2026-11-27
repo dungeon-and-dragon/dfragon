@@ -3,6 +3,7 @@ export {
   findActivitySeason,
   toActivityDayDetail,
   toActivitySeasons,
+  toContentReleases,
   toSeasonActivity,
   toSeasonBackfillRanges,
   toSeasonDays,

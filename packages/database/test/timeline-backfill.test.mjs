@@ -44,23 +44,28 @@ async function runMigration(client, name) {
   }
 }
 
-async function runMigrationsBefore(client, until) {
-  const names = (await readdir(migrationsDirectory, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && entry.name < until)
+async function migrationNames() {
+  return (await readdir(migrationsDirectory, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
     .map(({ name }) => name)
     .toSorted()
+}
 
-  for (const name of names) {
+async function runMigrationsBefore(client, until) {
+  for (const name of (await migrationNames()).filter((name) => name < until)) {
     await runMigration(client, name)
   }
 }
 
+// 옛 시즌 받기가 처음 본 클리어 시각 테이블도 갱신해 마지막 migration까지 적용한다.
 async function migratedDatabase(t, database) {
   await recreateDatabase(database)
   const client = connect(database)
   t.after(() => client.$disconnect())
-  await runMigrationsBefore(client, restartMigration)
-  await runMigration(client, restartMigration)
+
+  for (const name of await migrationNames()) {
+    await runMigration(client, name)
+  }
 
   return client
 }

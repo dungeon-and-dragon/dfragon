@@ -1,4 +1,5 @@
 import type { DatabaseClient } from './client.js'
+import { recordContentFirstClears } from './content-first-clear.js'
 import type { Prisma } from './generated/prisma/client.js'
 
 export type TimelineEventInput = {
@@ -164,6 +165,7 @@ async function replaceRangeRows(
   await transaction.timelineItem.createMany({
     data: items.map((item) => toItemData(character, item))
   })
+  await recordContentFirstClears(transaction, character, range)
 }
 
 export async function replaceTimelineRange(
