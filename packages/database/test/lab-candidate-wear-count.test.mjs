@@ -4,10 +4,12 @@ import {
   applyMigrations,
   createDatabaseClient,
   readItemAdoption,
+  readLabCandidates,
   recordCharacterBasic,
   recordCharacterSets,
   replaceItemAdoption,
-  replaceLabCandidateWearCounts
+  replaceLabCandidateWearCounts,
+  upsertLabCandidates
 } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_LAB_WEAR_COUNT_PORT
@@ -100,6 +102,25 @@ async function readWearCounts() {
     ORDER BY "slot_id", "item_name"`
 }
 
+function candidate(itemName, kind, changes = {}) {
+  return {
+    itemName,
+    kind,
+    categories: [kind],
+    roles: ['all'],
+    itemRarity: '레어',
+    itemTypeDetail: null,
+    availableLevel: null,
+    fame: 100,
+    card: null,
+    options: [],
+    buffLines: [],
+    description: null,
+    sourceItemId: `synthetic-${itemName}`,
+    ...changes
+  }
+}
+
 test('착용 수 교체는 칭호, 오라, 크리쳐만 이름과 부위별로 세고, 다시 돌리면 지금 착용만 남긴다', {
   skip: port === undefined
 }, async () => {
@@ -169,4 +190,61 @@ test('유일 장비 집계는 칭호, 오라, 크리쳐 줄이 더해져도 결�
   assert.deepEqual(withWorn, withoutWorn)
   assert.ok(withWorn.slots.some(({ slotId }) => slotId === 'RING'))
   assert.ok(withWorn.slots.every(({ slotId }) => !['TITLE', 'AURORA', 'CREATURE'].includes(slotId)))
+})
+
+test('후보 조회는 집계 전에는 착용 수가 비고, 집계 뒤에는 종류의 부위로 센 수와 집계 시각을 내며 마법부여는 비운다', {
+  skip: port === undefined
+}, async () => {
+  await client.$executeRaw`DELETE FROM "lab_candidate_wear_counts"`
+  await upsertLabCandidates(client, {
+    versionId: 'synthetic-version',
+    importedAt: fetchedAt,
+    items: [
+      candidate('합성 후보 칭호', 'TITLE', { fame: 300 }),
+      candidate('합성 후보 오라', 'AURA', { fame: 200 }),
+      candidate('합성 후보 크리쳐', 'CREATURE', { fame: 150 }),
+      candidate('합성 후보 안 낀 칭호', 'TITLE', { fame: 120 }),
+      candidate('합성 후보 카드', 'ENCHANT', {
+        categories: ['WEAPON'],
+        roles: ['dealer'],
+        fame: 110
+      })
+    ]
+  })
+  const wearOf = async () =>
+    (await readLabCandidates(client)).map(({ itemName, wearCount, wearCountedAt }) => [
+      itemName,
+      wearCount,
+      wearCountedAt
+    ])
+
+  assert.deepEqual(await wearOf(), [
+    ['합성 후보 칭호', null, null],
+    ['합성 후보 오라', null, null],
+    ['합성 후보 크리쳐', null, null],
+    ['합성 후보 안 낀 칭호', null, null],
+    ['합성 후보 카드', null, null]
+  ])
+
+  // 같은 이름이 다른 부위에 있어도 후보 종류의 부위 수만 쓴다.
+  await recordWearer('candidate-a', [
+    item('TITLE', '합성 후보 칭호', '칭호'),
+    item('AURORA', '합성 후보 오라'),
+    item('CREATURE', '합성 후보 크리쳐')
+  ])
+  await recordWearer('candidate-b', [
+    item('TITLE', '합성 후보 칭호', '칭호'),
+    item('CREATURE', '합성 후보 칭호')
+  ])
+  await recordWearer('candidate-c', [item('WEAPON', '합성 후보 카드', '도')])
+  const computedAt = new Date('2026-11-30T00:30:00Z')
+  await replaceLabCandidateWearCounts(client, computedAt)
+
+  assert.deepEqual(await wearOf(), [
+    ['합성 후보 칭호', 2, computedAt],
+    ['합성 후보 오라', 1, computedAt],
+    ['합성 후보 크리쳐', 1, computedAt],
+    ['합성 후보 안 낀 칭호', 0, computedAt],
+    ['합성 후보 카드', null, null]
+  ])
 })
