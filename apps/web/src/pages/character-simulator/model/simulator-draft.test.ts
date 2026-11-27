@@ -225,14 +225,17 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
   ).toEqual({ ...UNCHANGED_ITEM, ...WORN_WEAPON, reinforce: 22, amplified: false })
 })
 
-it('마법부여 선택지는 응답의 종결, 준종결, 배럭 순서이고 선택지마다 첫 카드를 둔다', () => {
+it('마법부여 선택지는 응답의 종결, 준종결, 배럭 순서이고 첫 카드와 그 뒤 첫 재화 카드를 둔다', () => {
   const pants = slotOf(dealerSlots, 'PANTS')
 
   expect(pants.enchantChoicesStatus).toBe('success')
-  expect(pants.enchantChoices.map(({ tier, card }) => [tier, card.itemName])).toEqual([
+  expect(
+    pants.enchantChoices.map(({ tier, cards }) => [tier, ...cards.map(({ itemName }) => itemName)])
+  ).toEqual([
     ['종결', '합성 하의 카드'],
     ['준종결', '합성 준종결 하의 카드'],
-    ['배럭', '합성 하의 보주']
+    ['배럭', '합성 배럭 하의 카드', '합성 하의 보주'],
+    ['배럭', '합성 교환 하의 보주']
   ])
 })
 

@@ -421,15 +421,20 @@ export function EnchantControl({
                 chosen={chosen}
                 onChoose={changeEnchant}
               >
-                <EnchantCardIcon card={choice.card} />
+                <EnchantCardIcon card={choice.cards[0]!} />
                 <span className="flex min-w-0 grow flex-col gap-1 text-xs">
                   <span>
                     <EnchantText options={choice.options} />
                   </span>
-                  <span className="flex items-center justify-between gap-3 text-2xs text-fg-muted">
-                    <span className="truncate">{choice.card.itemName}</span>
-                    <EnchantCardPrice card={choice.card} />
-                  </span>
+                  {choice.cards.map((card) => (
+                    <span
+                      key={card.itemName}
+                      className="flex items-center justify-between gap-3 text-2xs text-fg-muted"
+                    >
+                      <span className="truncate">{card.itemName}</span>
+                      <EnchantCardPrice card={card} />
+                    </span>
+                  ))}
                 </span>
               </ChoiceChip>
             ))}
