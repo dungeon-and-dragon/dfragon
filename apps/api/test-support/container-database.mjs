@@ -727,6 +727,31 @@ try {
   await psql("DELETE FROM lab_candidates WHERE item_name LIKE '합성 검증 %'")
   await psql("DELETE FROM auction_price_history WHERE item_name LIKE '합성 검증 %'")
 
+  stage = 'lab candidate wear counts'
+  const insertWearCount = (name, slotId, count) =>
+    psql(
+      `INSERT INTO lab_candidate_wear_counts (item_name, slot_id, count, computed_at) VALUES ('${name}', '${slotId}', ${count}, now())`
+    )
+  await insertWearCount('합성 검증 칭호', 'TITLE', 3)
+  await insertWearCount('합성 검증 칭호', 'CREATURE', 1)
+  await insertWearCount('합성 검증 오라', 'AURORA', 2)
+  assert.equal(
+    (
+      await psql(
+        "SELECT string_agg(item_name || ':' || slot_id || ':' || count, ',' ORDER BY item_name, slot_id) FROM lab_candidate_wear_counts WHERE item_name LIKE '합성 검증 %'"
+      )
+    ).stdout.trim(),
+    '합성 검증 오라:AURORA:2,합성 검증 칭호:CREATURE:1,합성 검증 칭호:TITLE:3'
+  )
+  for (const [name, slotId, count] of [
+    ['합성 검증 칭호', 'TITLE', 5],
+    ['합성 검증 무기', 'WEAPON', 1],
+    ['합성 검증 거부', 'TITLE', 0]
+  ]) {
+    await assert.rejects(insertWearCount(name, slotId, count))
+  }
+  await psql("DELETE FROM lab_candidate_wear_counts WHERE item_name LIKE '합성 검증 %'")
+
   stage = 'timeline tables'
   assert.equal(
     (
