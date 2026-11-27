@@ -20,6 +20,10 @@
       "types": "./dist/equipment-variants.d.ts",
       "import": "./dist/equipment-variants.js"
     },
+    "./epic-soul-recovery": {
+      "types": "./dist/epic-soul-recovery.d.ts",
+      "import": "./dist/epic-soul-recovery.js"
+    },
     "./error-chain": {
       "types": "./dist/error-chain.d.ts",
       "import": "./dist/error-chain.js"
