@@ -98,9 +98,21 @@ export type LabItemPriceRow = {
   checkedAt: Date | null
   cost: LabItemPriceCost | null
   detail: LabItemPriceDetail | null
+  candidate: LabItemPriceDetail | null
 }
 
-type StoredLabItemPriceRow = Omit<LabItemPriceRow, 'unitPrice' | 'cost' | 'detail'> & {
+type StoredLabItemPriceRow = Omit<
+  LabItemPriceRow,
+  'unitPrice' | 'cost' | 'detail' | 'candidate'
+> & {
+  hasCandidate: boolean
+  candidateDescription: string | null
+  candidateRarity: string | null
+  candidateIconUpdatedAt: Date | null
+  candidateItemTypeDetail: string | null
+  candidateAvailableLevel: number | null
+  candidateFame: number | null
+  candidateCard: LabItemCard | null
   hasDetail: boolean
   detailDescription: string | null
   detailRarity: string | null
@@ -169,6 +181,22 @@ function toPriceDetail({
   }
 }
 
+function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceDetail | null {
+  if (!row.hasCandidate) {
+    return null
+  }
+
+  return {
+    description: row.candidateDescription,
+    itemRarity: row.candidateRarity,
+    iconUpdatedAt: row.candidateIconUpdatedAt,
+    itemTypeDetail: row.candidateItemTypeDetail,
+    availableLevel: row.candidateAvailableLevel,
+    fame: row.candidateFame,
+    card: row.candidateCard
+  }
+}
+
 // 가격은 foreign key 없이 아이템 이름으로만 잇고, 재화는 currency_id로 잇는다.
 export async function readLabItemPrices(client: DatabaseClient): Promise<LabItemPriceRow[]> {
   const rows = await client.$queryRaw<StoredLabItemPriceRow[]>`
@@ -182,11 +210,18 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       d."item_rarity" AS "detailRarity",
       CASE WHEN d."icon" IS NULL THEN NULL ELSE d."updated_at" END AS "detailIconUpdatedAt",
       d."item_type_detail" AS "detailItemTypeDetail", d."available_level" AS "detailAvailableLevel",
-      d."fame" AS "detailFame", d."card" AS "detailCard"
+      d."fame" AS "detailFame", d."card" AS "detailCard",
+      candidate."item_name" IS NOT NULL AS "hasCandidate",
+      candidate."description" AS "candidateDescription", candidate."item_rarity" AS "candidateRarity",
+      CASE WHEN candidate."icon" IS NULL THEN NULL ELSE candidate."icon_updated_at" END AS "candidateIconUpdatedAt",
+      candidate."item_type_detail" AS "candidateItemTypeDetail",
+      candidate."available_level" AS "candidateAvailableLevel",
+      candidate."fame" AS "candidateFame", candidate."card" AS "candidateCard"
     FROM "lab_items" i
     LEFT JOIN "auction_prices" p ON p."item_name" = i."item_name"
     LEFT JOIN "lab_currencies" c ON c."id" = i."currency_id"
     LEFT JOIN "lab_item_details" d ON d."item_name" = i."item_name"
+    LEFT JOIN "lab_candidates" candidate ON candidate."item_name" = i."item_name"
     ORDER BY i."id"`
 
   return rows.map((row) => {
@@ -194,6 +229,7 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
     const price = unitPrice !== null ? Number(unitPrice) : null
     const cost = toPriceCost(row)
     const detail = toPriceDetail(row)
+    const candidate = toPriceCandidate(row)
 
     return {
       category,
@@ -205,7 +241,8 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       unitPrice: price,
       checkedAt,
       cost,
-      detail
+      detail,
+      candidate
     }
   })
 }
