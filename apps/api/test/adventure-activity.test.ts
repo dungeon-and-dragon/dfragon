@@ -23,7 +23,7 @@ import {
 import {
   readAdventureSeasonDays,
   parseActivityDayDetail as toActivityDayDetail,
-  parseSeasonActivity as toSeasonActivity
+  parseSeasonActivity
 } from '../src/infrastructure/database/adventure-activity.js'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -90,6 +90,11 @@ const enhancement = (
 // 운영 DB의 data.ticket은 객체지만 안의 키는 확인하지 못해 합성 키를 쓴다.
 const ticketItem = (name: string) => ({ name })
 const noRecords = { clears: [], items: [], itemDictionary: [] }
+const toSeasonActivity = (
+  range: ActivitySeasonRange,
+  records: Parameters<typeof parseSeasonActivity>[1],
+  firstClears: Parameters<typeof parseSeasonActivity>[2] = []
+) => parseSeasonActivity(range, records, firstClears)
 const activity = (records: Partial<Parameters<typeof toSeasonActivity>[1]>) =>
   toSeasonActivity(legacySeason, { ...noRecords, ...records })
 const day = (date: string) => {
@@ -125,7 +130,7 @@ test('시즌 시작 전과 다음 시즌 시작부터의 기록은 세지 않는
     items: [enhancement(401, '2026-12-17T06:00:00', 5, 6, true)]
   })
 
-  assert.deepEqual(summary.legions, [{ name: '아포칼립스', count: 2 }])
+  assert.deepEqual(summary.legions, [{ name: '아포칼립스', count: 2, releasedAt: null }])
   assert.equal(summary.enhancement.attempts, 0)
   assert.deepEqual(
     days.map(({ date }) => date),
@@ -139,7 +144,7 @@ test('지금 시즌은 끝이 없어 시작 뒤 기록을 모두 센다', () => 
     { ...noRecords, clears: [legion('2027-01-01T12:00:00', '아포칼립스')] }
   )
 
-  assert.deepEqual(current.summary.legions, [{ name: '아포칼립스', count: 1 }])
+  assert.deepEqual(current.summary.legions, [{ name: '아포칼립스', count: 1, releasedAt: null }])
 })
 
 test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출시가 최근인 것부터 둔다', () => {
@@ -160,15 +165,39 @@ test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출�
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 1, hard: 0, normal: 1 },
-    { name: '혼돈의 오즈마', raid: '혼돈의 오즈마', stage: null, count: 2, hard: 0, normal: 2 },
-    { name: '프레이-이시스', raid: '프레이-이시스', stage: null, count: 1, hard: 0, normal: 1 }
+    {
+      name: '이내 황혼전',
+      raid: '이내 황혼전',
+      stage: null,
+      count: 1,
+      hard: 0,
+      normal: 1,
+      releasedAt: null
+    },
+    {
+      name: '혼돈의 오즈마',
+      raid: '혼돈의 오즈마',
+      stage: null,
+      count: 2,
+      hard: 0,
+      normal: 2,
+      releasedAt: null
+    },
+    {
+      name: '프레이-이시스',
+      raid: '프레이-이시스',
+      stage: null,
+      count: 1,
+      hard: 0,
+      normal: 1,
+      releasedAt: null
+    }
   ])
   assert.deepEqual(summary.legions, [
-    { name: '아포칼립스', count: 1 },
-    { name: '베누스', count: 2 },
-    { name: '깨어난 숲(극)', count: 1 },
-    { name: '깨어난 숲(일반)', count: 2 }
+    { name: '아포칼립스', count: 1, releasedAt: null },
+    { name: '베누스', count: 2, releasedAt: null },
+    { name: '깨어난 숲(극)', count: 1, releasedAt: null },
+    { name: '깨어난 숲(일반)', count: 2, releasedAt: null }
   ])
 })
 
@@ -212,9 +241,33 @@ test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 1, hard: 0, normal: 1 },
-    { name: '혼돈의 오즈마', raid: '혼돈의 오즈마', stage: null, count: 3, hard: 2, normal: 1 },
-    { name: '무형의 시로코', raid: '무형의 시로코', stage: null, count: 1, hard: 1, normal: 0 }
+    {
+      name: '이내 황혼전',
+      raid: '이내 황혼전',
+      stage: null,
+      count: 1,
+      hard: 0,
+      normal: 1,
+      releasedAt: null
+    },
+    {
+      name: '혼돈의 오즈마',
+      raid: '혼돈의 오즈마',
+      stage: null,
+      count: 3,
+      hard: 2,
+      normal: 1,
+      releasedAt: null
+    },
+    {
+      name: '무형의 시로코',
+      raid: '무형의 시로코',
+      stage: null,
+      count: 1,
+      hard: 1,
+      normal: 0,
+      releasedAt: null
+    }
   ])
 })
 
@@ -254,7 +307,8 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '하드',
       count: 1,
       hard: 1,
-      normal: 0
+      normal: 0,
+      releasedAt: null
     },
     {
       name: '무너진 성자 미카엘라 (일반)',
@@ -262,7 +316,8 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '일반',
       count: 1,
       hard: 0,
-      normal: 1
+      normal: 1,
+      releasedAt: null
     },
     {
       name: '무너진 성자 미카엘라 (싱글/매칭)',
@@ -270,7 +325,8 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '싱글/매칭',
       count: 1,
       hard: 0,
-      normal: 1
+      normal: 1,
+      releasedAt: null
     },
     {
       name: '디레지에 레이드 (하드)',
@@ -278,7 +334,8 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '하드',
       count: 1,
       hard: 1,
-      normal: 0
+      normal: 0,
+      releasedAt: null
     },
     {
       name: '디레지에 레이드 (일반)',
@@ -286,7 +343,8 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '일반',
       count: 1,
       hard: 0,
-      normal: 1
+      normal: 1,
+      releasedAt: null
     },
     {
       name: '디레지에 레이드 (매칭)',
@@ -294,14 +352,105 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
       stage: '매칭',
       count: 1,
       hard: 0,
-      normal: 1
+      normal: 1,
+      releasedAt: null
     },
-    { name: '아스라한 (개전)', raid: '아스라한', stage: '개전', count: 1, hard: 1, normal: 0 },
-    { name: '기계 혁명 (하드)', raid: '기계 혁명', stage: '하드', count: 1, hard: 1, normal: 0 },
-    { name: '기계 혁명 (일반)', raid: '기계 혁명', stage: '일반', count: 1, hard: 0, normal: 1 },
-    { name: '기계 혁명 (개전)', raid: '기계 혁명', stage: '개전', count: 1, hard: 0, normal: 1 },
-    { name: '무형의 시로코', raid: '무형의 시로코', stage: null, count: 2, hard: 1, normal: 1 }
+    {
+      name: '아스라한 (개전)',
+      raid: '아스라한',
+      stage: '개전',
+      count: 1,
+      hard: 1,
+      normal: 0,
+      releasedAt: null
+    },
+    {
+      name: '기계 혁명 (하드)',
+      raid: '기계 혁명',
+      stage: '하드',
+      count: 1,
+      hard: 1,
+      normal: 0,
+      releasedAt: null
+    },
+    {
+      name: '기계 혁명 (일반)',
+      raid: '기계 혁명',
+      stage: '일반',
+      count: 1,
+      hard: 0,
+      normal: 1,
+      releasedAt: null
+    },
+    {
+      name: '기계 혁명 (개전)',
+      raid: '기계 혁명',
+      stage: '개전',
+      count: 1,
+      hard: 0,
+      normal: 1,
+      releasedAt: null
+    },
+    {
+      name: '무형의 시로코',
+      raid: '무형의 시로코',
+      stage: null,
+      count: 2,
+      hard: 1,
+      normal: 1,
+      releasedAt: null
+    }
   ])
+})
+
+test('레이드는 단계와 관계없이 레이드 이름, 레기온은 이름의 처음 본 클리어 시각을 releasedAt에 담고 표에 없으면 null이다', () => {
+  const firstClear = (kind: string, name: string, time: string) => {
+    const firstClearedAt = at(time)
+
+    return { kind, name, firstClearedAt }
+  }
+
+  const { summary } = toSeasonActivity(
+    legacySeason,
+    {
+      ...noRecords,
+      clears: [
+        {
+          ...hardRaid('2026-07-18T12:00:00', '무너진 성자 미카엘라'),
+          data: { modeName: '미카엘라 : 종언서(하드)', hard: true }
+        },
+        {
+          ...raid('2026-07-18T13:00:00', '무너진 성자 미카엘라'),
+          data: { modeName: '미카엘라 : 종언서' }
+        },
+        raid('2026-07-18T14:00:00', '합성 표 밖 레이드'),
+        legion('2026-07-18T15:00:00', '아포칼립스'),
+        legion('2026-07-18T16:00:00', '합성 표 밖 레기온')
+      ]
+    },
+    [
+      firstClear('raid', '무너진 성자 미카엘라', '2026-08-06T12:10:00'),
+      firstClear('legion', '아포칼립스', '2026-04-23T10:03:00'),
+      firstClear('legion', '합성 표 밖 레이드', '2020-01-01T00:00:00'),
+      firstClear('raid', '합성 표 밖 레기온', '2020-01-01T00:00:00')
+    ]
+  )
+
+  assert.deepEqual(
+    summary.raids.map(({ name, releasedAt }) => [name, releasedAt]),
+    [
+      ['무너진 성자 미카엘라 (하드)', at('2026-08-06T12:10:00')],
+      ['무너진 성자 미카엘라 (일반)', at('2026-08-06T12:10:00')],
+      ['합성 표 밖 레이드', null]
+    ]
+  )
+  assert.deepEqual(
+    summary.legions.map(({ name, releasedAt }) => [name, releasedAt]),
+    [
+      ['아포칼립스', at('2026-04-23T10:03:00')],
+      ['합성 표 밖 레기온', null]
+    ]
+  )
 })
 
 test('시즌 5~9의 아이템은 획득 코드의 레전더리, 에픽, 태초, 신화만 등급별로 세고 태초, 신화를 얻은 날을 표시한다', () => {

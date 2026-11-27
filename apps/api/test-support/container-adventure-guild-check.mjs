@@ -295,7 +295,8 @@ try {
           stage: '일반',
           count: 1,
           hard: 0,
-          normal: 1
+          normal: 1,
+          releasedAt: at('04-02T05:59:00')
         },
         {
           name: '디레지에 레이드 (하드)',
@@ -303,7 +304,8 @@ try {
           stage: '하드',
           count: 1,
           hard: 1,
-          normal: 0
+          normal: 0,
+          releasedAt: at('04-02T06:00:00')
         },
         {
           name: '합성 목록 밖 레이드',
@@ -311,10 +313,11 @@ try {
           stage: null,
           count: 1,
           hard: 0,
-          normal: 1
+          normal: 1,
+          releasedAt: at('04-02T06:30:00')
         }
       ],
-      legions: [{ name: '아포칼립스', count: 1 }],
+      legions: [{ name: '아포칼립스', count: 1, releasedAt: at('04-02T07:00:00') }],
       items: { legendary: 0, epic: 0, primeval: 1, mythic: 0 },
       oaths: { legendary: 0, epic: 0, primeval: 1 },
       enhancement: {
@@ -468,10 +471,11 @@ try {
           stage: null,
           count: 1,
           hard: 0,
-          normal: 1
+          normal: 1,
+          releasedAt: kst('2021-05-01T12:00:00')
         }
       ],
-      legions: [{ name: '합성 귀환 레기온', count: 1 }],
+      legions: [{ name: '합성 귀환 레기온', count: 1, releasedAt: kst('2021-05-01T13:00:00') }],
       items: { legendary: 0, epic: 0, primeval: 0, mythic: 1 },
       oaths: { legendary: 0, epic: 0, primeval: 0 },
       enhancement: {
@@ -650,7 +654,10 @@ try {
     activityAnswer.seasons.slice(0, seasonIds.length).map(({ id }) => id),
     seasonIds
   )
-  assert.deepEqual({ summary: activityAnswer.summary, days: activityAnswer.days }, seasonActivity)
+  assert.deepEqual(
+    { summary: activityAnswer.summary, days: activityAnswer.days },
+    JSON.parse(JSON.stringify(seasonActivity))
+  )
   const seasonDaysAnswer = await get(
     `/adventures/${encodeURIComponent(adventureName)}/activity/seasons/11/days`
   )
@@ -662,7 +669,10 @@ try {
   const returnedAnswer = await get(
     `/adventures/${encodeURIComponent(adventureName)}/activity?season=7`
   )
-  assert.deepEqual({ summary: returnedAnswer.summary, days: returnedAnswer.days }, returnedActivity)
+  assert.deepEqual(
+    { summary: returnedAnswer.summary, days: returnedAnswer.days },
+    JSON.parse(JSON.stringify(returnedActivity))
+  )
   // 모두 끝까지 받은 시즌이라 Neople을 부르지 않고 바로 다 받은 상태를 준다.
   const backfillPath = (season) =>
     new URL(
