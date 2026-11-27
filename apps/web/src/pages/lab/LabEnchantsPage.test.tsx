@@ -569,7 +569,7 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
   expect(await emphasizedCells()).toEqual(['올스탯', '100'])
 })
 
-it('등급표에 없는 벨트 버퍼 준종결 묶음도 DB에 아이템이 있으면 버퍼 표에 보인다', async () => {
+it('벨트 버퍼 준종결 묶음도 DB에 아이템이 있으면 버퍼 표에 보인다', async () => {
   server.use(
     http.get(LAB_ITEMS_URL, () =>
       HttpResponse.json({

@@ -15,7 +15,7 @@ const EXCHANGED_SKIPS_AUCTION =
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
-// 합성 경매장 응답이다. 아이템 이름은 저장소의 마법부여 등급표에 있는 카드 이름이고, itemId와 가격은 지어냈다.
+// 합성 경매장 응답이다. 아이템 이름은 지금은 지운 마법부여 등급표에 있던 카드 이름이고, itemId와 가격은 지어냈다.
 const names = {
   first: '거짓의 베리디쿠스 카드',
   comma: '허망한 맹신, 호스디그 카드',

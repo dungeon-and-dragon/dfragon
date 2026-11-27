@@ -771,7 +771,7 @@ describe('실험실 아이템 패널', () => {
     expect(checkedNames('칭호 종결')).toEqual([['합성 칭호 새 이름', true]])
   })
 
-  it('등급표에 없는 벨트 버퍼 준종결 묶음에도 이름을 넣어 저장할 수 있다', async () => {
+  it('벨트 버퍼 준종결 묶음에도 이름을 넣어 저장할 수 있다', async () => {
     const api = new FakeOpsApi()
     await openLabItems(api)
 

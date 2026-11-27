@@ -3,7 +3,7 @@ import test from 'node:test'
 import { AuctionPriceService } from '@dfragon/server-core/application/auction-prices/index.js'
 import { createAuctionPriceJob } from '../src/application/auction-prices/index.js'
 
-// 이름은 저장소의 마법부여 등급표에 있는 카드 이름이다. 경매장 조회, 아이템 검색과 가격 저장은 fake이며,
+// 이름은 지금은 지운 마법부여 등급표에 있던 카드 이름이다. 경매장 조회, 아이템 검색과 가격 저장은 fake이며,
 // 고르는 규칙은 server-core, 저장 SQL은 @dfragon/database의 테스트가 확인한다.
 const targets = [
   { itemName: '거짓의 베리디쿠스 카드', exchanged: false },
