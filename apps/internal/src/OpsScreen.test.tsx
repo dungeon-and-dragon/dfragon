@@ -50,7 +50,7 @@ async function renderScreen(api: FakeOpsApi): Promise<void> {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const client = createOpsClient('http://ops.test/api/', api.fetch)
   root = createRoot(container)
-  act(() => root?.render(<OpsApp client={client} queryClient={queryClient} />))
+  act(() => root?.render(<OpsApp client={client} queryClient={queryClient} page="ops" />))
   await waitFor(() => expect(container.querySelector('main section')).not.toBeNull())
   await flush()
 }
