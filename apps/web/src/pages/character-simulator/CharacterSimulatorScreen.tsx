@@ -1,4 +1,4 @@
-import { useCallback, useId, useMemo, useReducer, useState } from 'react'
+import { useCallback, useId, useMemo, useState } from 'react'
 import type { CharacterDetailView } from '#entities/character'
 import { useCharacterDetail } from '#entities/character-detail'
 import { LoadingLine } from '#shared/ui/LoadingLine'
@@ -11,8 +11,8 @@ import { SlotEditor, type SlotEditorActions } from './components/SlotEditor'
 import { SlotEditorSheet } from './components/SlotEditorSheet'
 import {
   hasChanges,
-  NO_CHANGES,
   rowsInEquipmentSet,
+  type SimulatorAction,
   simulationBody,
   simulatorReducer,
   simulatorRole,
@@ -22,6 +22,7 @@ import {
 import { hasAvatarPreset } from './model/simulator-avatar'
 import { oathInSet, toSimulatorOath } from './model/simulator-oath'
 import { simulatorSetPointsOf } from './model/simulator-set-points'
+import { encodeChanges, restoreChanges } from './model/simulator-share'
 import {
   sectionOf,
   selectedTargetOf,
@@ -37,10 +38,14 @@ const SECTION_TITLE = 'section-title bg-surface'
 
 export function CharacterSimulatorScreen({
   serverId,
-  characterId
+  characterId,
+  savedChanges,
+  onChangesSave
 }: {
   serverId: string
   characterId: string
+  savedChanges?: string | undefined
+  onChangesSave?: ((saved: string | undefined) => void) | undefined
 }): React.JSX.Element {
   const result = useCharacterDetail(serverId, characterId)
 
@@ -71,7 +76,14 @@ export function CharacterSimulatorScreen({
         </div>
       )
     case 'success':
-      return <Simulator key={`${serverId}/${characterId}`} detail={result.detail} />
+      return (
+        <Simulator
+          key={`${serverId}/${characterId}`}
+          detail={result.detail}
+          savedChanges={savedChanges}
+          onChangesSave={onChangesSave}
+        />
+      )
   }
 }
 
@@ -97,7 +109,15 @@ function useInView(): [(node: HTMLElement | null) => (() => void) | undefined, b
   return [watch, inView]
 }
 
-function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
+function Simulator({
+  detail,
+  savedChanges,
+  onChangesSave
+}: {
+  detail: CharacterDetailView
+  savedChanges: string | undefined
+  onChangesSave: ((saved: string | undefined) => void) | undefined
+}): React.JSX.Element {
   const { character } = detail
   const identity = { serverId: character.serverId, characterId: character.characterId }
   const enchantResult = useEnchantOptions()
@@ -117,7 +137,12 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     () => toSimulatorSwitching(detail, simulatorRole(detail.card)),
     [detail]
   )
-  const [changes, dispatch] = useReducer(simulatorReducer, NO_CHANGES)
+  const [changes, setChanges] = useState(() =>
+    restoreChanges(
+      { wornRows, equipmentSet, wornOath, avatarPresetAvailable, switching },
+      savedChanges
+    )
+  )
   const rows = useMemo(
     () => rowsInEquipmentSet(wornRows, changes.equipmentSet),
     [wornRows, changes.equipmentSet]
@@ -155,6 +180,17 @@ function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Eleme
     onOathUpgradeUnlockChange: (upgrade, step, unlocked) =>
       dispatch({ type: 'oathUpgradeUnlock', upgrade, step, unlocked }),
     onCrystalChange: (crystal, draft) => dispatch({ type: 'crystal', oath, crystal, draft })
+  }
+
+  function dispatch(action: SimulatorAction): void {
+    const next = simulatorReducer(changes, action)
+
+    if (next === changes) {
+      return
+    }
+
+    setChanges(next)
+    onChangesSave?.(encodeChanges(next))
   }
 
   function select(key: string): void {
