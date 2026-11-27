@@ -5,9 +5,11 @@ import { readJsonBody } from '#presentation/http/json-request.js'
 import { readItemName } from '#presentation/http/lab-fields.js'
 import {
   batchBody,
+  exclusionBody,
   finishBody,
   iconBody,
   readListQuery,
+  toLabCandidateExclusionListResponse,
   toLabCandidateListResponse,
   toLabCandidatePriceHistoryResponse
 } from './dto.js'
@@ -52,9 +54,9 @@ export class LabCandidateController {
       }
 
       const { snapshotId, items } = request.data
-      await this.service.importBatch(snapshotId, items)
+      const result = await this.service.importBatch(snapshotId, items)
 
-      return c.body(null, 204)
+      return c.json(result)
     })
 
     routes.put('/icon', async (c) => {
@@ -80,6 +82,36 @@ export class LabCandidateController {
       const result = await this.service.finish(request.data.snapshotId)
 
       return c.json(result)
+    })
+
+    routes.get('/exclusions', async (c) => {
+      const exclusions = await this.service.readExclusions()
+
+      return c.json(toLabCandidateExclusionListResponse(exclusions))
+    })
+
+    routes.post('/exclusions', async (c) => {
+      const request = exclusionBody.safeParse(await readJsonBody(c))
+
+      if (!request.success) {
+        throw new OpsFailure('request')
+      }
+
+      await this.service.exclude(request.data.itemName)
+
+      return c.body(null, 204)
+    })
+
+    routes.delete('/exclusions', async (c) => {
+      const request = exclusionBody.safeParse(await readJsonBody(c))
+
+      if (!request.success) {
+        throw new OpsFailure('request')
+      }
+
+      await this.service.include(request.data.itemName)
+
+      return c.body(null, 204)
     })
 
     return routes

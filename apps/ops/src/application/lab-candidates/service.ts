@@ -1,5 +1,7 @@
 import type {
   AuctionPriceHistoryEntry,
+  LabCandidateBatchResult,
+  LabCandidateExclusion,
   LabCandidateInput,
   LabCandidateQuery,
   LabCandidateSummary,
@@ -74,7 +76,7 @@ function recommendTiers(candidates: LabCandidateSummary[]): LabCandidateView[] {
 export class LabCandidateService {
   constructor(private readonly repository: LabCandidateRepository) {}
 
-  importBatch(snapshotId: string, items: LabCandidateInput[]): Promise<void> {
+  importBatch(snapshotId: string, items: LabCandidateInput[]): Promise<LabCandidateBatchResult> {
     const importedAt = new Date()
 
     return this.repository.upsert({ versionId: snapshotId, importedAt, items })
@@ -118,5 +120,21 @@ export class LabCandidateService {
     }
 
     return icon
+  }
+
+  async exclude(itemName: string): Promise<void> {
+    const { status } = await this.repository.exclude(itemName)
+
+    if (status === 'labItem') {
+      throw new OpsFailure('labCandidateInLabItems')
+    }
+  }
+
+  include(itemName: string): Promise<void> {
+    return this.repository.include(itemName)
+  }
+
+  readExclusions(): Promise<LabCandidateExclusion[]> {
+    return this.repository.readExclusions()
   }
 }

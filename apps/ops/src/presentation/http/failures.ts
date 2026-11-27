@@ -21,6 +21,7 @@ const failureResponses = {
     status: 404,
     body: { error: { code: 'LAB_CANDIDATE_ICON_NOT_FOUND' } }
   },
+  labCandidateInLabItems: { status: 409, body: { error: { code: 'LAB_CANDIDATE_IN_LAB_ITEMS' } } },
   internal: { status: 500, body: { error: { code: 'INTERNAL_SERVER_ERROR' } } }
 } as const satisfies Record<OpsFailureKind, FailureResponse>
 
