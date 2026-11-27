@@ -11,6 +11,8 @@ const LISTING_LIMIT = 50
 const LEVEL_LISTING_LIMIT = 400
 const LEVEL_TAG_PATTERN = /\[\d+Lv\]/g
 const WHITESPACE_RUN_PATTERN = /\s+/g
+const CREATURE_TYPE_DETAIL = '크리쳐'
+const EGG_SUFFIXES = [' 알', '의 알']
 
 type AuctionRow = Awaited<ReturnType<NeopleClient['auction']>>['rows'][number]
 
@@ -51,6 +53,22 @@ function isLevelVariant(rowName: string, itemName: string): boolean {
   return untagged === itemName
 }
 
+// 크리쳐는 경매장에 본체가 아니라 알로만 올라, 본체 이름에 알을 붙인 매물을 받는다.
+// 꼬리표가 있는 본체는 레벨마다 후보가 따로 있어, 같은 꼬리표가 붙은 알만 받는다.
+function isEggVariant(rowName: string, itemName: string): boolean {
+  if (EGG_SUFFIXES.some((suffix) => rowName === `${itemName}${suffix}`)) {
+    return true
+  }
+
+  const tagged = (itemName.match(LEVEL_TAG_PATTERN) ?? []).length > 0
+
+  if (tagged) {
+    return false
+  }
+
+  return isLevelVariant(rowName, `${itemName} 알`)
+}
+
 // 앞부분 검색어는 꼬리표 앞까지여야 해서, 이름 전체로 찾지 못하면 마지막 단어를 뺀 앞부분으로 한 번 더 찾는다.
 function levelSearchWords(itemName: string): string[] {
   const lastSpace = itemName.lastIndexOf(' ')
@@ -71,7 +89,11 @@ function isLevelTarget(
     return false
   }
 
-  return isLevelVariant(row.itemName, itemName)
+  if (isLevelVariant(row.itemName, itemName)) {
+    return true
+  }
+
+  return row.itemTypeDetail === CREATURE_TYPE_DETAIL && isEggVariant(row.itemName, itemName)
 }
 
 export function createNeopleLowestListing(
