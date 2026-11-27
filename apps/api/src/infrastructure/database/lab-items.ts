@@ -2,6 +2,7 @@ import {
   type DatabaseClient,
   type LabCurrencyIcon,
   type LabItemPriceRow,
+  readLabCandidateIcon,
   readLabCurrencyIcon,
   readLabItemDetailIcon,
   readLabItemPrices
@@ -19,7 +20,13 @@ export class DatabaseLabItemRepository implements LabItemRepository {
     return readLabCurrencyIcon(this.client, id)
   }
 
-  readItemIcon(itemName: string): Promise<LabCurrencyIcon | null> {
-    return readLabItemDetailIcon(this.client, itemName)
+  async readItemIcon(itemName: string): Promise<LabCurrencyIcon | null> {
+    const ownerIcon = await readLabItemDetailIcon(this.client, itemName)
+
+    if (ownerIcon !== null) {
+      return ownerIcon
+    }
+
+    return readLabCandidateIcon(this.client, itemName)
   }
 }
