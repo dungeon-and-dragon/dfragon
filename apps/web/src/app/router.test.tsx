@@ -325,7 +325,8 @@ it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, �
   const main = container.querySelector('main')!
   expect(labTabs()).toEqual([
     ['마법부여', '/lab/enchants', null],
-    ['멀티서치', '/lab/multisearch', 'page']
+    ['멀티서치', '/lab/multisearch', 'page'],
+    ['숨은 에소찾기', '/lab/epic-souls', null]
   ])
   const labNav = main.querySelector('nav[aria-label="실험실 종류"]')!
   const tabs = main.querySelector('[role="tablist"][aria-label="화면"]')!
@@ -618,6 +619,19 @@ it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸
     ['모험단', null],
     ['장비 시뮬레이터', null]
   ])
+})
+
+it('숨은 에소찾기 주소는 실험실 탭에서 그 탭을 고르고 제목을 실험실 숨은 에소찾기로 둔다', async () => {
+  window.history.replaceState(null, '', '/lab/epic-souls')
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(document.title).toBe('실험실 숨은 에소찾기 - DFragon'))
+  expect(labTabs()).toEqual([
+    ['마법부여', '/lab/enchants', null],
+    ['멀티서치', '/lab/multisearch', null],
+    ['숨은 에소찾기', '/lab/epic-souls', 'page']
+  ])
+  expect(container.querySelector('main input[aria-label="모험단"]')).not.toBeNull()
 })
 
 it('옛 멀티서치 주소는 기록을 늘리지 않고 실험실 멀티서치 주소로 바꾼다', async () => {
