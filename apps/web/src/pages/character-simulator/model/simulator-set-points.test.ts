@@ -1,5 +1,7 @@
+// @vitest-environment jsdom
 import { oathVariantOf } from '@dfragon/lib/equipment-variants'
 import { expect, it } from 'vitest'
+import { loadedEnchantOptions } from '#pages/character-simulator/api/enchant-options.fixture'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import {
   draftOf,
@@ -19,7 +21,7 @@ import { setGradeOf, simulatorSetPointsOf } from './simulator-set-points'
 const DRAGON_SET = 16204
 
 const detail = characterDetailFixture('dealer')
-const rows = toSimulatorRows(detail)
+const rows = toSimulatorRows(detail, loadedEnchantOptions)
 const equipmentSet = toEquipmentSet(detail)
 const oath = toSimulatorOath(detail)
 

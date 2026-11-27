@@ -26,6 +26,7 @@ import { API_BASE_URL as SITE_API_URL } from '#shared/api/dfragon-api'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { fameRankingHandlers } from '#entities/ranking/api/fame-ranking.handlers'
 import { labItemsHandlers } from '#pages/lab/api/lab-items.handlers'
+import { enchantOptionsHandlers } from '#pages/character-simulator/api/enchant-options.handlers'
 import { soulPricesHandlers } from '#pages/home/api/soul-prices.handlers'
 import { characterStatsHandlers } from '#pages/stats/api/stats.handlers'
 import { skillStatsHandlers } from '#entities/ranking/api/skill-stats.handlers'
@@ -578,7 +579,8 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
   server.use(
     http.post(`${DETAIL_URL}/simulation`, () =>
       HttpResponse.json({ baseline: null, simulated: null })
-    )
+    ),
+    ...enchantOptionsHandlers.options()
   )
   window.history.replaceState(null, '', `${DETAIL_PATH}/simulator`)
   await act(async () => root.render(<WebApp host={host} />))

@@ -1,4 +1,3 @@
-import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import { expect, it } from 'vitest'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 
@@ -101,15 +100,25 @@ it('버퍼는 직업별 스킬 강화를 버프 패시브 스킬 한 줄로 두�
   ])
 })
 
-it('등급표 목록은 표시가 같아진 항목을 한 줄로 보이고 착용한 마법부여와 같은 표기를 쓴다', () => {
-  const finals = enchantOptionsOf('JACKET', 'dealer').종결
-  const listed = finals.map((option) =>
-    optionEnchantLabels(option, 'dealer')
-      .map(({ label }) => label)
-      .join(', ')
+it('선택지는 표시 스탯을 착용한 마법부여와 같은 표기, 강조, 순서로 보이고 skillLevel은 버프 패시브 스킬 줄이 된다', () => {
+  const display = [
+    { name: '공격력', value: 110 },
+    { name: '올스탯', value: 90 },
+    { name: '최종 데미지 증가', value: '3%' }
+  ]
+  const listed = optionEnchantLabels({ display, skillLevel: null }, 'dealer').map(
+    ({ label }) => label
+  )
+  const buffer = optionEnchantLabels(
+    { display: [{ name: '올스탯', value: 125 }], skillLevel: 4 },
+    'buffer'
   )
 
-  expect(listed).toEqual(['최종 데미지 증가 +3%, 공격력 +110, 올스탯 +90'])
+  expect(listed).toEqual(['최종 데미지 증가 +3%', '공격력 +110', '올스탯 +90'])
+  expect(buffer).toEqual([
+    { label: '버프 패시브 스킬 +4', emphasized: true },
+    { label: '올스탯 +125', emphasized: true }
+  ])
   expect(
     labels([
       ['힘', 90],

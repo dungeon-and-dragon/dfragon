@@ -1,4 +1,5 @@
-import { type EnchantGradeSlot, enchantOptionsOf } from '@dfragon/lib/enchant-grades'
+// @vitest-environment jsdom
+import type { EnchantGradeSlot } from '@dfragon/lib/enchant-grades'
 import {
   EQUIPMENT_VARIANT_SLOTS,
   type EquipmentVariantSlot,
@@ -6,6 +7,16 @@ import {
 } from '@dfragon/lib/equipment-variants'
 import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { expect, it } from 'vitest'
+import {
+  BUFFER_JACKET_FINAL,
+  DEALER_AMULET_FINAL,
+  DEALER_EARRING_FINAL,
+  DEALER_PANTS_FINAL,
+  DEALER_PANTS_WORN,
+  enchantOptionsFixture,
+  loadedEnchantOptions
+} from '#pages/character-simulator/api/enchant-options.fixture'
+import { enchantOptionsSchema } from '#pages/character-simulator/api/useEnchantOptions'
 import type { CharacterDetailView } from '#entities/character'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import {
@@ -110,15 +121,7 @@ function apply(changes: SimulatorChanges, ...actions: SimulatorAction[]): Simula
   return actions.reduce(simulatorReducer, changes)
 }
 
-function firstOptionId(slotId: EnchantGradeSlot, role: 'dealer' | 'buffer'): string {
-  const { 종결, 준종결 } = enchantOptionsOf(slotId, role)
-  const option = [...종결, ...준종결][0]
-  expect(option, `${slotId} ${role}`).toBeDefined()
-
-  return option!.id
-}
-
-const dealerRows = toSimulatorRows(characterDetailFixture('dealer'))
+const dealerRows = toSimulatorRows(characterDetailFixture('dealer'), loadedEnchantOptions)
 const dealerSlots = slotsOf(dealerRows)
 const weapon = slotOf(dealerSlots, 'WEAPON')
 const amulet = slotOf(dealerSlots, 'AMULET')
@@ -140,12 +143,11 @@ it('장비 12부위를 응답 순서대로 두고, 착용한 수치와 강화, �
   expect(simulationBody(dealerRows, null, NO_CHANGES)).toEqual({ equipment: [] })
 })
 
-it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버퍼 등급표에서만 고른다', () => {
-  const bufferSlots = slotsOf(toSimulatorRows(characterDetailFixture('buffer')))
+it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버퍼 선택지에서만 고른다', () => {
+  const bufferSlots = slotsOf(
+    toSimulatorRows(characterDetailFixture('buffer'), loadedEnchantOptions)
+  )
   const jacket = slotOf(bufferSlots, 'JACKET')
-  const bufferIds = Object.values(enchantOptionsOf('JACKET', 'buffer'))
-    .flat()
-    .map(({ id }) => id)
 
   expect(draftOf(jacket, NO_CHANGES)).toEqual({
     ...UNCHANGED_ITEM,
@@ -153,12 +155,11 @@ it('버퍼의 0 증폭 장비는 증폭으로 두고, 마법부여 목록은 버
     amplified: true,
     variantId: variantOf(ETHEREAL_SET, 'JACKET', '레전더리', '일반').id
   })
-  expect(jacket.enchantChoices.map(({ id }) => id)).toEqual(bufferIds)
-  expect(jacket.enchantChoices.length).toBeGreaterThan(0)
+  expect(jacket.enchantChoices.map(({ id }) => id)).toEqual([BUFFER_JACKET_FINAL])
 })
 
 it('바꾼 부위만 그 부위의 원하는 상태 전체로 요청 body에 넣고, 원래 값으로 되돌리면 뺀다', () => {
-  const enchantId = firstOptionId('AMULET', 'dealer')
+  const enchantId = DEALER_AMULET_FINAL
   const changed = apply(
     NO_CHANGES,
     { type: 'change', slot: amulet, draft: { enchantId } },
@@ -191,7 +192,10 @@ it('초기화하면 바꾼 부위가 모두 원래대로 돌아간다', () => {
 it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까지 받는다', () => {
   const overLimit = slotOf(
     slotsOf(
-      toSimulatorRows(withItem(characterDetailFixture('dealer'), 'WEAPON', { reinforce: 23 }))
+      toSimulatorRows(
+        withItem(characterDetailFixture('dealer'), 'WEAPON', { reinforce: 23 }),
+        loadedEnchantOptions
+      )
     ),
     'WEAPON'
   )
@@ -221,38 +225,65 @@ it('수치는 +0부터 +20까지 받고, 20을 넘는 장비는 지금 수치까
   ).toEqual({ ...UNCHANGED_ITEM, ...WORN_WEAPON, reinforce: 22, amplified: false })
 })
 
-it('표시가 같아 합친 묶음은 묶음 id로만 고르고 묶음의 다른 항목 id는 받지 않는다', () => {
-  const jacket = slotOf(dealerSlots, 'JACKET')
-  const merged = enchantOptionsOf('JACKET', 'dealer').종결.find(
-    (option) => option.members.length > 1
-  )
-  expect(merged).toBeDefined()
-  const [, other] = merged!.members
+it('마법부여 선택지는 응답의 종결, 준종결, 배럭 순서이고 선택지마다 첫 카드를 둔다', () => {
+  const pants = slotOf(dealerSlots, 'PANTS')
 
-  expect(jacket.enchantChoices.map(({ id }) => id)).toContain(merged!.id)
+  expect(pants.enchantChoicesStatus).toBe('success')
+  expect(pants.enchantChoices.map(({ tier, card }) => [tier, card.itemName])).toEqual([
+    ['종결', '합성 하의 카드'],
+    ['준종결', '합성 준종결 하의 카드'],
+    ['배럭', '합성 하의 보주']
+  ])
+})
+
+it('착용한 마법부여와 표시가 같은 선택지가 있으면 그 선택지의 첫 카드를 착용 카드로 두고, 없으면 null이다', () => {
+  expect(slotOf(dealerSlots, 'PANTS').wornEnchantCard?.itemName).toBe('합성 준종결 하의 카드')
+  expect(amulet.wornEnchantCard).toBeNull()
+})
+
+it('선택지를 받는 중이거나 받지 못하면 선택지 없이 그 상태를 두고, 착용 카드도 없다', () => {
+  for (const status of ['loading', 'error'] as const) {
+    const pants = slotOf(
+      slotsOf(toSimulatorRows(characterDetailFixture('dealer'), { status, options: null })),
+      'PANTS'
+    )
+
+    expect(pants.enchantChoicesStatus).toBe(status)
+    expect(pants.enchantChoices).toEqual([])
+    expect(pants.wornEnchantCard).toBeNull()
+  }
+})
+
+it('그 부위 선택지에 없는 마법부여는 받지 않는다', () => {
   expect(
-    draftOf(
-      jacket,
-      apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { enchantId: merged!.id } })
-    ).enchantId
-  ).toBe(merged!.id)
-  expect(
-    apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { enchantId: other!.id } })
+    apply(NO_CHANGES, { type: 'change', slot: amulet, draft: { enchantId: DEALER_PANTS_FINAL } })
   ).toEqual(NO_CHANGES)
 })
 
-it('등급표에 없는 마법부여는 받지 않는다', () => {
-  const otherSlotId = firstOptionId('WEAPON', 'dealer')
+it('고른 마법부여가 다시 받은 선택지에 없으면 착용한 마법부여로 되돌려 요청한다', () => {
+  const pants = slotOf(dealerSlots, 'PANTS')
+  const changed = apply(NO_CHANGES, {
+    type: 'change',
+    slot: pants,
+    draft: { enchantId: DEALER_PANTS_WORN }
+  })
+  const slots = enchantOptionsFixture.slots.filter(({ slotId }) => slotId !== 'PANTS')
+  const options = enchantOptionsSchema.parse({ slots })
+  const refetched = toSimulatorRows(characterDetailFixture('dealer'), {
+    status: 'success',
+    options
+  })
 
-  expect(
-    apply(NO_CHANGES, { type: 'change', slot: amulet, draft: { enchantId: otherSlotId } })
-  ).toEqual(NO_CHANGES)
+  expect(draftOf(slotOf(slotsOf(refetched), 'PANTS'), changed).enchantId).toBeNull()
+  expect(simulationBody(refetched, null, changed).equipment).toEqual([
+    expect.objectContaining({ slotId: 'PANTS', enchantId: null })
+  ])
 })
 
 it('115레벨이 아닌 장비는 수치와 강화, 증폭을 바꾸지 않고 마법부여만 바꾼다', () => {
   const detail = withItem(characterDetailFixture('dealer'), 'AMULET', { itemAvailableLevel: 110 })
-  const oldAmulet = slotOf(slotsOf(toSimulatorRows(detail)), 'AMULET')
-  const enchantId = firstOptionId('AMULET', 'dealer')
+  const oldAmulet = slotOf(slotsOf(toSimulatorRows(detail, loadedEnchantOptions)), 'AMULET')
+  const enchantId = DEALER_AMULET_FINAL
   const changed = apply(
     NO_CHANGES,
     { type: 'change', slot: oldAmulet, draft: { reinforce: 12 } },
@@ -356,7 +387,7 @@ it('선택지에 없는 착용 아이템은 속한 선택지가 없다', () => {
     itemId: 'f'.repeat(32),
     itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]'
   })
-  const [unlisted] = slotItemsIn(toSimulatorRows(detail))
+  const [unlisted] = slotItemsIn(toSimulatorRows(detail, loadedEnchantOptions))
 
   expect(unlisted!.wornChoiceId).toBeNull()
   expect(unlisted!.itemName).toBe('진정한 각성을 이룬 자 플래티넘')
@@ -381,7 +412,7 @@ it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터도 그 줄을 비
     creature: null,
     avatar: detail.avatar.filter(({ slotId }) => slotId !== 'AURORA')
   }
-  const rows = toSimulatorRows(bare)
+  const rows = toSimulatorRows(bare, loadedEnchantOptions)
   const slotItems = slotItemsIn(rows)
   const [title] = slotItems
   const id = title!.choices[0]!.id
@@ -403,7 +434,7 @@ it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터도 그 줄을 비
 })
 
 const bufferDetail = characterDetailFixture('buffer')
-const bufferRows = toSimulatorRows(bufferDetail)
+const bufferRows = toSimulatorRows(bufferDetail, loadedEnchantOptions)
 const bufferSlots = slotsOf(bufferRows)
 const dealerJacket = slotOf(dealerSlots, 'JACKET')
 const dealerSupport = slotOf(dealerSlots, 'SUPPORT')
@@ -452,7 +483,7 @@ it('주 세트는 세트 포인트와 setItemId가 모두 있는 세트 가운�
     { ...bufferSet!, setItemId: SOUL_FAIRY_SET, active: null },
     pointed(ETHEREAL_SET, 100)
   ])
-  const wrist = slotOf(slotsOf(toSimulatorRows(detail)), 'WRIST')
+  const wrist = slotOf(slotsOf(toSimulatorRows(detail, loadedEnchantOptions)), 'WRIST')
 
   expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(ETHEREAL_SET, 'WRIST')))
 })
@@ -463,7 +494,7 @@ it('선택 목록에 없는 세트의 장비를 낀 부위는 세트 밖 장비�
     pointed(unlistedSet, 9_999),
     pointed(ETHEREAL_SET, 100)
   ])
-  const wrist = slotOf(slotsOf(toSimulatorRows(detail)), 'WRIST')
+  const wrist = slotOf(slotsOf(toSimulatorRows(detail, loadedEnchantOptions)), 'WRIST')
 
   expect(equipmentVariantsOf(unlistedSet, 'WRIST')).toEqual([])
   expect(idsOf(wrist.variants)).toEqual(idsOf(equipmentVariantsOf(ETHEREAL_SET, 'WRIST')))
@@ -477,7 +508,7 @@ it('세트 밖 유일 장비를 낀 부위는 주 세트의 선택지에서 유�
     setItemId: null,
     potency: { value: '35%' }
   })
-  const ring = slotOf(slotsOf(toSimulatorRows(detail)), 'RING')
+  const ring = slotOf(slotsOf(toSimulatorRows(detail, loadedEnchantOptions)), 'RING')
   const epic = variantOf(SOUL_FAIRY_SET, 'RING', '에픽', '일반')
   const changed = apply(NO_CHANGES, { type: 'change', slot: ring, draft: { potency: 60 } })
 
@@ -498,7 +529,7 @@ it('세트 밖 유일 장비를 낀 부위는 주 세트의 선택지에서 유�
 })
 
 it('아이템을 바꿔도 수치, 증폭, 마법부여는 그대로 두고 조율은 바꾼 아이템이 조율할 수 있는 단계까지만 둔다', () => {
-  const enchantId = firstOptionId('EARRING', 'dealer')
+  const enchantId = DEALER_EARRING_FINAL
   const exalted = variantOf(SOUL_FAIRY_SET, 'EARRING', '태초', '유일')
   const legendary = variantOf(SOUL_FAIRY_SET, 'EARRING', '레전더리', '일반')
   const tuned = apply(
@@ -721,7 +752,7 @@ it('장비 세트를 고른 뒤 바꾼 부위의 등급은 새 세트의 선택�
 })
 
 it('장비 세트를 바꾸면 부위에서 고른 등급을 새 세트의 같은 등급으로 옮기고 마법부여와 조율은 유지한다', () => {
-  const enchantId = firstOptionId('EARRING', 'dealer')
+  const enchantId = DEALER_EARRING_FINAL
   const legendary = variantOf(SOUL_FAIRY_SET, 'EARRING', '레전더리', '일반')
   const before = apply(
     NO_CHANGES,
@@ -776,7 +807,7 @@ it('세트가 섞인 캐릭터는 주 세트를 골라도 다른 세트의 부�
     itemName: shadowJacket.item.itemName,
     setItemId: SHADOW_SET
   })
-  const rows = toSimulatorRows(mixed)
+  const rows = toSimulatorRows(mixed, loadedEnchantOptions)
   const mixedSet = toEquipmentSet(mixed)!
   const changed = apply(NO_CHANGES, {
     type: 'equipmentSet',
@@ -817,7 +848,8 @@ it('선택지에 없는 착용 무기는 그 무기의 최대 단계까지 조�
     withItem(characterDetailFixture('dealer'), 'WEAPON', {
       itemId: 'unlisted-weapon',
       itemName: 'Beast-Saw'
-    })
+    }),
+    loadedEnchantOptions
   )
   const tunable = slotOf(slotsOf(rows), 'WEAPON')
   const changed = apply(NO_CHANGES, { type: 'change', slot: tunable, draft: { tune: 2 } })
@@ -937,7 +969,8 @@ it('"억압 - " 아이템을 낀 무기는 디거시를 고른 상태로 착용�
       itemId: SCYTHE.releasePending,
       itemName: '억압 - 재앙의 송곳니',
       weaponRelease: { value: 81 }
-    })
+    }),
+    loadedEnchantOptions
   )
   const pending = slotOf(slotsOf(rows), 'WEAPON')
   const full = apply(NO_CHANGES, { type: 'change', slot: pending, draft: { release: 100 } })
@@ -956,7 +989,7 @@ it('초기화하면 고른 장비 세트도 지운다', () => {
 
 it('장비 세트를 골라도 선택지 밖 착용 아이템을 낀 부위는 조율까지 그대로 두고 요청에 넣지 않는다', () => {
   const detail = withItem(bufferDetail, 'WRIST', { tune: [{ level: 2, setPoint: 235 }] })
-  const rows = toSimulatorRows(detail)
+  const rows = toSimulatorRows(detail, loadedEnchantOptions)
   const changed = apply(NO_CHANGES, {
     type: 'equipmentSet',
     rows,
@@ -1014,7 +1047,9 @@ it('아바타는 종결 아바타와 엠블렘을 고르면 프리셋을 요청�
 
 it('무기를 끼지 않은 캐릭터는 무기 줄을 비어 있음으로 두고, 직업이 낄 수 있는 종류마다 무기 선택지를 둔다', () => {
   // 딜러 fixture 캐릭터는 프리스트다.
-  const slots = slotsOf(toSimulatorRows(withoutWeapon(characterDetailFixture('dealer'))))
+  const slots = slotsOf(
+    toSimulatorRows(withoutWeapon(characterDetailFixture('dealer')), loadedEnchantOptions)
+  )
   const unworn = slots[0]!
 
   expect(slots.map(({ slotId }) => slotId)).toEqual(GRADE_SLOTS)
@@ -1040,7 +1075,7 @@ it('무기를 끼지 않은 캐릭터는 무기 줄을 비어 있음으로 두�
 it('직업이 무기 종류 표에 없으면 비어 있는 무기 줄에 선택지를 두지 않는다', () => {
   const detail = withoutWeapon(characterDetailFixture('dealer'))
   const unknown = { ...detail, character: { ...detail.character, jobGrowId: 'unknown-grow' } }
-  const unworn = slotOf(slotsOf(toSimulatorRows(unknown)), 'WEAPON')
+  const unworn = slotOf(slotsOf(toSimulatorRows(unknown, loadedEnchantOptions)), 'WEAPON')
 
   expect(unworn).toMatchObject({ empty: true, variants: [], weaponTypes: [] })
 })
@@ -1054,7 +1089,7 @@ it('비어 있는 장비 부위는 주 세트의 선택지를 두고, 고르면 
       equipment: detail.equipment.equipment.filter(({ slotId }) => slotId !== 'JACKET')
     }
   }
-  const rows = toSimulatorRows(bare)
+  const rows = toSimulatorRows(bare, loadedEnchantOptions)
   const jacket = slotOf(slotsOf(rows), 'JACKET')
   const epic = variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반')
   const chosen = apply(NO_CHANGES, { type: 'change', slot: jacket, draft: { variantId: epic.id } })
@@ -1087,7 +1122,7 @@ it('비어 있는 장비 부위는 아이템을 고른 뒤에만 강화, 증폭,
       equipment: detail.equipment.equipment.filter(({ slotId }) => slotId !== 'JACKET')
     }
   }
-  const rows = toSimulatorRows(bare)
+  const rows = toSimulatorRows(bare, loadedEnchantOptions)
   const jacket = slotOf(slotsOf(rows), 'JACKET')
   const epic = variantOf(SOUL_FAIRY_SET, 'JACKET', '에픽', '일반')
   const enchantId = jacket.enchantChoices[0]!.id
@@ -1113,7 +1148,10 @@ it('비어 있는 장비 부위는 아이템을 고른 뒤에만 강화, 증폭,
 })
 
 it('무기를 끼지 않은 캐릭터가 무기를 고르면 강화, 마법부여 없이 그 선택지와 조율, 해방 수치를 보낸다', () => {
-  const rows = toSimulatorRows(withoutWeapon(characterDetailFixture('dealer')))
+  const rows = toSimulatorRows(
+    withoutWeapon(characterDetailFixture('dealer')),
+    loadedEnchantOptions
+  )
   const unworn = slotOf(slotsOf(rows), 'WEAPON')
   const release = unworn.variants.find(({ weapon }) => weapon?.line === '해방')!
   const tunable = unworn.variants.find(({ maxTune }) => maxTune > 0)!
@@ -1150,7 +1188,7 @@ it('장비가 모두 비어 주 세트가 없어도 세트를 고르면 빈 11�
       setItemInfo: []
     }
   }
-  const rows = toSimulatorRows(emptied)
+  const rows = toSimulatorRows(emptied, loadedEnchantOptions)
   const equipmentSet = toEquipmentSet(emptied)
   const chosen = apply(NO_CHANGES, {
     type: 'equipmentSet',
