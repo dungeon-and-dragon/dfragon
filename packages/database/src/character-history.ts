@@ -331,7 +331,7 @@ async function findOrCreateEngineId(
 }
 
 export async function readCharacterHistory(
-  client: DatabaseClient,
+  client: DatabaseClient | Prisma.TransactionClient,
   { serverId, characterId }: CharacterHistoryKey
 ): Promise<StoredCharacterHistory> {
   const where = { serverId, characterId }
