@@ -43,7 +43,7 @@ import {
   toSeasonBackfillJobs,
   toSeasonBackfillProgress
 } from '#domain/character-timeline/index.js'
-import { parseTimelineClearRow, parseTimelineEnhancementRow } from './character-timeline-read.js'
+import { parseTimelineClearRow, parseTimelineEnhancementRow } from './timeline-rows.js'
 
 export type ActivityRecords = {
   clears: readonly TimelineEventRow[]

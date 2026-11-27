@@ -9,6 +9,7 @@ import {
   readRecentTimelineItems
 } from '@dfragon/database'
 import {
+  ACQUISITION_CODES,
   ENHANCEMENT_KINDS,
   RAID_CLEAR_CODES,
   TIMELINE_PAGE_SIZE,
@@ -24,11 +25,7 @@ import {
   toAdventureTimelinePage,
   toSourceCursor
 } from '#domain/adventure-guild/index.js'
-import {
-  PAGE_QUERIES,
-  parseTimelineClearRow,
-  parseTimelineEnhancementRow
-} from './character-timeline-read.js'
+import { parseTimelineClearRow, parseTimelineEnhancementRow } from './timeline-rows.js'
 
 type ItemFilter = Pick<RecentTimelineItemQuery, 'codes' | 'itemRarities'>
 
@@ -41,9 +38,11 @@ const ENHANCEMENT_CODES = [...ENHANCEMENT_KINDS]
   .filter(([, kind]) => kind !== 'refine')
   .map(([code]) => code)
 
+const ACQUISITION_FILTER = { codes: ACQUISITION_CODES, itemRarities: ['에픽', '태초'] }
+
 const READS = {
   enhancement: { source: 'item', filter: { codes: ENHANCEMENT_CODES } },
-  acquisition: { source: 'item', filter: PAGE_QUERIES.acquisitions },
+  acquisition: { source: 'item', filter: ACQUISITION_FILTER },
   clear: { source: 'event', codes: RAID_CLEAR_CODES }
 } as const satisfies Record<AdventureTimelineKind, TimelineRead>
 

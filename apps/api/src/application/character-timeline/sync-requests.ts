@@ -4,13 +4,7 @@ import {
   isSyncedRecently
 } from '@dfragon/server-core/application/character-timeline/index.js'
 import type { SeasonBackfillJob } from '@dfragon/server-core/domain/character-timeline/index.js'
-import type { Pause } from './ports.js'
 import type { TimelineSyncRequestRepository } from './repository.js'
-
-// 이 시간을 넘기면 동기화가 끝나지 않았어도 그때 저장된 값으로 답한다(ADR 0091).
-const SYNC_WAIT_MS = 10_000
-// worker가 빈 테이블을 0.5초마다 보므로, 행이 없어진 뒤 그 절반 안에 알아챈다.
-const SYNC_WAIT_POLL_MS = 250
 
 const characterKey = ({ serverId, characterId }: TimelineCharacter) => `${serverId}/${characterId}`
 
@@ -26,12 +20,9 @@ export type RequestTimelineSync = (characters: readonly TimelineCharacter[]) => 
 
 export type TimelineSyncRequestPorts = {
   now: () => Date
-  pause: Pause
 }
 
 export class TimelineSyncRequestService {
-  private closed = false
-
   constructor(
     private readonly repository: TimelineSyncRequestRepository,
     private readonly ports: TimelineSyncRequestPorts
@@ -68,30 +59,7 @@ export class TimelineSyncRequestService {
     }
 
     if (requests.length > 0) {
-      await this.repository.request(requests, { awaited: false })
-    }
-  }
-
-  async syncAndWait(character: TimelineCharacter): Promise<void> {
-    const [state] = await this.repository.readStates([character])
-
-    if (isSyncedRecently(state, this.ports.now())) {
-      return
-    }
-
-    const request = syncRequest(character)
-    await this.repository.request([request], { awaited: true })
-
-    const deadline = this.ports.now().getTime() + SYNC_WAIT_MS
-
-    while (!this.closed && (await this.repository.has(request))) {
-      const remaining = deadline - this.ports.now().getTime()
-
-      if (remaining <= 0) {
-        return
-      }
-
-      await this.ports.pause(Math.min(SYNC_WAIT_POLL_MS, remaining))
+      await this.repository.request(requests)
     }
   }
 
@@ -106,7 +74,7 @@ export class TimelineSyncRequestService {
       seasonId
     }))
 
-    await this.repository.request(requests, { awaited: false })
+    await this.repository.request(requests)
   }
 
   // 옛 시즌 받기 요청 행이 남아 있는 시즌이 받는 중인 시즌이다.
@@ -118,9 +86,5 @@ export class TimelineSyncRequestService {
     }
 
     return new Set(await this.repository.readSeasonBackfillSeasons(characters))
-  }
-
-  close(): void {
-    this.closed = true
   }
 }
