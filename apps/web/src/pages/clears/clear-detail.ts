@@ -16,6 +16,7 @@ import {
   type ClearStageMoves,
   type ClearWeek,
   type ClearWeekOverWeek,
+  isAwakenedJob,
   shareText
 } from '#entities/ranking'
 import { type ContentChoice, type GroupedContent, groupsOf } from './clear-groups'
@@ -429,6 +430,7 @@ function compareJobs(sort: JobSort): (left: RankedJob, right: RankedJob) => numb
 
 export function jobRows(jobs: readonly ClearJob[], sort: JobSort, metric: JobMetric): JobRow[] {
   return jobs
+    .filter(isAwakenedJob)
     .map((job) => rankedJob(job, metric))
     .toSorted(compareJobs(sort))
     .map(({ row }) => row)

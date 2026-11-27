@@ -12,6 +12,7 @@ import {
   type ClearFameDistribution,
   type ClearTimes,
   type ClearWeek,
+  isAwakenedJob,
   shareText
 } from '#entities/ranking'
 import { addDays } from './clear-weeks'
@@ -349,6 +350,7 @@ function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPl
 // 명성과 장비 점수를 바꿔도 순위 목록이 같도록 명성 분포가 있는 전직으로 순위를 정한다.
 export function jobRanks(jobs: readonly ClearOverviewJob[], metric: JobMetric): JobRanks {
   const rows = jobs
+    .filter(isAwakenedJob)
     .flatMap((job) => {
       if (job.population === 0 || job.fame === null) {
         return []
