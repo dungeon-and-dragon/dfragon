@@ -2,7 +2,8 @@ import { Hono } from 'hono'
 import type { LabItemDetailService } from '#application/lab-item-details/index.js'
 import { OpsFailure } from '#domain/failure.js'
 import { readJsonBody } from '#presentation/http/json-request.js'
-import { readItemName, saveBody, toLabItemDetailListResponse } from './dto.js'
+import { readItemName } from '#presentation/http/lab-fields.js'
+import { saveBody, toLabItemDetailListResponse } from './dto.js'
 
 export class LabItemDetailController {
   constructor(private readonly service: LabItemDetailService) {}
