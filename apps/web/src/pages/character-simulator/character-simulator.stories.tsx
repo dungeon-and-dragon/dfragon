@@ -9,6 +9,7 @@ import {
   withPendingReleaseWeapon,
   withSwitchingEquipment
 } from './api/simulation.fixture'
+import { enchantOptionsHandlers } from './api/enchant-options.handlers'
 import { simulatorStoryHandlers } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
 
@@ -139,8 +140,16 @@ async function changeDealerEquipment({ canvasElement }: { canvasElement: HTMLEle
   await choose(canvasElement, '상의')
   await press(canvasElement, '상의 증폭')
   await press(canvasElement, '상의 수치 올리기', 10)
-  await choose(canvasElement, '목걸이')
-  await toggle(canvasElement, '목걸이 마법부여', '최종 데미지 증가 +2%')
+  await choose(canvasElement, '하의')
+  await toggle(canvasElement, '하의 마법부여', '최종 데미지 증가 +3%')
+}
+
+async function choosePants({ canvasElement }: { canvasElement: HTMLElement }) {
+  await choose(canvasElement, '하의')
+}
+
+function withEnchantOptions(override: RequestHandler): Handlers {
+  return (detail) => [override, ...simulatorStoryHandlers.calculated(detail)]
 }
 
 async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }) {
@@ -336,6 +345,21 @@ export const 무기해방: Story = {
 export const 빈부위: Story = {
   ...screenStory('dealer', simulatorStoryHandlers.calculated, withEmptySlots),
   play: chooseWeapon
+}
+
+export const 마법부여: Story = {
+  ...screenStory('dealer', simulatorStoryHandlers.calculated),
+  play: choosePants
+}
+
+export const 마법부여받는중: Story = {
+  ...screenStory('dealer', withEnchantOptions(enchantOptionsHandlers.loading)),
+  play: choosePants
+}
+
+export const 마법부여실패: Story = {
+  ...screenStory('dealer', withEnchantOptions(enchantOptionsHandlers.failure)),
+  play: choosePants
 }
 
 export const 휴대폰: Story = {

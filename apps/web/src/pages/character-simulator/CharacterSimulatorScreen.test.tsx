@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-import { enchantOptionsOf } from '@dfragon/lib/enchant-grades'
 import {
   type EquipmentVariantSlot,
   equipmentSets,
@@ -35,6 +34,8 @@ import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
 import { ITEM_DETAIL_URL, itemDetailHandlers } from '#widgets/item-tooltip/api/item-detail.handlers'
+import { DEALER_PANTS_FINAL } from './api/enchant-options.fixture'
+import { enchantOptionsHandlers } from './api/enchant-options.handlers'
 import { simulationScore, withSwitchingEquipment } from './api/simulation.fixture'
 import { simulationUrl } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
@@ -49,7 +50,7 @@ let root: Root
 let bodies: SimulationBody[]
 
 beforeEach(() => {
-  server.use(oathCatalogHandlers.notUploaded)
+  server.use(oathCatalogHandlers.notUploaded, ...enchantOptionsHandlers.options())
   bodies = []
   container = document.createElement('div')
   document.body.append(container)
@@ -288,7 +289,8 @@ it('열면 착용한 장비의 수치, 증폭, 마법부여를 기본값으로 �
   expect(bodies).toEqual([{ equipment: [] }])
   expect(reinforceOf('무기')).toBe('+10')
   expect(control('무기 증폭').getAttribute('aria-checked')).toBe('false')
-  expect(pressedIn('무기 마법부여')).toBe('현재 마법부여화속성 강화 +15, 명속성 강화 +15')
+  expect(pressedButton('무기 마법부여')?.getAttribute('aria-label')).toBe('현재 마법부여')
+  expect(pressedIn('무기 마법부여')).toBe('화속성 강화 +15, 명속성 강화 +15')
 
   await choose('상의')
 
@@ -308,7 +310,6 @@ it('열면 착용한 장비의 수치, 증폭, 마법부여를 기본값으로 �
 })
 
 it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 점수와 차이를 새 결과로 바꾼다', async () => {
-  const [amuletOption] = enchantOptionsOf('AMULET', 'dealer').종결
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -318,8 +319,8 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
 
   await step('무기 수치 올리기', 2)
   await act(async () => control('무기 증폭').click())
-  await choose('목걸이')
-  await press('목걸이 마법부여', '최종 데미지 증가 +2%')
+  await choose('하의')
+  await press('하의 마법부여', '최종 데미지 증가 +3%')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -331,10 +332,10 @@ it('값을 바꾸면 바꾼 부위의 상태 전체를 요청하고 오른쪽 �
       { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 12, amplified: true, enchantId: null },
       {
         ...KEPT_ITEM,
-        slotId: 'AMULET',
+        slotId: 'PANTS',
         reinforce: 0,
         amplified: false,
-        enchantId: amuletOption!.id
+        enchantId: DEALER_PANTS_FINAL
       }
     ]
   })
@@ -1193,8 +1194,10 @@ it('좁은 화면에서는 장비창의 줄을 누르면 그 줄의 조작을 �
     3
   )
   expect(
-    sheet?.querySelector('[aria-label="상의 마법부여"] [aria-pressed="true"]')?.textContent
-  ).toMatch(/^현재 마법부여/)
+    sheet
+      ?.querySelector('[aria-label="상의 마법부여"] [aria-pressed="true"]')
+      ?.getAttribute('aria-label')
+  ).toBe('현재 마법부여')
 
   await choose('무기')
 
@@ -1796,4 +1799,100 @@ it('초기화하면 고른 아바타 프리셋, 스위칭 레벨과 짙편린 �
   expect(rowValueOf('스위칭')).toBe('광적인 믿음 16레벨, 짙편린 0부위')
   expect(control('스위칭 레벨').textContent).toBe('16레벨')
   expect((control('짙편린 부위 수') as HTMLInputElement).value).toBe('0')
+})
+
+function enchantTiers(slotLabel: string): string[] {
+  const labels = control(`${slotLabel} 마법부여`).querySelectorAll('.chip-list-label')
+
+  return [...labels].map((label) => label.textContent ?? '')
+}
+
+function wornEnchantIcon(slotLabel: string): Element {
+  const worn = control(`${slotLabel} 마법부여`).querySelector('[aria-label="현재 마법부여"]')
+  expect(worn, slotLabel).not.toBeNull()
+
+  return worn!.firstElementChild!
+}
+
+async function openDealerPants(): Promise<void> {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,000'],
+    ['차이', '0']
+  ])
+  await choose('하의')
+}
+
+it('마법부여는 현재, 종결, 준종결, 배럭 구획 순서이고 선택지가 없는 구획은 그리지 않는다', async () => {
+  await openDealerPants()
+
+  expect(enchantTiers('하의')).toEqual(['현재', '종결', '준종결', '배럭'])
+
+  await choose('목걸이')
+
+  expect(enchantTiers('목걸이')).toEqual(['현재', '종결'])
+})
+
+it('선택지마다 첫 카드의 이름과 가격만 보이고, 재화로 사는 카드는 개수와 재화를, 올린 아이콘이 있으면 그 아이콘을 보인다', async () => {
+  await openDealerPants()
+  const [, final, , barracks] = buttonsIn('하의 마법부여')
+
+  expect(final!.textContent).toContain('합성 하의 카드26,498,500')
+  expect(final!.textContent).not.toContain('합성 비싼 하의 카드')
+  expect(final!.querySelector('img')!.getAttribute('src')).toContain(
+    '42ee831ce6b283ecd8b06969caad7894'
+  )
+  expect(barracks!.textContent).toContain('합성 하의 보주240')
+  expect(barracks!.querySelector('img[alt="합성 교환 주화"]')).not.toBeNull()
+  expect(barracks!.querySelector('img')!.getAttribute('src')).toContain('/api/lab/item-icon?')
+})
+
+it('버퍼 캐릭터에는 버퍼 선택지만 보인다', async () => {
+  await render(characterDetailFixture('buffer'))
+  await expect.poll(() => rowsIn('장비').length).toBeGreaterThan(0)
+  await choose('상의')
+
+  await expect
+    .poll(() => buttonNames('상의 마법부여').slice(1))
+    .toEqual([expect.stringContaining('합성 버퍼 상의 카드')])
+})
+
+it('현재 줄은 착용한 마법부여와 표시가 같은 선택지의 첫 카드 아이콘을 보이고, 같은 선택지가 없으면 빈 아이콘 칸이다', async () => {
+  await openDealerPants()
+
+  expect(wornEnchantIcon('하의').getAttribute('src')).toContain('42ee831ce6b283ecd8b06969caad7894')
+  expect(pressedButton('하의 마법부여')?.getAttribute('aria-label')).toBe('현재 마법부여')
+
+  await choose('목걸이')
+
+  expect(wornEnchantIcon('목걸이').tagName).toBe('SPAN')
+})
+
+it('마법부여 목록을 받지 못해도 현재 줄을 빈 아이콘 칸으로 두고 실패 문구를 보이며, 강화를 바꾸면 계산을 요청한다', async () => {
+  server.use(enchantOptionsHandlers.failure)
+  await openDealerPants()
+
+  await expect
+    .poll(() => control('하의 마법부여').textContent)
+    .toContain('마법부여 목록을 불러오지 못했습니다.')
+  expect(enchantTiers('하의')).toEqual(['현재'])
+  expect(wornEnchantIcon('하의').tagName).toBe('SPAN')
+
+  await step('하의 수치 올리기', 1)
+
+  await waitForScores([
+    ['현재', '1,000,000'],
+    ['변경 후', '1,000,001'],
+    ['차이', '+1']
+  ])
+})
+
+it('마법부여 목록을 받는 동안에는 현재 줄만 빈 아이콘 칸으로 둔다', async () => {
+  server.use(enchantOptionsHandlers.loading)
+  await openDealerPants()
+
+  expect(enchantTiers('하의')).toEqual(['현재'])
+  expect(wornEnchantIcon('하의').tagName).toBe('SPAN')
+  expect(control('하의 마법부여').textContent).not.toContain('불러오지 못했습니다')
 })

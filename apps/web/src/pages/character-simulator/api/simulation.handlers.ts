@@ -9,6 +9,7 @@ import type { SimulationBody } from '#pages/character-simulator/model/simulator-
 import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
 import { ITEM_DETAIL_URL } from '#widgets/item-tooltip/api/item-detail.handlers'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
+import { enchantOptionsHandlers } from './enchant-options.handlers'
 import {
   calculatorOf,
   simulationScore,
@@ -64,6 +65,7 @@ function simulatorHandlers(detail: CharacterDetailView, simulate: Simulate) {
   return [
     slotItemDetailHandler,
     oathCatalogHandlers.catalog(simulatorOathCatalog),
+    ...enchantOptionsHandlers.options(),
     http.get(characterUrl(identity), () => HttpResponse.json(detail)),
     http.post(simulationUrl(identity), async ({ request }) => {
       const body = (await request.json()) as SimulationBody

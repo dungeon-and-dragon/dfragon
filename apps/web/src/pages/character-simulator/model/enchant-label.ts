@@ -1,8 +1,4 @@
-import {
-  displayStatusOf,
-  type EnchantDisplayStatus,
-  type EnchantGradeOption
-} from '@dfragon/lib/enchant-grades'
+import { displayStatusOf, type EnchantDisplayStatus } from '@dfragon/lib/enchant-grades'
 import {
   BUFF_PASSIVE_SKILL,
   buffSkillLevel,
@@ -23,7 +19,7 @@ function displayName(name: string): string {
 }
 
 /**
- * 묶음 표시 규칙은 등급표와 같은 lib의 규칙을 쓰고, 여기서는 이름 띄어쓰기, 부호, 스킬 레벨 줄과 역할별 강조, 순서만
+ * 묶음 표시 규칙은 API의 선택지와 같은 lib의 규칙을 쓰고, 여기서는 이름 띄어쓰기, 부호, 스킬 레벨 줄과 역할별 강조, 순서만
  * 정한다. 강조와 순서는 캐릭터 상세 장비 탭과 같은 규칙이다.
  */
 function labelsOf(
@@ -63,12 +59,10 @@ function labelsOf(
 }
 
 export function optionEnchantLabels(
-  option: EnchantGradeOption,
+  { display, skillLevel }: { display: readonly EnchantDisplayStatus[]; skillLevel: number | null },
   role: EnchantRole
 ): EnchantOption[] {
-  const [first = null] = option.members
-
-  return labelsOf(option.display, buffSkillLevel(first), role)
+  return labelsOf(display, skillLevel, role)
 }
 
 export function equippedEnchantLabels(

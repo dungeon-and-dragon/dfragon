@@ -6,10 +6,14 @@ import {
   enhancementTextClasses,
   ItemIcon,
   ItemName,
-  type ItemView
+  type ItemView,
+  itemPartClasses,
+  itemRarityOfGrade,
+  raritySolidOf
 } from '#entities/character'
 import { ItemTooltip } from '#widgets/item-tooltip'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
+import type { LabEnchantCard } from '#pages/character-simulator/api/useEnchantOptions'
 import {
   type EnchantChoice,
   FULL_POTENCY,
@@ -19,9 +23,10 @@ import {
 } from '#pages/character-simulator/model/simulator-draft'
 import { TuneSelect } from './TuneSelect'
 
-// 등급표 id는 `부위:카드:역할`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템`, 장비 선택지 id는 32자리 itemId 모양이라 이 값과 겹치지 않는다.
+// 마법부여 선택지 id는 `lab:부위:역할:hash`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템`, 장비 선택지 id는 32자리 itemId 모양이라 이 값과 겹치지 않는다.
 const CURRENT = 'current'
-const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결']
+const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결', '배럭']
+const integer = new Intl.NumberFormat('ko-KR')
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
 const CONTROL_LINE = 'flex h-control-sm items-center'
 
@@ -38,11 +43,13 @@ function ChoiceChip({
   value,
   chosen,
   onChoose,
+  ariaLabel,
   children
 }: {
   value: string
   chosen: string
   onChoose: (value: string) => void
+  ariaLabel?: string
   children: React.ReactNode
 }): React.JSX.Element {
   function changePressed(pressed: boolean): void {
@@ -52,7 +59,7 @@ function ChoiceChip({
   }
 
   return (
-    <Chip pressed={value === chosen} onPressedChange={changePressed}>
+    <Chip pressed={value === chosen} onPressedChange={changePressed} aria-label={ariaLabel}>
       {children}
     </Chip>
   )
@@ -306,6 +313,45 @@ function joinLabels(options: readonly EnchantOption[]): string {
   return options.map(({ label }) => label).join(', ')
 }
 
+// iconUrl은 소유자가 올린 그림이라 Neople 아이콘보다 먼저 쓴다.
+function EnchantCardIcon({ card }: { card: LabEnchantCard | null }): React.JSX.Element {
+  if (card === null) {
+    return <ItemIcon itemId={null} rarity={null} />
+  }
+
+  const rarity = itemRarityOfGrade(card.itemRarity)
+
+  if (card.iconUrl === null) {
+    return <ItemIcon itemId={card.itemId} rarity={rarity} />
+  }
+
+  return (
+    <img
+      src={card.iconUrl}
+      alt=""
+      loading="lazy"
+      className={`${itemPartClasses.icon} size-game-icon ${raritySolidOf(rarity)}`}
+    />
+  )
+}
+
+function EnchantCardPrice({ card }: { card: LabEnchantCard }): React.JSX.Element {
+  if (card.cost !== null) {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-1">
+        <span className="num">{integer.format(card.cost.count)}</span>
+        <img src={card.cost.iconUrl} alt={card.cost.currencyName} className="size-[16px]" />
+      </span>
+    )
+  }
+
+  if (card.unitPrice === null) {
+    return <span className="num shrink-0">{MISSING_VALUE}</span>
+  }
+
+  return <span className="num shrink-0">{integer.format(card.unitPrice)}</span>
+}
+
 export function EnchantText({ options }: { options: readonly EnchantOption[] }): React.JSX.Element {
   const important = joinLabels(options.filter(({ emphasized }) => emphasized))
   const minor = joinLabels(options.filter(({ emphasized }) => !emphasized))
@@ -343,12 +389,21 @@ export function EnchantControl({
 
   return (
     <div className="chip-list" role="group" aria-label={label}>
-      <ChoiceChip value={CURRENT} chosen={chosen} onChoose={changeEnchant}>
-        <span className="shrink-0">현재 마법부여</span>
-        {slot.enchants.length > 0 && (
-          <span className="text-xs text-fg-subtle">{joinLabels(slot.enchants)}</span>
-        )}
+      <span className="chip-list-label">현재</span>
+      <ChoiceChip
+        value={CURRENT}
+        chosen={chosen}
+        onChoose={changeEnchant}
+        ariaLabel="현재 마법부여"
+      >
+        <EnchantCardIcon card={slot.wornEnchantCard} />
+        <span className="min-w-0 grow text-xs">
+          <EnchantText options={slot.enchants} />
+        </span>
       </ChoiceChip>
+      {slot.enchantChoicesStatus === 'error' && (
+        <p className="m-0 pt-2 text-xs text-fg-subtle">마법부여 목록을 불러오지 못했습니다.</p>
+      )}
       {ENCHANT_TIERS.map((tier) => {
         const choices = slot.enchantChoices.filter((choice) => choice.tier === tier)
 
@@ -366,8 +421,15 @@ export function EnchantControl({
                 chosen={chosen}
                 onChoose={changeEnchant}
               >
-                <span className="text-xs">
-                  <EnchantText options={choice.options} />
+                <EnchantCardIcon card={choice.card} />
+                <span className="flex min-w-0 grow flex-col gap-1 text-xs">
+                  <span>
+                    <EnchantText options={choice.options} />
+                  </span>
+                  <span className="flex items-center justify-between gap-3 text-2xs text-fg-muted">
+                    <span className="truncate">{choice.card.itemName}</span>
+                    <EnchantCardPrice card={choice.card} />
+                  </span>
                 </span>
               </ChoiceChip>
             ))}

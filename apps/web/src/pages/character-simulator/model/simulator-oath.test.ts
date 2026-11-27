@@ -1,9 +1,11 @@
+// @vitest-environment jsdom
 import {
   oathCrystalVariantsOf,
   oathVariantOf,
   oathVariantsOf
 } from '@dfragon/lib/equipment-variants'
 import { expect, it } from 'vitest'
+import { loadedEnchantOptions } from '#pages/character-simulator/api/enchant-options.fixture'
 import type { CharacterDetailView } from '#entities/character'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import {
@@ -106,7 +108,13 @@ it('서약 세트를 고르면 본체와 광휘 결정이 그 세트의 같은 �
     ...Array.from({ length: 3 }, () => crystalId(SHADOW_SET, '태초'))
   ])
   expect(view.crystals.map(({ wornTune }) => wornTune)).toEqual([3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0])
-  expect(simulationBody(toSimulatorRows(characterDetailFixture('dealer')), view, changed)).toEqual({
+  expect(
+    simulationBody(
+      toSimulatorRows(characterDetailFixture('dealer'), loadedEnchantOptions),
+      view,
+      changed
+    )
+  ).toEqual({
     equipment: [],
     oathSet: SHADOW_SET
   })
@@ -435,7 +443,7 @@ it('응답에 서약 세트가 없는 캐릭터도 서약 세트를 고르면 �
 
   expect(crystalAt(view, 3).wornVariantId).toBe(crystalId(SHADOW_SET, '유니크'))
   expect(crystalAt(view, 0).wornVariantId).toBeNull()
-  expect(simulationBody(toSimulatorRows(detail), view, changed)).toEqual({
+  expect(simulationBody(toSimulatorRows(detail, loadedEnchantOptions), view, changed)).toEqual({
     equipment: [],
     oathSet: SHADOW_SET
   })
@@ -516,7 +524,7 @@ it('비어 있는 결정 칸은 착용 세트의 결정을 고를 수 있고 고
     wornVariantId: null
   })
   expect(idsOf(empty.choices)).toEqual(idsOf(oathCrystalVariantsOf(DRAGON_SET)))
-  expect(simulationBody(toSimulatorRows(partial), view, changed)).toEqual({
+  expect(simulationBody(toSimulatorRows(partial, loadedEnchantOptions), view, changed)).toEqual({
     equipment: [],
     oath: [{ slotNo: 10, tune: 0, variantId: epic }]
   })
@@ -525,7 +533,7 @@ it('비어 있는 결정 칸은 착용 세트의 결정을 고를 수 있고 고
 it('서약이 없으면 본체를 고르기 전에는 서약 세트를 골라도 서약을 요청하지 않는다', () => {
   const detail = { ...characterDetailFixture('dealer'), oath: null }
   const empty = toSimulatorOath(detail)
-  const rows = toSimulatorRows(detail)
+  const rows = toSimulatorRows(detail, loadedEnchantOptions)
   const setOnly = apply(NO_CHANGES, { type: 'oathSet', oath: empty, setId: SHADOW_SET })
   const chosen = oathVariantOf(SHADOW_SET, '태초')!
   const withBody = apply(setOnly, { type: 'oathBody', body: empty.body!, id: chosen.id })

@@ -2,6 +2,7 @@ import { useCallback, useId, useMemo, useReducer, useState } from 'react'
 import type { CharacterDetailView } from '#entities/character'
 import { useCharacterDetail } from '#entities/character-detail'
 import { LoadingLine } from '#shared/ui/LoadingLine'
+import { useEnchantOptions } from './api/useEnchantOptions'
 import { useEquipmentSimulation } from './api/useEquipmentSimulation'
 import { EquipmentList, EtcList, OathList } from './components/EquipmentList'
 import { SimulatorHeader } from './components/SimulatorHeader'
@@ -99,7 +100,13 @@ function useInView(): [(node: HTMLElement | null) => (() => void) | undefined, b
 function Simulator({ detail }: { detail: CharacterDetailView }): React.JSX.Element {
   const { character } = detail
   const identity = { serverId: character.serverId, characterId: character.characterId }
-  const wornRows = useMemo(() => toSimulatorRows(detail), [detail])
+  const enchantResult = useEnchantOptions()
+  const enchantStatus = enchantResult.status
+  const enchantValue = enchantResult.status === 'success' ? enchantResult.value : null
+  const wornRows = useMemo(
+    () => toSimulatorRows(detail, { status: enchantStatus, options: enchantValue }),
+    [detail, enchantStatus, enchantValue]
+  )
   const equipmentSet = useMemo(() => toEquipmentSet(detail), [detail])
   const wornOath = useMemo(() => toSimulatorOath(detail), [detail])
   const avatarPresetAvailable = useMemo(
