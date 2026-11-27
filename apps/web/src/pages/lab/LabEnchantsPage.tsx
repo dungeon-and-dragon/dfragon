@@ -79,7 +79,13 @@ function LabEnchantsBody({
         <>
           {roleChips}
           {enchantRows.length > 0 && (
-            <LabItemTable categoryLabel="부위" itemLabel="카드" rows={enchantRows} role={role} />
+            <LabItemTable
+              categoryLabel="부위"
+              itemLabel="카드"
+              rows={enchantRows}
+              role={role}
+              withFame
+            />
           )}
           {accessoryRows.length > 0 && (
             <section aria-label={ACCESSORY_TITLE}>

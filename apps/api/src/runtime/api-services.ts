@@ -260,7 +260,10 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     new CharacterTimelineService(emptyCharacterTimelineRepository, noTimelineSync)
   const adventureGuild = createAdventureGuild(options.adventureGuild, timelineSync)
   const rankingStats = new RankingStatsService(options.rankingStats ?? emptyRankingStatsRepository)
-  const labItems = new LabItemService(options.labItems ?? emptyLabItemRepository)
+  const labItems = new LabItemService(
+    options.labItems ?? emptyLabItemRepository,
+    (itemIds, signal) => options.details.catalog.load(itemIds, signal)
+  )
   const clearStats = new ClearStatsService(options.clearStats ?? emptyClearStatsRepository, () =>
     reportCode('CLEAR_STATS_REFRESH_FAILED')
   )

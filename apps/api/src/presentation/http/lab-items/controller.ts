@@ -1,5 +1,7 @@
+import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
 import type { LabItemService } from '#application/lab-items/index.js'
+import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
 import { type LabItemsResponse, readCurrencyId } from './dto.js'
 
 // 아이콘 주소에 바꾼 시각이 들어가 같은 주소의 본문은 바뀌지 않는다.
@@ -16,14 +18,16 @@ function iconHeaders(contentType: string) {
 export class LabItemController {
   constructor(private readonly service: LabItemService) {}
 
-  routes(): Hono {
-    const routes = new Hono()
+  routes(): Hono<AccessLogEnv> {
+    const routes = new Hono<AccessLogEnv>()
 
-    routes.get('/items', async (c) => {
-      const labItems: LabItemsResponse = await this.service.get()
+    routes.get('/items', (c) =>
+      respondUnlessDisconnected(c, async (signal) => {
+        const labItems: LabItemsResponse = await this.service.get(signal)
 
-      return c.json(labItems)
-    })
+        return c.json(labItems)
+      })
+    )
 
     routes.get('/currencies/:id/icon', async (c) => {
       const id = readCurrencyId(c.req.param('id'))

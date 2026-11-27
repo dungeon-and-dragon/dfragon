@@ -11,7 +11,7 @@ export const LAB_CURRENCY_ICON_PATH = '/lab/currencies/1/icon?v=1764135000000'
 export const LAB_ITEM_ICON_PATH = `/lab/item-icon?${new URLSearchParams({ itemName: '합성 무기 보주', v: '1764135000000' })}`
 
 // 이름은 마법부여 등급표와 부위별 아이템 id 파일에 있는 이름이고, 칭호, 크리쳐, 오라의 itemId와 레어리티는 그 파일 그대로다.
-// 카드의 itemId는 그 파일에 없어 바칼 카드만 Neople 응답에서 받은 itemId를 쓰고 나머지는 null로 두며, 가격은 합성 값이다. 보주와 재화의 이름, 설명, 보주의 tooltip 값은 지어낸 값이다.
+// 카드의 itemId는 그 파일에 없어 바칼 카드만 Neople 응답에서 받은 itemId를 쓰고 나머지는 null로 두며, 가격과 명성은 합성 값이다. 보주와 재화의 이름, 설명, 보주의 tooltip 값은 지어낸 값이다.
 export const labItemsFixture = {
   items: {
     groups: [
@@ -22,6 +22,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '멸절의 폭룡왕 바칼 카드',
+            fame: 210,
             itemId: STORY_CARD_ITEM_ID,
             itemRarity: '레전더리',
             iconPath: null,
@@ -38,17 +39,8 @@ export const labItemsFixture = {
         tier: '준종결',
         items: [
           {
-            itemName: '허망한 맹신, 호스디그 카드',
-            itemId: null,
-            itemRarity: '유니크',
-            iconPath: null,
-            description: null,
-            unitPrice: null,
-            checkedAt: CHECKED_AT,
-            cost: null
-          },
-          {
             itemName: '합성 무기 보주',
+            fame: 232,
             itemId: null,
             itemRarity: '유니크',
             iconPath: LAB_ITEM_ICON_PATH,
@@ -96,6 +88,17 @@ export const labItemsFixture = {
                 ]
               }
             }
+          },
+          {
+            itemName: '허망한 맹신, 호스디그 카드',
+            fame: 210,
+            itemId: null,
+            itemRarity: '유니크',
+            iconPath: null,
+            description: null,
+            unitPrice: null,
+            checkedAt: CHECKED_AT,
+            cost: null
           }
         ]
       },
@@ -106,6 +109,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '뒤쫓는 자 제논 카드',
+            fame: 210,
             itemId: null,
             itemRarity: '레전더리',
             iconPath: null,
@@ -123,6 +127,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '대천사 미카엘 카드',
+            fame: 196,
             itemId: null,
             itemRarity: '유니크',
             iconPath: null,
@@ -133,6 +138,7 @@ export const labItemsFixture = {
           },
           {
             itemName: '혼돈의 천사 루치펠 카드',
+            fame: null,
             itemId: null,
             itemRarity: null,
             iconPath: null,
@@ -150,6 +156,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '천해천 딜러 상의 카드 (최종 데미지 3%)',
+            fame: 232,
             itemId: null,
             itemRarity: '레전더리',
             iconPath: null,
@@ -167,6 +174,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '중천 딜러 상의 카드 (최종 데미지 2%)',
+            fame: 221,
             itemId: null,
             itemRarity: '유니크',
             iconPath: null,
@@ -184,6 +192,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)',
+            fame: 232,
             itemId: null,
             itemRarity: '레전더리',
             iconPath: null,
@@ -201,6 +210,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '합성 여신 카드',
+            fame: 240,
             itemId: STORY_BUFF_CARD_ITEM_ID,
             itemRarity: '레전더리',
             iconPath: null,

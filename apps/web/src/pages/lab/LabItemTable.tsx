@@ -38,24 +38,26 @@ const LAST_ROW_CELL = 'border-b-0'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
-function priceOf(unitPrice: number | null): string {
-  if (unitPrice === null) {
+function integerText(value: number | null): string {
+  if (value === null) {
     return MISSING_VALUE
   }
 
-  return integer.format(unitPrice)
+  return integer.format(value)
 }
 
 export function LabItemTable({
   categoryLabel,
   itemLabel,
   rows,
-  role
+  role,
+  withFame = false
 }: {
   categoryLabel: string
   itemLabel: string
   rows: readonly LabCategoryRows[]
   role?: EnchantRole
+  withFame?: boolean
 }): React.JSX.Element {
   return (
     <div className="table-scroll">
@@ -64,6 +66,7 @@ export function LabItemTable({
           <col className="w-[120px]" />
           <col className="w-[120px]" />
           <col />
+          {withFame && <col className="w-[100px]" />}
           <col className="w-[160px]" />
         </colgroup>
         <thead>
@@ -75,6 +78,11 @@ export function LabItemTable({
               등급
             </th>
             <th scope="col">{itemLabel}</th>
+            {withFame && (
+              <th scope="col" className="table-num">
+                명성
+              </th>
+            )}
             <th scope="col" className="table-num">
               최저가
             </th>
@@ -109,6 +117,7 @@ export function LabItemTable({
                   <td className={MERGED_ROW_CELL}>
                     <LabItemName item={item} role={role} />
                   </td>
+                  {withFame && <td className="table-num">{integerText(item.fame)}</td>}
                   <td className="table-num font-semibold">
                     <LabItemPrice item={item} />
                   </td>
@@ -232,5 +241,5 @@ function LabItemPrice({ item }: { item: LabItem }): React.JSX.Element {
     return <CurrencyCost cost={item.cost} />
   }
 
-  return <>{priceOf(item.unitPrice)}</>
+  return <>{integerText(item.unitPrice)}</>
 }
