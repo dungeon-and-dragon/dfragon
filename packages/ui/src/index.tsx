@@ -43,6 +43,14 @@ export { ConfirmPopover } from './confirm-popover'
 export type { ConfirmPopoverProps } from './confirm-popover'
 export { Tooltip } from './tooltip'
 export type { TooltipPopupProps } from './tooltip'
+export { ItemDetailCard } from './item-detail-card'
+export type {
+  ItemDetail,
+  ItemDetailCardOption,
+  ItemDetailCardOptions,
+  ItemDetailCardProps,
+  ItemDetailStatus
+} from './item-detail-card'
 export { Pagination } from './pagination'
 export type { PaginationProps } from './pagination'
 export { StatusChip } from './status-chip'

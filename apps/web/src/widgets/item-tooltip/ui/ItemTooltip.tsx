@@ -1,55 +1,26 @@
 import { cardOptionRows, type EnchantRole } from '@dfragon/lib/enchant-options'
-import { Tooltip } from '@dfragon/ui'
-import { Fragment, type ReactElement, type ReactNode } from 'react'
+import { ItemDetailCard, type ItemDetailCardOptions, Tooltip } from '@dfragon/ui'
+import type { ReactElement, ReactNode } from 'react'
 import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
 import type { ItemCard, ItemTooltipDetail } from '#widgets/item-tooltip/model/item-detail'
-import { ItemIcon, raritySolidOfName, rarityTextOfName } from '#entities/character'
+import { ItemIcon } from '#entities/character'
 
-const FAME_STATUS = '모험가 명성'
 const FAILED = '아이템 정보를 받지 못했습니다.'
-const integer = new Intl.NumberFormat('ko-KR')
 
-const SEPARATOR = '|'
-
-function CardOptions({
-  card,
-  role
-}: {
-  card: ItemCard
+function cardOptions(
+  card: ItemCard | null,
   role: EnchantRole | undefined
-}): React.JSX.Element {
+): ItemDetailCardOptions | null {
+  if (card === null) {
+    return null
+  }
+
   const rows = cardOptionRows(card, role)
-  const stageCount = card.enchants.length
-  // 이름 열 뒤로 단계 값과 구분자 열을 번갈아 두어 단계마다 값이 세로로 맞는다.
-  const gridTemplateColumns = `max-content repeat(${Math.max(stageCount * 2 - 1, 1)}, max-content)`
 
-  return (
-    <div className="flex flex-col gap-2 border-t border-line pt-2">
-      <p data-card-slots="" className="m-0 text-fg-muted">
-        {card.slots.join(', ')}
-      </p>
-      <div className="grid gap-x-2" style={{ gridTemplateColumns }}>
-        {rows.map(({ name, values, emphasized }) => {
-          const tone = emphasized ? 'text-game-enchant' : ''
-
-          return (
-            <div key={name} data-card-option="" className="contents">
-              <span className={`pr-2 ${tone}`}>{name}</span>
-              {values.map((value, index) => (
-                <Fragment key={index}>
-                  {index > 0 && <span className="text-fg-subtle">{SEPARATOR}</span>}
-                  <span className={`num text-right ${tone}`}>{value}</span>
-                </Fragment>
-              ))}
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
+  return { slots: card.slots, rows }
 }
 
-function ItemDetailCard({
+function TooltipCard({
   item,
   icon,
   role
@@ -58,43 +29,9 @@ function ItemDetailCard({
   icon: ReactNode
   role: EnchantRole | undefined
 }): React.JSX.Element {
-  const status = item.status.filter(({ name }) => name !== FAME_STATUS)
-  const nameTone = rarityTextOfName(item.rarity ?? '') ?? 'text-fg'
+  const card = cardOptions(item.card, role)
 
-  return (
-    <div className="flex w-[280px] flex-col gap-2 text-fg">
-      <div className="flex items-start gap-2">
-        {icon}
-        <b className={`min-w-0 grow text-sm ${nameTone}`}>{item.name}</b>
-      </div>
-      <div className="flex flex-col items-end text-fg-muted">
-        {item.rarity !== null && (
-          <span className={`${raritySolidOfName(item.rarity) ?? ''}`}>{item.rarity}</span>
-        )}
-        {item.availableLevel !== null && <span>{`레벨제한 ${item.availableLevel}`}</span>}
-        {item.typeDetail !== null && <span>{item.typeDetail}</span>}
-      </div>
-      {item.fame !== null && (
-        <p className="m-0 border-t border-line pt-2 text-game-fame">
-          {`${FAME_STATUS} ${integer.format(item.fame)}`}
-        </p>
-      )}
-      {status.length > 0 && (
-        <ul className="m-0 flex list-none flex-col p-0">
-          {status.map(({ name, value }) => (
-            <li key={name}>{`${name} ${value}`}</li>
-          ))}
-        </ul>
-      )}
-      {item.card !== null && <CardOptions card={item.card} role={role} />}
-      {item.explain !== null && (
-        <p className="m-0 border-t border-line pt-2 whitespace-pre-line">{item.explain}</p>
-      )}
-      {item.flavorText !== null && (
-        <p className="m-0 whitespace-pre-line text-fg-subtle">{item.flavorText}</p>
-      )}
-    </div>
-  )
+  return <ItemDetailCard item={item} icon={icon} card={card} />
 }
 
 function ItemTooltipBody({
@@ -113,7 +50,7 @@ function ItemTooltipBody({
       return <p className="m-0 text-fg-muted">{FAILED}</p>
     case 'success':
       return (
-        <ItemDetailCard
+        <TooltipCard
           item={result.value}
           icon={<ItemIcon itemId={itemId} rarity={null} size="sm" />}
           role={role}
@@ -167,7 +104,7 @@ export function ItemDetailTooltip({
       <Tooltip.Trigger delay={0} closeDelay={0} render={children} />
       <Tooltip.Popup side="right" align="start" sideOffset={8}>
         <div className="tooltip-item">
-          <ItemDetailCard item={item} icon={icon} role={role} />
+          <TooltipCard item={item} icon={icon} role={role} />
         </div>
       </Tooltip.Popup>
     </Tooltip.Root>

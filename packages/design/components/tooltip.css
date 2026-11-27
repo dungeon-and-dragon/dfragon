@@ -87,6 +87,153 @@
   font-weight: var(--font-weight-normal);
 }
 
+/*
+ * <div class="tooltip-item"><div class="item-card">…</div></div>. 아이템 정보 카드다.
+ * 이름과 등급의 색은 data-rarity(common부터 mythic), 마법부여 옵션 강조는 이름과 값 칸의 data-emphasized로 그린다.
+ */
+.item-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 280px;
+  color: var(--color-fg);
+}
+
+.item-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.item-card-name {
+  min-width: 0;
+  flex-grow: 1;
+  font-size: var(--text-sm);
+  line-height: var(--text-sm--line-height);
+}
+
+.item-card-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: var(--color-fg-muted);
+}
+
+.item-card-section {
+  margin: 0;
+  border-top: 1px solid var(--color-line);
+  padding-top: 8px;
+}
+
+.item-card-fame {
+  color: var(--color-game-fame);
+}
+
+.item-card-status {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-card-enchant {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-card-slots {
+  margin: 0;
+  color: var(--color-fg-muted);
+}
+
+.item-card-options {
+  display: grid;
+  column-gap: 8px;
+}
+
+.item-card-option {
+  display: contents;
+}
+
+.item-card-option-name {
+  padding-right: 8px;
+}
+
+.item-card-option-value {
+  text-align: right;
+}
+
+.item-card-option-separator {
+  color: var(--color-fg-subtle);
+}
+
+.item-card-option-name[data-emphasized],
+.item-card-option-value[data-emphasized] {
+  color: var(--color-game-enchant);
+}
+
+.item-card-explain {
+  white-space: pre-line;
+}
+
+.item-card-flavor {
+  margin: 0;
+  white-space: pre-line;
+  color: var(--color-fg-subtle);
+}
+
+[data-rarity='common']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-common);
+}
+
+[data-rarity='uncommon']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-uncommon);
+}
+
+[data-rarity='rare']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-rare);
+}
+
+[data-rarity='unique']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-unique);
+}
+
+[data-rarity='epic']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-epic);
+}
+
+[data-rarity='legendary']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-legendary);
+}
+
+[data-rarity='chronicle']:where(.item-card-name, .item-card-rarity) {
+  color: var(--color-rarity-chronicle);
+}
+
+.item-card-rarity[data-rarity='primordial'] {
+  color: var(--color-rarity-primordial);
+}
+
+.item-card-rarity[data-rarity='mythic'] {
+  color: var(--color-rarity-mythic);
+}
+
+/* 이름은 좁은 자리가 아니라 태초, 신화를 그라데이션 글자로 그린다. */
+.item-card-name:is([data-rarity='primordial'], [data-rarity='mythic']) {
+  background-clip: text;
+  color: transparent;
+}
+
+.item-card-name[data-rarity='primordial'] {
+  background-image: var(--gradient-rarity-primordial);
+}
+
+.item-card-name[data-rarity='mythic'] {
+  background-image: var(--gradient-rarity-mythic);
+}
+
 @media (width < 1024px) {
   .tooltip-positioner:has(.tooltip-portrait) {
     display: none;
