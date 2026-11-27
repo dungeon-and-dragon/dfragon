@@ -610,3 +610,252 @@ test('카드가 한 번에 읽는 상한보다 많아도 모든 카드의 명성
   assert.equal(fames.length, 130)
   assert.ok(fames.every((fame) => fame === 210))
 })
+
+type EnchantOptionsBody = {
+  slots: {
+    slotId: string
+    role: string
+    tiers: {
+      tier: string
+      options: {
+        id: string
+        display: { name: string; value: number | string }[]
+        skillLevel: number | null
+        cards: { itemName: string; unitPrice: number | null }[]
+      }[]
+    }[]
+  }[]
+}
+
+// Neople 카드 상세의 cardInfo 모양이고, 값은 아이템 상세처럼 문자열이다.
+function enchantCardPayload(topStatus: { name: string; value: string }[]) {
+  return {
+    itemName: '합성 카드',
+    itemRarity: '레전더리',
+    cardInfo: {
+      slots: [{ slotName: '무기' }],
+      enchant: [
+        { upgrade: 0, status: [{ name: '모험가 명성', value: '100' }] },
+        { upgrade: 1, status: [...topStatus, { name: '모험가 명성', value: '200' }] }
+      ]
+    }
+  }
+}
+
+const ELEMENT_15 = [{ name: '모든 속성 강화', value: '15' }]
+const ATTACK_30 = [
+  { name: '물리 공격력', value: '30' },
+  { name: '마법 공격력', value: '30' },
+  { name: '독립 공격력', value: '30' }
+]
+
+function enchantCatalog(cards: Readonly<Record<string, { name: string; value: string }[]>>) {
+  const fetchCatalog: FetchCatalog = async (itemIds) =>
+    new Map(
+      itemIds.flatMap((itemId) => {
+        const status = cards[itemId]
+
+        if (status === undefined) {
+          return []
+        }
+
+        return [[itemId, enchantCardPayload(status)] as const]
+      })
+    )
+
+  return fetchCatalog
+}
+
+function enchantRow(
+  category: string,
+  role: string,
+  tier: string,
+  itemName: string,
+  itemId: string,
+  unitPrice: number | null
+): LabItemPriceRow {
+  return { ...row(category, role, tier, itemName, unitPrice), itemId }
+}
+
+function ownerRow(
+  category: string,
+  role: string,
+  tier: string,
+  itemName: string,
+  status: { name: string; value: string }[]
+): LabItemPriceRow {
+  return {
+    ...row(category, role, tier, itemName, null, false),
+    detail: {
+      description: null,
+      itemRarity: '유니크',
+      iconUpdatedAt: null,
+      itemTypeDetail: null,
+      availableLevel: null,
+      fame: null,
+      card: { slots: [], enchants: [{ upgrade: 0, status }] }
+    }
+  }
+}
+
+async function requestEnchantOptions(
+  t: test.TestContext,
+  rows: LabItemPriceRow[],
+  fetchCatalog: FetchCatalog = noCatalog
+): Promise<EnchantOptionsBody> {
+  const request = await startApi(t, rows, undefined, undefined, fetchCatalog)
+  const response = await request('/lab/enchant-options')
+
+  assert.equal(response.status, 200)
+
+  return (await response.json()) as EnchantOptionsBody
+}
+
+function cardNamesOf(body: EnchantOptionsBody) {
+  return body.slots.map(({ slotId, role, tiers }) => ({
+    slotId,
+    role,
+    tiers: tiers.map(({ tier, options }) => ({
+      tier,
+      options: options.map(({ cards }) => cards.map(({ itemName }) => itemName))
+    }))
+  }))
+}
+
+test('마법부여 선택지는 옵션이 같은 카드를 하나로 묶어 카드를 가격 낮은 순으로 두고, 카드에는 실험실 목록과 같은 가격 칸을 낸다', async (t) => {
+  const body = await requestEnchantOptions(
+    t,
+    [
+      enchantRow('WEAPON', 'dealer', '종결', '합성 비싼 카드', 'card-expensive', 9_000),
+      enchantRow('WEAPON', 'dealer', '종결', '합성 가격 없는 카드', 'card-unpriced', null),
+      enchantRow('WEAPON', 'dealer', '종결', '합성 싼 카드', 'card-cheap', 1_000)
+    ],
+    enchantCatalog({
+      'card-expensive': [...ELEMENT_15, ...ATTACK_30],
+      'card-unpriced': [...ELEMENT_15, ...ATTACK_30],
+      'card-cheap': [...ATTACK_30, ...ELEMENT_15]
+    })
+  )
+
+  const [option] = body.slots[0]!.tiers[0]!.options
+
+  assert.equal(body.slots[0]!.tiers[0]!.options.length, 1)
+  assert.deepEqual(option!.display, [
+    { name: '공격력', value: 30 },
+    { name: '모든 속성 강화', value: 15 }
+  ])
+  assert.equal(option!.skillLevel, null)
+  assert.deepEqual(option!.cards, [
+    {
+      itemName: '합성 싼 카드',
+      itemId: 'card-cheap',
+      itemRarity: '레전더리',
+      iconPath: null,
+      unitPrice: 1_000,
+      cost: null
+    },
+    {
+      itemName: '합성 비싼 카드',
+      itemId: 'card-expensive',
+      itemRarity: '레전더리',
+      iconPath: null,
+      unitPrice: 9_000,
+      cost: null
+    },
+    {
+      itemName: '합성 가격 없는 카드',
+      itemId: 'card-unpriced',
+      itemRarity: null,
+      iconPath: null,
+      unitPrice: null,
+      cost: null
+    }
+  ])
+})
+
+test('마법부여 선택지는 부위 순서, 딜러 다음 버퍼, 종결, 준종결, 배럭 순이고 두 등급에 걸친 옵션은 높은 등급에만 둔다', async (t) => {
+  const body = await requestEnchantOptions(
+    t,
+    [
+      enchantRow('WAIST', 'dealer', '배럭', '합성 배럭 카드', 'card-element', 100),
+      enchantRow('WAIST', 'dealer', '배럭', '합성 배럭 공격력 카드', 'card-attack', 50),
+      enchantRow('WAIST', 'dealer', '준종결', '합성 준종결 카드', 'card-element', 300),
+      enchantRow('WEAPON', 'buffer', '종결', '합성 버퍼 카드', 'card-attack', 100),
+      enchantRow('WEAPON', 'dealer', '배럭', '합성 무기 배럭 카드', 'card-attack', 100),
+      row('TITLE', 'all', '종결', '합성 칭호', 100)
+    ],
+    enchantCatalog({ 'card-element': ELEMENT_15, 'card-attack': ATTACK_30 })
+  )
+
+  assert.deepEqual(cardNamesOf(body), [
+    {
+      slotId: 'WEAPON',
+      role: 'dealer',
+      tiers: [{ tier: '배럭', options: [['합성 무기 배럭 카드']] }]
+    },
+    { slotId: 'WEAPON', role: 'buffer', tiers: [{ tier: '종결', options: [['합성 버퍼 카드']] }] },
+    {
+      slotId: 'WAIST',
+      role: 'dealer',
+      tiers: [
+        { tier: '준종결', options: [['합성 배럭 카드', '합성 준종결 카드']] },
+        { tier: '배럭', options: [['합성 배럭 공격력 카드']] }
+      ]
+    }
+  ])
+})
+
+test('소유자가 넣은 단일 속성 강화 항목은 모든 속성 강화 카드와 묶이고, 버프 패시브 스킬 항목은 skillLevel을 낸다', async (t) => {
+  const body = await requestEnchantOptions(
+    t,
+    [
+      ownerRow('WEAPON', 'dealer', '종결', '합성 보주', [{ name: '단일 속성 강화', value: '15' }]),
+      enchantRow('WEAPON', 'dealer', '종결', '합성 카드', 'card-element', 1_000),
+      ownerRow('WAIST', 'buffer', '배럭', '합성 선택 상자', [
+        { name: '버프 패시브 스킬', value: '3' },
+        { name: '힘', value: '30' },
+        { name: '지능', value: '30' },
+        { name: '체력', value: '30' },
+        { name: '정신력', value: '30' }
+      ])
+    ],
+    enchantCatalog({ 'card-element': ELEMENT_15 })
+  )
+
+  assert.deepEqual(cardNamesOf(body), [
+    {
+      slotId: 'WEAPON',
+      role: 'dealer',
+      tiers: [{ tier: '종결', options: [['합성 카드', '합성 보주']] }]
+    },
+    { slotId: 'WAIST', role: 'buffer', tiers: [{ tier: '배럭', options: [['합성 선택 상자']] }] }
+  ])
+
+  const buffer = body.slots[1]!.tiers[0]!.options[0]!
+
+  assert.equal(buffer.skillLevel, 3)
+  assert.deepEqual(buffer.display, [{ name: '올스탯', value: 30 }])
+})
+
+test('아이템 상세를 받지 못한 카드와 옵션이 없는 항목은 선택지에서 빠지고 나머지 선택지는 그대로 내며, 같은 목록이면 id가 같다', async (t) => {
+  const rows = [
+    enchantRow('WEAPON', 'dealer', '종결', '합성 상세 없는 카드', 'card-missing', 100),
+    row('WEAPON', 'dealer', '종결', '합성 옵션 없는 항목', null, false),
+    enchantRow('WEAPON', 'dealer', '종결', '합성 카드', 'card-element', 1_000)
+  ]
+  const catalog = enchantCatalog({ 'card-element': ELEMENT_15 })
+  const request = await startApi(t, rows, undefined, undefined, catalog)
+  const first = (await (await request('/lab/enchant-options')).json()) as EnchantOptionsBody
+  const second = (await (await request('/lab/enchant-options')).json()) as EnchantOptionsBody
+
+  assert.deepEqual(cardNamesOf(first), [
+    { slotId: 'WEAPON', role: 'dealer', tiers: [{ tier: '종결', options: [['합성 카드']] }] }
+  ])
+  assert.equal(first.slots[0]!.tiers[0]!.options[0]!.id, second.slots[0]!.tiers[0]!.options[0]!.id)
+})
+
+test('실험실에 마법부여 항목이 없으면 200과 빈 slots로 답한다', async (t) => {
+  const body = await requestEnchantOptions(t, [row('TITLE', 'all', '종결', '합성 칭호', 100)])
+
+  assert.deepEqual(body, { slots: [] })
+})
