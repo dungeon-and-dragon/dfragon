@@ -1,8 +1,8 @@
 import { Tooltip } from '@dfragon/ui'
-import { Fragment, type ReactElement } from 'react'
+import { Fragment, type ReactElement, type ReactNode } from 'react'
 import { useItemDetail } from '#widgets/item-tooltip/api/useItemDetail'
 import { cardOptionRows } from '#widgets/item-tooltip/model/card-options'
-import type { ItemCard, ItemDetail } from '#widgets/item-tooltip/model/item-detail'
+import type { ItemCard, ItemTooltipDetail } from '#widgets/item-tooltip/model/item-detail'
 import {
   type EnchantRole,
   ItemIcon,
@@ -56,9 +56,11 @@ function CardOptions({
 
 function ItemDetailCard({
   item,
+  icon,
   role
 }: {
-  item: ItemDetail
+  item: ItemTooltipDetail
+  icon: ReactNode
   role: EnchantRole | undefined
 }): React.JSX.Element {
   const status = item.status.filter(({ name }) => name !== FAME_STATUS)
@@ -67,7 +69,7 @@ function ItemDetailCard({
   return (
     <div className="flex w-[280px] flex-col gap-2 text-fg">
       <div className="flex items-start gap-2">
-        <ItemIcon itemId={item.itemId} rarity={null} size="sm" />
+        {icon}
         <b className={`min-w-0 grow text-sm ${nameTone}`}>{item.name}</b>
       </div>
       <div className="flex flex-col items-end text-fg-muted">
@@ -115,7 +117,13 @@ function ItemTooltipBody({
     case 'error':
       return <p className="m-0 text-fg-muted">{FAILED}</p>
     case 'success':
-      return <ItemDetailCard item={result.value} role={role} />
+      return (
+        <ItemDetailCard
+          item={result.value}
+          icon={<ItemIcon itemId={itemId} rarity={null} size="sm" />}
+          role={role}
+        />
+      )
   }
 }
 
@@ -135,6 +143,36 @@ export function ItemTooltip({
       <Tooltip.Popup side="right" align="start" sideOffset={8}>
         <div className="tooltip-item">
           <ItemTooltipBody itemId={itemId} role={role} />
+        </div>
+      </Tooltip.Popup>
+    </Tooltip.Root>
+  )
+}
+
+export function ItemDetailTooltip({
+  item,
+  iconUrl,
+  role,
+  children
+}: {
+  item: ItemTooltipDetail
+  iconUrl: string | null
+  role?: EnchantRole
+  children: ReactElement
+}): React.JSX.Element {
+  const icon =
+    iconUrl !== null ? (
+      <img src={iconUrl} alt="" className="size-[24px]" />
+    ) : (
+      <ItemIcon itemId={null} rarity={null} size="sm" />
+    )
+
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger delay={0} closeDelay={0} render={children} />
+      <Tooltip.Popup side="right" align="start" sideOffset={8}>
+        <div className="tooltip-item">
+          <ItemDetailCard item={item} icon={icon} role={role} />
         </div>
       </Tooltip.Popup>
     </Tooltip.Root>
