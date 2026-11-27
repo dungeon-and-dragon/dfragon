@@ -17,4 +17,7 @@ export {
 } from './character-activity.js'
 export { DatabaseTimelineSyncRequestRepository } from './timeline-sync-request.js'
 export { DatabaseLabItemRepository } from './lab-items.js'
-export { DatabaseLabCandidatePriceRepository } from './lab-candidates.js'
+export {
+  DatabaseLabCandidatePriceRepository,
+  DatabaseLabCandidateWearCountRepository
+} from './lab-candidates.js'

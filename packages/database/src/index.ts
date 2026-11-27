@@ -41,6 +41,7 @@ export type {
   LabCandidateQuery,
   LabCandidateSummary
 } from './lab-candidate.js'
+export { replaceLabCandidateWearCounts } from './lab-candidate-wear-count.js'
 export {
   readItemDictionary,
   readUnlistedAcquisitionItemIds,

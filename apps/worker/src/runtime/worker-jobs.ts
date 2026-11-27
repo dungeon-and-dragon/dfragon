@@ -31,6 +31,7 @@ import {
   createAuctionPriceJob,
   createLabCandidatePriceJob
 } from '#application/auction-prices/index.js'
+import { createLabCandidateWearCountJob } from '#application/lab-candidates/index.js'
 import {
   DatabaseAcquisitionItemRepository,
   DatabaseCharacterActivityRepository,
@@ -42,6 +43,7 @@ import {
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
   DatabaseLabCandidatePriceRepository,
+  DatabaseLabCandidateWearCountRepository,
   DatabaseLabItemRepository,
   DatabaseScoreCalculationRepository
 } from '#infrastructure/database/index.js'
@@ -184,6 +186,7 @@ export function createWorkerJobs(
     createScoreCalculationJob(scoreService, scoreSchedule),
     createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary),
     createAuctionPriceJob(new DatabaseLabItemRepository(client), auctionPrices),
-    createLabCandidatePriceJob(new DatabaseLabCandidatePriceRepository(client), auctionPrices)
+    createLabCandidatePriceJob(new DatabaseLabCandidatePriceRepository(client), auctionPrices),
+    createLabCandidateWearCountJob(new DatabaseLabCandidateWearCountRepository(client))
   ]
 }
