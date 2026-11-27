@@ -62,6 +62,10 @@ export type StoredCharacterHistorySnapshot = {
   sections: Record<string, CharacterSectionBody>
 }
 
+type ComparableScore = Pick<StoredCharacterScoreHistory, 'kind' | 'score' | 'engine'> & {
+  approximate: Pick<CharacterScoreApproximation, 'source'> | null
+}
+
 // timeline.ts의 캐릭터 lock(1175), character.ts의 모험단 lock(1176)과 다른 namespace다.
 const historyLockNamespace = 1177
 
@@ -113,6 +117,36 @@ function toStoredScoreHistory(row: ScoreHistoryRow): StoredCharacterScoreHistory
   }
 }
 
+export function isFameLowered(fame: number | null, recorded: number | null): boolean {
+  return fame !== null && recorded !== null && fame < recorded
+}
+
+export function isScoreLowered(
+  score: ComparableScore | null,
+  recorded: ComparableScore | null
+): boolean {
+  if (score === null || recorded === null) {
+    return false
+  }
+
+  // 종류, 엔진 버전, 근사 방식이 다르면 같은 장비도 값이 달라 낮아졌는지 가릴 수 없다.
+  const comparable =
+    score.kind === recorded.kind &&
+    score.engine.package === recorded.engine.package &&
+    score.engine.rulesRev === recorded.engine.rulesRev &&
+    score.engine.bundleId === recorded.engine.bundleId &&
+    score.approximate?.source === recorded.approximate?.source
+
+  return comparable && score.score < recorded.score
+}
+
+export function lockCharacterHistory(
+  transaction: Prisma.TransactionClient,
+  { serverId, characterId }: CharacterHistoryKey
+): Promise<number> {
+  return transaction.$executeRaw`SELECT pg_advisory_xact_lock(${historyLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
+}
+
 export async function recordCharacterHistory(
   client: DatabaseClient,
   input: CharacterHistoryInput
@@ -121,13 +155,20 @@ export async function recordCharacterHistory(
     const { serverId, characterId } = input
 
     // 최신 행을 읽고 비교해 쓰는 사이에 같은 캐릭터의 다른 저장이 끼면 같은 값이 두 행이 되므로 읽기 전에 잡는다.
-    await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${historyLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
+    await lockCharacterHistory(transaction, input)
     const latest = await transaction.characterBasicHistory.findFirst({
       where: { serverId, characterId },
       orderBy: { observedAt: 'desc' }
     })
 
     if (latest !== null && input.observedAt <= latest.lastSeenAt) {
+      return
+    }
+
+    if (latest !== null && (await isLowered(transaction, input, latest.fame))) {
+      // 점수 없이 같은 시각으로 다시 오는 저장이 낮아진 값을 쓰지 않게 확인 시각은 옮긴다.
+      await extendLastSeen(transaction, input, latest.observedAt)
+
       return
     }
 
@@ -140,18 +181,50 @@ export async function recordCharacterHistory(
   })
 }
 
+async function isLowered(
+  transaction: Prisma.TransactionClient,
+  { serverId, characterId, basic, score }: CharacterHistoryInput,
+  recordedFame: number | null
+): Promise<boolean> {
+  if (isFameLowered(basic.fame, recordedFame)) {
+    return true
+  }
+
+  if (score === null) {
+    return false
+  }
+
+  const recorded = await transaction.characterScoreHistory.findFirst({
+    where: { serverId, characterId },
+    orderBy: { observedAt: 'desc' },
+    select: scoreColumns
+  })
+
+  return recorded !== null && isScoreLowered(score, toStoredScoreHistory(recorded))
+}
+
+async function extendLastSeen(
+  transaction: Prisma.TransactionClient,
+  { serverId, characterId, observedAt }: CharacterHistoryInput,
+  latestObservedAt: Date
+): Promise<void> {
+  await transaction.characterBasicHistory.update({
+    where: {
+      serverId_characterId_observedAt: { serverId, characterId, observedAt: latestObservedAt }
+    },
+    data: { lastSeenAt: observedAt }
+  })
+}
+
 async function writeBasic(
   transaction: Prisma.TransactionClient,
-  { serverId, characterId, observedAt, basic }: CharacterHistoryInput,
+  input: CharacterHistoryInput,
   latest: StoredCharacterBasicHistory | null
 ): Promise<void> {
+  const { serverId, characterId, observedAt, basic } = input
+
   if (latest !== null && basicFields.every((field) => latest[field] === basic[field])) {
-    await transaction.characterBasicHistory.update({
-      where: {
-        serverId_characterId_observedAt: { serverId, characterId, observedAt: latest.observedAt }
-      },
-      data: { lastSeenAt: observedAt }
-    })
+    await extendLastSeen(transaction, input, latest.observedAt)
 
     return
   }
