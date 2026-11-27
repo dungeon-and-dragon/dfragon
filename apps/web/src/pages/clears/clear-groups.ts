@@ -2,7 +2,13 @@ import type { ClearContent, ClearContentKind } from '#entities/ranking'
 
 export type ClearStage = '하드' | '일반'
 
-export type ClearGroup = Readonly<{ key: string; name: string; shortName: string; color: string }>
+export type ClearGroup = Readonly<{
+  key: string
+  name: string
+  shortName: string
+  color: string
+  caption?: string
+}>
 
 // choice는 상세 화면의 단계, 미션 선택지이고 slug를 주소 query에 쓴다.
 export type ContentChoice = Readonly<{ slug: string; label: string }>
@@ -56,7 +62,8 @@ const NIGHTMARE: ClearGroup = {
   key: 'nightmare',
   name: '각인된 악몽',
   shortName: '각인된 악몽',
-  color: 'var(--color-chart-7)'
+  color: 'var(--color-chart-7)',
+  caption: '더러운 피를 흘리는 자'
 }
 
 // 같은 레이드의 일반과 하드를 카드 하나로 묶고, 기간이나 전환을 바꿔도 같은 색을 쓰게 컨텐츠마다 묶음을 고정한다(ADR 0055).
