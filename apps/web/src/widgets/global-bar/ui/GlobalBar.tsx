@@ -21,8 +21,7 @@ const GLOBAL_MENU: readonly GlobalMenuItem[] = [
   { label: '검색', to: '/rankings' },
   { label: '통계', to: '/stats', currentOn: CLEARS_PATH },
   { label: '모험단', to: '/adventures' },
-  { label: '장비 시뮬레이터', to: '/simulator', currentOn: CHARACTER_SIMULATOR_PATH },
-  { label: '즐겨찾기', to: '/favorites' }
+  { label: '장비 시뮬레이터', to: '/simulator', currentOn: CHARACTER_SIMULATOR_PATH }
 ]
 
 // 첫 화면과 시뮬레이터 검색 화면은 본문에 큰 검색창이 있어 전역 바의 검색창을 숨긴다.
