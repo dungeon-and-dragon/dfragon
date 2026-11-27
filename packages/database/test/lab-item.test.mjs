@@ -609,13 +609,26 @@ test('후보 가격 대상은 고른 이름을 빼고, 고른 아이템의 가�
   ])
   const [{ iconUpdatedAt }] = await readLabCandidates(client, { kind: 'TITLE' })
   const rows = await readLabItemPrices(client)
+  const candidateLines = { options: [{ name: '힘', value: '100' }], buffLines: ['합성 버프 옵션'] }
+  const selectedDetail = {
+    description: selected.description,
+    itemRarity: '레어',
+    ...tooltip,
+    ...candidateLines
+  }
+  const noIconDetail = {
+    description: noIcon.description,
+    itemRarity: '레어',
+    ...noTooltip,
+    ...candidateLines
+  }
   assert.deepEqual(
     rows.map(({ candidate: detail }) => detail),
     [
-      { description: selected.description, itemRarity: '레어', ...tooltip, iconUpdatedAt },
-      { description: noIcon.description, itemRarity: '레어', ...noTooltip, iconUpdatedAt: null },
+      { ...selectedDetail, iconUpdatedAt },
+      { ...noIconDetail, iconUpdatedAt: null },
       null,
-      { description: selected.description, itemRarity: '레어', ...tooltip, iconUpdatedAt }
+      { ...selectedDetail, iconUpdatedAt }
     ]
   )
   assert.ok(rows.every(({ detail }) => detail === null))
@@ -900,6 +913,14 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래�
       [titleBase, 30_000, `synthetic-${titleBase}`, '합성 후보 설명'],
       ['합성 변형만', 9_000, 'synthetic-합성 변형만[40Lv]', '합성 변형 설명'],
       ['합성 후보 없는 아이템', null, null, null]
+    ]
+  )
+  assert.deepEqual(
+    rows.map(({ candidate: detail }) => [detail?.options ?? null, detail?.buffLines ?? null]),
+    [
+      [[{ name: '힘', value: '100' }], ['합성 버프 옵션']],
+      [[{ name: '힘', value: '100' }], ['합성 버프 옵션']],
+      [null, null]
     ]
   )
   assert.deepEqual(

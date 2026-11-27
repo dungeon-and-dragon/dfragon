@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { DatabaseClient, LabItemPriceDetail, LabItemPriceRow } from '@dfragon/database'
+import type {
+  DatabaseClient,
+  LabItemPriceCandidate,
+  LabItemPriceDetail,
+  LabItemPriceRow
+} from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { FetchCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
@@ -21,6 +26,8 @@ const EMPTY_DETAIL: LabItemPriceDetail = {
   fame: null,
   card: null
 }
+
+const EMPTY_CANDIDATE: LabItemPriceCandidate = { ...EMPTY_DETAIL, options: [], buffLines: [] }
 
 // 아이템 이름은 모두 지어낸 이름이다.
 function row(
@@ -159,7 +166,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: 900,
             checkedAt: CHECKED_AT,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           },
           {
             itemName: '합성 카드 중간',
@@ -172,7 +180,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: 10_000,
             checkedAt: CHECKED_AT,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           },
           {
             itemName: '합성 카드 비싼',
@@ -185,7 +194,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: 3_000_000_000,
             checkedAt: CHECKED_AT,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           },
           {
             itemName: '합성 카드 가',
@@ -198,7 +208,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: null,
             checkedAt: null,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           },
           {
             itemName: '합성 카드 다',
@@ -211,7 +222,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: null,
             checkedAt: CHECKED_AT,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           }
         ]
       },
@@ -231,7 +243,8 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             unitPrice: null,
             checkedAt: null,
             platinum: null,
-            cost: null
+            cost: null,
+            performanceKey: null
           }
         ]
       }
@@ -293,6 +306,117 @@ test('칭호의 일반 최저가와 플래티넘 최저가를 나눠 내고, 플
   )
 })
 
+function cardCandidate(
+  fame: number,
+  lowValue: string,
+  topValue: string,
+  slots = ['무기']
+): LabItemPriceCandidate {
+  const enchants = [
+    { upgrade: 1, status: [{ name: '힘', value: topValue }] },
+    { upgrade: 0, status: [{ name: '힘', value: lowValue }] }
+  ]
+
+  return { ...EMPTY_CANDIDATE, fame, card: { slots, enchants } }
+}
+
+function exchangedRow(itemName: string, currencyId: number): LabItemPriceRow {
+  const cost = {
+    currencyId,
+    currencyName: `합성 재화 ${currencyId}`,
+    currencyDescription: null,
+    currencyUpdatedAt: new Date(CHECKED_AT),
+    count: 3
+  }
+
+  return {
+    ...row('WEAPON', 'dealer', '종결', itemName, null, false),
+    candidate: cardCandidate(210, '90', '100'),
+    cost
+  }
+}
+
+async function performanceKeys(
+  t: test.TestContext,
+  rows: LabItemPriceRow[]
+): Promise<Map<string, string | null>> {
+  const response = await requestLabItems(t, rows)
+  const { groups } = (await response.json()) as {
+    groups: { items: { itemName: string; performanceKey: string | null }[] }[]
+  }
+  const items = groups.flatMap(({ items }) => items)
+
+  return new Map(items.map(({ itemName, performanceKey }) => [itemName, performanceKey]))
+}
+
+test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성, 구매 방법이 같으면 같은 performanceKey이고 낮은 단계 옵션은 보지 않는다', async (t) => {
+  const card = (itemName: string, candidate: LabItemPriceCandidate | null) => ({
+    ...row('WEAPON', 'dealer', '종결', itemName, 1_000),
+    candidate
+  })
+  const keys = await performanceKeys(t, [
+    card('합성 기준', cardCandidate(210, '90', '100')),
+    card('합성 낮은 단계만 다름', cardCandidate(210, '80', '100')),
+    card('합성 높은 단계 다름', cardCandidate(210, '90', '110')),
+    card('합성 명성 다름', cardCandidate(220, '90', '100')),
+    card('합성 부위 다름', cardCandidate(210, '90', '100', ['무기', '상의'])),
+    exchangedRow('합성 재화 1', 1),
+    exchangedRow('합성 재화 2', 2),
+    card('합성 옵션 없음', null)
+  ])
+
+  const base = keys.get('합성 기준')
+  assert.equal(typeof base, 'string')
+  assert.equal(keys.get('합성 낮은 단계만 다름'), base)
+  const differents = ['합성 높은 단계 다름', '합성 명성 다름', '합성 부위 다름', '합성 재화 1']
+
+  for (const itemName of differents) {
+    assert.notEqual(keys.get(itemName), base, itemName)
+  }
+  assert.notEqual(keys.get('합성 재화 1'), keys.get('합성 재화 2'))
+  assert.equal(keys.get('합성 옵션 없음'), null)
+})
+
+test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanceKey이고 소유자 상세 옵션이 있으면 그 값으로 비교한다', async (t) => {
+  const titleCandidate = (
+    options: { name: string; value: string }[],
+    buffLines = ['합성 스킬 Lv +1'],
+    fame = 700
+  ) => ({ ...EMPTY_CANDIDATE, fame, options, buffLines })
+  const strength = { name: '힘', value: '100' }
+  const intelligence = { name: '지능', value: '100' }
+  const ownerDetail = {
+    ...EMPTY_DETAIL,
+    card: { slots: [], enchants: [{ upgrade: 0, status: [{ name: '힘', value: '200' }] }] }
+  }
+  const title = (itemName: string) => row('TITLE', 'all', '종결', itemName, 1_000)
+  const keys = await performanceKeys(t, [
+    { ...title('합성 칭호 A'), candidate: titleCandidate([strength, intelligence]) },
+    { ...title('합성 칭호 B'), candidate: titleCandidate([intelligence, strength]) },
+    {
+      ...title('합성 칭호 버프 다름'),
+      candidate: titleCandidate([strength, intelligence], ['합성 스킬 Lv +2'])
+    },
+    {
+      ...title('합성 칭호 명성 다름'),
+      candidate: titleCandidate([strength, intelligence], undefined, 800)
+    },
+    {
+      ...title('합성 칭호 소유자 A'),
+      candidate: titleCandidate([strength, intelligence]),
+      detail: ownerDetail
+    },
+    { ...title('합성 칭호 소유자 B'), candidate: titleCandidate([strength]), detail: ownerDetail }
+  ])
+
+  assert.equal(typeof keys.get('합성 칭호 A'), 'string')
+  assert.equal(keys.get('합성 칭호 B'), keys.get('합성 칭호 A'))
+  assert.notEqual(keys.get('합성 칭호 버프 다름'), keys.get('합성 칭호 A'))
+  assert.notEqual(keys.get('합성 칭호 명성 다름'), keys.get('합성 칭호 A'))
+  assert.notEqual(keys.get('합성 칭호 소유자 A'), keys.get('합성 칭호 A'))
+  assert.equal(keys.get('합성 칭호 소유자 B'), keys.get('합성 칭호 소유자 A'))
+})
+
 test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 설명, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
   const currencyUpdatedAt = new Date('2026-11-27T01:02:03.004Z')
   const exchanged: LabItemPriceRow = {
@@ -332,7 +456,8 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
               description: '합성 설명',
               count: 5,
               iconPath: `/lab/currencies/7/icon?v=${currencyUpdatedAt.getTime()}`
-            }
+            },
+            performanceKey: null
           }
         ]
       }
@@ -478,7 +603,8 @@ test('소유자가 넣은 tooltip 값은 아이템 상세와 같은 이름과 �
 })
 
 test('후보는 비어 있는 등급, 아이콘, 설명을 채우고 tooltip은 소유자 상세가 없을 때 후보 상세로 만든다', async (t) => {
-  const candidate: LabItemPriceDetail = {
+  const candidate: LabItemPriceCandidate = {
+    ...EMPTY_CANDIDATE,
     itemRarity: '유니크',
     iconUpdatedAt: new Date(1000),
     description: '합성 후보 설명',
@@ -708,23 +834,23 @@ test('마법부여 명성은 소유자, Neople 카드, 후보 순으로 쓰고, 
       count: 10
     },
     detail: { ...EMPTY_DETAIL, fame: 232 },
-    candidate: { ...EMPTY_DETAIL, fame: 300 }
+    candidate: { ...EMPTY_CANDIDATE, fame: 300 }
   }
   const response = await requestLabItems(
     t,
     [
       {
         ...cardRow('합성 낮은 명성', 'card-low', 100),
-        candidate: { ...EMPTY_DETAIL, fame: 300 }
+        candidate: { ...EMPTY_CANDIDATE, fame: 300 }
       },
       cardRow('합성 명성 없음', 'card-missing', 50),
       {
         ...cardRow('합성 후보 카드', 'candidate-only', 500),
-        candidate: { ...EMPTY_DETAIL, fame: 205 }
+        candidate: { ...EMPTY_CANDIDATE, fame: 205 }
       },
       {
         ...row('WEAPON', 'dealer', '종결', '합성 후보 보주', null, false),
-        candidate: { ...EMPTY_DETAIL, fame: 200 }
+        candidate: { ...EMPTY_CANDIDATE, fame: 200 }
       },
       cardRow('합성 비싼 카드', 'card-high', 9_000),
       exchanged,
@@ -763,20 +889,20 @@ test('칭호, 크리쳐, 오라는 소유자 명성을 먼저 쓰고 칭호 묶�
   const response = await requestLabItems(t, [
     {
       ...row('TITLE', 'all', '종결', '합성 저가 칭호', 100),
-      candidate: { ...EMPTY_DETAIL, fame: 700 }
+      candidate: { ...EMPTY_CANDIDATE, fame: 700 }
     },
     {
       ...row('TITLE', 'all', '종결', '합성 고가 칭호', 900),
-      candidate: { ...EMPTY_DETAIL, fame: 900 }
+      candidate: { ...EMPTY_CANDIDATE, fame: 900 }
     },
     {
       ...row('CREATURE', 'all', '종결', '합성 크리쳐', 500),
-      candidate: { ...EMPTY_DETAIL, fame: 750 },
+      candidate: { ...EMPTY_CANDIDATE, fame: 750 },
       detail: { ...EMPTY_DETAIL, fame: 800 }
     },
     {
       ...row('AURA', 'all', '종결', '합성 오라', 600),
-      candidate: { ...EMPTY_DETAIL, fame: 550 },
+      candidate: { ...EMPTY_CANDIDATE, fame: 550 },
       detail: EMPTY_DETAIL
     }
   ])
