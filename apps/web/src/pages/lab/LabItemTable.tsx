@@ -1,5 +1,6 @@
 import {
   ItemIcon,
+  itemIconUrl,
   type ItemRarity,
   itemPartClasses,
   itemRarityOfGrade,
@@ -168,7 +169,7 @@ function LabItemName({
     </div>
   )
 
-  if (item.itemId !== null) {
+  if (item.tooltip === null && item.itemId !== null) {
     return (
       <ItemTooltip itemId={item.itemId} role={role}>
         {name}
@@ -189,9 +190,11 @@ function LabItemName({
     explain: item.description,
     flavorText: null
   }
+  const neopleIconUrl = item.itemId !== null ? itemIconUrl(item.itemId) : null
+  const iconUrl = item.iconUrl ?? neopleIconUrl
 
   return (
-    <ItemDetailTooltip item={detail} iconUrl={item.iconUrl} role={role}>
+    <ItemDetailTooltip item={detail} iconUrl={iconUrl} role={role}>
       {name}
     </ItemDetailTooltip>
   )

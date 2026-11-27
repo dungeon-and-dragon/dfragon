@@ -228,6 +228,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '프로스트의 전설',
+            fame: 980,
             itemId: '42fd3d4144f788b37ed19c70281dcda6',
             itemRarity: '레어',
             iconPath: null,
@@ -238,6 +239,7 @@ export const labItemsFixture = {
           },
           {
             itemName: '진정한 각성을 이룬 자',
+            fame: 910,
             itemId: 'c89a01593a155a3cbaaf272084d8fb57',
             itemRarity: '레어',
             iconPath: null,
@@ -255,6 +257,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '운명을 담는 재단사',
+            fame: 830,
             itemId: 'bf04e5b415fea3989e8607efb4987d14',
             itemRarity: '레어',
             iconPath: null,
@@ -272,6 +275,7 @@ export const labItemsFixture = {
         items: [
           {
             itemName: '초월한 폭풍의 기세',
+            fame: 720,
             itemId: '6997321d175648e99eb75adf5c8e2625',
             itemRarity: '레어',
             iconPath: null,
