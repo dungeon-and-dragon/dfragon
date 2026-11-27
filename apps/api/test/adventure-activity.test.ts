@@ -160,9 +160,9 @@ test('레이드와 레기온은 이름별로 세어 횟수와 관계없이 출�
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
-    { name: '혼돈의 오즈마', count: 2, hard: 0, normal: 2 },
-    { name: '프레이-이시스', count: 1, hard: 0, normal: 1 }
+    { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', raid: '혼돈의 오즈마', stage: null, count: 2, hard: 0, normal: 2 },
+    { name: '프레이-이시스', raid: '프레이-이시스', stage: null, count: 1, hard: 0, normal: 1 }
   ])
   assert.deepEqual(summary.legions, [
     { name: '아포칼립스', count: 1 },
@@ -212,9 +212,9 @@ test('레이드는 data.hard가 true인 클리어를 하드, 나머지를 노말
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
-    { name: '혼돈의 오즈마', count: 3, hard: 2, normal: 1 },
-    { name: '무형의 시로코', count: 1, hard: 1, normal: 0 }
+    { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', raid: '혼돈의 오즈마', stage: null, count: 3, hard: 2, normal: 1 },
+    { name: '무형의 시로코', raid: '무형의 시로코', stage: null, count: 1, hard: 1, normal: 0 }
   ])
 })
 
@@ -248,17 +248,59 @@ test('modeName이 있는 레이드는 개전, 매칭 같은 단계와 본 레이
   })
 
   assert.deepEqual(summary.raids, [
-    { name: '무너진 성자 미카엘라 (하드)', count: 1, hard: 1, normal: 0 },
-    { name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 },
-    { name: '무너진 성자 미카엘라 (싱글/매칭)', count: 1, hard: 0, normal: 1 },
-    { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
-    { name: '디레지에 레이드 (일반)', count: 1, hard: 0, normal: 1 },
-    { name: '디레지에 레이드 (매칭)', count: 1, hard: 0, normal: 1 },
-    { name: '아스라한 (개전)', count: 1, hard: 1, normal: 0 },
-    { name: '기계 혁명 (하드)', count: 1, hard: 1, normal: 0 },
-    { name: '기계 혁명 (일반)', count: 1, hard: 0, normal: 1 },
-    { name: '기계 혁명 (개전)', count: 1, hard: 0, normal: 1 },
-    { name: '무형의 시로코', count: 2, hard: 1, normal: 1 }
+    {
+      name: '무너진 성자 미카엘라 (하드)',
+      raid: '무너진 성자 미카엘라',
+      stage: '하드',
+      count: 1,
+      hard: 1,
+      normal: 0
+    },
+    {
+      name: '무너진 성자 미카엘라 (일반)',
+      raid: '무너진 성자 미카엘라',
+      stage: '일반',
+      count: 1,
+      hard: 0,
+      normal: 1
+    },
+    {
+      name: '무너진 성자 미카엘라 (싱글/매칭)',
+      raid: '무너진 성자 미카엘라',
+      stage: '싱글/매칭',
+      count: 1,
+      hard: 0,
+      normal: 1
+    },
+    {
+      name: '디레지에 레이드 (하드)',
+      raid: '디레지에 레이드',
+      stage: '하드',
+      count: 1,
+      hard: 1,
+      normal: 0
+    },
+    {
+      name: '디레지에 레이드 (일반)',
+      raid: '디레지에 레이드',
+      stage: '일반',
+      count: 1,
+      hard: 0,
+      normal: 1
+    },
+    {
+      name: '디레지에 레이드 (매칭)',
+      raid: '디레지에 레이드',
+      stage: '매칭',
+      count: 1,
+      hard: 0,
+      normal: 1
+    },
+    { name: '아스라한 (개전)', raid: '아스라한', stage: '개전', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (하드)', raid: '기계 혁명', stage: '하드', count: 1, hard: 1, normal: 0 },
+    { name: '기계 혁명 (일반)', raid: '기계 혁명', stage: '일반', count: 1, hard: 0, normal: 1 },
+    { name: '기계 혁명 (개전)', raid: '기계 혁명', stage: '개전', count: 1, hard: 0, normal: 1 },
+    { name: '무형의 시로코', raid: '무형의 시로코', stage: null, count: 2, hard: 1, normal: 1 }
   ])
 })
 
@@ -566,9 +608,9 @@ test('하루 상세도 레이드를 하드, 노말로 나누고 출시가 최근
   })
 
   assert.deepEqual(raids, [
-    { name: '이내 황혼전', count: 1, hard: 0, normal: 1 },
-    { name: '혼돈의 오즈마', count: 2, hard: 1, normal: 1 },
-    { name: '합성 레이드', count: 2, hard: 0, normal: 2 }
+    { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 1, hard: 0, normal: 1 },
+    { name: '혼돈의 오즈마', raid: '혼돈의 오즈마', stage: null, count: 2, hard: 1, normal: 1 },
+    { name: '합성 레이드', raid: '합성 레이드', stage: null, count: 2, hard: 0, normal: 2 }
   ])
   assert.deepEqual(legions, [
     { name: '아포칼립스', count: 1 },
@@ -723,7 +765,16 @@ test('시즌 하루 상세는 06시 경계와 시즌 구간을 지키고 하루 
   )
   assert.deepEqual(result.days[0], {
     date: '2026-07-17',
-    raids: [{ name: '디레지에 레이드', count: 1, hard: 0, normal: 1 }],
+    raids: [
+      {
+        name: '디레지에 레이드',
+        raid: '디레지에 레이드',
+        stage: null,
+        count: 1,
+        hard: 0,
+        normal: 1
+      }
+    ],
     legions: [],
     items: [{ at: '2026-07-18T05:58:00+09:00', name: '합성 아이템', rarity: '에픽' }],
     oaths: [],
