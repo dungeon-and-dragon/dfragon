@@ -7,6 +7,7 @@ import { AdventureTabs } from './AdventureTabs'
 import { useAdventureWeekly } from './api/useAdventureWeekly'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AdventureDashboard } from './AdventureDashboard'
+import { SeasonClears } from './SeasonClears'
 import { adventureTabsHeight, WIDE_STICKY_TABLE_FRAME } from './sticky-head'
 import { WeeklyClearTable } from './WeeklyClearTable'
 import { useObservedHeight } from './use-observed-height'
@@ -62,6 +63,7 @@ export function WeeklyScreen({
         />
       </div>
       <ActivityHeatmap adventureName={adventureName} season={season} />
+      <SeasonClears adventureName={adventureName} season={season} />
       <WeeklyClearList adventureName={adventureName} />
     </div>
   )
