@@ -39,6 +39,7 @@ import {
 import { ClearStatsService } from './dist/application/content-clears/service.js'
 
 // 합성 캐릭터와 클리어 기록이다. 최고 명성은 앞 단계가 넣은 캐릭터보다 높게 두어 수집 대상의 맨 앞에 온다.
+// 수집 대상은 眞 전직 캐릭터라 합성 전직 이름도 眞으로 시작한다.
 const at = (time) => new Date(`${time}+09:00`)
 const basic = (
   serverId,
@@ -55,7 +56,7 @@ const basic = (
   jobId: 'synthetic-clear-job',
   jobGrowId,
   jobName: '합성직업',
-  jobGrowName: '합성전직',
+  jobGrowName: '眞 합성전직',
   fame,
   guildId: null,
   guildName: null
@@ -85,7 +86,7 @@ const population = (
       jobId: 'synthetic-clear-job',
       jobGrowId: 'synthetic-clear-grow',
       jobName: '합성직업',
-      jobGrowName: '합성전직',
+      jobGrowName: '眞 합성전직',
       count: population
     }
   ],
@@ -187,7 +188,7 @@ try {
     jobId: 'synthetic-clear-job',
     jobGrowId: 'synthetic-clear-grow',
     jobName: '합성직업',
-    jobGrowName: '합성전직'
+    jobGrowName: '眞 합성전직'
   })
   const characters = await readClearPopulation(client, collectionMinFame)
   assert.deepEqual(characters.slice(0, 5), [
@@ -242,7 +243,7 @@ try {
     jobId: 'synthetic-clear-job',
     jobGrowId: 'synthetic-clear-grow',
     jobName: '합성직업',
-    jobGrowName: '합성전직',
+    jobGrowName: '眞 합성전직',
     count
   })
 
@@ -252,8 +253,8 @@ try {
   // 예전 상한 10만 명을 넘는 수집 대상도 모두 읽는다.
   const bulkCharacters = 100001
   await client.$executeRaw`
-    INSERT INTO characters (server_id, character_id, character_name, adventure_id, max_fame)
-    SELECT 'cain', 'clear-bulk-' || n, '합성대량' || n, adventure_id, ${collectionMinFame} + n
+    INSERT INTO characters (server_id, character_id, character_name, adventure_id, max_fame, job_grow_name)
+    SELECT 'cain', 'clear-bulk-' || n, '합성대량' || n, adventure_id, ${collectionMinFame} + n, '眞 합성전직'
     FROM generate_series(1, ${bulkCharacters}) AS n
     CROSS JOIN (SELECT adventure_id FROM characters WHERE character_id = 'clear-top') adventure`
   assert.equal(
