@@ -14,59 +14,136 @@ const stage = (upgrade: number, status: [string, string][], buffSkills: string[]
 const buffCard = {
   slots: ['상의'],
   enchants: [
-    stage(0, [
-      ['캐스트속도', '5%'],
-      ['힘', '100'],
-      ['모든 속성 강화', '10']
-    ]),
-    stage(1, [
-      ['힘', '105'],
-      ['캐스트속도', '6%'],
-      ['모든 속성 강화', '11']
-    ])
+    stage(
+      0,
+      [
+        ['캐스트속도', '5%'],
+        ['힘', '100'],
+        ['물리 공격력', '20'],
+        ['모든 속성 강화', '10'],
+        ['모험가 명성', '210']
+      ],
+      ['3']
+    ),
+    stage(
+      1,
+      [
+        ['지능', '105'],
+        ['캐스트속도', '6%'],
+        ['물리 공격력', '25'],
+        ['모든 속성 강화', '11'],
+        ['모험가 명성', '221']
+      ],
+      ['4']
+    )
   ]
 }
 
-it('옵션마다 낮은 단계부터 값을 모으고, 줄 순서는 가장 낮은 단계의 옵션 순서를 따른다', () => {
-  expect(cardOptionRows(buffCard, undefined).map(({ name, values }) => [name, values])).toEqual([
-    ['캐스트속도', ['5%', '6%']],
-    ['힘', ['100', '105']],
-    ['모든 속성 강화', ['10', '11']]
+it('힘, 지능, 체력, 정신력은 올스탯, 공격력과 크리티컬 히트도 각 묶음 한 줄로 합치고, 단계마다 묶음의 가장 큰 값을 보인다', () => {
+  const card = {
+    slots: ['무기'],
+    enchants: [
+      stage(0, [
+        ['힘', '100'],
+        ['지능', '120'],
+        ['물리 공격력', '20'],
+        ['독립 공격력', '30'],
+        ['물리 크리티컬 히트', '3%']
+      ]),
+      stage(1, [
+        ['체력', '110'],
+        ['정신력', '105'],
+        ['마법 공격력', '35'],
+        ['마법 크리티컬 히트', '4%'],
+        ['물리 크리티컬 히트', '5%']
+      ])
+    ]
+  }
+
+  expect(cardOptionRows(card, 'dealer').map(({ name, values }) => [name, values])).toEqual([
+    ['공격력', ['30', '35']],
+    ['올스탯', ['120', '110']],
+    ['크리티컬', ['3%', '5%']]
   ])
 })
 
-it('딜러는 속성 강화를, 버퍼는 올스탯 묶음을 강조하고, 역할을 모르면 둘 다 강조한다', () => {
-  const emphasizedOf = (role: 'dealer' | 'buffer' | undefined) =>
-    cardOptionRows(buffCard, role)
-      .filter(({ emphasized }) => emphasized)
-      .map(({ name }) => name)
+it('딜러는 속성 강화, 버퍼는 버프 패시브 스킬과 올스탯을 위로 올리고, 그다음 장비 탭 옵션 순서를 따르며 순서가 같은 줄은 원래 순서를 지킨다', () => {
+  const rowsOf = (role: 'dealer' | 'buffer') =>
+    cardOptionRows(buffCard, role).map(({ name, emphasized }) => [name, emphasized])
 
-  expect(emphasizedOf('dealer')).toEqual(['모든 속성 강화'])
-  expect(emphasizedOf('buffer')).toEqual(['힘'])
-  expect(emphasizedOf(undefined)).toEqual(['힘', '모든 속성 강화'])
+  expect(rowsOf('dealer')).toEqual([
+    ['모든 속성 강화', true],
+    ['버프 패시브 스킬', false],
+    ['공격력', false],
+    ['올스탯', false],
+    ['캐스트속도', false],
+    ['모험가 명성', false]
+  ])
+  expect(rowsOf('buffer')).toEqual([
+    ['버프 패시브 스킬', true],
+    ['올스탯', true],
+    ['모든 속성 강화', false],
+    ['공격력', false],
+    ['캐스트속도', false],
+    ['모험가 명성', false]
+  ])
 })
 
-it('어떤 단계에만 있는 옵션은 없는 단계를 -로 채우고 뒤에 두며, 단계가 하나면 값도 하나다', () => {
+it('역할을 모르면 딜러와 버퍼의 강조 줄을 모두 위로 올린다', () => {
+  expect(
+    cardOptionRows(buffCard, undefined).map(({ name, emphasized }) => [name, emphasized])
+  ).toEqual([
+    ['모든 속성 강화', true],
+    ['버프 패시브 스킬', true],
+    ['올스탯', true],
+    ['공격력', false],
+    ['캐스트속도', false],
+    ['모험가 명성', false]
+  ])
+})
+
+it('단일 속성 강화는 모든 속성 강화로 바꾸지 않고 이름 그대로 두되, 딜러 기준에서 속성 강화처럼 강조해 위로 올린다', () => {
+  const card = {
+    slots: ['목걸이'],
+    enchants: [
+      stage(0, [
+        ['힘', '50'],
+        ['화속성강화', '20'],
+        ['수속성 강화', '18']
+      ])
+    ]
+  }
+
+  expect(
+    cardOptionRows(card, 'dealer').map(({ name, values, emphasized }) => [name, values, emphasized])
+  ).toEqual([
+    ['화속성강화', ['20'], true],
+    ['수속성 강화', ['18'], true],
+    ['올스탯', ['50'], false]
+  ])
+})
+
+it('어떤 단계에만 있는 옵션은 없는 단계를 -로 채우되 순서는 강조와 옵션 순서를 따르고, 단계가 하나면 값도 하나다', () => {
   const partial = {
     slots: ['무기'],
     enchants: [
       stage(0, [['물리 공격력', '20']]),
       stage(1, [
         ['물리 공격력', '25'],
-        ['적중률', '3%']
+        ['모든 속성 강화', '3']
       ])
     ]
   }
   const single = { slots: ['칭호'], enchants: [stage(0, [['모든 속성 강화', '13']])] }
 
-  expect(cardOptionRows(partial, 'dealer').map(({ values }) => values)).toEqual([
-    ['20', '25'],
-    ['-', '3%']
+  expect(cardOptionRows(partial, 'dealer').map(({ name, values }) => [name, values])).toEqual([
+    ['모든 속성 강화', ['-', '3']],
+    ['공격력', ['20', '25']]
   ])
   expect(cardOptionRows(single, 'dealer').map(({ values }) => values)).toEqual([['13']])
 })
 
-it('버프 스킬은 직업별 값 가운데 단계마다 가장 큰 값을 버프 패시브 스킬 한 줄로 묶어 장비 탭 옵션 순서 자리에 두고, 버퍼 기준에서 강조한다', () => {
+it('버프 스킬은 직업별 값 가운데 단계마다 가장 큰 값을 버프 패시브 스킬 한 줄로 묶고, 버퍼 기준에서 강조해 맨 위에 둔다', () => {
   const card = {
     slots: ['상의'],
     enchants: [
@@ -95,9 +172,9 @@ it('버프 스킬은 직업별 값 가운데 단계마다 가장 큰 값을 버�
   }
 
   expect(cardOptionRows(card, 'buffer')).toEqual([
-    { name: '모든 속성 강화', values: ['10', '-', '-'], emphasized: false },
     { name: '버프 패시브 스킬', values: ['4', '4', '-'], emphasized: true },
-    { name: '힘', values: ['105', '115', '125'], emphasized: true },
+    { name: '올스탯', values: ['105', '115', '125'], emphasized: true },
+    { name: '모든 속성 강화', values: ['10', '-', '-'], emphasized: false },
     { name: '모험가 명성', values: ['210', '221', '240'], emphasized: false }
   ])
   expect(cardOptionRows(card, 'dealer')[1]).toMatchObject({

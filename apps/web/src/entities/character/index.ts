@@ -7,6 +7,7 @@ export {
   buffSkillLevel,
   enchantGroup,
   enchantOrderRank,
+  enchantStatGroup,
   isEmphasizedEnchant,
   signedEnchantValue,
   toEquipmentView

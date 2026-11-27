@@ -83,11 +83,8 @@ export type EquipmentView = Readonly<{
   aura: ItemView | null
 }>
 
-export function enchantGroup(name: string): string {
-  if (SINGLE_ELEMENT_PATTERN.test(name)) {
-    return ALL_ELEMENT
-  }
-
+// 단일 속성 강화는 그대로 두고 올스탯, 공격력, 크리티컬 묶음만 적용한다.
+export function enchantStatGroup(name: string): string {
   const group = ENCHANT_GROUPS.get(name)
 
   if (group === undefined) {
@@ -95,6 +92,14 @@ export function enchantGroup(name: string): string {
   }
 
   return group
+}
+
+export function enchantGroup(name: string): string {
+  if (SINGLE_ELEMENT_PATTERN.test(name)) {
+    return ALL_ELEMENT
+  }
+
+  return enchantStatGroup(name)
 }
 
 function magnitude(value: StatValue): number {
