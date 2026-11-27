@@ -986,7 +986,7 @@ test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 pl
         { itemId: null, itemRarity: null, unitPrice: null, checkedAt: null }
       ],
       ['합성 오라', 'synthetic-합성 오라', 3_000, null],
-      ['합성 겹침', null, null, null],
+      ['합성 겹침', 'synthetic-합성 겹침 플래티넘', 5_000, null],
       ['합성 카드', 'synthetic-합성 카드', 4_000, null]
     ]
   )
