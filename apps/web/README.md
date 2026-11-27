@@ -1,6 +1,6 @@
 # Web
 
-DFragon 웹 앱입니다. Node 서버가 전역 틀을 서버에서 그려 내주고 화면은 브라우저에서 그립니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 데스크톱 브라우저용입니다.
+DFragon 웹 앱입니다. Node 서버가 전역 틀을 서버에서 그려 내주고 화면은 브라우저에서 그립니다. `dfragon.com`에 올리며, 설치 없이 캐릭터와 모험단을 찾고 멀티서치에서 닉네임 검색, 스크린샷 붙여넣기, 화면 공유로 파티, 공대를 확인합니다. 폭 375px부터 지원하고, 멀티서치는 데스크톱 브라우저용입니다.
 
 ## 실행과 검증
 
@@ -47,7 +47,7 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -e DFRA
 - `src/entities/<도메인>/`: 두 슬라이스 이상이 쓰는 schema, 타입, 표시 함수와 조회를 둡니다.
 - `src/shared/`: `ui`, `api`, `lib`, `config`, `assets`처럼 도메인을 모르는 코드를 둡니다.
 - `src/testing/`: Vitest setup, router와 query client 테스트 도구, story 틀을 둡니다. handler가 없는 API 요청을 보낸 테스트는 실패합니다.
-- `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮긴 데이터 파일입니다. 형식은 [이벤트 보상 schema](src/entities/catalog/model/event-rewards.ts)에 있습니다.
+- `public/data/event-rewards.v1.json`: 공식 이벤트의 보상과 획득 조건을 옮기는 데이터 파일의 경로입니다. 형식은 [이벤트 보상 schema](src/entities/catalog/model/event-rewards.ts)에 있고, 파일이 있을 때만 웹 테스트가 이 schema로 검사합니다.
 
 pages, widgets, features, entities는 슬라이스로 나누고, 같은 계층의 다른 슬라이스는 import하지 않습니다.
 슬라이스 안은 `ui`(컴포넌트), `api`(요청과 query hook, fixture, MSW handler), `model`(store와 React hook, schema와 타입), `lib`(React를 쓰지 않는 계산과 판정) 세그먼트로 나눕니다.

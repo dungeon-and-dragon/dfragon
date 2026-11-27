@@ -6,7 +6,7 @@
 ## 코드 위치
 
 `src/`는 API와 같은 계층 폴더로 나눕니다(ADR 0047, ADR 0057).
-기능(`jobs`, `queues`, `collection`, `batch-neople-keys`, `lab-items`, `lab-currencies`)마다 아래 파일을 둡니다.
+기능(`jobs`, `queues`, `collection`, `batch-neople-keys`, `lab-items`, `lab-item-details`, `lab-currencies`)마다 아래 파일을 둡니다.
 계층 사이의 import 방향과 presentation의 Repository import는 `pnpm lint`가 막습니다.
 
 | 역할 | 파일 | 내용 |
