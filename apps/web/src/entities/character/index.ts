@@ -48,7 +48,6 @@ export type { SetPointBonusRule } from './lib/set-point-bonus'
 export { toStatusLayout } from './lib/status-layout'
 export {
   acquisitionRoute,
-  CLEAR_KIND_LABELS,
   ENHANCEMENT_KIND_LABELS,
   formatEnhancementValue
 } from './lib/timeline-format'
@@ -100,18 +99,7 @@ export {
   characterImageUrl
 } from './model/character-summary'
 export type { ListScore } from './model/character-summary'
-export {
-  characterTimelineSchema,
-  timelineAcquisitionPageSchema,
-  timelineEnhancementPageSchema
-} from './model/character-timeline'
-export type {
-  CharacterTimeline,
-  TimelineAcquisition,
-  TimelineClearCount,
-  TimelineEnhancement,
-  TimelinePage
-} from './model/character-timeline'
+export type { TimelineEnhancement } from './model/character-timeline'
 export {
   isMaleCrusaderJob,
   MALE_CRUSADER_DEALER_SKILL,

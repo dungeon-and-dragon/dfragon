@@ -1,5 +1,5 @@
 import type { GameTextLines, SkillWindowCatalog } from '#entities/catalog'
-import type { CharacterDetailView, CharacterHistory, CharacterTimeline } from '#entities/character'
+import type { CharacterDetailView, CharacterHistory } from '#entities/character'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 
 // 캐릭터 상세 화면 테스트의 fixture에서 만든 story와 MSW handler의 값이다. 이름, 소속과 그림 주소는 실제 캐릭터가 아닌 합성 값이다.
@@ -170,70 +170,6 @@ export const storyBuffSkillWindowCatalog: SkillWindowCatalog = {
       }
     }
   }
-}
-
-export const storyTimeline: CharacterTimeline = {
-  seasonClears: [
-    { kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 },
-    { kind: 'raid', name: '나벨 레이드', hard: true, count: 2 },
-    { kind: 'raid', name: '나벨 레이드', hard: false, count: 1 },
-    { kind: 'legion', name: '베누스', hard: false, count: 12 }
-  ],
-  enhancements: [
-    {
-      kind: 'reinforce',
-      itemId: 'item-1',
-      itemName: '합성 무기',
-      itemRarity: '에픽',
-      before: 13,
-      after: 14,
-      result: true,
-      safe: true,
-      occurredAt: '2026-11-04T01:02:00.000Z'
-    },
-    {
-      kind: 'amplify',
-      itemId: 'item-2',
-      itemName: '합성 상의',
-      itemRarity: '태초',
-      before: 10,
-      after: 0,
-      result: false,
-      safe: false,
-      occurredAt: '2026-11-03T23:59:00.000Z'
-    },
-    {
-      kind: 'refine',
-      itemId: 'item-1',
-      itemName: '합성 무기',
-      itemRarity: '에픽',
-      before: null,
-      after: 8,
-      result: true,
-      safe: null,
-      occurredAt: '2026-11-03T00:00:00.000Z'
-    }
-  ],
-  enhancementsCursor: null,
-  acquisitions: [
-    {
-      code: 505,
-      name: '아이템 획득(던전 드랍)',
-      itemId: 'item-3',
-      itemName: '합성 하의',
-      itemRarity: '태초',
-      occurredAt: '2026-11-02T10:00:00.000Z'
-    },
-    {
-      code: 550,
-      name: '항아리 획득',
-      itemId: 'item-4',
-      itemName: '합성 신발',
-      itemRarity: '에픽',
-      occurredAt: '2026-11-01T10:00:00.000Z'
-    }
-  ],
-  acquisitionsCursor: null
 }
 
 const HISTORY_FIRST = '2026-11-05T13:00:00.000Z'
