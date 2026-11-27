@@ -42,6 +42,8 @@ export function RecentCharacterList({
   const large = size === 'large'
   const recentCharacters = useRecentCharacterStore((state) => state.recentCharacters)
   const removeRecentCharacter = useRecentCharacterStore((state) => state.removeRecentCharacter)
+  const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
+  const hasSavedCharacters = recentCharacters.length > 0 || favoriteCharacters.length > 0
 
   function handleOpenChange(next: boolean): void {
     if (!next) {
@@ -65,18 +67,20 @@ export function RecentCharacterList({
     input.current?.focus()
   }
 
+  // 즐겨찾기 절에서 하트를 누르면 그 줄이 사라져 초점을 잃으므로 이름 칸으로 옮긴다.
+  function focusInput(): void {
+    input.current?.focus()
+  }
+
   return (
-    <Popover.Root
-      open={open && (large || recentCharacters.length > 0)}
-      onOpenChange={handleOpenChange}
-    >
+    <Popover.Root open={open && (large || hasSavedCharacters)} onOpenChange={handleOpenChange}>
       <Popover.Popup
         anchor={anchor}
         side="bottom"
         align={large ? 'start' : 'end'}
         sideOffset={6}
         ref={popup}
-        aria-label={large ? '최근 본 캐릭터와 즐겨찾기' : '최근 본 캐릭터'}
+        aria-label="최근 본 캐릭터와 즐겨찾기"
         initialFocus={input}
         finalFocus={false}
         onKeyDown={handleListKeyDown}
@@ -84,23 +88,50 @@ export function RecentCharacterList({
         {/* 팝오버 테두리 1px씩을 빼 팝오버 바깥 폭이 기준 폭과 같게 한다. */}
         {large ? (
           <div className="max-h-[calc(var(--available-height)-2px)] w-[calc(var(--anchor-width)-2px)] overflow-y-auto">
-            <SavedCharacterSections characterPage={characterPage} input={input} onPick={onClose} />
+            <SavedCharacterSections
+              characterPage={characterPage}
+              onPick={onClose}
+              onFavoriteToggle={focusInput}
+            />
           </div>
         ) : (
           <div className="box-border max-h-[calc(min(480px,var(--available-height))-2px)] w-[min(418px,calc(var(--available-width)-2px))] overflow-y-auto py-1">
-            <h3 className={titleClass}>최근 본 캐릭터</h3>
-            <ul className={listClass}>
-              {recentCharacters.map((character) => (
-                <li key={`${character.serverId}/${character.characterId}`} className="relative">
-                  <RecentItem
-                    character={character}
-                    characterPage={characterPage}
-                    onPick={onClose}
-                  />
-                  <RemoveButton character={character} onRemove={remove} />
-                </li>
-              ))}
-            </ul>
+            {recentCharacters.length > 0 && (
+              <section>
+                <h3 className={titleClass}>최근 본 캐릭터</h3>
+                <ul className={listClass}>
+                  {recentCharacters.map((character) => (
+                    <li key={`${character.serverId}/${character.characterId}`} className="relative">
+                      <RecentItem
+                        character={character}
+                        characterPage={characterPage}
+                        onPick={onClose}
+                      />
+                      <RemoveButton character={character} onRemove={remove} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            {favoriteCharacters.length > 0 && (
+              <section>
+                <h3 className={titleClass}>즐겨찾기</h3>
+                <ul className={listClass}>
+                  {favoriteCharacters.slice(0, SECTION_ROW_LIMIT).map((character) => (
+                    <li key={`${character.serverId}/${character.characterId}`} className="relative">
+                      <RecentItem
+                        character={character}
+                        characterPage={characterPage}
+                        onPick={onClose}
+                      />
+                      <span className="absolute end-3 top-1/2 -translate-y-1/2">
+                        <FavoriteToggle character={character} onToggle={focusInput} />
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
         )}
       </Popover.Popup>
@@ -110,20 +141,15 @@ export function RecentCharacterList({
 
 function SavedCharacterSections({
   characterPage,
-  input,
-  onPick
+  onPick,
+  onFavoriteToggle
 }: {
   characterPage: CharacterPage
-  input: RefObject<HTMLInputElement | null>
   onPick: () => void
+  onFavoriteToggle: () => void
 }): React.JSX.Element {
   const recentCharacters = useRecentCharacterStore((state) => state.recentCharacters)
   const favoriteCharacters = useFavoriteCharacterStore((state) => state.favoriteCharacters)
-
-  // 즐겨찾기 절에서 하트를 누르면 그 줄이 사라져 초점을 잃으므로 이름 칸으로 옮긴다.
-  function focusInput(): void {
-    input.current?.focus()
-  }
 
   return (
     <>
@@ -140,7 +166,7 @@ function SavedCharacterSections({
         characters={favoriteCharacters.slice(0, SECTION_ROW_LIMIT)}
         characterPage={characterPage}
         onPick={onPick}
-        onFavoriteToggle={focusInput}
+        onFavoriteToggle={onFavoriteToggle}
       />
     </>
   )

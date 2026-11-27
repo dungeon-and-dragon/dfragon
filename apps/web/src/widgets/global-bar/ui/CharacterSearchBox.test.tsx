@@ -112,13 +112,11 @@ it('최근 본 캐릭터가 있으면 지우기 버튼으로 비운 뒤 빈 이�
   })
   await renderSearchBox()
   await typeName('하')
-  expect(document.querySelector('[aria-label="최근 본 캐릭터"]')).toBeNull()
+  expect(savedDropdown()).toBeNull()
 
   await act(async () => clearButton()!.click())
 
-  await vi.waitFor(() =>
-    expect(document.querySelector('[aria-label="최근 본 캐릭터"]')).not.toBeNull()
-  )
+  await vi.waitFor(() => expect(savedDropdown()).not.toBeNull())
 })
 
 function recentCharacter(
@@ -155,14 +153,7 @@ it('최근 본 캐릭터는 첫 줄에 이름, 직업명과 만렙이 아닐 때
   })
   await renderSearchBox()
 
-  await act(async () => nameInput().focus())
-
-  const popup = await vi.waitFor(() => {
-    const element = document.querySelector('[aria-label="최근 본 캐릭터"]')
-    expect(element).not.toBeNull()
-
-    return element!
-  })
+  const popup = await openSavedDropdown()
   const lines = [...popup.querySelectorAll('li a')].map((item) =>
     [...(item.children[1]?.children ?? [])].map((line) => line.textContent)
   )
@@ -213,6 +204,61 @@ function heart(element: HTMLElement, characterName: string): HTMLButtonElement {
   return row.querySelector<HTMLButtonElement>('button[aria-label^="즐겨찾기"]')!
 }
 
+it('작은 검색창은 저장된 캐릭터가 없으면 초점을 줘도 드롭다운을 열지 않는다', async () => {
+  await renderSearchBox()
+
+  await act(async () => nameInput().focus())
+
+  expect(savedDropdown()).toBeNull()
+})
+
+it('작은 검색창 드롭다운은 최근 본 캐릭터 아래에 즐겨찾기를 최대 5줄 그리고, 즐겨찾기만 있으면 즐겨찾기 절만 연다', async () => {
+  const favoriteCharacters = ['1', '2', '3', '4', '5', '6'].map((id) =>
+    savedCharacter(`favorite-${id}`, `즐찾${id}`)
+  )
+  useFavoriteCharacterStore.setState({ favoriteCharacters })
+  await renderSearchBox()
+
+  const favoritesOnly = await openSavedDropdown()
+  const favoriteSection = section(favoritesOnly, '즐겨찾기')
+
+  expect([...favoritesOnly.querySelectorAll('h3')].map((title) => title.textContent)).toEqual([
+    '즐겨찾기'
+  ])
+  expect(rowTexts(favoriteSection)).toEqual(rowsNamed('즐찾1', '즐찾2', '즐찾3', '즐찾4', '즐찾5'))
+
+  await act(async () =>
+    useRecentCharacterStore.setState({
+      recentCharacters: [recentCharacter('recent-1', '하늘', 115)]
+    })
+  )
+
+  expect([...favoritesOnly.querySelectorAll('h3')].map((title) => title.textContent)).toEqual([
+    '최근 본 캐릭터',
+    '즐겨찾기'
+  ])
+  expect(favoritesOnly.querySelector('li a')?.getAttribute('href')).toBe('/c/prey/recent-1')
+})
+
+it('작은 검색창 즐겨찾기 절의 하트를 누르면 그 줄이 빠지고 초점은 이름 칸으로 간다', async () => {
+  useRecentCharacterStore.setState({ recentCharacters: [recentCharacter('recent-1', '하늘', 115)] })
+  useFavoriteCharacterStore.setState({ favoriteCharacters: [savedCharacter('favorite-1', '바다')] })
+  await renderSearchBox()
+  const dropdown = await openSavedDropdown()
+  const favoriteHeart = heart(section(dropdown, '즐겨찾기'), '바다')
+  expect(favoriteHeart.getAttribute('aria-label')).toBe('즐겨찾기 해제')
+
+  await act(async () => favoriteHeart.focus())
+  await act(async () => favoriteHeart.click())
+
+  expect(savedDropdown()).toBe(dropdown)
+  expect([...dropdown.querySelectorAll('h3')].map((title) => title.textContent)).toEqual([
+    '최근 본 캐릭터'
+  ])
+  expect(document.activeElement).toBe(nameInput())
+  expect(useFavoriteCharacterStore.getState().favoriteCharacters).toEqual([])
+})
+
 it('큰 검색창은 저장된 캐릭터가 없어도 초점을 주면 두 절에 빈 줄 하나씩을 연다', async () => {
   await renderSearchBox('large')
 
@@ -227,7 +273,6 @@ it('큰 검색창은 저장된 캐릭터가 없어도 초점을 주면 두 절�
     ['최근 본 캐릭터', '최근 본 캐릭터가 없습니다.'],
     ['즐겨찾기', '즐겨찾기한 캐릭터가 없습니다.']
   ])
-  expect(document.querySelector('[aria-label="최근 본 캐릭터"]')).toBeNull()
 })
 
 it('큰 검색창 드롭다운은 두 절을 저장된 순서대로 최대 5줄씩 그리고 항목은 캐릭터 상세로 가며 네트워크 요청을 내지 않는다', async () => {
@@ -348,13 +393,6 @@ it('시뮬레이터로 보내는 작은 검색창의 최근 본 캐릭터 항목
   useRecentCharacterStore.setState({ recentCharacters: [recentCharacter('recent-1', '하늘', 115)] })
   await renderSearchBox('medium', 'simulator')
 
-  await act(async () => nameInput().focus())
-
-  const popup = await vi.waitFor(() => {
-    const element = document.querySelector('[aria-label="최근 본 캐릭터"]')
-    expect(element).not.toBeNull()
-
-    return element!
-  })
+  const popup = await openSavedDropdown()
   expect(popup.querySelector('li a')?.getAttribute('href')).toBe('/c/prey/recent-1/simulator')
 })

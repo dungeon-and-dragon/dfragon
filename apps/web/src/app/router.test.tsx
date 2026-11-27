@@ -1608,7 +1608,7 @@ it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐�
 })
 
 function recentPopup(): HTMLElement | null {
-  return document.querySelector('[aria-label="최근 본 캐릭터"]')
+  return document.querySelector('[aria-label="최근 본 캐릭터와 즐겨찾기"]')
 }
 
 it('상세를 연 캐릭터는 비어 있는 이름 칸에 초점이 가면 최근 본 캐릭터로 보이고, 이름을 쓰면 닫히며, 지우면 목록에서 빠진다', async () => {
