@@ -724,6 +724,222 @@ test('해제하면 제외 목록에서 빠지고 후보 줄은 다음 batch에�
   )
 })
 
+const titleBase = '합성 전설'
+const titlePlatinum = '합성 전설 플래티넘[30Lv]'
+const titlePlatinumHigh = '합성 전설 플래티넘[100Lv]'
+
+async function recordPrice(client, itemName, unitPrice) {
+  await recordAuctionPrice(client, {
+    itemName,
+    itemId: `synthetic-${itemName}`,
+    itemRarity: '레어',
+    unitPrice,
+    checkedAt: importedAt
+  })
+}
+
+async function insertWearCount(client, itemName, slotId, count) {
+  await client.$executeRawUnsafe(
+    'INSERT INTO "lab_candidate_wear_counts" ("item_name", "slot_id", "count", "computed_at") VALUES ($1, $2, $3, $4)',
+    itemName,
+    slotId,
+    count,
+    importedAt
+  )
+}
+
+test('칭호 후보는 기본 이름 한 줄로 묶어 가장 싼 변형의 가격, 변형 착용 수의 합, 기본 이름 줄의 값을 낸다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate(titleBase, { fame: 700 }),
+      candidate(titlePlatinum, { fame: 700, options: [{ name: '힘', value: '120' }] }),
+      candidate(titlePlatinumHigh, { fame: 700, options: [{ name: '힘', value: '120' }] }),
+      candidate('합성 다른 칭호', { fame: 600 })
+    ]
+  })
+  await recordPrice(client, titleBase, 30_000)
+  await recordPrice(client, titlePlatinum, 20_000)
+  await recordPrice(client, titlePlatinumHigh, 25_000)
+  await insertWearCount(client, titleBase, 'TITLE', 3)
+  await insertWearCount(client, titlePlatinumHigh, 'TITLE', 4)
+
+  const rows = await readLabCandidates(client, { kind: 'TITLE' })
+
+  assert.deepEqual(
+    rows.map(({ itemName, unitPrice, itemId, wearCount, options }) => ({
+      itemName,
+      unitPrice,
+      itemId,
+      wearCount,
+      options
+    })),
+    [
+      {
+        itemName: titleBase,
+        unitPrice: 20_000,
+        itemId: `synthetic-${titlePlatinum}`,
+        wearCount: 7,
+        options: [{ name: '힘', value: '100' }]
+      },
+      {
+        itemName: '합성 다른 칭호',
+        unitPrice: null,
+        itemId: null,
+        wearCount: 0,
+        options: [{ name: '힘', value: '100' }]
+      }
+    ]
+  )
+})
+
+test('기본 이름 줄이 없는 크리쳐 묶음은 기본 이름으로 한 줄이고 플래티넘이 아닌 변형의 값과 아이콘을 낸다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const creature = { kind: 'CREATURE', categories: ['CREATURE'], fame: 300 }
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate('합성 요정 플래티넘[30Lv]', { ...creature, description: '합성 플래티넘 설명' }),
+      candidate('합성 요정[40Lv]', { ...creature, description: '합성 40레벨 설명' }),
+      candidate('합성 요정[30Lv]', { ...creature, description: '합성 30레벨 설명' })
+    ]
+  })
+  await saveLabCandidateIcon(client, '합성 요정[30Lv]', pngIcon)
+  await saveLabCandidateIcon(client, '합성 요정 플래티넘[30Lv]', webpIcon)
+
+  const [row, ...others] = await readLabCandidates(client, { kind: 'CREATURE' })
+
+  assert.deepEqual(others, [])
+  assert.equal(row.itemName, '합성 요정')
+  assert.equal(row.description, '합성 30레벨 설명')
+  assert.equal(row.hasIcon, true)
+  assert.deepEqual(await readLabCandidateIcon(client, '합성 요정'), pngIcon)
+  assert.equal(await readLabCandidateIcon(client, '합성 없는 요정'), null)
+})
+
+test('오라와 마법부여 카드는 꼬리표가 붙어도 이름마다 한 줄이다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const aura = { kind: 'AURA', categories: ['AURA'] }
+  const enchant = { kind: 'ENCHANT', categories: ['WEAPON'], roles: ['dealer'] }
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate('합성 오라', aura),
+      candidate('합성 오라 플래티넘[30Lv]', aura),
+      candidate('합성 카드', enchant),
+      candidate('합성 카드 플래티넘', enchant)
+    ]
+  })
+
+  const auras = await readLabCandidates(client, { kind: 'AURA' })
+  const cards = await readLabCandidates(client, {
+    kind: 'ENCHANT',
+    category: 'WEAPON',
+    role: 'dealer'
+  })
+
+  assert.deepEqual(
+    auras.map(({ itemName }) => itemName),
+    ['합성 오라', '합성 오라 플래티넘[30Lv]']
+  )
+  assert.deepEqual(
+    cards.map(({ itemName }) => itemName),
+    ['합성 카드', '합성 카드 플래티넘']
+  )
+})
+
+test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 변형까지 가장 싼 가격과 기본 이름 줄의 후보 상세를 낸다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate(titleBase, { ...tooltip }),
+      candidate(titlePlatinum, { ...tooltip, description: '합성 플래티넘 설명' }),
+      candidate('합성 변형만[30Lv]', { description: '합성 변형 설명' }),
+      candidate('합성 변형만[40Lv]', { description: '합성 변형 설명' })
+    ]
+  })
+  await recordPrice(client, titleBase, 30_000)
+  await recordPrice(client, titlePlatinum, 20_000)
+  await recordPrice(client, '합성 변형만[40Lv]', 9_000)
+  await replaceLabItemGroup(client, {
+    ...titleFinal,
+    items: [unpriced(titleBase), unpriced('합성 변형만'), unpriced('합성 후보 없는 아이템')]
+  })
+
+  const rows = await readLabItemPrices(client)
+
+  assert.deepEqual(
+    rows.map(({ itemName, unitPrice, itemId, candidate: detail }) => [
+      itemName,
+      unitPrice,
+      itemId,
+      detail?.description ?? null
+    ]),
+    [
+      [titleBase, 20_000, `synthetic-${titlePlatinum}`, '합성 후보 설명'],
+      ['합성 변형만', 9_000, 'synthetic-합성 변형만[40Lv]', '합성 변형 설명'],
+      ['합성 후보 없는 아이템', null, null, null]
+    ]
+  )
+  assert.deepEqual(
+    (await readLabCandidatePriceTargets(client)).map(({ itemName }) => itemName).sort(),
+    ['합성 변형만[30Lv]', '합성 변형만[40Lv]', titlePlatinum].sort()
+  )
+})
+
+test('칭호를 기본 이름으로 제외하면 변형까지 지우고, 변형 이름의 batch도 건너뛰며, 변형이 실험실 아이템에 있으면 제외하지 않는다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate(titleBase),
+      candidate(titlePlatinum),
+      candidate('합성 고른 칭호'),
+      candidate('합성 고른 칭호[30Lv]')
+    ]
+  })
+  await replaceLabItemGroup(client, { ...titleFinal, items: [unpriced('합성 고른 칭호[30Lv]')] })
+
+  assert.deepEqual(await excludeLabCandidate(client, titleBase), { status: 'excluded' })
+  assert.deepEqual(await excludeLabCandidate(client, '합성 고른 칭호'), { status: 'labItem' })
+
+  const result = await upsertLabCandidates(client, {
+    versionId: 'second',
+    importedAt,
+    items: [
+      candidate(titlePlatinumHigh),
+      candidate('합성 오라 플래티넘', { kind: 'AURA', categories: ['AURA'] })
+    ]
+  })
+
+  assert.deepEqual(result, { saved: 1, skipped: [titlePlatinumHigh] })
+  assert.deepEqual(
+    (await readLabCandidates(client, { kind: 'TITLE' })).map(({ itemName }) => itemName),
+    ['합성 고른 칭호']
+  )
+  assert.deepEqual(
+    (await readLabCandidateExclusions(client)).map(({ itemName }) => itemName),
+    [titleBase]
+  )
+})
+
 test('후보 CHECK는 일반 종류의 목록과 아이콘 쌍을 지키고 잘못된 묶음은 모두 rollback한다', {
   skip: port === undefined
 }, async (t) => {
