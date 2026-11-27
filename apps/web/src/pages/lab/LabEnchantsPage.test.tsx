@@ -486,6 +486,7 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 �
   ])
   expect(emphasized).toEqual(['모든 속성 강화'])
   expect(separator?.textContent).toBe('|')
+  expect(separator?.classList).toContain('item-card-option-separator')
   expect(separator?.hasAttribute('data-emphasized')).toBe(false)
 
   await leave(card)

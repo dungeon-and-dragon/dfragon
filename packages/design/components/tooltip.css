@@ -90,6 +90,7 @@
 /*
  * <div class="tooltip-item"><div class="item-card">…</div></div>. 아이템 정보 카드다.
  * 이름과 등급의 색은 data-rarity(common부터 mythic), 마법부여 옵션 강조는 이름과 값 칸의 data-emphasized로 그린다.
+ * 버프 줄은 옵션 줄과 같은 item-card-status 목록에 item-card-section을 더해 구분선 아래에 둔다.
  */
 .item-card {
   display: flex;
@@ -133,7 +134,7 @@
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 0;
+  padding-inline-start: 0;
   list-style: none;
 }
 
