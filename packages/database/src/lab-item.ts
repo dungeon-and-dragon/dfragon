@@ -1,4 +1,5 @@
 import type { DatabaseClient } from './client.js'
+import type { LabItemCard, LabItemTooltipFields } from './lab-item-detail.js'
 
 export type LabItemCost = {
   currencyId: number
@@ -80,7 +81,7 @@ export type LabItemPriceCost = {
   count: number
 }
 
-export type LabItemPriceDetail = {
+export type LabItemPriceDetail = LabItemTooltipFields & {
   description: string | null
   itemRarity: string | null
   iconUpdatedAt: Date | null
@@ -104,6 +105,10 @@ type StoredLabItemPriceRow = Omit<LabItemPriceRow, 'unitPrice' | 'cost' | 'detai
   detailDescription: string | null
   detailRarity: string | null
   detailIconUpdatedAt: Date | null
+  detailItemTypeDetail: string | null
+  detailAvailableLevel: number | null
+  detailFame: number | null
+  detailCard: LabItemCard | null
   unitPrice: bigint | null
   currencyId: bigint | null
   currencyName: string | null
@@ -143,7 +148,11 @@ function toPriceDetail({
   hasDetail,
   detailDescription,
   detailRarity,
-  detailIconUpdatedAt
+  detailIconUpdatedAt,
+  detailItemTypeDetail,
+  detailAvailableLevel,
+  detailFame,
+  detailCard
 }: StoredLabItemPriceRow): LabItemPriceDetail | null {
   if (!hasDetail) {
     return null
@@ -152,7 +161,11 @@ function toPriceDetail({
   return {
     description: detailDescription,
     itemRarity: detailRarity,
-    iconUpdatedAt: detailIconUpdatedAt
+    iconUpdatedAt: detailIconUpdatedAt,
+    itemTypeDetail: detailItemTypeDetail,
+    availableLevel: detailAvailableLevel,
+    fame: detailFame,
+    card: detailCard
   }
 }
 
@@ -167,7 +180,9 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       c."updated_at" AS "currencyUpdatedAt", i."currency_count" AS "currencyCount",
       d."item_name" IS NOT NULL AS "hasDetail", d."description" AS "detailDescription",
       d."item_rarity" AS "detailRarity",
-      CASE WHEN d."icon" IS NULL THEN NULL ELSE d."updated_at" END AS "detailIconUpdatedAt"
+      CASE WHEN d."icon" IS NULL THEN NULL ELSE d."updated_at" END AS "detailIconUpdatedAt",
+      d."item_type_detail" AS "detailItemTypeDetail", d."available_level" AS "detailAvailableLevel",
+      d."fame" AS "detailFame", d."card" AS "detailCard"
     FROM "lab_items" i
     LEFT JOIN "auction_prices" p ON p."item_name" = i."item_name"
     LEFT JOIN "lab_currencies" c ON c."id" = i."currency_id"
