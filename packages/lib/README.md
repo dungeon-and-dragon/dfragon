@@ -25,10 +25,7 @@ parsePort('3000') // 3000
 
 `MALE_CRUSADER_DEALER_SKILL`(`용기의 은총`)은 남성 크루세이더를 딜러로 판정하는 스킬 이름입니다. API의 역할 판정과 `@dfragon/database`의 역할 SQL이 씁니다.
 
-`@dfragon/lib/enchant-grades`는 장비 시뮬레이터의 마법부여 등급표(`src/enchant-grades.json`)를 웹과 API에 제공합니다.
-`enchantOptionsOf(slotId, role)`는 부위, 역할의 등급별 선택 항목을, `findEnchantOption(slotId, role, id)`는 멤버 id가 속한 선택 항목을 돌려줍니다. 표시가 같은 등급표 항목은 한 선택 항목으로 묶이며, 표시 스탯은 `displayStatusOf(grade)`가 만듭니다.
-`optionNeedsMainStat(option)`이 true인 선택 항목은 `chooseEnchantGrade(option, mainStat)`으로 캐릭터의 주스탯에 맞는 항목을 고릅니다.
-등급표는 점수 엔진 저장소가 만든 `enchant-grades.dfragon.json`(version 2)을 복사한 파일이며 손으로 고치지 않습니다. 새 파일로 바꾸면 root에서 `pnpm exec biome format --write packages/lib/src/enchant-grades.json`, `node scripts/check-writing.mjs packages/lib/src/enchant-grades.json`을 실행하고, `test/enchant-grades.test.mjs`의 부위별 id 기대값을 새 표에 맞춘 뒤 `pnpm --filter @dfragon/lib test`를 실행합니다.
+`@dfragon/lib/enchant-grades`는 마법부여 부위 목록과 표시, 묶음, 주스탯 선택 규칙을 웹과 API에 제공합니다.
 
 `@dfragon/lib/slot-items`의 `slotItemsOf(category)`, `findSlotItem(category, id)`는 장비 시뮬레이터에서 고를 수 있는 칭호, 크리쳐, 오라 목록을 찾습니다. 엔진 점수 효과가 같은 아이템은 한 항목으로 묶여 있고, 항목의 `item`은 엔진에 넘길 대표 아이템입니다.
 `findWornSlotItem(category, worn)`은 착용 아이템이 속한 항목을 찾습니다. 대표 아이템과 itemId가 같거나 이름이 엔진 목록의 그 묶음 `members`에만 있으면 그 항목이고, 여러 묶음에 같은 이름이 있는 `ambiguousMembers`는 itemId로만 찾습니다.
