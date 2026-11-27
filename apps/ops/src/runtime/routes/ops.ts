@@ -6,6 +6,8 @@ import type { CollectionRepository } from '#application/collection/repository.js
 import { CollectionService } from '#application/collection/index.js'
 import type { JobRepository } from '#application/jobs/repository.js'
 import { JobService } from '#application/jobs/index.js'
+import type { LabCandidateRepository } from '#application/lab-candidates/repository.js'
+import { LabCandidateService } from '#application/lab-candidates/index.js'
 import type { LabCurrencyRepository } from '#application/lab-currencies/repository.js'
 import { LabCurrencyService } from '#application/lab-currencies/index.js'
 import type { LabItemDetailRepository } from '#application/lab-item-details/repository.js'
@@ -22,13 +24,14 @@ import {
   limitJsonBody,
   requireJsonContentType
 } from '#presentation/http/json-request.js'
+import { LabCandidateController } from '#presentation/http/lab-candidates/index.js'
 import { LabCurrencyController } from '#presentation/http/lab-currencies/index.js'
 import { LabItemDetailController } from '#presentation/http/lab-item-details/index.js'
 import { LabItemController } from '#presentation/http/lab-items/index.js'
 import { QueueController } from '#presentation/http/queues/index.js'
 
 // 아이콘을 base64로 받는 경로다.
-const ICON_PATHS = ['/api/lab-currencies/*', '/api/lab-item-details/*']
+const ICON_PATHS = ['/api/lab-currencies/*', '/api/lab-item-details/*', '/api/lab-candidates/icon']
 
 export interface OpsRouteOptions {
   readonly jobs: JobRepository
@@ -38,6 +41,7 @@ export interface OpsRouteOptions {
   readonly labItems: LabItemRepository
   readonly labCurrencies: LabCurrencyRepository
   readonly labItemDetails: LabItemDetailRepository
+  readonly labCandidates: LabCandidateRepository
 }
 
 export function createOpsRoutes({
@@ -47,7 +51,8 @@ export function createOpsRoutes({
   batchNeopleKeys,
   labItems,
   labCurrencies,
-  labItemDetails
+  labItemDetails,
+  labCandidates
 }: OpsRouteOptions): Hono {
   const queues: QueueRepository = { readCounts: readQueueCounts }
   const jobController = new JobController(new JobService(jobs))
@@ -61,6 +66,7 @@ export function createOpsRoutes({
   const labItemDetailController = new LabItemDetailController(
     new LabItemDetailService(labItemDetails)
   )
+  const labCandidateController = new LabCandidateController(new LabCandidateService(labCandidates))
   const routes = new Hono()
 
   routes.use(requireJsonContentType, except(ICON_PATHS, limitJsonBody))
@@ -76,6 +82,7 @@ export function createOpsRoutes({
   routes.route('/api/lab-items', labItemController.routes())
   routes.route('/api/lab-currencies', labCurrencyController.routes())
   routes.route('/api/lab-item-details', labItemDetailController.routes())
+  routes.route('/api/lab-candidates', labCandidateController.routes())
 
   return routes
 }

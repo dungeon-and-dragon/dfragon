@@ -9,6 +9,9 @@ export type OpsFailureKind =
   | 'labCurrencyNotFound'
   | 'labCurrencyDuplicate'
   | 'labItemIconNotFound'
+  | 'labCandidateNotFound'
+  | 'labCandidateSnapshotNotFound'
+  | 'labCandidateIconNotFound'
   | 'internal'
 
 export class OpsFailure extends Error {

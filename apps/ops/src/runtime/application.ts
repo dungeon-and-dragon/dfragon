@@ -3,6 +3,7 @@ import {
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
   DatabaseJobRepository,
+  DatabaseLabCandidateRepository,
   DatabaseLabCurrencyRepository,
   DatabaseLabItemDetailRepository,
   DatabaseLabItemRepository,
@@ -22,6 +23,7 @@ export function createOpsRuntime(database: DatabaseConfiguration) {
     labItems: new DatabaseLabItemRepository(client),
     labCurrencies: new DatabaseLabCurrencyRepository(client),
     labItemDetails: new DatabaseLabItemDetailRepository(client),
+    labCandidates: new DatabaseLabCandidateRepository(client),
     close: () => client.$disconnect()
   })
 }
