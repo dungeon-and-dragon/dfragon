@@ -35,8 +35,8 @@ export class LabItemDetailController {
         throw new OpsFailure('request')
       }
 
-      const { itemName, description, itemRarity, icon } = request.data
-      await this.service.save(itemName, { description, itemRarity }, icon)
+      const { itemName, icon, ...input } = request.data
+      await this.service.save(itemName, input, icon)
 
       return c.body(null, 204)
     })
