@@ -1123,4 +1123,97 @@ describe('실험실 후보 페이지', () => {
     )
     expect(rowNames()).toEqual(['합성 칭호 A'])
   })
+
+  it('기본 이름으로 묶은 칭호 줄을 종결로 저장하면 PUT 묶음에 기본 이름 하나만 넣는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 전설', priceItemName: '합성 전설 플래티넘[30Lv]' })
+    ]
+    await openCandidates(api)
+
+    expect(rowNames()).toEqual(['합성 전설'])
+    await choose('합성 전설 등급', '종결')
+    await click(buttonIn(panel(), '저장'))
+
+    await waitFor(() =>
+      expect(labItemPuts(api)).toEqual([
+        { ...TITLE, tier: '종결', items: [{ itemName: '합성 전설', cost: null }] }
+      ])
+    )
+  })
+
+  it('변형 이름이 종결에 있으면 묶은 줄을 종결로 보이고 제외를 막으며, 등급을 옮겨 저장하면 변형 이름을 빼고 기본 이름을 넣는다', async () => {
+    const api = new FakeOpsApi()
+    const cost = { currencyId: 1, count: 3 }
+    api.labCandidates = [labCandidate({ itemName: '합성 전설' })]
+    api.labItems = [
+      {
+        ...TITLE,
+        tier: '종결',
+        items: [
+          { itemName: '합성 전설 플래티넘[30Lv]', cost },
+          { itemName: '합성 다른 칭호', cost: null }
+        ]
+      }
+    ]
+    await openCandidates(api)
+
+    expect(tierOf('합성 전설')).toBe('종결')
+    expect(labeledButton('합성 전설 제외').disabled).toBe(true)
+    expect(pendingDot('합성 전설')).toBeNull()
+
+    await choose('합성 전설 등급', '준종결')
+    await click(buttonIn(panel(), '저장'))
+
+    await waitFor(() => expect(labItemPuts(api)).toHaveLength(2))
+    expect(labItemPuts(api)).toEqual(
+      expect.arrayContaining([
+        { ...TITLE, tier: '종결', items: [{ itemName: '합성 다른 칭호', cost: null }] },
+        { ...TITLE, tier: '준종결', items: [{ itemName: '합성 전설', cost }] }
+      ])
+    )
+  })
+
+  it('변형 이름으로 저장된 줄은 같은 등급으로 되돌려도 저장할 변경으로 남아 기본 이름으로 바꿔 저장한다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 전설' })]
+    api.labItems = [
+      { ...TITLE, tier: '종결', items: [{ itemName: '합성 전설[30Lv]', cost: null }] }
+    ]
+    await openCandidates(api)
+
+    await choose('합성 전설 등급', '준종결')
+    await choose('합성 전설 등급', '종결')
+    expect(pendingDot('합성 전설')).not.toBeNull()
+    await click(buttonIn(panel(), '저장'))
+
+    await waitFor(() =>
+      expect(labItemPuts(api)).toEqual([
+        { ...TITLE, tier: '종결', items: [{ itemName: '합성 전설', cost: null }] }
+      ])
+    )
+  })
+
+  it('묶은 줄의 최저가 칸을 펼치면 최저가를 낸 변형의 가격 이력을 보인다', async () => {
+    const api = new FakeOpsApi()
+    const variant = '합성 전설 플래티넘[30Lv]'
+    api.labCandidates = [labCandidate({ itemName: '합성 전설', priceItemName: variant })]
+    api.labCandidateHistory = {
+      [variant]: [
+        {
+          id: 1,
+          itemName: variant,
+          itemId: 'synthetic-item',
+          unitPrice: 900_000,
+          checkedAt: '2026-11-10T05:00:00.000Z'
+        }
+      ]
+    }
+    await openCandidates(api)
+
+    await click(rowOf('합성 전설').querySelector<HTMLButtonElement>('button[aria-expanded]')!)
+
+    await waitFor(() => expect(panel().querySelector('dl')).not.toBeNull())
+    expect(textsOf(panel(), 'dl > div > :last-child')).toEqual(['900,000'])
+  })
 })
