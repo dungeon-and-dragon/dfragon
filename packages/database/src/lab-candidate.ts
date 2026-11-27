@@ -131,6 +131,7 @@ export type LabCandidateSummary = LabCandidateInput & {
   checkedAt: Date | null
   previousPrice: LabCandidatePreviousPrice | null
   wearCount: number | null
+  wearCountedAt: Date | null
 }
 
 type StoredLabCandidate = Omit<LabCandidateSummary, 'unitPrice' | 'previousPrice'> & {
@@ -157,8 +158,15 @@ export async function readLabCandidates(
       c."icon" IS NOT NULL AS "hasIcon", c."icon_updated_at" AS "iconUpdatedAt",
       p."item_id" AS "itemId", p."unit_price" AS "unitPrice", p."checked_at" AS "checkedAt",
       h."item_id" AS "previousItemId", h."unit_price" AS "previousUnitPrice",
-      h."checked_at" AS "previousCheckedAt", NULL::integer AS "wearCount"
+      h."checked_at" AS "previousCheckedAt",
+      CASE WHEN worn."slot_id" IS NOT NULL THEN COALESCE(w."count", 0) END AS "wearCount",
+      CASE WHEN worn."slot_id" IS NOT NULL THEN counted."at" END AS "wearCountedAt"
     FROM "lab_candidates" c
+    CROSS JOIN (SELECT max("computed_at") AS "at" FROM "lab_candidate_wear_counts") counted
+    LEFT JOIN (VALUES ('TITLE', 'TITLE'), ('AURA', 'AURORA'), ('CREATURE', 'CREATURE'))
+      AS worn ("kind", "slot_id") ON worn."kind" = c."kind" AND counted."at" IS NOT NULL
+    LEFT JOIN "lab_candidate_wear_counts" w
+      ON w."item_name" = c."item_name" AND w."slot_id" = worn."slot_id"
     LEFT JOIN "auction_prices" p ON p."item_name" = c."item_name"
     LEFT JOIN LATERAL (
       SELECT "item_id", "unit_price", "checked_at"
