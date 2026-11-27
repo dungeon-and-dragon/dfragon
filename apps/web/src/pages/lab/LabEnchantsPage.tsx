@@ -90,7 +90,7 @@ function LabEnchantsBody({
           {accessoryRows.length > 0 && (
             <section aria-label={ACCESSORY_TITLE}>
               <h2 className="section-title">{ACCESSORY_TITLE}</h2>
-              <LabItemTable categoryLabel="종류" itemLabel="아이템" rows={accessoryRows} />
+              <LabItemTable categoryLabel="종류" itemLabel="아이템" rows={accessoryRows} withFame />
             </section>
           )}
           {lastCheckedAt !== null && (
