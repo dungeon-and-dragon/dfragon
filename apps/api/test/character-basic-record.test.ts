@@ -963,14 +963,11 @@ test('타임라인 동기화 요청 넣기가 실패해도 상세 응답은 그�
   const failing = await listen({
     details: detailsReturning(payloads),
     timeline: {
-      read: async () => assert.fail('타임라인을 읽으면 안 된다'),
-      readPage: async () => assert.fail('이어 받기를 부르면 안 된다'),
       requests: {
         readStates: async () => {
           throw new Error('database closed')
         },
         request: async () => assert.fail('상태를 읽지 못하면 넣으면 안 된다'),
-        has: async () => assert.fail('기다리면 안 된다'),
         readSeasonBackfillSeasons: async () => assert.fail('옛 시즌 받기를 읽으면 안 된다')
       },
       close: async () => undefined

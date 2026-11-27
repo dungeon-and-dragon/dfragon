@@ -10,8 +10,8 @@ export const requestKey = ({ kind, serverId, characterId, seasonId }: TimelineSy
 
 // 요청 테이블과 동기화 상태를 메모리에 흉내 낸 fake이며 DB를 쓰지 않는다. 행을 지우는 worker는 테스트가 remove로 흉내 낸다.
 export function memoryTimelineRequests(states: readonly TimelineSyncStateRow[] = []) {
-  const rows = new Map<string, TimelineSyncRequest & { awaited: boolean }>()
-  const inserted: (TimelineSyncRequest & { awaited: boolean })[] = []
+  const rows = new Map<string, TimelineSyncRequest>()
+  const inserted: TimelineSyncRequest[] = []
   const repository: TimelineSyncRequestRepository = {
     readStates: async (characters) =>
       states.filter((state) =>
@@ -20,16 +20,12 @@ export function memoryTimelineRequests(states: readonly TimelineSyncStateRow[] =
             state.serverId === serverId && state.characterId === characterId
         )
       ),
-    request: async (requests, { awaited }) => {
+    request: async (requests) => {
       for (const request of requests) {
-        const existing = rows.get(requestKey(request))
-        const row = { ...request, awaited: awaited || existing?.awaited === true }
-
-        rows.set(requestKey(request), row)
-        inserted.push({ ...request, awaited })
+        rows.set(requestKey(request), request)
+        inserted.push(request)
       }
     },
-    has: async (request) => rows.has(requestKey(request)),
     readSeasonBackfillSeasons: async (characters) => [
       ...new Set(
         [...rows.values()]
@@ -69,7 +65,6 @@ export function syncRequestRecorder(
         }
       }
     },
-    has: async () => false,
     readSeasonBackfillSeasons: async () => []
   }
 }

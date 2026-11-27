@@ -23,6 +23,9 @@ test('제거된 경로는 404를 반환하고 provider를 호출하지 않는다
       '/docs',
       '/docs/openapi.json',
       '/characters/cain/character-id/appearance',
+      '/characters/cain/character-id/timeline',
+      '/characters/cain/character-id/timeline/enhancements?before=1.1',
+      '/characters/cain/character-id/timeline/acquisitions?before=1.1',
       '/adventures/characters?adventureName=fixture'
     ]) {
       const response = await fetch(`${origin}${path}`)
