@@ -10,8 +10,14 @@ export {
 export { editBuffLevel, editSwitchingEquipment, simulatedBuff } from './buff.js'
 export type { SimulationFeatures } from './engine-version.js'
 export { supportsSimulation } from './engine-version.js'
-export type { EquipmentChange } from './equipment.js'
-export { editEquipment, needsMainStat, simulatedEquipment, wornMainStat } from './equipment.js'
+export type { EquipmentChange, LabEnchantSlots } from './equipment.js'
+export {
+  changesEnchant,
+  editEquipment,
+  needsMainStat,
+  simulatedEquipment,
+  wornMainStat
+} from './equipment.js'
 export {
   addedItemSlots,
   editEquipmentItems,

@@ -1,7 +1,7 @@
 import {
   ENCHANT_GRADE_SLOTS,
-  type EnchantGrade,
-  type EnchantGradeOption,
+  type EnchantEntry,
+  type EnchantMembers,
   type EnchantGradeRole,
   type EnchantGradeSlot,
   chooseEnchantGrade,
@@ -13,6 +13,11 @@ import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterRole } from '@dfragon/server-core/domain/character-role.js'
 import type { ScoreMainStat } from '@dfragon/server-core/domain/score/index.js'
+import {
+  type LabEnchantCardPrice,
+  type LabEnchantSlot,
+  findLabEnchantOption
+} from '#domain/lab-enchant-options/index.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
 const REINFORCE_LIMIT = 20
@@ -40,9 +45,11 @@ export interface EquipmentEdit {
   readonly original: CharacterPayload
   readonly reinforce: number
   readonly amplified: boolean
-  /** 표시가 같은 등급표 항목의 묶음이며, 항목은 주스탯을 안 뒤에 고른다. */
-  readonly enchant: EnchantGradeOption | null
+  /** 표시가 같은 마법부여 항목의 묶음이며, 항목은 주스탯을 안 뒤에 고른다. */
+  readonly enchant: EnchantMembers<EnchantEntry> | null
 }
+
+export type LabEnchantSlots = readonly LabEnchantSlot<LabEnchantCardPrice>[]
 
 function equippedItems(equipment: CharacterPayload): CharacterPayload[] {
   if (!Array.isArray(equipment.equipment)) {
@@ -73,12 +80,19 @@ function isAmplified(item: CharacterPayload): boolean {
   return typeof item.amplificationName === 'string'
 }
 
-function enchantOf(change: EquipmentChange, role: EnchantGradeRole): EnchantGradeOption | null {
+// 등급표 id는 웹이 실험실 선택지로 바뀔 때까지 받는다.
+function enchantOf(
+  change: EquipmentChange,
+  role: EnchantGradeRole,
+  labOptions: LabEnchantSlots
+): EnchantMembers<EnchantEntry> | null {
   if (change.enchantId === null) {
     return null
   }
 
-  const option = findEnchantOption(change.slotId, role, change.enchantId)
+  const option =
+    findEnchantOption(change.slotId, role, change.enchantId) ??
+    findLabEnchantOption(labOptions, change.slotId, role, change.enchantId)
 
   if (option === null) {
     throw new EquipmentSimulationFailure('request')
@@ -87,19 +101,24 @@ function enchantOf(change: EquipmentChange, role: EnchantGradeRole): EnchantGrad
   return option
 }
 
+export function changesEnchant(changes: readonly EquipmentChange[]): boolean {
+  return changes.some(({ enchantId }) => enchantId !== null)
+}
+
 function isBareSlot(change: EquipmentChange): boolean {
   return change.reinforce === 0 && !change.amplified && change.enchantId === null
 }
 
 /**
- * 범위 밖 수치, 그 부위나 역할의 등급표에 없는 마법부여는 거절한다. 비어 있는 부위는 `addedSlots`(이 요청이 장비를 더하는
+ * 범위 밖 수치, 그 부위나 역할의 등급표와 실험실 선택지에 없는 마법부여는 거절한다. 비어 있는 부위는 `addedSlots`(이 요청이 장비를 더하는
  * 부위)일 때만 그 장비에 강화, 증폭, 마법부여를 싣고, 장비를 더하지 않는 빈 부위에 실으면 거절한다.
  */
 export function editEquipment(
   equipment: CharacterPayload,
   changes: readonly EquipmentChange[],
   role: CharacterRole | null,
-  addedSlots: ReadonlySet<string>
+  addedSlots: ReadonlySet<string>,
+  labOptions: LabEnchantSlots
 ): EquipmentEdit[] {
   const items = equippedItems(equipment)
   const gradeRole = enchantRole(role)
@@ -121,7 +140,7 @@ export function editEquipment(
       throw new EquipmentSimulationFailure('request')
     }
 
-    const enchant = enchantOf(change, gradeRole)
+    const enchant = enchantOf(change, gradeRole, labOptions)
 
     return [{ original, reinforce: change.reinforce, amplified: change.amplified, enchant }]
   })
@@ -193,7 +212,7 @@ function amplificationName(edit: EquipmentEdit, mainStat: ScoreMainStat | null):
 }
 
 // Neople 응답은 직업별 스킬 강화가 없는 마법부여에 reinforceSkill 키를 두지 않는다.
-function toNeopleEnchant(grade: EnchantGrade): CharacterPayload {
+function toNeopleEnchant(grade: EnchantEntry): CharacterPayload {
   const status = structuredClone(grade.status)
 
   if (grade.reinforceSkill.length === 0) {
