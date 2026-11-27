@@ -445,12 +445,12 @@ it('itemId가 없고 운영 화면에서 넣은 상세가 있는 아이템은 �
   const rows = [...box.querySelectorAll('[data-card-option]')]
   const lines = rows.map((row) => [...row.children].map((cell) => cell.textContent).join(' '))
   const emphasized = rows
-    .filter((row) => row.firstElementChild?.classList.contains('text-game-enchant'))
+    .filter((row) => row.firstElementChild?.hasAttribute('data-emphasized'))
     .map((row) => row.firstElementChild?.textContent)
   const name = box.querySelector('b')!
   expect(box.querySelector('img')?.getAttribute('src')).toBe(`/api${iconPath}`)
   expect(name.textContent).toBe('합성 상자')
-  expect(name.classList).toContain('text-rarity-unique')
+  expect(name.dataset.rarity).toBe('unique')
   for (const text of ['유니크', '레벨제한 115', '합성 재료', '모험가 명성 232']) {
     expect(box.textContent).toContain(text)
   }
@@ -475,7 +475,7 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 �
   const rows = [...document.querySelectorAll('.tooltip-item [data-card-option]')]
   const lines = rows.map((row) => [...row.children].map((cell) => cell.textContent).join(' '))
   const emphasized = rows
-    .filter((row) => row.firstElementChild?.classList.contains('text-game-enchant'))
+    .filter((row) => row.firstElementChild?.hasAttribute('data-emphasized'))
     .map((row) => row.firstElementChild?.textContent)
   const separator = rows[0]?.children[2]
 
@@ -485,8 +485,8 @@ it('카드에 마우스를 올리면 아이템 정보 tooltip에 라벨 없는 �
     '모험가 명성 196 | 196 | 210'
   ])
   expect(emphasized).toEqual(['모든 속성 강화'])
-  expect(separator?.classList).toContain('text-fg-subtle')
-  expect(separator?.classList).not.toContain('text-game-enchant')
+  expect(separator?.textContent).toBe('|')
+  expect(separator?.hasAttribute('data-emphasized')).toBe(false)
 
   await leave(card)
   await vi.waitFor(() => expect(document.querySelector('.tooltip-item')).toBeNull())
@@ -554,7 +554,7 @@ it('카드 옵션 강조는 고른 역할을 따라, 딜러 탭은 속성 강화
     )
 
     const cells = [...document.querySelectorAll('.tooltip-item [data-card-option] > span')]
-      .filter((cell) => cell.classList.contains('text-game-enchant'))
+      .filter((cell) => cell.hasAttribute('data-emphasized'))
       .map((cell) => cell.textContent)
 
     await leave(name)
@@ -621,8 +621,8 @@ it('버퍼 탭에서 버퍼 카드에 마우스를 올리면 버프 패시브 �
   const cells = [...buffRow!.children]
 
   expect(cells.map((cell) => cell.textContent).join(' ')).toBe('버프 패시브 스킬 4 | 4 | 4')
-  expect(cells[0]?.classList).toContain('text-game-enchant')
-  expect(cells[1]?.classList).toContain('text-game-enchant')
+  expect(cells[0]?.hasAttribute('data-emphasized')).toBe(true)
+  expect(cells[1]?.hasAttribute('data-emphasized')).toBe(true)
 })
 
 it('API가 배럭 묶음을 주면 등급 열에 배럭으로 보인다', async () => {
