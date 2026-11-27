@@ -350,6 +350,10 @@ function candidatesApi(): FakeOpsApi {
       items: [{ itemName: '합성 각성 칭호', cost: null }]
     }
   ]
+  api.labCandidateExclusions = [
+    { itemName: '합성 검색 없는 칭호', excludedAt: minutesAgo(5) },
+    { itemName: '합성 이벤트 칭호[90Lv]', excludedAt: minutesAgo(2_880) }
+  ]
 
   return api
 }

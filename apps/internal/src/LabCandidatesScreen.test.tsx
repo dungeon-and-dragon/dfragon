@@ -190,6 +190,39 @@ function labItemPuts(api: FakeOpsApi): unknown[] {
     .map(({ body }) => body)
 }
 
+function exclusionPanel(): HTMLElement {
+  const found = container.querySelector<HTMLElement>('section[aria-label="제외한 후보"]')
+
+  if (found === null) {
+    throw new Error('제외한 후보 영역이 없습니다.')
+  }
+
+  return found
+}
+
+function exclusionRows(): string[][] {
+  return [...exclusionPanel().querySelectorAll('tbody tr')].map((row) =>
+    [...row.querySelectorAll('td')].map((cell) => cell.textContent ?? '')
+  )
+}
+
+function labeledButton(label: string): HTMLButtonElement {
+  const found = container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
+
+  if (found === null) {
+    throw new Error(`${label} 버튼이 없습니다.`)
+  }
+
+  return found
+}
+
+function exclusionWrites(api: FakeOpsApi): { method: string; body: unknown }[] {
+  return api
+    .writes()
+    .filter(({ path }) => path === '/api/lab-candidates/exclusions')
+    .map(({ method, body }) => ({ method, body }))
+}
+
 async function hoverName(name: string): Promise<HTMLElement> {
   const target = rowOf(name).querySelector('td:first-child [tabindex="0"]')
 
@@ -221,7 +254,7 @@ function textsOf(scope: ParentNode, selector: string): string[] {
 const TITLE = { category: 'TITLE', role: 'all' }
 
 describe('실험실 후보 페이지', () => {
-  it('상단 바의 실험실 후보 주소를 열면 후보 패널만 보이고 메뉴가 현재 페이지로 굵게 표시된다', async () => {
+  it('상단 바의 실험실 후보 주소를 열면 후보 패널과 제외한 후보만 보이고 메뉴가 현재 페이지로 굵게 표시된다', async () => {
     const api = new FakeOpsApi()
     api.labCandidates = [labCandidate({ itemName: '합성 칭호 A' })]
     await openCandidates(api)
@@ -230,7 +263,7 @@ describe('실험실 후보 페이지', () => {
       section.getAttribute('aria-label')
     )
 
-    expect(sections).toEqual(['실험실 후보'])
+    expect(sections).toEqual(['실험실 후보', '제외한 후보'])
     expect(container.querySelector('[role="tablist"][aria-label="운영"]')).toBeNull()
     const menu = [...container.querySelectorAll('nav[aria-label="운영 화면"] a')].map((link) => [
       link.textContent,
@@ -975,5 +1008,119 @@ describe('실험실 후보 페이지', () => {
 
     await waitFor(() => expect(cellsOf('합성 칭호 A')[4]).toBe('2,000'))
     expect(api.labCandidateQueries).toHaveLength(2)
+  })
+
+  it('제외를 누르면 확인 창 없이 제외하고, 후보 표에서 빼고 제외한 후보에 이름과 제외 시각을 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.now = () => '2026-11-10T05:30:00.000Z'
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 칭호 A' }),
+      labCandidate({ itemName: '합성 칭호 B' })
+    ]
+    const confirm = vi.spyOn(window, 'confirm')
+    await openCandidates(api)
+    await waitFor(() => expect(exclusionPanel().textContent).toContain('제외한 후보가 없습니다.'))
+
+    await click(labeledButton('합성 칭호 A 제외'))
+
+    await waitFor(() => expect(rowNames()).toEqual(['합성 칭호 B']))
+    await waitFor(() =>
+      expect(exclusionRows()).toEqual([['합성 칭호 A', '11-10 14:30:00', '해제']])
+    )
+    expect(exclusionWrites(api)).toEqual([{ method: 'POST', body: { itemName: '합성 칭호 A' } }])
+    expect(confirm).not.toHaveBeenCalled()
+  })
+
+  it('실험실 아이템 묶음에 든 후보는 다른 부위 묶음에 있어도 제외 버튼을 막는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 칭호 A' }),
+      labCandidate({ itemName: '합성 칭호 B' }),
+      labCandidate({ itemName: '합성 칭호 C' })
+    ]
+    api.labItems = [
+      { ...TITLE, tier: '종결', items: [{ itemName: '합성 칭호 A', cost: null }] },
+      {
+        category: 'WEAPON',
+        role: 'dealer',
+        tier: '배럭',
+        items: [{ itemName: '합성 칭호 B', cost: null }]
+      }
+    ]
+    await openCandidates(api)
+
+    expect(labeledButton('합성 칭호 A 제외').disabled).toBe(true)
+    expect(labeledButton('합성 칭호 B 제외').disabled).toBe(true)
+    expect(labeledButton('합성 칭호 C 제외').disabled).toBe(false)
+  })
+
+  it('해제를 누르면 해제를 요청하고 제외한 후보에서 뺀다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 B' })]
+    api.labCandidateExclusions = [
+      { itemName: '합성 칭호 A', excludedAt: '2026-11-10T05:00:00.000Z' }
+    ]
+    await openCandidates(api)
+    await waitFor(() => expect(exclusionRows()).toHaveLength(1))
+
+    await click(labeledButton('합성 칭호 A 해제'))
+
+    await waitFor(() => expect(exclusionPanel().textContent).toContain('제외한 후보가 없습니다.'))
+    expect(exclusionWrites(api)).toEqual([{ method: 'DELETE', body: { itemName: '합성 칭호 A' } }])
+  })
+
+  it('저장하지 않은 등급 변경이 있는 후보를 제외하면 그 변경도 버려 저장할 변경이 남지 않는다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 칭호 A' }),
+      labCandidate({ itemName: '합성 칭호 B' })
+    ]
+    await openCandidates(api)
+    await choose('합성 칭호 A 등급', '종결')
+    expect(panel().textContent).toContain('변경 1')
+
+    await click(labeledButton('합성 칭호 A 제외'))
+
+    await waitFor(() => expect(rowNames()).toEqual(['합성 칭호 B']))
+    expect(panel().textContent).not.toContain('변경 1')
+    expect(buttonIn(panel(), '저장').disabled).toBe(true)
+  })
+
+  it('제외나 해제가 실패하면 실패 문구를 보이고 후보와 제외한 후보를 그대로 둔다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A' })]
+    api.labCandidateExclusions = [
+      { itemName: '합성 칭호 B', excludedAt: '2026-11-10T05:00:00.000Z' }
+    ]
+    await openCandidates(
+      api,
+      failing(api, ({ method }) => method === 'POST' || method === 'DELETE')
+    )
+    await waitFor(() => expect(exclusionRows()).toHaveLength(1))
+
+    await click(labeledButton('합성 칭호 A 제외'))
+    await click(labeledButton('합성 칭호 B 해제'))
+
+    await waitFor(() => expect(panel().textContent).toContain('제외하지 못했습니다.'))
+    await waitFor(() => expect(exclusionPanel().textContent).toContain('해제하지 못했습니다.'))
+    expect(rowNames()).toEqual(['합성 칭호 A'])
+    expect(exclusionRows().map(([name]) => name)).toEqual(['합성 칭호 B'])
+  })
+
+  it('제외한 후보를 읽지 못하면 그 구획에만 오류 문구를 보이고 후보 표는 그대로 보인다', async () => {
+    const api = new FakeOpsApi()
+    api.labCandidates = [labCandidate({ itemName: '합성 칭호 A' })]
+    const transport = failing(
+      api,
+      ({ url }) => new URL(url).pathname === '/api/lab-candidates/exclusions'
+    )
+    await openCandidates(api, transport)
+
+    await waitFor(() =>
+      expect(exclusionPanel().querySelector('[role="alert"]')?.textContent).toBe(
+        '제외한 후보를 읽지 못했습니다.'
+      )
+    )
+    expect(rowNames()).toEqual(['합성 칭호 A'])
   })
 })

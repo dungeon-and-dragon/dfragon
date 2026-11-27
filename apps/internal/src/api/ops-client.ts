@@ -10,9 +10,11 @@ import {
   failureSchema,
   type JobList,
   jobListSchema,
+  type LabCandidateExclusionList,
   type LabCandidateKind,
   type LabCandidateList,
   type LabCandidatePriceHistory,
+  labCandidateExclusionListSchema,
   labCandidateListSchema,
   labCandidatePriceHistorySchema,
   type LabCurrencyList,
@@ -92,6 +94,9 @@ export type OpsClient = {
   readLabCandidates: (query: LabCandidateQuery) => Promise<LabCandidateList>
   readLabCandidatePriceHistory: (itemName: string) => Promise<LabCandidatePriceHistory>
   labCandidateIconUrl: (itemName: string, updatedAt: Date) => string
+  readLabCandidateExclusions: () => Promise<LabCandidateExclusionList>
+  excludeLabCandidate: (itemName: string) => Promise<void>
+  includeLabCandidate: (itemName: string) => Promise<void>
 }
 
 async function throwFailure(response: KyResponse): Promise<never> {
@@ -222,6 +227,16 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
       const query = new URLSearchParams({ itemName, v: version })
 
       return new URL(`lab-candidates/icon?${query}`, baseUrl).href
+    },
+    readLabCandidateExclusions: async () =>
+      readBody(await http.get('lab-candidates/exclusions'), labCandidateExclusionListSchema),
+    excludeLabCandidate: async (itemName) => {
+      const json = { itemName }
+      await expectNoContent(await http.post('lab-candidates/exclusions', { json }))
+    },
+    includeLabCandidate: async (itemName) => {
+      const json = { itemName }
+      await expectNoContent(await http.delete('lab-candidates/exclusions', { json }))
     }
   }
 }
