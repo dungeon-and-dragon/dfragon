@@ -70,6 +70,7 @@ const LEGION_STAGE = /^(.+)\((극|일반)\)$/
 
 function splitLegionName(name: string): { name: string; stage: string | null } {
   const match = LEGION_STAGE.exec(name)
+
   if (match === null) {
     return { name, stage: null }
   }
@@ -95,7 +96,6 @@ function toClearRows({ raids, legions }: ActivitySummary): ClearRow[] {
 
   for (const legion of legions) {
     const { name, stage } = splitLegionName(legion.name)
-
     add('legion', name, stage, legion.count)
   }
 
