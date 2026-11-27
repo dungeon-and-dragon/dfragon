@@ -1,8 +1,5 @@
-import {
-  type EnchantGradeSlot,
-  type EnchantGradeTier,
-  enchantOptionsOf
-} from '@dfragon/lib/enchant-grades'
+import type { EnchantGradeSlot } from '@dfragon/lib/enchant-grades'
+import type { LabItemTier } from '@dfragon/lib/lab-items'
 import {
   EQUIPMENT_VARIANT_SLOTS,
   type EquipmentSet,
@@ -33,6 +30,11 @@ import {
   itemRarityOfGrade,
   toItemView
 } from '#entities/character'
+import type { LoadedResult } from '#shared/lib/useLoadedResult'
+import type {
+  EnchantOptions,
+  LabEnchantCard
+} from '#pages/character-simulator/api/useEnchantOptions'
 import { EMPTY_SLOT_NAME } from './empty-slot'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
 import type { AvatarPresetChange } from './simulator-avatar'
@@ -111,11 +113,15 @@ const EQUIPMENT_SLOT_NAMES: Readonly<Record<EnchantGradeSlot | typeof TITLE_SLOT
 }
 export const TUNED_WEAPON_NAME = '레거시 조율 완료'
 
+/** card는 그 선택지에서 가장 싼 카드다. */
 export type EnchantChoice = Readonly<{
   id: string
-  tier: EnchantGradeTier
+  tier: LabItemTier
   options: EnchantOption[]
+  card: LabEnchantCard
 }>
+
+export type EnchantChoicesStatus = LoadedResult<EnchantOptions>['status']
 
 /**
  * maxTune이 0이면 조율할 수 없는 아이템이다. 무기 선택지는 variant 대신 weapon이 있고, name은 아이템 이름이 아니라 계열
@@ -142,7 +148,8 @@ export type WeaponTypeChoice = Readonly<{
  * 세트로 옮긴 값이고, wornVariantId가 null이면 선택지에 없는 착용 아이템이다. wornMaxTune은 선택지에 없는 착용 아이템의 조율
  * 상한이다(무기). empty는 비어 있는 부위이고, 선택지의 아이템을 고른 뒤에만 강화, 증폭, 마법부여를 고를 수 있다. weaponTypes는 비어
  * 있는 무기 줄에만 있고, variants는 그 종류들의 선택지를 모두 담는다. wornSetPoint, wornSetItemId는 착용 아이템의 세트 포인트와
- * 세트이고, 선택지에 없는 착용 아이템의 세트 포인트를 셀 때 쓴다.
+ * 세트이고, 선택지에 없는 착용 아이템의 세트 포인트를 셀 때 쓴다. wornEnchantCard는 착용한 마법부여와 표시가 같은 선택지의
+ * 카드이고, 찾지 못하면 null이다.
  */
 export type SimulatorSlot = ItemView &
   Readonly<{
@@ -154,6 +161,8 @@ export type SimulatorSlot = ItemView &
     reinforceEditable: boolean
     enchants: EnchantOption[]
     enchantChoices: EnchantChoice[]
+    enchantChoicesStatus: EnchantChoicesStatus
+    wornEnchantCard: LabEnchantCard | null
     variants: readonly VariantChoice[]
     wornVariantId: string | null
     wornTune: number
@@ -289,6 +298,10 @@ export type SimulatorAction =
     }>
   | Readonly<{ type: 'reset' }>
 
+function hasEnchantChoice(slot: SimulatorSlot, enchantId: string): boolean {
+  return slot.enchantChoices.some(({ id }) => id === enchantId)
+}
+
 function isVariantSlot(slotId: string): slotId is EquipmentVariantSlot {
   return EQUIPMENT_VARIANT_SLOTS.some((variantSlot) => variantSlot === slotId)
 }
@@ -301,17 +314,66 @@ export function simulatorRole(card: CharacterDetailView['card']): EnchantRole {
   return 'dealer'
 }
 
-function enchantChoices(slotId: EnchantGradeSlot, role: EnchantRole): EnchantChoice[] {
-  const tiers = enchantOptionsOf(slotId, role)
-  const tierNames: EnchantGradeTier[] = ['종결', '준종결']
+type SlotEnchants = Readonly<{
+  choices: EnchantChoice[]
+  status: EnchantChoicesStatus
+}>
 
-  return tierNames.flatMap((tier) =>
-    tiers[tier].map((option) => {
-      const options = optionEnchantLabels(option, role)
+/** status가 success일 때만 options가 있다. */
+export type SimulatorEnchantOptions = Readonly<{
+  status: EnchantChoicesStatus
+  options: EnchantOptions | null
+}>
 
-      return { id: option.id, tier, options }
+function enchantChoicesOf(
+  slotId: EnchantGradeSlot,
+  role: EnchantRole,
+  { status, options }: SimulatorEnchantOptions
+): SlotEnchants {
+  if (options === null) {
+    return { choices: [], status }
+  }
+
+  const slot = options.slots.find(
+    (candidate) => candidate.slotId === slotId && candidate.role === role
+  )
+
+  const tiers = slot?.tiers ?? []
+  const choices = tiers.flatMap(({ tier, options }) =>
+    options.map((option) => {
+      const labels = optionEnchantLabels(option, role)
+
+      return { id: option.id, tier, options: labels, card: option.cards[0]! }
     })
   )
+
+  return { choices, status }
+}
+
+function labelKey(options: readonly EnchantOption[]): string {
+  return options
+    .map(({ label }) => label)
+    .toSorted()
+    .join('\n')
+}
+
+// 착용 장비 응답에는 카드가 없어, 옵션 표시가 같은 선택지의 카드를 착용한 카드로 본다.
+function wornEnchantCardOf(
+  enchants: readonly EnchantOption[],
+  choices: readonly EnchantChoice[]
+): LabEnchantCard | null {
+  if (enchants.length === 0) {
+    return null
+  }
+
+  const key = labelKey(enchants)
+  const choice = choices.find(({ options }) => labelKey(options) === key)
+
+  if (choice === undefined) {
+    return null
+  }
+
+  return choice.card
 }
 
 function maxTuneOf(tuneSetPoints: readonly number[]): number {
@@ -497,7 +559,8 @@ function wornReleaseOf(
 function toSimulatorSlot(
   item: EquipmentItem & { slotId: EnchantGradeSlot },
   role: EnchantRole,
-  setIdsByPoint: readonly string[]
+  setIdsByPoint: readonly string[],
+  enchantOptions: SimulatorEnchantOptions
 ): SimulatorSlot {
   const reinforce = item.reinforce ?? 0
   const itemView = toItemView(item)
@@ -505,7 +568,8 @@ function toSimulatorSlot(
   const reinforceLimit = Math.max(REINFORCE_LIMIT, reinforce)
   const reinforceEditable = item.itemAvailableLevel === SIMULATED_ITEM_LEVEL
   const enchants = equippedEnchantLabels(item.enchant, role)
-  const choices = enchantChoices(item.slotId, role)
+  const { choices, status } = enchantChoicesOf(item.slotId, role, enchantOptions)
+  const wornEnchantCard = wornEnchantCardOf(enchants, choices)
   const variants = variantChoicesOf(item, item.slotId, setIdsByPoint)
   const wornVariantId = wornVariantIdOf(item, variants)
   const wornTune = wornTuneOf(item)
@@ -524,6 +588,8 @@ function toSimulatorSlot(
     reinforceEditable,
     enchants,
     enchantChoices: choices,
+    enchantChoicesStatus: status,
+    wornEnchantCard,
     variants,
     wornVariantId,
     wornTune,
@@ -555,8 +621,10 @@ function emptySlot(
   slotId: EnchantGradeSlot,
   character: SimulatorDetail['character'],
   role: EnchantRole,
-  setIdsByPoint: readonly string[]
+  setIdsByPoint: readonly string[],
+  enchantOptions: SimulatorEnchantOptions
 ): SimulatorSlot {
+  const { choices, status } = enchantChoicesOf(slotId, role, enchantOptions)
   const weaponTypes = slotId === WEAPON_SLOT_ID ? emptyWeaponTypes(character) : []
   const variants = isVariantSlot(slotId)
     ? setVariantChoicesOf(slotId, setIdsByPoint)
@@ -573,7 +641,9 @@ function emptySlot(
     reinforceLimit: REINFORCE_LIMIT,
     reinforceEditable: true,
     enchants: [],
-    enchantChoices: enchantChoices(slotId, role),
+    enchantChoices: choices,
+    enchantChoicesStatus: status,
+    wornEnchantCard: null,
     variants,
     wornVariantId: null,
     wornTune: 0,
@@ -719,7 +789,10 @@ export function rowsInEquipmentSet(
  * 장비 12부위와 칭호는 응답 순서대로, 크리쳐와 오라는 캐릭터 상세 장비 탭처럼 장비 뒤에 둔다. 비어 있는 부위도 줄을 두고 아이템을
  * 더할 수 있다.
  */
-export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
+export function toSimulatorRows(
+  detail: SimulatorDetail,
+  enchantOptions: SimulatorEnchantOptions
+): SimulatorRow[] {
   const role = simulatorRole(detail.card)
   const setIdsByPoint = setIdsByPointOf(detail.equipment.setItemInfo)
   const slotIds = Object.keys(EQUIPMENT_SLOT_NAMES) as (keyof typeof EQUIPMENT_SLOT_NAMES)[]
@@ -731,12 +804,12 @@ export function toSimulatorRows(detail: SimulatorDetail): SimulatorRow[] {
     }
 
     if (item === undefined) {
-      const slot = emptySlot(slotId, detail.character, role, setIdsByPoint)
+      const slot = emptySlot(slotId, detail.character, role, setIdsByPoint, enchantOptions)
 
       return { kind: 'equipment', slot }
     }
 
-    const slot = toSimulatorSlot({ ...item, slotId }, role, setIdsByPoint)
+    const slot = toSimulatorSlot({ ...item, slotId }, role, setIdsByPoint, enchantOptions)
 
     return { kind: 'equipment', slot }
   })
@@ -758,6 +831,7 @@ function originalDraft(slot: SimulatorSlot): SlotDraft {
   }
 }
 
+/** 고른 마법부여가 다시 받은 선택지에 없으면 착용한 마법부여로 되돌린다. */
 export function draftOf(slot: SimulatorSlot, changes: SimulatorChanges): SlotDraft {
   const changed = changes.equipment[slot.slotId]
 
@@ -765,10 +839,14 @@ export function draftOf(slot: SimulatorSlot, changes: SimulatorChanges): SlotDra
     return originalDraft(slot)
   }
 
+  if (changed.enchantId !== null && !hasEnchantChoice(slot, changed.enchantId)) {
+    return { ...changed, enchantId: null }
+  }
+
   return changed
 }
 
-/** 고른 마법부여의 옵션이다. 고르지 않았거나 등급표에 없는 id면 착용한 마법부여다. */
+/** 고른 마법부여의 옵션이다. 고르지 않았거나 선택지에 없는 id면 착용한 마법부여다. */
 export function enchantLabelsOf(
   slot: SimulatorSlot,
   enchantId: string | null
@@ -859,7 +937,7 @@ function isAllowed(slot: SimulatorSlot, current: SlotDraft, next: SlotDraft): bo
     return false
   }
 
-  if (next.enchantId !== null && !slot.enchantChoices.some(({ id }) => id === next.enchantId)) {
+  if (next.enchantId !== null && !hasEnchantChoice(slot, next.enchantId)) {
     return false
   }
 
@@ -1201,13 +1279,11 @@ export function simulationBody(
       return []
     }
 
-    const draft = changes.equipment[row.slot.slotId]
-
-    if (draft === undefined) {
+    if (changes.equipment[row.slot.slotId] === undefined) {
       return []
     }
 
-    return [toSimulationChange(row.slot, draft)]
+    return [toSimulationChange(row.slot, draftOf(row.slot, changes))]
   })
   // 서약이 없는 캐릭터는 본체를 고르기 전까지 서약 세트만 골라도 더할 서약이 없어 보내지 않는다.
   const oathChanges =
