@@ -1,4 +1,10 @@
 import type { DatabaseClient } from './client.js'
+import {
+  cheapestVariantOf,
+  groupByBaseName,
+  representativeOf,
+  VARIANT_GROUPED_KINDS
+} from './lab-candidate-variant.js'
 import type { LabItemCard, LabItemTooltipFields } from './lab-item-detail.js'
 
 export type LabItemCost = {
@@ -224,12 +230,24 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
     LEFT JOIN "lab_candidates" candidate ON candidate."item_name" = i."item_name"
     ORDER BY i."id"`
 
+  const variantGroups = await readCandidateVariantGroups(client)
+
   return rows.map((row) => {
-    const { category, role, tier, itemName, itemId, itemRarity, unitPrice, checkedAt } = row
-    const price = unitPrice !== null ? Number(unitPrice) : null
+    const { category, role, tier, itemName } = row
+    const variants = variantGroups.get(itemName) ?? []
+    const ownPrice = row.unitPrice !== null ? Number(row.unitPrice) : null
+    const own = {
+      itemName,
+      itemId: row.itemId,
+      itemRarity: row.itemRarity,
+      unitPrice: ownPrice,
+      checkedAt: row.checkedAt
+    }
+
+    const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf([own, ...variants])
     const cost = toPriceCost(row)
     const detail = toPriceDetail(row)
-    const candidate = toPriceCandidate(row)
+    const candidate = toPriceCandidate(row) ?? variantCandidateOf(itemName, variants)
 
     return {
       category,
@@ -238,11 +256,77 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       itemName,
       itemId,
       itemRarity,
-      unitPrice: price,
+      unitPrice,
       checkedAt,
       cost,
       detail,
       candidate
     }
   })
+}
+
+type CandidateVariantPrice = {
+  itemName: string
+  itemId: string | null
+  itemRarity: string | null
+  unitPrice: number | null
+  checkedAt: Date | null
+  candidate: LabItemPriceDetail
+}
+
+type StoredCandidateVariantPrice = Omit<CandidateVariantPrice, 'unitPrice' | 'candidate'> &
+  Omit<LabItemPriceDetail, 'itemRarity'> & {
+    unitPrice: bigint | null
+    candidateRarity: string | null
+  }
+
+function variantCandidateOf(
+  itemName: string,
+  variants: readonly CandidateVariantPrice[]
+): LabItemPriceDetail | null {
+  if (variants.length === 0) {
+    return null
+  }
+
+  return representativeOf(itemName, variants).candidate
+}
+
+// 실험실 아이템에 기본 이름만 저장한 칭호, 크리쳐도 변형의 가격과 후보 상세를 보이게 기본 이름으로 묶어 둔다.
+async function readCandidateVariantGroups(
+  client: DatabaseClient
+): Promise<Map<string, CandidateVariantPrice[]>> {
+  const rows = await client.$queryRaw<StoredCandidateVariantPrice[]>`
+    SELECT
+      c."item_name" AS "itemName", p."item_id" AS "itemId", p."item_rarity" AS "itemRarity",
+      p."unit_price" AS "unitPrice", p."checked_at" AS "checkedAt",
+      c."description", c."item_rarity" AS "candidateRarity",
+      CASE WHEN c."icon" IS NULL THEN NULL ELSE c."icon_updated_at" END AS "iconUpdatedAt",
+      c."item_type_detail" AS "itemTypeDetail", c."available_level" AS "availableLevel",
+      c."fame", c."card"
+    FROM "lab_candidates" c
+    LEFT JOIN "auction_prices" p ON p."item_name" = c."item_name"
+    WHERE c."kind" = ANY(${[...VARIANT_GROUPED_KINDS]}::text[])`
+
+  const variants = rows.map((row) => {
+    const unitPrice = row.unitPrice !== null ? Number(row.unitPrice) : null
+
+    return {
+      itemName: row.itemName,
+      itemId: row.itemId,
+      itemRarity: row.itemRarity,
+      unitPrice,
+      checkedAt: row.checkedAt,
+      candidate: {
+        description: row.description,
+        itemRarity: row.candidateRarity,
+        iconUpdatedAt: row.iconUpdatedAt,
+        itemTypeDetail: row.itemTypeDetail,
+        availableLevel: row.availableLevel,
+        fame: row.fame,
+        card: row.card
+      }
+    }
+  })
+
+  return groupByBaseName(variants)
 }

@@ -1,8 +1,17 @@
+import { labItemBaseName } from '@dfragon/lib/lab-items'
 import type { LabItemPriceTarget } from './auction-price.js'
 import type { DatabaseClient } from './client.js'
 import type { Prisma } from './generated/prisma/client.js'
 import type { LabCurrencyIcon } from './lab-currency.js'
 import type { LabItemTooltipFields } from './lab-item-detail.js'
+import {
+  cheapestVariantOf,
+  compareVariants,
+  groupByBaseName,
+  isVariantGroupedKind,
+  representativeOf,
+  VARIANT_GROUPED_KINDS
+} from './lab-candidate-variant.js'
 
 export type LabCandidateKind = 'TITLE' | 'CREATURE' | 'AURA' | 'ENCHANT'
 
@@ -29,20 +38,29 @@ export type LabCandidateBatchResult = {
   skipped: string[]
 }
 
+function exclusionNamesOf({ itemName, kind }: LabCandidateInput): string[] {
+  if (!isVariantGroupedKind(kind)) {
+    return [itemName]
+  }
+
+  return [itemName, labItemBaseName(itemName)]
+}
+
 export async function upsertLabCandidates(
   client: DatabaseClient,
   { versionId, importedAt, items }: LabCandidateBatch
 ): Promise<LabCandidateBatchResult> {
-  const itemNames = items.map(({ itemName }) => itemName)
+  const exclusionNames = items.flatMap(exclusionNamesOf)
   const exclusions = await client.labCandidateExclusion.findMany({
-    where: { itemName: { in: itemNames } },
+    where: { itemName: { in: exclusionNames } },
     select: { itemName: true }
   })
   const excluded = new Set(exclusions.map(({ itemName }) => itemName))
-  const kept = items.filter(({ itemName }) => !excluded.has(itemName))
-  const skipped = items
-    .filter(({ itemName }) => excluded.has(itemName))
-    .map(({ itemName }) => itemName)
+  const isExcluded = (item: LabCandidateInput) =>
+    exclusionNamesOf(item).some((name) => excluded.has(name))
+
+  const kept = items.filter((item) => !isExcluded(item))
+  const skipped = items.filter(isExcluded).map(({ itemName }) => itemName)
 
   const writes = kept.map((item) => {
     const options = JSON.stringify(item.options)
@@ -91,14 +109,36 @@ export async function saveLabCandidateIcon(
   return { status }
 }
 
+async function readIconRow(client: DatabaseClient, itemName: string) {
+  return client.labCandidate.findUnique({
+    where: { itemName },
+    select: { icon: true, iconContentType: true }
+  })
+}
+
+// 기본 이름 줄이 없는 칭호, 크리쳐 묶음은 기본 이름으로 아이콘을 요청하므로, 묶은 줄의 값을 정하는 변형의 아이콘을 낸다.
+async function readVariantIconRow(client: DatabaseClient, baseName: string) {
+  const grouped = await client.labCandidate.findMany({
+    where: { kind: { in: [...VARIANT_GROUPED_KINDS] } },
+    select: { itemName: true }
+  })
+
+  const variants = grouped.filter((row) => labItemBaseName(row.itemName) === baseName)
+
+  if (variants.length === 0) {
+    return null
+  }
+
+  const { itemName } = representativeOf(baseName, variants)
+
+  return readIconRow(client, itemName)
+}
+
 export async function readLabCandidateIcon(
   client: DatabaseClient,
   itemName: string
 ): Promise<LabCurrencyIcon | null> {
-  const row = await client.labCandidate.findUnique({
-    where: { itemName },
-    select: { icon: true, iconContentType: true }
-  })
+  const row = (await readIconRow(client, itemName)) ?? (await readVariantIconRow(client, itemName))
 
   if (row === null || row.icon === null || row.iconContentType === null) {
     return null
@@ -199,18 +239,81 @@ export async function readLabCandidates(
       AND (${role}::text IS NULL OR ${role} = ANY(c."roles"))
     ORDER BY c."fame" DESC NULLS LAST, c."item_name"`
 
-  return rows.map(({ unitPrice, previousItemId, previousUnitPrice, previousCheckedAt, ...row }) => {
-    let previousPrice: LabCandidatePreviousPrice | null = null
+  const candidates = rows.map(
+    ({ unitPrice, previousItemId, previousUnitPrice, previousCheckedAt, ...row }) => {
+      let previousPrice: LabCandidatePreviousPrice | null = null
 
-    if (previousCheckedAt !== null) {
-      const price = previousUnitPrice !== null ? Number(previousUnitPrice) : null
-      previousPrice = { itemId: previousItemId, unitPrice: price, checkedAt: previousCheckedAt }
+      if (previousCheckedAt !== null) {
+        const price = previousUnitPrice !== null ? Number(previousUnitPrice) : null
+        previousPrice = { itemId: previousItemId, unitPrice: price, checkedAt: previousCheckedAt }
+      }
+
+      const price = unitPrice !== null ? Number(unitPrice) : null
+
+      return { ...row, unitPrice: price, previousPrice }
+    }
+  )
+
+  return groupLabCandidateVariants(candidates)
+}
+
+function sumWearCounts(rows: readonly LabCandidateSummary[]): number | null {
+  const counts = rows.flatMap(({ wearCount }) => (wearCount !== null ? [wearCount] : []))
+
+  if (counts.length === 0) {
+    return null
+  }
+
+  return counts.reduce((total, count) => total + count, 0)
+}
+
+function mergeVariants(baseName: string, rows: LabCandidateSummary[]): LabCandidateSummary {
+  const sorted = [...rows].sort((left, right) =>
+    compareVariants(baseName, left.itemName, right.itemName)
+  )
+
+  const representative = sorted[0]
+  const { itemId, unitPrice, checkedAt, previousPrice } = cheapestVariantOf(sorted)
+  const wearCount = sumWearCounts(sorted)
+
+  return {
+    ...representative,
+    itemName: baseName,
+    itemId,
+    unitPrice,
+    checkedAt,
+    previousPrice,
+    wearCount
+  }
+}
+
+// SQL의 명성, 이름 순서를 지키도록 묶음은 처음 나온 변형 자리에 둔다.
+function groupLabCandidateVariants(candidates: LabCandidateSummary[]): LabCandidateSummary[] {
+  const grouped = candidates.filter(({ kind }) => isVariantGroupedKind(kind))
+  const groups = groupByBaseName(grouped)
+  const placed = new Set<string>()
+  const result: LabCandidateSummary[] = []
+
+  for (const candidate of candidates) {
+    if (!isVariantGroupedKind(candidate.kind)) {
+      result.push(candidate)
+      continue
     }
 
-    const price = unitPrice !== null ? Number(unitPrice) : null
+    const baseName = labItemBaseName(candidate.itemName)
 
-    return { ...row, unitPrice: price, previousPrice }
-  })
+    if (placed.has(baseName)) {
+      continue
+    }
+
+    const variants = groups.get(baseName) ?? [candidate]
+    const merged = mergeVariants(baseName, variants)
+
+    placed.add(baseName)
+    result.push(merged)
+  }
+
+  return result
 }
 
 export async function readLabCandidatePriceTargets(

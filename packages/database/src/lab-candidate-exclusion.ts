@@ -1,4 +1,6 @@
+import { labItemBaseName } from '@dfragon/lib/lab-items'
 import type { DatabaseClient } from './client.js'
+import { VARIANT_GROUPED_KINDS } from './lab-candidate-variant.js'
 
 export type LabCandidateExclusion = {
   itemName: string
@@ -10,8 +12,18 @@ export async function excludeLabCandidate(
   itemName: string
 ): Promise<{ status: 'excluded' | 'labItem' }> {
   return client.$transaction(async (transaction) => {
+    const grouped = await transaction.labCandidate.findMany({
+      where: { kind: { in: [...VARIANT_GROUPED_KINDS] } },
+      select: { itemName: true }
+    })
+
+    const variantNames = grouped
+      .map((row) => row.itemName)
+      .filter((name) => labItemBaseName(name) === itemName)
+
+    const names = [itemName, ...variantNames]
     const labItem = await transaction.labItem.findFirst({
-      where: { itemName },
+      where: { itemName: { in: names } },
       select: { id: true }
     })
 
@@ -25,7 +37,7 @@ export async function excludeLabCandidate(
       create: { itemName, excludedAt },
       update: {}
     })
-    await transaction.labCandidate.deleteMany({ where: { itemName } })
+    await transaction.labCandidate.deleteMany({ where: { itemName: { in: names } } })
 
     return { status: 'excluded' }
   })
