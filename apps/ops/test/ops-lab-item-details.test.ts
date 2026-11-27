@@ -39,6 +39,14 @@ async function startOpsApp(t: test.TestContext, labItemDetails: LabItemDetailRep
     labItems: { readGroups: unused, replaceGroup: unused },
     labCurrencies: { readCurrencies: unused, readIcon: unused, add: unused, update: unused },
     labItemDetails,
+    labCandidates: {
+      upsert: unused,
+      saveIcon: unused,
+      deleteOtherVersions: unused,
+      readCandidates: unused,
+      readIcon: unused,
+      readPriceHistory: unused
+    },
     writeAccessLog: () => undefined
   })
   t.after(() => app.close())

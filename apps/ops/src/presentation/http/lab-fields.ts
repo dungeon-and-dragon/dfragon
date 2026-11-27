@@ -1,5 +1,18 @@
 import type { LabCurrencyIcon } from '@dfragon/database'
 import { z } from 'zod'
+import { OpsFailure } from '#domain/failure.js'
+
+export const itemNameField = z.string().trim().min(1)
+
+export function readItemName(value: string | undefined): string {
+  const name = itemNameField.safeParse(value)
+
+  if (!name.success) {
+    throw new OpsFailure('request')
+  }
+
+  return name.data
+}
 
 // 게임 아이콘은 수 KB인 PNG라, 잘못 고른 큰 그림만 막을 만큼 둔다.
 const ICON_MAX_BYTES = 64 * 1024
@@ -71,4 +84,47 @@ export const iconField = z.base64().transform((value, context): LabCurrencyIcon 
   }
 
   return read
+})
+
+// tooltip 한 상자에 들어갈 만큼으로 둔다.
+const TYPE_DETAIL_MAX_LENGTH = 40
+const SLOT_MAX_COUNT = 12
+const STAGE_MAX_COUNT = 5
+const OPTION_MAX_COUNT = 30
+const OPTION_TEXT_MAX_LENGTH = 40
+
+const shortText = z.string().trim().min(1).max(OPTION_TEXT_MAX_LENGTH)
+
+// 빈 값은 값이 없는 것으로 저장해 tooltip이 그 줄을 빼게 한다.
+export const typeDetailField = z
+  .string()
+  .trim()
+  .max(TYPE_DETAIL_MAX_LENGTH)
+  .transform((value) => {
+    if (value === '') {
+      return null
+    }
+
+    return value
+  })
+
+export const statusField = z
+  .array(z.object({ name: shortText, value: shortText }))
+  .max(OPTION_MAX_COUNT)
+
+const stageField = z.object({
+  upgrade: z.int().min(0),
+  status: statusField
+})
+
+// 공개 API가 카드 상세와 같은 모양으로 내므로, 단계는 upgrade가 커지는 순서로만 받는다.
+export const cardField = z.object({
+  slots: z.array(shortText).min(1).max(SLOT_MAX_COUNT),
+  enchants: z
+    .array(stageField)
+    .min(1)
+    .max(STAGE_MAX_COUNT)
+    .refine((stages) =>
+      stages.every((stage, index) => index === 0 || stages[index - 1].upgrade < stage.upgrade)
+    )
 })
