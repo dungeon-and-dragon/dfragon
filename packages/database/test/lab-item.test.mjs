@@ -440,7 +440,8 @@ test('후보를 다른 판으로 다시 넣으면 값을 바꾸고 아이콘과 
       checkedAt: null,
       previousPrice: null,
       wearCount: null,
-      wearCountedAt: null
+      wearCountedAt: null,
+      priceItemName: itemName
     }
   ])
   await saveLabCandidateIcon(client, itemName, webpIcon)
@@ -771,12 +772,13 @@ test('칭호 후보는 기본 이름 한 줄로 묶어 가장 싼 변형의 가�
   const rows = await readLabCandidates(client, { kind: 'TITLE' })
 
   assert.deepEqual(
-    rows.map(({ itemName, unitPrice, itemId, wearCount, options }) => ({
+    rows.map(({ itemName, unitPrice, itemId, wearCount, options, priceItemName }) => ({
       itemName,
       unitPrice,
       itemId,
       wearCount,
-      options
+      options,
+      priceItemName
     })),
     [
       {
@@ -784,14 +786,16 @@ test('칭호 후보는 기본 이름 한 줄로 묶어 가장 싼 변형의 가�
         unitPrice: 20_000,
         itemId: `synthetic-${titlePlatinum}`,
         wearCount: 7,
-        options: [{ name: '힘', value: '100' }]
+        options: [{ name: '힘', value: '100' }],
+        priceItemName: titlePlatinum
       },
       {
         itemName: '합성 다른 칭호',
         unitPrice: null,
         itemId: null,
         wearCount: 0,
-        options: [{ name: '힘', value: '100' }]
+        options: [{ name: '힘', value: '100' }],
+        priceItemName: '합성 다른 칭호'
       }
     ]
   )
