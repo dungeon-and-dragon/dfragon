@@ -182,6 +182,8 @@ export type {
   RaidClearRecordInput
 } from './clear-record.js'
 export { createDatabaseClient } from './client.js'
+export { readContentFirstClears } from './content-first-clear.js'
+export type { ContentFirstClear } from './content-first-clear.js'
 export {
   analyzeContentClears,
   countClearPopulation,
