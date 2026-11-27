@@ -3,6 +3,7 @@ import test from 'node:test'
 import type { LabCurrencyIcon, LabCurrencySummary, LabItemGroup } from '@dfragon/database'
 import type { BatchNeopleKeyRepository } from '../src/application/batch-neople-keys/repository.js'
 import type { LabCurrencyRepository } from '../src/application/lab-currencies/repository.js'
+import type { LabCandidateRepository } from '../src/application/lab-candidates/repository.js'
 import type { LabItemDetailRepository } from '../src/application/lab-item-details/repository.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { createOpsHttpApp } from '../src/runtime/ops-app.js'
@@ -25,6 +26,14 @@ const unusedLabItemDetailStore: LabItemDetailRepository = {
   readDetails: unusedLabItemDetails,
   readIcon: unusedLabItemDetails,
   save: unusedLabItemDetails
+}
+const unusedLabCandidateStore: LabCandidateRepository = {
+  upsert: unusedLabItemDetails,
+  saveIcon: unusedLabItemDetails,
+  deleteOtherVersions: unusedLabItemDetails,
+  readCandidates: unusedLabItemDetails,
+  readIcon: unusedLabItemDetails,
+  readPriceHistory: unusedLabItemDetails
 }
 
 // 묶음 교체, 재화 이름 중복, 아이콘 저장은 DB 함수 테스트가 실제 DB로 확인한다. 이 fake는 경로가 넘긴 값만 남긴다.
@@ -92,6 +101,7 @@ async function startOpsApp(
     labItems,
     labCurrencies,
     labItemDetails: unusedLabItemDetailStore,
+    labCandidates: unusedLabCandidateStore,
     writeAccessLog: () => undefined
   })
   t.after(() => app.close())
