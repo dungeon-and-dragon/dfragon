@@ -5,16 +5,14 @@ export type { ItemRarity } from './lib/character-detail-display'
 export {
   BUFF_PASSIVE_SKILL,
   buffSkillLevel,
+  type EnchantRole,
   enchantGroup,
   enchantOrderRank,
-  enchantStatGroup,
-  isEmphasizedEnchant,
-  signedEnchantValue,
-  toEquipmentView
-} from './lib/character-equipment'
+  isEmphasizedEnchant
+} from '@dfragon/lib/enchant-options'
+export { signedEnchantValue, toEquipmentView } from './lib/character-equipment'
 export type {
   EnchantOption,
-  EnchantRole,
   EnchantStats,
   EquipmentReinforce,
   EquipmentRow,

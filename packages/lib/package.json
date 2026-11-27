@@ -28,6 +28,10 @@
       "types": "./dist/enchant-grades.d.ts",
       "import": "./dist/enchant-grades.js"
     },
+    "./enchant-options": {
+      "types": "./dist/enchant-options.d.ts",
+      "import": "./dist/enchant-options.js"
+    },
     "./lab-items": {
       "types": "./dist/lab-items.d.ts",
       "import": "./dist/lab-items.js"
