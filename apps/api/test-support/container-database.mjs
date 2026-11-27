@@ -752,6 +752,22 @@ try {
   }
   await psql("DELETE FROM lab_candidate_wear_counts WHERE item_name LIKE '합성 검증 %'")
 
+  stage = 'lab candidate exclusions'
+  const insertExclusion = (name) =>
+    psql(`INSERT INTO lab_candidate_exclusions (item_name, excluded_at) VALUES ('${name}', now())`)
+  await insertExclusion('합성 검증 제외')
+  await assert.rejects(insertExclusion('합성 검증 제외'))
+  await assert.rejects(
+    psql("INSERT INTO lab_candidate_exclusions (item_name) VALUES ('합성 검증 시각 없음')")
+  )
+  assert.equal(
+    (
+      await psql("SELECT count(*) FROM lab_candidate_exclusions WHERE item_name LIKE '합성 검증 %'")
+    ).stdout.trim(),
+    '1'
+  )
+  await psql("DELETE FROM lab_candidate_exclusions WHERE item_name LIKE '합성 검증 %'")
+
   stage = 'timeline tables'
   assert.equal(
     (
