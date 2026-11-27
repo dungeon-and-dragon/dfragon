@@ -197,6 +197,7 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: '레전더리',
     unitPrice: 3_000_000_000,
     checkedAt,
+    platinum: null,
     cost: null,
     detail: null,
     candidate: null
@@ -206,6 +207,7 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: null,
     unitPrice: null,
     checkedAt: null,
+    platinum: null,
     cost: null,
     detail: null,
     candidate: null
@@ -215,6 +217,7 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: '유니크',
     unitPrice: null,
     checkedAt,
+    platinum: null,
     cost: {
       currencyId,
       currencyName: '합성 재화',
@@ -862,7 +865,7 @@ test('오라와 마법부여 카드는 꼬리표가 붙어도 이름마다 한 �
   )
 })
 
-test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 변형까지 가장 싼 가격과 기본 이름 줄의 후보 상세를 낸다', {
+test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래티넘이 아닌 변형까지 가장 싼 가격과 기본 이름 줄의 후보 상세를 낸다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
@@ -894,7 +897,7 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 변형�
       detail?.description ?? null
     ]),
     [
-      [titleBase, 20_000, `synthetic-${titlePlatinum}`, '합성 후보 설명'],
+      [titleBase, 30_000, `synthetic-${titleBase}`, '합성 후보 설명'],
       ['합성 변형만', 9_000, 'synthetic-합성 변형만[40Lv]', '합성 변형 설명'],
       ['합성 후보 없는 아이템', null, null, null]
     ]
@@ -902,6 +905,90 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 변형�
   assert.deepEqual(
     (await readLabCandidatePriceTargets(client)).map(({ itemName }) => itemName).sort(),
     ['합성 변형만[30Lv]', '합성 변형만[40Lv]', titlePlatinum].sort()
+  )
+})
+
+test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 platinum으로 따로 내고, 매물이 없으면 가격만 비우며, 변형이 없거나 다른 종류면 null이다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const creature = { kind: 'CREATURE', categories: ['CREATURE'] }
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate(titleBase),
+      candidate('합성 전설[30Lv]'),
+      candidate(titlePlatinum),
+      candidate('합성 전설 플래티넘[45Lv]'),
+      candidate('합성 요정[30Lv]', creature),
+      candidate('합성 요정 플래티넘[30Lv]', creature),
+      candidate('합성 평범'),
+      candidate('합성 오라', { kind: 'AURA', categories: ['AURA'] }),
+      candidate('합성 오라 플래티넘', { kind: 'AURA', categories: ['AURA'] }),
+      candidate('합성 겹침 플래티넘')
+    ]
+  })
+  await recordPrice(client, titleBase, 50_000)
+  await recordPrice(client, '합성 전설[30Lv]', 40_000)
+  await recordPrice(client, titlePlatinum, 90_000)
+  await recordPrice(client, '합성 전설 플래티넘[45Lv]', 70_000)
+  await recordPrice(client, '합성 요정[30Lv]', 1_000)
+  await recordPrice(client, '합성 평범', 2_000)
+  await recordPrice(client, '합성 오라', 3_000)
+  await recordPrice(client, '합성 오라 플래티넘', 1)
+  await recordPrice(client, '합성 카드', 4_000)
+  await recordPrice(client, '합성 겹침 플래티넘', 5_000)
+  await replaceLabItemGroup(client, {
+    ...titleFinal,
+    items: [unpriced(titleBase), unpriced('합성 평범')]
+  })
+  await replaceLabItemGroup(client, {
+    category: 'CREATURE',
+    role: 'all',
+    tier: '종결',
+    items: [unpriced('합성 요정')]
+  })
+  await replaceLabItemGroup(client, {
+    category: 'AURA',
+    role: 'all',
+    tier: '종결',
+    items: [unpriced('합성 오라'), unpriced('합성 겹침')]
+  })
+  await replaceLabItemGroup(client, { ...weaponDealerFinal, items: [unpriced('합성 카드')] })
+
+  const rows = await readLabItemPrices(client)
+
+  assert.deepEqual(
+    rows.map(({ itemName, itemId, unitPrice, platinum }) => [
+      itemName,
+      itemId,
+      unitPrice,
+      platinum
+    ]),
+    [
+      [
+        titleBase,
+        'synthetic-합성 전설[30Lv]',
+        40_000,
+        {
+          itemId: 'synthetic-합성 전설 플래티넘[45Lv]',
+          itemRarity: '레어',
+          unitPrice: 70_000,
+          checkedAt: importedAt
+        }
+      ],
+      ['합성 평범', 'synthetic-합성 평범', 2_000, null],
+      [
+        '합성 요정',
+        'synthetic-합성 요정[30Lv]',
+        1_000,
+        { itemId: null, itemRarity: null, unitPrice: null, checkedAt: null }
+      ],
+      ['합성 오라', 'synthetic-합성 오라', 3_000, null],
+      ['합성 겹침', null, null, null],
+      ['합성 카드', 'synthetic-합성 카드', 4_000, null]
+    ]
   )
 })
 
