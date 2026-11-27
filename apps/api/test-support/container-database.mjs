@@ -620,6 +620,26 @@ try {
     ).stdout.trim(),
     't|t|합성 검증 설명|유니크|t'
   )
+  assert.equal(
+    (
+      await psql(
+        "SELECT item_type_detail IS NULL, available_level IS NULL, fame IS NULL, card IS NULL FROM lab_item_details WHERE item_name = '합성 검증 상자'"
+      )
+    ).stdout.trim(),
+    't|t|t|t'
+  )
+  await psql(
+    `UPDATE lab_item_details SET item_type_detail = '합성 재료', available_level = 115, fame = 232, card = '{"slots":["상의"],"enchants":[]}' WHERE item_name = '합성 검증 상자'`
+  )
+  await assert.rejects(
+    psql("UPDATE lab_item_details SET available_level = 0 WHERE item_name = '합성 검증 상자'")
+  )
+  await assert.rejects(
+    psql("UPDATE lab_item_details SET fame = 0 WHERE item_name = '합성 검증 상자'")
+  )
+  await assert.rejects(
+    psql("UPDATE lab_item_details SET card = '[]' WHERE item_name = '합성 검증 상자'")
+  )
   await psql(
     "UPDATE lab_item_details SET icon = '\\x89504e47'::bytea, icon_content_type = 'image/png' WHERE item_name = '합성 검증 상자'"
   )
