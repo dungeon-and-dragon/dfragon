@@ -43,12 +43,41 @@ const STORY_SEASONS = [
 const RAIDS = ['가 레이드', '나 레이드'] as const
 const LEGION = '다 레기온'
 
+// 합성 응답의 처음 본 클리어 시각이다. 운영 타임라인 기록에서 이름마다 가장 이른 클리어 시각을 옮겼다.
+const STORY_RELEASED_AT = new Map([
+  ['무너진 성자 미카엘라', '2026-08-06T03:10:00.000Z'],
+  ['아포칼립스', '2026-04-23T01:03:00.000Z'],
+  ['디레지에 레이드', '2025-12-04T01:25:00.000Z'],
+  ['이내 황혼전', '2025-08-21T01:15:00.000Z'],
+  ['만들어진 신 나벨', '2025-04-17T01:20:00.000Z'],
+  ['베누스', '2025-02-06T01:23:00.000Z'],
+  ['깨어난 숲(극)', '2024-07-18T03:59:00.000Z'],
+  ['깨어난 숲(일반)', '2024-07-18T02:39:00.000Z'],
+  ['아스라한', '2024-02-22T03:02:00.000Z'],
+  ['어둑섬', '2023-11-09T03:18:00.000Z'],
+  ['차원회랑', '2022-12-29T01:45:00.000Z'],
+  ['기계 혁명', '2022-09-22T01:50:00.000Z'],
+  ['이스핀즈', '2022-07-07T02:53:00.000Z'],
+  ['혼돈의 오즈마', '2021-05-27T02:35:00.000Z'],
+  ['무형의 시로코', '2020-05-14T02:43:00.000Z'],
+  ['프레이-이시스', '2019-02-14T04:20:00.000Z'],
+  ['루크', '2017-09-22T21:37:00.000Z'],
+  ['안톤', '2017-09-22T21:54:00.000Z']
+])
+
 function raidCount(raid: string, stage: string | null, count: number, hard: boolean) {
   const name = stage === null ? raid : `${raid} (${stage})`
   const hardCount = hard ? count : 0
   const normalCount = count - hardCount
+  const releasedAt = STORY_RELEASED_AT.get(raid) ?? null
 
-  return { name, raid, stage, count, hard: hardCount, normal: normalCount }
+  return { name, raid, stage, count, hard: hardCount, normal: normalCount, releasedAt }
+}
+
+function legionCount(name: string, count: number) {
+  const releasedAt = STORY_RELEASED_AT.get(name) ?? null
+
+  return { name, count, releasedAt }
 }
 
 function isoDate(at: number): string {
@@ -143,13 +172,13 @@ export function storyAdventureActivity(
         raidCount('안톤', null, 1, false)
       ],
       legions: [
-        { name: '아포칼립스', count: 204 },
-        { name: '베누스', count: 48 },
-        { name: '깨어난 숲(극)', count: 5 },
-        { name: '깨어난 숲(일반)', count: 3 },
-        { name: '어둑섬', count: 2 },
-        { name: '차원회랑', count: 2 },
-        { name: '이스핀즈', count: 1 }
+        legionCount('아포칼립스', 204),
+        legionCount('베누스', 48),
+        legionCount('깨어난 숲(극)', 5),
+        legionCount('깨어난 숲(일반)', 3),
+        legionCount('어둑섬', 2),
+        legionCount('차원회랑', 2),
+        legionCount('이스핀즈', 1)
       ],
       items: { legendary: 312, epic: 48, primeval: 6, mythic },
       oaths,

@@ -9,6 +9,8 @@ const raidCount = nameCount.extend({
   hard: count.optional(),
   normal: count.optional()
 })
+// 처음 본 클리어 시각을 보내기 전의 API와도 호환하도록 없으면 받지 않는다.
+const released = { releasedAt: z.iso.datetime().nullable().optional() }
 const enhancementTarget = z.object({ target: z.number().int(), attempts: count, successes: count })
 
 export const adventureActivitySchema = z.object({
@@ -30,8 +32,8 @@ export const adventureActivitySchema = z.object({
     })
     .nullable(),
   summary: z.object({
-    raids: z.array(raidCount),
-    legions: z.array(nameCount),
+    raids: z.array(raidCount.extend(released)),
+    legions: z.array(nameCount.extend(released)),
     items: z.object({ legendary: count, epic: count, primeval: count, mythic: count }),
     oaths: z.object({ legendary: count, epic: count, primeval: count }),
     enhancement: z.object({
