@@ -5,7 +5,6 @@ export {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository
 } from './content-clear-collection.js'
-export { DatabaseLoweredHistoryTrimRepository } from './lowered-history-trim.js'
 export { DatabaseSkillChainBackfillRepository } from './skill-chain-backfill.js'
 export { DatabaseSkillStyleCollectionRepository } from './skill-style-collection.js'
 export { DatabaseStatsJobRepository } from './stats-jobs.js'
