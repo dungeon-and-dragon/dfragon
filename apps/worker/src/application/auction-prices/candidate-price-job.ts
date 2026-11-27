@@ -1,5 +1,5 @@
 import type { AuctionPriceService } from '@dfragon/server-core/application/auction-prices/index.js'
-import { subDays } from 'date-fns'
+import { subHours } from 'date-fns'
 import { z } from 'zod'
 import { defineJob, NEOPLE_APIS } from '#application/jobs/index.js'
 import type { LabCandidatePriceRepository } from './candidate-repository.js'
@@ -23,7 +23,7 @@ export function createLabCandidatePriceJob(
     run: async (_args, { reportProgress }) => {
       const targets = await repository.readPriceTargets()
       const checked = await prices.refresh(targets, reportProgress)
-      const historyCutoff = subDays(now(), HISTORY_RETENTION_DAYS)
+      const historyCutoff = subHours(now(), HISTORY_RETENTION_DAYS * 24)
       const deleted = await repository.deleteHistoryBefore(historyCutoff)
 
       return { checked, deleted }
