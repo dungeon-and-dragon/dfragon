@@ -7,7 +7,7 @@ import type {
 
 // 문서가 unitPrice 정렬 값의 형식을 예시로 보여 주지 않아, 정렬이 무시돼도 최저가를 고르게 여러 행을 받아 직접 비교한다.
 const LISTING_LIMIT = 50
-// 앞부분 검색에는 꼬리표 없는 같은 이름 매물도 섞여 나와, Neople이 받는 최대 행 수를 받는다.
+// 앞부분 검색에는 같은 앞부분을 쓰는 다른 아이템도 섞여 나와, Neople이 받는 최대 행 수를 받는다.
 const LEVEL_LISTING_LIMIT = 400
 const LEVEL_TAG_PATTERN = /\[\d+Lv\]/g
 const WHITESPACE_RUN_PATTERN = /\s+/g
