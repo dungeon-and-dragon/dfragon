@@ -138,7 +138,7 @@ function Card({
   selected: boolean
   onOpen: (card: ContentCard) => void
 }): React.JSX.Element {
-  const { kind, name, backgroundId, stages } = card
+  const { kind, name, caption, backgroundId, stages } = card
   const background = findClearContentBackground(backgroundId)
 
   function open(): void {
@@ -162,6 +162,7 @@ function Card({
       <span aria-hidden="true" className={SHADE} />
       <span className="relative text-xs font-medium text-fg">{kind}</span>
       <span className="relative mt-auto text-base font-semibold">{name}</span>
+      {caption !== null && <span className="relative text-xs text-fg-muted">{caption}</span>}
       <span className="relative mt-3 flex gap-6">
         {stages.map((stage) => (
           <Stage key={stage.contentId} stage={stage} />

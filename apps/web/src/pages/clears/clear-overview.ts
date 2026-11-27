@@ -122,6 +122,7 @@ export type ContentCard = Readonly<{
   key: string
   kind: string
   name: string
+  caption: string | null
   backgroundId: string
   stages: readonly CardStage[]
 }>
@@ -169,11 +170,14 @@ export function contentCards(contents: readonly ClearContent[], weekStart: strin
       return []
     }
 
+    const caption = first.place.group.caption ?? null
+
     return [
       {
         key: first.place.group.key,
         kind: KIND_LABELS[first.content.kind],
         name: first.place.group.name,
+        caption,
         backgroundId: first.content.id,
         stages
       }
