@@ -59,10 +59,19 @@ export type LabCurrencyBody = {
   updatedAt: string
 }
 
+type LabItemCardBody = {
+  slots: string[]
+  enchants: { upgrade: number; status: { name: string; value: string }[] }[]
+}
+
 export type LabItemDetailBody = {
   itemName: string
   description: string | null
   itemRarity: string | null
+  itemTypeDetail: string | null
+  availableLevel: number | null
+  fame: number | null
+  card: LabItemCardBody | null
   hasIcon: boolean
   updatedAt: string
 }
@@ -71,14 +80,18 @@ type LabItemDetailRequest = {
   itemName: string
   description: string
   itemRarity: string | null
+  itemTypeDetail: string
+  availableLevel: number | null
+  fame: number | null
+  card: LabItemCardBody | null
   icon?: string | null
 }
 
 type LabCurrencyRequest = { name: string; description: string; icon?: string }
 
-/** 운영 app처럼 빈 설명은 설명 없음으로 둔다. */
-function storedDescription(description: string): string | null {
-  const trimmed = description.trim()
+/** 운영 app처럼 빈 설명과 아이템 종류는 값 없음으로 둔다. */
+function storedText(value: string): string | null {
+  const trimmed = value.trim()
 
   if (trimmed === '') {
     return null
@@ -374,16 +387,25 @@ export class FakeOpsApi {
     itemName,
     description,
     itemRarity,
+    itemTypeDetail,
+    availableLevel,
+    fame,
+    card,
     icon
   }: LabItemDetailRequest): Response {
     const saved = this.labItemDetails.find((detail) => detail.itemName === itemName)
     const hasIcon = icon === undefined ? (saved?.hasIcon ?? false) : icon !== null
     const updatedAt = this.now()
-    const stored = storedDescription(description)
+    const stored = storedText(description)
+    const storedTypeDetail = storedText(itemTypeDetail)
     const detail = {
       itemName,
       description: stored,
       itemRarity,
+      itemTypeDetail: storedTypeDetail,
+      availableLevel,
+      fame,
+      card,
       hasIcon,
       updatedAt
     }
@@ -405,7 +427,7 @@ export class FakeOpsApi {
     }
 
     const id = this.labCurrencies.length + 1
-    const stored = storedDescription(description)
+    const stored = storedText(description)
     const updatedAt = this.now()
     const added = { id, name, description: stored, updatedAt }
     this.labCurrencies = [...this.labCurrencies, added]
@@ -424,7 +446,7 @@ export class FakeOpsApi {
         return currency
       }
 
-      const stored = storedDescription(description)
+      const stored = storedText(description)
       const updatedAt = this.now()
 
       return { ...currency, name, description: stored, updatedAt }
