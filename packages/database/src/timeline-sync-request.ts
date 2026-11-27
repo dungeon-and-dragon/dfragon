@@ -122,18 +122,6 @@ export async function countTimelineSyncRequests(
   })
 }
 
-export async function hasTimelineSyncRequest(
-  client: DatabaseClient,
-  request: TimelineSyncRequest
-): Promise<boolean> {
-  const found = await client.timelineSyncRequest.findFirst({
-    where: request,
-    select: { kind: true }
-  })
-
-  return found !== null
-}
-
 export async function readSeasonBackfillRequestSeasons(
   client: DatabaseClient,
   characters: readonly TimelineCharacter[]

@@ -10,7 +10,6 @@ import {
   DatabaseCharacterBasicRepository,
   DatabaseCharacterHistoryRepository,
   DatabaseCharacterSearchRepository,
-  DatabaseCharacterTimelineRepository,
   DatabaseLabItemRepository,
   DatabaseRankingStatsRepository,
   DatabaseTimelineSyncRequestRepository
@@ -59,14 +58,11 @@ function createDatabaseSubscribers(
   const clearStatsClient = createDatabaseClient(database, CLEAR_STATS_POOL)
   const characterBasic = new DatabaseCharacterBasicRepository(client)
   const characterSearch = new DatabaseCharacterSearchRepository(client)
-  const timelineRead = new DatabaseCharacterTimelineRepository(client)
 
   // 클리어 통계는 clearStatsClient, 나머지 option은 client를 함께 쓰며, 공개 app이 닫힐 때 `timeline.close`로 모두 닫는다.
 
   return {
     timeline: {
-      read: (character) => timelineRead.readTimeline(character),
-      readPage: (character, list, before) => timelineRead.readPage(character, list, before),
       requests: new DatabaseTimelineSyncRequestRepository(client),
       close: async () => {
         await Promise.all([client.$disconnect(), clearStatsClient.$disconnect()])
