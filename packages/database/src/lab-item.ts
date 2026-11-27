@@ -95,6 +95,14 @@ export type LabItemPriceDetail = LabItemTooltipFields & {
   iconUpdatedAt: Date | null
 }
 
+export type LabItemStatusLine = { name: string; value: string }
+
+// 같은 성능 판정에 쓰는 옵션 줄과 버프 줄은 후보에만 있다.
+export type LabItemPriceCandidate = LabItemPriceDetail & {
+  options: LabItemStatusLine[]
+  buffLines: string[]
+}
+
 export type LabItemPlatinumPrice = {
   itemId: string | null
   itemRarity: string | null
@@ -114,7 +122,7 @@ export type LabItemPriceRow = {
   platinum: LabItemPlatinumPrice | null
   cost: LabItemPriceCost | null
   detail: LabItemPriceDetail | null
-  candidate: LabItemPriceDetail | null
+  candidate: LabItemPriceCandidate | null
 }
 
 type StoredLabItemPriceRow = Omit<
@@ -129,6 +137,8 @@ type StoredLabItemPriceRow = Omit<
   candidateAvailableLevel: number | null
   candidateFame: number | null
   candidateCard: LabItemCard | null
+  candidateOptions: LabItemStatusLine[]
+  candidateBuffLines: string[]
   hasDetail: boolean
   detailDescription: string | null
   detailRarity: string | null
@@ -197,7 +207,7 @@ function toPriceDetail({
   }
 }
 
-function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceDetail | null {
+function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceCandidate | null {
   if (!row.hasCandidate) {
     return null
   }
@@ -209,7 +219,9 @@ function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceDetail | null
     itemTypeDetail: row.candidateItemTypeDetail,
     availableLevel: row.candidateAvailableLevel,
     fame: row.candidateFame,
-    card: row.candidateCard
+    card: row.candidateCard,
+    options: row.candidateOptions,
+    buffLines: row.candidateBuffLines
   }
 }
 
@@ -247,7 +259,8 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       CASE WHEN candidate."icon" IS NULL THEN NULL ELSE candidate."icon_updated_at" END AS "candidateIconUpdatedAt",
       candidate."item_type_detail" AS "candidateItemTypeDetail",
       candidate."available_level" AS "candidateAvailableLevel",
-      candidate."fame" AS "candidateFame", candidate."card" AS "candidateCard"
+      candidate."fame" AS "candidateFame", candidate."card" AS "candidateCard",
+      candidate."options" AS "candidateOptions", candidate."buff_lines" AS "candidateBuffLines"
     FROM "lab_items" i
     LEFT JOIN "auction_prices" p ON p."item_name" = i."item_name"
     LEFT JOIN "lab_currencies" c ON c."id" = i."currency_id"
@@ -301,11 +314,11 @@ type CandidateVariantPrice = {
   itemRarity: string | null
   unitPrice: number | null
   checkedAt: Date | null
-  candidate: LabItemPriceDetail
+  candidate: LabItemPriceCandidate
 }
 
 type StoredCandidateVariantPrice = Omit<CandidateVariantPrice, 'unitPrice' | 'candidate'> &
-  Omit<LabItemPriceDetail, 'itemRarity'> & {
+  Omit<LabItemPriceCandidate, 'itemRarity'> & {
     unitPrice: bigint | null
     candidateRarity: string | null
   }
@@ -313,7 +326,7 @@ type StoredCandidateVariantPrice = Omit<CandidateVariantPrice, 'unitPrice' | 'ca
 function variantCandidateOf(
   itemName: string,
   variants: readonly CandidateVariantPrice[]
-): LabItemPriceDetail | null {
+): LabItemPriceCandidate | null {
   if (variants.length === 0) {
     return null
   }
@@ -332,7 +345,7 @@ async function readCandidateVariantGroups(
       c."description", c."item_rarity" AS "candidateRarity",
       CASE WHEN c."icon" IS NULL THEN NULL ELSE c."icon_updated_at" END AS "iconUpdatedAt",
       c."item_type_detail" AS "itemTypeDetail", c."available_level" AS "availableLevel",
-      c."fame", c."card"
+      c."fame", c."card", c."options", c."buff_lines" AS "buffLines"
     FROM "lab_candidates" c
     LEFT JOIN "auction_prices" p ON p."item_name" = c."item_name"
     WHERE c."kind" = ANY(${[...VARIANT_GROUPED_KINDS]}::text[])`
@@ -353,7 +366,9 @@ async function readCandidateVariantGroups(
         itemTypeDetail: row.itemTypeDetail,
         availableLevel: row.availableLevel,
         fame: row.fame,
-        card: row.card
+        card: row.card,
+        options: row.options,
+        buffLines: row.buffLines
       }
     }
   })
