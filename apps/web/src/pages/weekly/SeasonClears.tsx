@@ -2,7 +2,6 @@ import type { ActivitySummary } from '#entities/adventure-guild'
 import apocalypse from '#shared/assets/clear-content-backgrounds/apocalypse.webp'
 import asrahan from '#shared/assets/clear-content-backgrounds/asrahan.webp'
 import awakenedForest from '#shared/assets/clear-content-backgrounds/awakened-forest.webp'
-import bakal from '#shared/assets/clear-content-backgrounds/bakal.webp'
 import darkIsland from '#shared/assets/clear-content-backgrounds/dark-island.webp'
 import diregie from '#shared/assets/clear-content-backgrounds/diregie.webp'
 import dimensionCorridor from '#shared/assets/clear-content-backgrounds/dimension-corridor.webp'
@@ -11,15 +10,15 @@ import gaeBolg from '#shared/assets/clear-content-backgrounds/gae-bolg.webp'
 import inae from '#shared/assets/clear-content-backgrounds/inae.webp'
 import ispins from '#shared/assets/clear-content-backgrounds/ispins.webp'
 import luke from '#shared/assets/clear-content-backgrounds/luke.webp'
-import ozma from '#shared/assets/clear-content-backgrounds/ozma.webp'
-import preyIsys from '#shared/assets/clear-content-backgrounds/prey-isys.webp'
 import sirocco from '#shared/assets/clear-content-backgrounds/sirocco.webp'
 import venus from '#shared/assets/clear-content-backgrounds/venus.webp'
+import season6 from '#shared/assets/season-raid-backgrounds/season-6.webp'
+import season7 from '#shared/assets/season-raid-backgrounds/season-7.webp'
+import season8 from '#shared/assets/season-raid-backgrounds/season-8.webp'
 import season10 from '#shared/assets/season-raid-backgrounds/season-10.webp'
 import season11 from '#shared/assets/season-raid-backgrounds/season-11.webp'
 import { useAdventureActivity } from './api/useAdventureActivity'
 
-const TITLE = '이번 시즌 클리어'
 const HARD_BADGE = 'badge bg-danger-weak text-fg-danger'
 // 깨어난 숲의 극은 레이드 하드와 같은 어려운 단계다.
 const HARD_STAGES = new Set(['하드', '극'])
@@ -31,18 +30,18 @@ const SHADE =
 
 const numberFormat = new Intl.NumberFormat('ko-KR')
 
-// 레이드와 레기온 이름은 겹치지 않아 이름으로 고른다. 나벨과 미카엘라는 그 레이드가 나온 시즌 배경과 같은 원본이고,
-// 아스라한은 안개신 레이드, 기계 혁명은 폭룡왕 바칼 레이드 그림이다.
+// 레이드와 레기온 이름은 겹치지 않아 이름으로 고른다. 미카엘라, 나벨, 기계 혁명(폭룡왕 바칼), 혼돈의 오즈마,
+// 프레이-이시스는 그 레이드가 나온 시즌 배경과 같은 원본이고, 아스라한은 안개신 레이드 그림이다.
 const BACKGROUNDS = new Map<string, string>([
   ['무너진 성자 미카엘라', season11],
   ['디레지에 레이드', diregie],
   ['이내 황혼전', inae],
   ['만들어진 신 나벨', season10],
   ['아스라한', asrahan],
-  ['기계 혁명', bakal],
-  ['혼돈의 오즈마', ozma],
+  ['기계 혁명', season8],
+  ['혼돈의 오즈마', season7],
   ['무형의 시로코', sirocco],
-  ['프레이-이시스', preyIsys],
+  ['프레이-이시스', season6],
   ['루크', luke],
   ['안톤', anton],
   ['코드네임 게이볼그', gaeBolg],
@@ -155,13 +154,9 @@ export function SeasonClears({
   const rows = toClearRows(result.value.summary)
 
   return (
-    <section aria-label={TITLE} className="section min-w-0">
-      <h2 className="section-title whitespace-nowrap">
-        <span>{TITLE}</span>
-        <span className="section-title-count">{rows.length}</span>
-      </h2>
+    <section aria-label="시즌 클리어" className="section min-w-0">
       {rows.length === 0 ? (
-        <p className="m-0 px-4 py-3 text-fg-subtle">이번 시즌 클리어 기록이 없습니다.</p>
+        <p className="m-0 px-4 py-3 text-fg-subtle">클리어 기록이 없습니다.</p>
       ) : (
         <ul className="m-0 flex list-none flex-col gap-1 px-4 py-3">
           {rows.map((row) => (
