@@ -1175,7 +1175,7 @@ try {
         await psql(
           "SELECT count(*) FROM job_runs WHERE trigger = 'catchup' AND status IN ('succeeded', 'failed')"
         )
-      ).stdout.trim() === '6'
+      ).stdout.trim() === '7'
   )
   assert.equal(
     (
@@ -1183,12 +1183,12 @@ try {
         "SELECT string_agg(name || ':' || schedule || ':' || (next_run_at > now()) || ':' || (args_schema->>'type') || ':' || (paused_at IS NOT NULL), ',' ORDER BY name) FROM jobs"
       )
     ).stdout.trim(),
-    'auction-price-refresh:*/10 * * * *:true:object:false,character-fame-refresh:0 3 * * *:true:object:true,character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,inactive-character-recheck:0 4 L * *:true:object:true,item-adoption:0 0 * * *:true:object:false,item-dictionary-fill:0 * * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false,skill-style-collection:0 0 * * 5:true:object:true'
+    'auction-price-refresh:*/10 * * * *:true:object:false,character-fame-refresh:0 3 * * *:true:object:true,character-stats:0 0 * * *:true:object:false,clear-week-samples:30 * * * *:true:object:false,content-clear-collection:0 6 * * 4:true:object:true,inactive-character-recheck:0 4 L * *:true:object:true,item-adoption:0 0 * * *:true:object:false,item-dictionary-fill:0 * * * *:true:object:true,job-run-cleanup:0 4 * * *:true:object:false,lab-candidate-price-refresh:0 * * * *:true:object:false,score-calculation:0 22 * * 3:true:object:false,set-adoption:0 0 * * *:true:object:false,skill-adoption:0 0 * * *:true:object:false,skill-style-collection:0 0 * * 5:true:object:true'
   )
   assert.equal(
     (
       await psql(
-        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption', 'set-adoption', 'item-adoption', 'auction-price-refresh')"
+        "SELECT string_agg(job_name || ':' || trigger || ':' || status || ':' || coalesce(summary::text, '-'), ',' ORDER BY id) FROM job_runs WHERE job_name NOT IN ('character-stats', 'skill-adoption', 'set-adoption', 'item-adoption', 'auction-price-refresh', 'lab-candidate-price-refresh')"
       )
     ).stdout.trim(),
     'job-run-cleanup:schedule:interrupted:-,kept-probe:manual:succeeded:-,job-run-cleanup:catchup:succeeded:{"deleted": 1, "deletedEvents": 0}'
@@ -1233,6 +1233,14 @@ try {
       )
     ).stdout.trim(),
     'succeeded:true'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT status || ':' || coalesce(summary::text, '-') FROM job_runs WHERE job_name = 'lab-candidate-price-refresh'"
+      )
+    ).stdout.trim(),
+    'succeeded:{"checked": 0, "deleted": 0}'
   )
 
   stage = 'character collector runs requested jobs'
