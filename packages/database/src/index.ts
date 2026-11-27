@@ -106,10 +106,6 @@ export {
   readCharacterSectionHistory,
   recordCharacterHistory
 } from './character-history.js'
-export {
-  readLoweredHistoryCharacters,
-  trimLoweredCharacterHistory
-} from './character-history-trim.js'
 export type {
   CharacterHistoryBasic,
   CharacterHistoryInput,

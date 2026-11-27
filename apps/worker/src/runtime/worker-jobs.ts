@@ -37,7 +37,6 @@ import {
   DatabaseClearCollectionRepository,
   DatabaseClearRecordBackfillRepository,
   DatabaseCollectionRepository,
-  DatabaseLoweredHistoryTrimRepository,
   DatabaseSkillChainBackfillRepository,
   DatabaseSkillStyleCollectionRepository,
   DatabaseStatsJobRepository,
@@ -64,10 +63,6 @@ import {
   createJobRunCleanupJob
 } from '#application/jobs/index.js'
 import type { ScoreCalculationPorts } from '#application/character-score/ports.js'
-import {
-  LoweredHistoryTrimService,
-  createLoweredHistoryTrimJob
-} from '#application/character-history/index.js'
 import type { CharacterActivityPorts } from '#application/character-activity/ports.js'
 import {
   CharacterActivityService,
@@ -171,9 +166,6 @@ export function createWorkerJobs(
     new DatabaseScoreCalculationRepository(client, SCORE_CALCULATION_JOB_NAME),
     { ...score, ...clock }
   )
-  const historyTrimService = new LoweredHistoryTrimService(
-    new DatabaseLoweredHistoryTrimRepository(client)
-  )
 
   return [
     createJobRunCleanupJob(cleanupService),
@@ -190,7 +182,6 @@ export function createWorkerJobs(
     createSetAdoptionJob(statsService),
     createItemAdoptionJob(statsService),
     createScoreCalculationJob(scoreService, scoreSchedule),
-    createLoweredHistoryTrimJob(historyTrimService),
     createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary),
     createAuctionPriceJob(new DatabaseLabItemRepository(client), auctionPrices),
     createLabCandidatePriceJob(new DatabaseLabCandidatePriceRepository(client), auctionPrices)

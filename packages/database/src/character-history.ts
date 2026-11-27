@@ -117,14 +117,11 @@ function toStoredScoreHistory(row: ScoreHistoryRow): StoredCharacterScoreHistory
   }
 }
 
-export function isFameLowered(fame: number | null, recorded: number | null): boolean {
+function isFameLowered(fame: number | null, recorded: number | null): boolean {
   return fame !== null && recorded !== null && fame < recorded
 }
 
-export function isScoreLowered(
-  score: ComparableScore | null,
-  recorded: ComparableScore | null
-): boolean {
+function isScoreLowered(score: ComparableScore | null, recorded: ComparableScore | null): boolean {
   if (score === null || recorded === null) {
     return false
   }
@@ -140,13 +137,6 @@ export function isScoreLowered(
   return comparable && score.score < recorded.score
 }
 
-export function lockCharacterHistory(
-  transaction: Prisma.TransactionClient,
-  { serverId, characterId }: CharacterHistoryKey
-): Promise<number> {
-  return transaction.$executeRaw`SELECT pg_advisory_xact_lock(${historyLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
-}
-
 export async function recordCharacterHistory(
   client: DatabaseClient,
   input: CharacterHistoryInput
@@ -155,7 +145,7 @@ export async function recordCharacterHistory(
     const { serverId, characterId } = input
 
     // 최신 행을 읽고 비교해 쓰는 사이에 같은 캐릭터의 다른 저장이 끼면 같은 값이 두 행이 되므로 읽기 전에 잡는다.
-    await lockCharacterHistory(transaction, input)
+    await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${historyLockNamespace}::int, hashtext(${`${serverId}/${characterId}`}))`
     const latest = await transaction.characterBasicHistory.findFirst({
       where: { serverId, characterId },
       orderBy: { observedAt: 'desc' }
@@ -331,7 +321,7 @@ async function findOrCreateEngineId(
 }
 
 export async function readCharacterHistory(
-  client: DatabaseClient | Prisma.TransactionClient,
+  client: DatabaseClient,
   { serverId, characterId }: CharacterHistoryKey
 ): Promise<StoredCharacterHistory> {
   const where = { serverId, characterId }
