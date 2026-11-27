@@ -24,6 +24,7 @@ const LAB_ITEMS_KEY = ['lab-items'] as const
 const LAB_CURRENCIES_KEY = ['lab-currencies'] as const
 const LAB_ITEM_DETAILS_KEY = ['lab-item-details'] as const
 const LAB_CANDIDATES_KEY = ['lab-candidates'] as const
+const LAB_CANDIDATE_EXCLUSIONS_KEY = [...LAB_CANDIDATES_KEY, 'exclusions'] as const
 
 export const OpsClientContext = createContext<OpsClient | null>(null)
 
@@ -244,6 +245,35 @@ export function useLabCandidatePriceHistory(itemName: string) {
   return useQuery({
     queryKey: [...LAB_CANDIDATES_KEY, 'history', itemName],
     queryFn: () => client.readLabCandidatePriceHistory(itemName)
+  })
+}
+
+export function useLabCandidateExclusions() {
+  const client = useOpsClient()
+
+  return useQuery({
+    queryKey: LAB_CANDIDATE_EXCLUSIONS_KEY,
+    queryFn: client.readLabCandidateExclusions
+  })
+}
+
+export function useExcludeLabCandidate(): UseMutationResult<void, Error, string> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (itemName: string) => client.excludeLabCandidate(itemName),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CANDIDATES_KEY })
+  })
+}
+
+export function useIncludeLabCandidate(): UseMutationResult<void, Error, string> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (itemName: string) => client.includeLabCandidate(itemName),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: LAB_CANDIDATE_EXCLUSIONS_KEY })
   })
 }
 
