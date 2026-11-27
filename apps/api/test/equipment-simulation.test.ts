@@ -148,7 +148,9 @@ function fixture(
 }
 
 async function listen(t: TestContext, options: Partial<ApiHttpAppOptions>) {
+  const labItems = labItemsOf(DEFAULT_LAB_ROWS)
   const { app } = await createApiHttpApp({
+    labItems,
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => assert.fail('상세 조회를 부르면 안 된다'),
@@ -183,9 +185,7 @@ function itemOf(items: readonly unknown[], slotId: string): Item {
   return item!
 }
 
-// 실제 등급표의 값이다. 표를 다시 생성해 값이 바뀌면 함께 고친다.
-// 묶이는 항목이 없는 준종결 항목이라 고른 항목이 그대로 엔진에 들어간다.
-const DEALER_JACKET_ID = 'JACKET:10361759:dealer'
+// 아래 엔진 입력은 DEFAULT_LAB_ROWS의 소유자 항목을 엔진 입력 모양으로 바꾼 값이다.
 const DEALER_JACKET_ENCHANT = {
   status: [
     { name: '물리 공격력', value: 110 },
@@ -196,7 +196,6 @@ const DEALER_JACKET_ENCHANT = {
     { name: '최종 데미지 증가', value: '2%' }
   ]
 }
-const BUFFER_WAIST_ID = 'WAIST:10362002:buffer'
 const BUFFER_WAIST_ENCHANT = {
   reinforceSkill: [
     { jobName: '프리스트(남)', skills: [{ name: '수호의 은총', value: '3' }] },
@@ -220,8 +219,9 @@ test('딜러가 바꾼 부위는 강화 수치와 마법부여만 바꾸고 나�
   const before = structuredClone(payloads)
   const engine = scoring()
   const origin = await listen(t, { details, ...engine.options })
+  const enchantId = await labEnchantId(origin, 'JACKET', 'dealer')
   const response = await simulate(origin, path, {
-    equipment: [{ slotId: 'JACKET', reinforce: 12, amplified: false, enchantId: DEALER_JACKET_ID }]
+    equipment: [{ slotId: 'JACKET', reinforce: 12, amplified: false, enchantId }]
   })
 
   assert.equal(response.status, 200)
@@ -358,11 +358,10 @@ test('4스탯 항목이 있는 묶음은 주스탯을 계산하지 않고 그 �
   )
   const engine = scoring()
   const origin = await listen(t, { details, ...engine.options })
+  const enchantId = await labEnchantId(origin, 'WEAPON', 'buffer')
 
   const response = await simulate(origin, path, {
-    equipment: [
-      { slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: 'WEAPON:10326833:buffer' }
-    ]
+    equipment: [{ slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId }]
   })
 
   assert.equal(response.status, 200)
@@ -390,10 +389,11 @@ test('버퍼는 버프 점수로 계산하고, 증폭을 유지한 장비는 원
   const { original, details, path } = fixture('buffer-muse')
   const engine = scoring()
   const origin = await listen(t, { details, ...engine.options })
+  const enchantId = await labEnchantId(origin, 'WAIST', 'buffer')
   const response = await simulate(origin, path, {
     equipment: [
       { slotId: 'WEAPON', reinforce: 13, amplified: true, enchantId: null },
-      { slotId: 'WAIST', reinforce: 11, amplified: false, enchantId: BUFFER_WAIST_ID }
+      { slotId: 'WAIST', reinforce: 11, amplified: false, enchantId }
     ]
   })
 
@@ -570,8 +570,7 @@ const invalidBodies: readonly (readonly [string, unknown])[] = [
   ['빠진 칸', { equipment: [{ slotId: 'JACKET', reinforce: 10, amplified: false }] }],
   ['임의 마법부여 값', { equipment: [{ ...change, status: [{ name: '힘', value: 999 }] }] }],
   ['모르는 마법부여', { equipment: [{ ...change, enchantId: 'missing-enchant-grade' }] }],
-  ['다른 부위의 마법부여', { equipment: [{ ...change, enchantId: 'SHOULDER:10401273:dealer' }] }],
-  ['다른 역할의 마법부여', { equipment: [{ ...change, enchantId: 'JACKET:10417946:buffer' }] }],
+  ['지운 등급표의 id', { equipment: [{ ...change, enchantId: 'JACKET:10361759:dealer' }] }],
   ['모르는 최상위 칸', { equipment: [], fame: 1 }]
 ]
 
@@ -646,6 +645,42 @@ const LAB_JACKET_CARD = {
   }
 }
 
+function labItemsOf(rows: readonly LabItemPriceRow[]) {
+  return {
+    readLabItemPrices: async () => [...rows],
+    readCurrencyIcon: async () => null,
+    readItemIcon: async () => null
+  }
+}
+
+const FOUR_STATS = ['힘', '지능', '체력', '정신력']
+
+function stats(names: readonly string[], value: string) {
+  return names.map((name) => ({ name, value }))
+}
+
+// 엔진 입력을 확인하는 테스트가 고르는 실험실 마법부여다. 모두 소유자가 옵션을 넣은 합성 항목이라 카드 상세를 받지 않는다.
+const DEFAULT_LAB_ROWS: readonly LabItemPriceRow[] = [
+  labRow('WEAPON', 'dealer', '합성 무기 보주', null, [{ name: '모든 속성 강화', value: '15' }]),
+  labRow('WEAPON', 'buffer', '합성 체력 보주', null, stats(['체력'], '100')),
+  labRow('WEAPON', 'buffer', '합성 4스탯 보주', null, stats(FOUR_STATS, '100')),
+  labRow('WEAPON', 'buffer', '합성 정신력 보주', null, stats(['정신력'], '100')),
+  labRow('JACKET', 'dealer', '합성 상의 보주', null, [
+    ...stats(['물리 공격력', '마법 공격력', '독립 공격력'], '110'),
+    ...stats(['힘', '지능'], '90'),
+    { name: '최종 데미지 증가', value: '2%' }
+  ]),
+  labRow('SHOULDER', 'buffer', '합성 어깨 보주', null, [
+    { name: '버프 패시브 스킬', value: '3' },
+    ...stats(FOUR_STATS, '100')
+  ]),
+  labRow('WAIST', 'buffer', '합성 벨트 보주', null, [
+    { name: '버프 패시브 스킬', value: '3' },
+    ...stats(FOUR_STATS, '120'),
+    ...stats(['물리 크리티컬 히트', '마법 크리티컬 히트'], '7%')
+  ])
+]
+
 async function labOptionIds(origin: string) {
   const response = await fetch(new URL('/lab/enchant-options', origin))
   const { slots } = (await response.json()) as {
@@ -655,6 +690,13 @@ async function labOptionIds(origin: string) {
   return new Map(
     slots.map(({ slotId, role, tiers }) => [`${slotId}:${role}`, tiers[0]!.options[0]!.id])
   )
+}
+
+async function labEnchantId(origin: string, slotId: string, role: string): Promise<string> {
+  const id = (await labOptionIds(origin)).get(`${slotId}:${role}`)
+  assert.notEqual(id, undefined, `${slotId} ${role}`)
+
+  return id!
 }
 
 test('실험실 선택지 id로 계산하면 그 부위 enchant에 카드의 가장 높은 단계 옵션을 명성 줄 없이 정수는 숫자로 넣는다', async (t) => {
@@ -906,10 +948,11 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
   const raised = await scoresOf(dealerOrigin, dealer.path, allDealerSlots(12))
   assert.ok(raised.simulated.value > raised.baseline.value)
 
+  const jacketEnchant = await labEnchantId(dealerOrigin, 'JACKET', 'dealer')
   const enchanted = await scoresOf(dealerOrigin, dealer.path, [
-    { slotId: 'JACKET', reinforce: 0, amplified: false, enchantId: 'JACKET:10417944:dealer' }
+    { slotId: 'JACKET', reinforce: 0, amplified: false, enchantId: jacketEnchant }
   ])
-  // 원본 상의 마법부여(공격력 50, 힘과 지능 20)보다 공격력 110, 4스탯 90, 최종 데미지 3% 항목이 높다.
+  // 원본 상의 마법부여(공격력 50, 힘과 지능 20)보다 공격력 110, 힘과 지능 90, 최종 데미지 2% 항목이 높다.
   assert.ok(enchanted.simulated.value > enchanted.baseline.value)
 
   const amplified = await scoresOf(dealerOrigin, dealer.path, [
@@ -924,8 +967,9 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
   assert.ok(buffRaised.simulated.value > buffRaised.baseline.value)
 
   // 스킬 레벨 3은 원본 어깨와 같고 4스탯이 원본 120보다 낮은 100이라 점수가 내려간다.
+  const shoulderEnchant = await labEnchantId(bufferOrigin, 'SHOULDER', 'buffer')
   const skillEnchanted = await scoresOf(bufferOrigin, buffer.path, [
-    { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: 'SHOULDER:10343455:buffer' }
+    { slotId: 'SHOULDER', reinforce: 11, amplified: true, enchantId: shoulderEnchant }
   ])
   assert.ok(skillEnchanted.simulated.value < skillEnchanted.baseline.value)
 })
@@ -1305,7 +1349,8 @@ test('새 칸을 null로 보내고 서약을 빈 배열로 보낸 요청은 새 
   const { details, path } = fixture('dealer-blade')
   const engine = scoring()
   const origin = await listen(t, { details, ...engine.options })
-  const change = { slotId: 'JACKET', reinforce: 12, amplified: false, enchantId: DEALER_JACKET_ID }
+  const enchantId = await labEnchantId(origin, 'JACKET', 'dealer')
+  const change = { slotId: 'JACKET', reinforce: 12, amplified: false, enchantId }
 
   const plain = await simulate(origin, path, { equipment: [change] })
   const nulls = await simulate(origin, path, {
@@ -3275,6 +3320,9 @@ const VAGABOND = {
   jobGrowId: 'c9b492038ee3ca8d27d7004cf58d59f3'
 }
 
+// addedWeaponSimulation이 이 값을 실험실의 딜러 무기 선택지 id로 바꿔 보낸다.
+const WEAPON_LAB_ENCHANT = 'WEAPON:dealer'
+
 async function addedWeaponSimulation(
   t: TestContext,
   fields: Item,
@@ -3284,9 +3332,13 @@ async function addedWeaponSimulation(
   payloads.basic = { ...payloads.basic, ...job }
   const engine = scoring(versionedEngine(package_))
   const origin = await listen(t, { details, ...engine.options })
-  const response = await simulate(origin, path, {
-    equipment: [{ ...bareChange, ...fields }]
-  })
+  const change: Item = { ...bareChange, ...fields }
+
+  if (change.enchantId === WEAPON_LAB_ENCHANT) {
+    change.enchantId = await labEnchantId(origin, 'WEAPON', 'dealer')
+  }
+
+  const response = await simulate(origin, path, { equipment: [change] })
 
   return { engine, response }
 }
@@ -3346,7 +3398,7 @@ test('무기를 끼지 않은 캐릭터에 더한 무기에는 강화, 증폭, �
     variantId: GREATSWORD_STAR,
     reinforce: 10,
     amplified: true,
-    enchantId: 'WEAPON:10413546:dealer'
+    enchantId: WEAPON_LAB_ENCHANT
   })
 
   assert.equal(response.status, 200)
@@ -3376,7 +3428,7 @@ const invalidAddedWeaponCases: readonly (readonly [string, Item])[] = [
   ['최대 단계를 넘는 조율', { variantId: GREATSWORD_STAR, tune: 4 }],
   ['해방 계열이 아닌 선택지의 해방 수치', { variantId: GREATSWORD_STAR, release: 100 }],
   ['선택지 없는 강화', { reinforce: 10 }],
-  ['선택지 없는 마법부여', { enchantId: 'WEAPON:10413546:dealer' }]
+  ['선택지 없는 마법부여', { enchantId: WEAPON_LAB_ENCHANT }]
 ]
 
 for (const [name, fields] of invalidAddedWeaponCases) {
@@ -3447,6 +3499,7 @@ test('비어 있는 장비 부위에 더한 장비에는 강화, 증폭, 마법�
   )
   const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
+  const enchantId = await labEnchantId(origin, 'JACKET', 'dealer')
 
   const response = await simulate(origin, path, {
     equipment: [
@@ -3455,7 +3508,7 @@ test('비어 있는 장비 부위에 더한 장비에는 강화, 증폭, 마법�
         slotId: 'JACKET',
         reinforce: 10,
         amplified: true,
-        enchantId: DEALER_JACKET_ID,
+        enchantId,
         variantId: PURIFICATION_EPIC_JACKET
       }
     ]
@@ -3488,9 +3541,10 @@ test('장비를 더하지 않는 빈 부위에 강화나 마법부여만 보내�
   )
   const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
+  const enchantId = await labEnchantId(origin, 'JACKET', 'dealer')
 
   const response = await simulate(origin, path, {
-    equipment: [{ ...bareChange, slotId: 'JACKET', reinforce: 10, enchantId: DEALER_JACKET_ID }]
+    equipment: [{ ...bareChange, slotId: 'JACKET', reinforce: 10, enchantId }]
   })
 
   assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })

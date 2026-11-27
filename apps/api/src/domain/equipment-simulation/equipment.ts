@@ -5,7 +5,6 @@ import {
   type EnchantGradeRole,
   type EnchantGradeSlot,
   chooseEnchantGrade,
-  findEnchantOption,
   isEnchantMainStat,
   optionNeedsMainStat
 } from '@dfragon/lib/enchant-grades'
@@ -59,7 +58,7 @@ function equippedItems(equipment: CharacterPayload): CharacterPayload[] {
   return equipment.equipment.filter(isRecord)
 }
 
-// 버프 점수로 계산하는 버퍼만 버퍼 등급표를 쓰고, 나머지는 장비 점수로 계산하므로 딜러 등급표를 쓴다.
+// 버프 점수로 계산하는 버퍼만 버퍼 선택지를 쓰고, 나머지는 장비 점수로 계산하므로 딜러 선택지를 쓴다.
 function enchantRole(role: CharacterRole | null): EnchantGradeRole {
   if (role === 'buffer') {
     return 'buffer'
@@ -80,7 +79,6 @@ function isAmplified(item: CharacterPayload): boolean {
   return typeof item.amplificationName === 'string'
 }
 
-// 등급표 id는 웹이 실험실 선택지로 바뀔 때까지 받는다.
 function enchantOf(
   change: EquipmentChange,
   role: EnchantGradeRole,
@@ -90,9 +88,7 @@ function enchantOf(
     return null
   }
 
-  const option =
-    findEnchantOption(change.slotId, role, change.enchantId) ??
-    findLabEnchantOption(labOptions, change.slotId, role, change.enchantId)
+  const option = findLabEnchantOption(labOptions, change.slotId, role, change.enchantId)
 
   if (option === null) {
     throw new EquipmentSimulationFailure('request')
@@ -110,7 +106,7 @@ function isBareSlot(change: EquipmentChange): boolean {
 }
 
 /**
- * 범위 밖 수치, 그 부위나 역할의 등급표와 실험실 선택지에 없는 마법부여는 거절한다. 비어 있는 부위는 `addedSlots`(이 요청이 장비를 더하는
+ * 범위 밖 수치, 그 부위나 역할의 실험실 선택지에 없는 마법부여는 거절한다. 비어 있는 부위는 `addedSlots`(이 요청이 장비를 더하는
  * 부위)일 때만 그 장비에 강화, 증폭, 마법부여를 싣고, 장비를 더하지 않는 빈 부위에 실으면 거절한다.
  */
 export function editEquipment(
@@ -189,7 +185,7 @@ export function wornMainStat(equipment: CharacterPayload): ScoreMainStat | null 
     return null
   }
 
-  // 등급표의 주스탯과 엔진 결과의 주스탯이 같은 목록이어야 이 대입이 타입 검사를 통과한다.
+  // lib의 주스탯과 엔진 결과의 주스탯이 같은 목록이어야 이 대입이 타입 검사를 통과한다.
   const mainStat: ScoreMainStat = stat
 
   return mainStat

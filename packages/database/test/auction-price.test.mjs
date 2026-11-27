@@ -55,7 +55,7 @@ before(async () => {
 
 after(() => client?.$disconnect())
 
-// 이름은 저장소의 마법부여 등급표에 있는 카드 이름이고, itemId와 가격은 지어냈다.
+// 이름은 지금은 지운 마법부여 등급표에 있던 카드 이름이고, itemId와 가격은 지어냈다.
 const shared = '허망한 맹신, 호스디그 카드'
 const single = '거짓의 베리디쿠스 카드'
 const readPrices = () =>

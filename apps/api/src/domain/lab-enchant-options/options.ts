@@ -19,7 +19,7 @@ const INTEGER = /^-?\d+$/
 const LEADING_PLUS = /^\+/
 const ROLES: readonly EnchantGradeRole[] = ['dealer', 'buffer']
 
-// 등급표의 버퍼 항목이 쓰는 다섯 직업의 스킬이다(ADR 0094).
+// 버퍼 카드 대부분이 올리는 다섯 직업의 스킬이다(ADR 0094).
 const BUFF_PASSIVE_SKILLS = [
   { jobName: '프리스트(남)', name: '수호의 은총' },
   { jobName: '프리스트(여)', name: '계시 : 아리아' },
@@ -176,7 +176,7 @@ function skillLevelOf(members: readonly EnchantEntry[]): number | null {
 /** 묶음의 표시를 짧은 문자열로 줄이고, 같은 표시면 같은 값이다. */
 export type DigestOptionKey = (key: string) => string
 
-// 묶음의 표시로 정해 실험실 목록이 그대로면 요청마다 같고, 등급표 id와 겹치지 않게 접두어를 둔다.
+// 묶음의 표시로 정해 실험실 목록이 그대로면 요청마다 같다.
 function optionId(
   slotId: EnchantGradeSlot,
   role: EnchantGradeRole,
@@ -231,7 +231,7 @@ function slotOptions<C extends LabEnchantCardPrice>(
   return { slotId, role, tiers: filledTiers }
 }
 
-/** 부위는 등급표 부위 순서, 역할은 딜러 다음 버퍼, 등급은 종결, 준종결, 배럭 순이고 선택지가 없는 부위와 등급은 뺀다. */
+/** 부위는 ENCHANT_GRADE_SLOTS 순서, 역할은 딜러 다음 버퍼, 등급은 종결, 준종결, 배럭 순이고 선택지가 없는 부위와 등급은 뺀다. */
 export function labEnchantOptions<C extends LabEnchantCardPrice>(
   sources: readonly LabEnchantSource<C>[],
   digest: DigestOptionKey

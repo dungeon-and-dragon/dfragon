@@ -1,5 +1,3 @@
-import table from './enchant-grades.json' with { type: 'json' }
-
 export const ENCHANT_GRADE_SLOTS = [
   'WEAPON',
   'JACKET',
@@ -18,8 +16,6 @@ export const ENCHANT_GRADE_SLOTS = [
 export type EnchantGradeSlot = (typeof ENCHANT_GRADE_SLOTS)[number]
 
 export type EnchantGradeRole = 'dealer' | 'buffer'
-
-export type EnchantGradeTier = '종결' | '준종결'
 
 export interface EnchantStatus {
   readonly name: string
@@ -41,33 +37,6 @@ export interface EnchantEntry {
   readonly reinforceSkill: readonly EnchantReinforceSkill[]
 }
 
-export interface EnchantGrade extends EnchantEntry {
-  readonly id: string
-  readonly fame: number
-  readonly cardName: string
-  readonly cardId: number
-  readonly roles: readonly EnchantGradeRole[]
-}
-
-type EnchantGradeTiers = Readonly<Record<EnchantGradeTier, readonly EnchantGrade[]>>
-
-interface EnchantGradeTable {
-  readonly version: 2
-  readonly slots: Readonly<Record<EnchantGradeSlot, EnchantGradeTiers>>
-}
-
-// 엔진 저장소가 만든 파일을 그대로 두므로 모양은 테스트가 확인한다.
-const grades = table as EnchantGradeTable
-
-function gradesOf(slotId: EnchantGradeSlot, role: EnchantGradeRole): EnchantGradeTiers {
-  const tiers = grades.slots[slotId]
-  const fits = (grade: EnchantGrade) => grade.roles.includes(role)
-  const finals = tiers.종결.filter(fits)
-  const semiFinals = tiers.준종결.filter(fits)
-
-  return { 종결: finals, 준종결: semiFinals }
-}
-
 export const ENCHANT_MAIN_STATS = ['힘', '지능', '체력', '정신력'] as const
 
 export type EnchantMainStat = (typeof ENCHANT_MAIN_STATS)[number]
@@ -81,23 +50,12 @@ export interface EnchantDisplayStatus {
   readonly value: number | string
 }
 
-/** 등급표 항목 가운데 표시가 같은 묶음이다. id는 첫 항목의 id이고, display는 묶음의 표시 규칙을 적용한 스탯이다. */
-export interface EnchantGradeOption {
-  readonly id: string
-  readonly display: readonly EnchantDisplayStatus[]
-  readonly members: readonly EnchantGrade[]
-}
-
 /** 표시가 같은 항목의 묶음이다. key는 표시와 직업별 스킬 강화가 같으면 같은 문자열이다. */
 export interface EnchantEntryGroup<T extends EnchantEntry> {
   readonly key: string
   readonly display: readonly EnchantDisplayStatus[]
   readonly members: readonly T[]
 }
-
-export type EnchantGradeOptionTiers = Readonly<
-  Record<EnchantGradeTier, readonly EnchantGradeOption[]>
->
 
 const MAIN_STATS: readonly string[] = ENCHANT_MAIN_STATS
 const ATTACK_STATS: readonly string[] = ['물리 공격력', '마법 공격력', '독립 공격력']
@@ -142,8 +100,8 @@ function maxAmount(statuses: readonly EnchantStatus[]): StatAmount {
 }
 
 // 원본 마법부여의 칸 순서를 따라, 한 묶음으로 표시하는 스탯은 처음 나온 자리에 둔다.
-// 웹이 착용한 마법부여도 등급표 목록과 같은 표기로 보이도록 status만 받는다.
-export function displayStatusOf(grade: Pick<EnchantGrade, 'status'>): EnchantDisplayStatus[] {
+// 웹이 착용한 마법부여도 선택지와 같은 표기로 보이도록 status만 받는다.
+export function displayStatusOf(grade: Pick<EnchantEntry, 'status'>): EnchantDisplayStatus[] {
   const display: EnchantDisplayStatus[] = []
   const pick = (names: readonly string[]) =>
     grade.status.filter((status) => names.includes(status.name))
@@ -219,43 +177,6 @@ export function groupEnchantEntries<T extends EnchantEntry>(
   }
 
   return [...groups.values()]
-}
-
-function optionsOf(grades: readonly EnchantGrade[]): EnchantGradeOption[] {
-  return groupEnchantEntries(grades).map(({ display, members }) => ({
-    id: members[0]!.id,
-    display,
-    members
-  }))
-}
-
-export function enchantOptionsOf(
-  slotId: EnchantGradeSlot,
-  role: EnchantGradeRole
-): EnchantGradeOptionTiers {
-  const { 종결, 준종결 } = gradesOf(slotId, role)
-  const finals = optionsOf(종결)
-  const semiFinals = optionsOf(준종결)
-
-  return { 종결: finals, 준종결: semiFinals }
-}
-
-/** 그 부위, 역할에서 id의 항목이 속한 묶음이다. 다른 부위, 역할이나 없는 id는 null이다. */
-export function findEnchantOption(
-  slotId: EnchantGradeSlot,
-  role: EnchantGradeRole,
-  id: string
-): EnchantGradeOption | null {
-  const { 종결, 준종결 } = enchantOptionsOf(slotId, role)
-  const option = [...종결, ...준종결].find((candidate) =>
-    candidate.members.some((member) => member.id === id)
-  )
-
-  if (option === undefined) {
-    return null
-  }
-
-  return option
 }
 
 function hasAllMainStats(entry: EnchantEntry): boolean {

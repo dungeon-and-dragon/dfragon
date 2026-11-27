@@ -12,7 +12,6 @@ export const LAB_ITEM_ROLES = ['dealer', 'buffer', 'all'] as const
 
 export type LabItemRole = (typeof LAB_ITEM_ROLES)[number]
 
-// 배럭은 등급표에 없는 실험실 등급이라 등급표의 등급 타입과 묶지 않는다.
 export const LAB_ITEM_TIERS = ['종결', '준종결', '배럭'] as const
 
 export type LabItemTier = (typeof LAB_ITEM_TIERS)[number]
