@@ -43,6 +43,14 @@ const STORY_SEASONS = [
 const RAIDS = ['가 레이드', '나 레이드'] as const
 const LEGION = '다 레기온'
 
+function raidCount(raid: string, stage: string | null, count: number, hard: boolean) {
+  const name = stage === null ? raid : `${raid} (${stage})`
+  const hardCount = hard ? count : 0
+  const normalCount = count - hardCount
+
+  return { name, raid, stage, count, hard: hardCount, normal: normalCount }
+}
+
 function isoDate(at: number): string {
   return new Date(at).toISOString().slice(0, 10)
 }
@@ -117,10 +125,21 @@ export function storyAdventureActivity(
     season: { id: seasonId, startsAt, endsAt, timelineStartsAt: startsAt },
     summary: {
       raids: [
-        { name: RAIDS[0], count: 412, hard: 120, normal: 292 },
-        { name: RAIDS[1], count: 186 }
+        raidCount('무너진 성자 미카엘라', '하드', 18, true),
+        raidCount('무너진 성자 미카엘라', '일반', 64, false),
+        raidCount('무너진 성자 미카엘라', '싱글/매칭', 41, false),
+        raidCount('디레지에 레이드', '하드', 120, true),
+        raidCount('디레지에 레이드', '일반', 292, false),
+        raidCount('디레지에 레이드', '매칭', 37, false),
+        raidCount('이내 황혼전', null, 186, false),
+        raidCount('만들어진 신 나벨', '하드', 9, true),
+        raidCount('기계 혁명', '하드', 2, true)
       ],
-      legions: [{ name: LEGION, count: 204 }],
+      legions: [
+        { name: '아포칼립스', count: 204 },
+        { name: '베누스', count: 48 },
+        { name: '깨어난 숲(일반)', count: 3 }
+      ],
       items: { legendary: 312, epic: 48, primeval: 6, mythic },
       oaths,
       enhancement: {

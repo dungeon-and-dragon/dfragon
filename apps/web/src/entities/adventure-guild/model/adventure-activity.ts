@@ -2,8 +2,13 @@ import { z } from 'zod'
 
 const count = z.number().int().nonnegative()
 const nameCount = z.object({ name: z.string(), count })
-// 하드, 노말을 보내기 전의 API와도 호환하도록 없으면 받지 않는다.
-const raidCount = nameCount.extend({ hard: count.optional(), normal: count.optional() })
+// 하드, 노말과 레이드 이름, 단계를 보내기 전의 API와도 호환하도록 없으면 받지 않는다.
+const raidCount = nameCount.extend({
+  raid: z.string().optional(),
+  stage: z.string().nullable().optional(),
+  hard: count.optional(),
+  normal: count.optional()
+})
 const enhancementTarget = z.object({ target: z.number().int(), attempts: count, successes: count })
 
 export const adventureActivitySchema = z.object({
