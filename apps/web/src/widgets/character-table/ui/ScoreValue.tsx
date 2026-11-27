@@ -8,7 +8,7 @@ const SCORE_TONES: Record<NonNullable<ListScore>['calculator'], string> = {
   buff: 'text-score-buffer'
 }
 const SCORE_NOTE_LABELS = { equipment: '장비 점수', buff: '버프 점수' } as const
-const APPROXIMATE_CLASS = 'border-b border-dotted border-fg-subtle'
+const APPROXIMATE_CLASS = 'border-0 border-b border-dotted border-fg-subtle'
 
 function ScoreNumber({
   score,

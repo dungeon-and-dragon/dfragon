@@ -491,7 +491,7 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
       {value != null ? (
         <span
           title={description}
-          className={`${numberClass}${tone !== null ? ` ${scoreToneClasses[tone]}` : ''}${approximate ? ' border-b border-dotted border-fg-subtle' : ''}`}
+          className={`${numberClass}${tone !== null ? ` ${scoreToneClasses[tone]}` : ''}${approximate ? ' border-0 border-b border-dotted border-fg-subtle' : ''}`}
         >
           {approximate ? formatApproximateScore(value) : integer.format(value)}
         </span>
