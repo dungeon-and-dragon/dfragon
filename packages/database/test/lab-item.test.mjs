@@ -4,14 +4,21 @@ import test from 'node:test'
 import {
   addLabCurrency,
   createDatabaseClient,
+  deleteLabCandidatesOtherVersions,
+  readLabCandidateIcon,
+  readLabCandidatePriceTargets,
+  readLabCandidates,
   readLabCurrencies,
   readLabCurrencyIcon,
   readLabItemGroups,
   readLabItemDetailIcon,
   readLabItemDetails,
   readLabItemPrices,
+  recordAuctionPrice,
   replaceLabItemGroup,
   saveLabItemDetail,
+  saveLabCandidateIcon,
+  upsertLabCandidates,
   updateLabCurrency
 } from '../dist/index.js'
 
@@ -27,7 +34,8 @@ const MIGRATIONS = [
   '20261126200000_add_lab_currencies',
   '20261127100000_add_lab_currency_description',
   '20261127200000_add_lab_item_details',
-  '20261128100000_add_lab_item_tooltip_fields'
+  '20261128100000_add_lab_item_tooltip_fields',
+  '20261128200000_add_lab_candidates_auction_price_history'
 ]
 
 const noTooltip = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
@@ -74,7 +82,7 @@ async function connectWithEmptyTables(t) {
 
   t.after(() => client.$disconnect())
   await client.$executeRawUnsafe(
-    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details"'
+    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details", "lab_candidates", "auction_price_history"'
   )
 
   for (const name of MIGRATIONS) {
@@ -185,7 +193,8 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     unitPrice: 3_000_000_000,
     checkedAt,
     cost: null,
-    detail: null
+    detail: null,
+    candidate: null
   }
   const missing = {
     itemId: null,
@@ -193,7 +202,8 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     unitPrice: null,
     checkedAt: null,
     cost: null,
-    detail: null
+    detail: null,
+    candidate: null
   }
   const exchanged = {
     itemId: 'synthetic-title',
@@ -207,7 +217,8 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
       currencyUpdatedAt: updatedAt,
       count: 3
     },
-    detail: null
+    detail: null,
+    candidate: null
   }
 
   assert.deepEqual(await readLabItemPrices(client), [
@@ -358,4 +369,285 @@ test('가격 읽기는 이름으로 아이템 상세와 tooltip 값을 붙이고
     },
     { itemName: '합성 카드', detail: null }
   ])
+})
+
+const importedAt = new Date('2026-11-27T00:00:00Z')
+const invalidCandidateCategoryPattern = /lab_candidates_(kind|categories_roles)_check/
+const invalidCandidateIconPattern = /lab_candidates_icon_check/
+
+function candidate(itemName, changes = {}) {
+  return {
+    itemName,
+    kind: 'TITLE',
+    categories: ['TITLE'],
+    roles: ['all'],
+    itemRarity: '레어',
+    ...noTooltip,
+    options: [{ name: '힘', value: '100' }],
+    buffLines: ['합성 버프 옵션'],
+    description: '합성 후보 설명',
+    sourceItemId: 'synthetic-source',
+    ...changes
+  }
+}
+
+test('후보를 다른 판으로 다시 넣으면 값을 바꾸고 아이콘과 아이콘 시각은 유지한다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const itemName = '합성 후보'
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [candidate(itemName)]
+  })
+  assert.equal(await readLabCandidateIcon(client, itemName), null)
+  assert.deepEqual(await saveLabCandidateIcon(client, '없는 후보', pngIcon), { status: 'notFound' })
+  assert.equal(await readLabCandidateIcon(client, '없는 후보'), null)
+  assert.deepEqual(await saveLabCandidateIcon(client, itemName, pngIcon), { status: 'updated' })
+  const [{ iconUpdatedAt }] = await readLabCandidates(client)
+  assert.ok(iconUpdatedAt instanceof Date)
+
+  const later = new Date('2026-11-28T00:00:00Z')
+  const changed = candidate(itemName, {
+    kind: 'ENCHANT',
+    categories: ['WEAPON', 'JACKET'],
+    roles: ['dealer', 'buffer'],
+    itemRarity: '유니크',
+    ...tooltip,
+    options: [],
+    buffLines: [],
+    description: null,
+    sourceItemId: 'synthetic-other-source'
+  })
+  await upsertLabCandidates(client, { versionId: 'second', importedAt: later, items: [changed] })
+
+  assert.deepEqual(await readLabCandidateIcon(client, itemName), pngIcon)
+  assert.deepEqual(await readLabCandidates(client), [
+    {
+      ...changed,
+      versionId: 'second',
+      importedAt: later,
+      hasIcon: true,
+      iconUpdatedAt,
+      itemId: null,
+      unitPrice: null,
+      checkedAt: null,
+      previousPrice: null,
+      wearCount: null
+    }
+  ])
+  await saveLabCandidateIcon(client, itemName, webpIcon)
+  assert.deepEqual(await readLabCandidateIcon(client, itemName), webpIcon)
+})
+
+test('후보 정리는 지정한 판만 남기며 없는 판이면 0을 알리고 기존 후보를 보존한다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'old',
+    importedAt,
+    items: [candidate('합성 이전 후보')]
+  })
+  await upsertLabCandidates(client, {
+    versionId: 'new',
+    importedAt,
+    items: [candidate('합성 새 후보'), candidate('합성 새 후보 B')]
+  })
+  assert.deepEqual(await deleteLabCandidatesOtherVersions(client, 'missing'), {
+    remaining: 0,
+    deleted: 0
+  })
+  assert.equal((await readLabCandidates(client)).length, 3)
+  assert.deepEqual(await deleteLabCandidatesOtherVersions(client, 'new'), {
+    remaining: 2,
+    deleted: 1
+  })
+  assert.deepEqual(
+    (await readLabCandidates(client)).map(({ itemName }) => itemName),
+    ['합성 새 후보', '합성 새 후보 B']
+  )
+  assert.deepEqual(await deleteLabCandidatesOtherVersions(client, 'new'), {
+    remaining: 2,
+    deleted: 0
+  })
+})
+
+test('후보 조회는 종류, 부위, 역할을 거르고 명성순으로 가격과 직전의 다른 가격을 붙인다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const enchant = { kind: 'ENCHANT', categories: ['WEAPON', 'JACKET'], roles: ['dealer', 'buffer'] }
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate('합성 높은 카드', { ...enchant, fame: 500 }),
+      candidate('합성 낮은 카드', { ...enchant, fame: 100 }),
+      candidate('합성 명성 없는 카드', enchant),
+      candidate('합성 다른 부위', { ...enchant, categories: ['PANTS'], fame: 900 }),
+      candidate('합성 다른 역할', { ...enchant, roles: ['buffer'], fame: 800 }),
+      candidate('합성 칭호', { fame: 700 })
+    ]
+  })
+  const price = { itemName: '합성 높은 카드', itemId: 'synthetic-item', itemRarity: '유니크' }
+  await recordAuctionPrice(client, { ...price, unitPrice: 3_000_000_000, checkedAt: importedAt })
+  const changedAt = new Date('2026-11-27T01:00:00Z')
+  await recordAuctionPrice(client, { ...price, unitPrice: 4_000_000_000, checkedAt: changedAt })
+  const dailyAt = new Date('2026-11-28T01:00:00Z')
+  await recordAuctionPrice(client, { ...price, unitPrice: 4_000_000_000, checkedAt: dailyAt })
+  await recordAuctionPrice(client, {
+    ...price,
+    itemName: '합성 다른 부위',
+    unitPrice: 1,
+    checkedAt: dailyAt
+  })
+  const rows = await readLabCandidates(client, {
+    kind: 'ENCHANT',
+    category: 'WEAPON',
+    role: 'dealer'
+  })
+
+  assert.deepEqual(
+    rows.map(({ itemName }) => itemName),
+    ['합성 높은 카드', '합성 낮은 카드', '합성 명성 없는 카드']
+  )
+  assert.equal(rows[0].unitPrice, 4_000_000_000)
+  assert.equal(rows[0].itemId, 'synthetic-item')
+  assert.deepEqual(rows[0].checkedAt, dailyAt)
+  assert.deepEqual(rows[0].previousPrice, {
+    itemId: 'synthetic-item',
+    unitPrice: 3_000_000_000,
+    checkedAt: importedAt
+  })
+  for (const row of rows.slice(1)) {
+    assert.equal(row.itemId, null)
+    assert.equal(row.unitPrice, null)
+    assert.equal(row.checkedAt, null)
+    assert.equal(row.previousPrice, null)
+  }
+  assert.ok(rows.every(({ wearCount }) => wearCount === null))
+  assert.ok(rows.every((row) => !('icon' in row) && !('iconContentType' in row)))
+  assert.deepEqual(
+    (await readLabCandidates(client, { kind: 'TITLE' })).map(({ itemName }) => itemName),
+    ['합성 칭호']
+  )
+
+  const missingAt = new Date('2026-11-28T02:00:00Z')
+  await recordAuctionPrice(client, { ...price, unitPrice: null, checkedAt: missingAt })
+  const [missing] = await readLabCandidates(client, {
+    kind: 'ENCHANT',
+    category: 'WEAPON',
+    role: 'dealer'
+  })
+  assert.equal(missing.unitPrice, null)
+  assert.deepEqual(missing.previousPrice, {
+    itemId: 'synthetic-item',
+    unitPrice: 4_000_000_000,
+    checkedAt: dailyAt
+  })
+  await recordAuctionPrice(client, {
+    ...price,
+    unitPrice: 100,
+    checkedAt: new Date('2026-11-28T03:00:00Z')
+  })
+  const [returned] = await readLabCandidates(client, {
+    kind: 'ENCHANT',
+    category: 'WEAPON',
+    role: 'dealer'
+  })
+  assert.deepEqual(returned.previousPrice, {
+    itemId: 'synthetic-item',
+    unitPrice: null,
+    checkedAt: missingAt
+  })
+})
+
+test('후보 가격 대상은 고른 이름을 빼고, 고른 아이템의 가격 조회는 후보 상세를 이름으로 붙인다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  const selected = candidate('합성 선택 후보', { ...tooltip })
+  const noIcon = candidate('합성 아이콘 없는 후보')
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      selected,
+      noIcon,
+      candidate('합성 미선택 카드', {
+        kind: 'ENCHANT',
+        categories: ['WEAPON', 'JACKET'],
+        roles: ['dealer']
+      })
+    ]
+  })
+  await saveLabCandidateIcon(client, selected.itemName, pngIcon)
+  await replaceLabItemGroup(client, {
+    ...titleFinal,
+    items: [
+      unpriced(selected.itemName),
+      unpriced(noIcon.itemName),
+      unpriced('합성 후보 없는 아이템')
+    ]
+  })
+  await replaceLabItemGroup(client, { ...weaponDealerFinal, items: [unpriced(selected.itemName)] })
+
+  assert.deepEqual(await readLabCandidatePriceTargets(client), [
+    { itemName: '합성 미선택 카드', exchanged: false, categories: ['WEAPON', 'JACKET'] }
+  ])
+  const [{ iconUpdatedAt }] = await readLabCandidates(client, { kind: 'TITLE' })
+  const rows = await readLabItemPrices(client)
+  assert.deepEqual(
+    rows.map(({ candidate: detail }) => detail),
+    [
+      { description: selected.description, itemRarity: '레어', ...tooltip, iconUpdatedAt },
+      { description: noIcon.description, itemRarity: '레어', ...noTooltip, iconUpdatedAt: null },
+      null,
+      { description: selected.description, itemRarity: '레어', ...tooltip, iconUpdatedAt }
+    ]
+  )
+  assert.ok(rows.every(({ detail }) => detail === null))
+})
+
+test('후보 CHECK는 일반 종류의 목록과 아이콘 쌍을 지키고 잘못된 묶음은 모두 rollback한다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  for (const changes of [
+    { kind: 'OTHER' },
+    { categories: ['TITLE', 'CREATURE'] },
+    { categories: ['CREATURE'] },
+    { categories: [] },
+    { roles: ['dealer'] },
+    { roles: ['all', 'buffer'] },
+    { roles: [] }
+  ]) {
+    await assert.rejects(
+      upsertLabCandidates(client, {
+        versionId: 'first',
+        importedAt,
+        items: [candidate('합성 정상 후보'), candidate('합성 잘못된 후보', changes)]
+      }),
+      invalidCandidateCategoryPattern
+    )
+    assert.deepEqual(await readLabCandidates(client), [])
+  }
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [candidate('합성 후보')]
+  })
+  await assert.rejects(
+    client.$executeRaw`
+    UPDATE "lab_candidates" SET "icon_content_type" = 'image/png' WHERE "item_name" = '합성 후보'`,
+    invalidCandidateIconPattern
+  )
+  await assert.rejects(
+    client.$executeRaw`
+    UPDATE "lab_candidates" SET "icon" = ${pngIcon.bytes}::bytea WHERE "item_name" = '합성 후보'`,
+    invalidCandidateIconPattern
+  )
+  assert.equal(await readLabCandidateIcon(client, '합성 후보'), null)
 })

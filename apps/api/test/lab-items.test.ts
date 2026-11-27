@@ -32,7 +32,8 @@ function row(
       unitPrice: null,
       checkedAt: null,
       cost: null,
-      detail: null
+      detail: null,
+      candidate: null
     }
   }
 
@@ -50,7 +51,8 @@ function row(
     unitPrice,
     checkedAt: new Date(CHECKED_AT),
     cost: null,
-    detail: null
+    detail: null,
+    candidate: null
   }
 }
 
