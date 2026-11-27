@@ -500,6 +500,29 @@ it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 
   ])
 })
 
+it('전직별 클리어 순위는 眞 각성 전 전직을 클리어율이 가장 높아도 두지 않는다', async () => {
+  await open(undefined, {
+    overview: (selected) => {
+      const overview = overviewOf(selected)
+      const unawakened = { ...job(20, 2, 2), jobName: '아처', jobGrowName: '하이드라' }
+      const contents = overview.contents.map((item) => ({
+        ...item,
+        jobs: [...item.jobs, unawakened]
+      }))
+
+      return HttpResponse.json({ ...overview, contents })
+    }
+  })
+
+  const high = panel('전직별 클리어')?.querySelector('[aria-label="클리어율 높은 전직"]')
+  const rates = [...(high?.querySelectorAll('li') ?? [])].map(
+    (row) => row.lastElementChild?.textContent
+  )
+
+  expect(rates[0]).toBe('20.0%')
+  expect(panel('전직별 클리어')?.textContent).not.toContain('하이드라')
+})
+
 it('함께 깬 컨텐츠 패널은 두지 않는다', async () => {
   await open(undefined)
 

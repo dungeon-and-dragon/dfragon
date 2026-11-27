@@ -534,6 +534,25 @@ it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 �
   expect(jobNames()).toHaveLength(12)
 })
 
+it('전직별 클리어는 眞 각성 전 전직을 클리어율이 가장 높아도 두지 않는다', async () => {
+  await open(
+    { contentKey: 'michaela' },
+    {
+      contentStats: (contentId, weekStart) => {
+        const stats = statsOf(contentId, weekStart)
+        const unawakened = { ...job(12, 2, 2, 120000), jobName: '나이트', jobGrowName: '나이트' }
+
+        return HttpResponse.json({ ...stats, jobs: [...stats.jobs, unawakened] })
+      }
+    }
+  )
+
+  await click(buttonNamed('전직 12개 모두 보기'))
+
+  expect(jobNames()).toHaveLength(12)
+  expect(jobNames()).not.toContain('나이트')
+})
+
 it('전직별 클리어 줄에 마우스를 올리면 전직명 아래 클리어 / 캐릭터 수와 분포 값 여섯 개를 띄운다', async () => {
   await open({ contentKey: 'michaela' })
 
