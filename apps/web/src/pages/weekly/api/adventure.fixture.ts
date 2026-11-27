@@ -133,12 +133,23 @@ export function storyAdventureActivity(
         raidCount('디레지에 레이드', '매칭', 37, false),
         raidCount('이내 황혼전', null, 186, false),
         raidCount('만들어진 신 나벨', '하드', 9, true),
-        raidCount('기계 혁명', '하드', 2, true)
+        raidCount('아스라한', '일반', 4, false),
+        raidCount('아스라한', '개전', 6, false),
+        raidCount('기계 혁명', '하드', 2, true),
+        raidCount('혼돈의 오즈마', null, 3, false),
+        raidCount('무형의 시로코', null, 1, false),
+        raidCount('프레이-이시스', null, 1, false),
+        raidCount('루크', null, 1, false),
+        raidCount('안톤', null, 1, false)
       ],
       legions: [
         { name: '아포칼립스', count: 204 },
         { name: '베누스', count: 48 },
-        { name: '깨어난 숲(일반)', count: 3 }
+        { name: '깨어난 숲(극)', count: 5 },
+        { name: '깨어난 숲(일반)', count: 3 },
+        { name: '어둑섬', count: 2 },
+        { name: '차원회랑', count: 2 },
+        { name: '이스핀즈', count: 1 }
       ],
       items: { legendary: 312, epic: 48, primeval: 6, mythic },
       oaths,
