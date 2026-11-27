@@ -28,7 +28,7 @@ export function storyItemDetail(itemId: string): ItemDetail {
 
 export const STORY_CARD_ITEM_ID = '42ee831ce6b283ecd8b06969caad7894'
 
-// 카드 이름은 등급표에 있는 이름이고, 부위와 단계별 옵션은 Neople 아이템 상세 응답의 cardInfo를 옮긴 값이다.
+// 카드 이름은 지금은 지운 마법부여 등급표에 있던 이름이고, 부위와 단계별 옵션은 Neople 아이템 상세 응답의 cardInfo를 옮긴 값이다.
 export function storyCardDetail(itemId: string): ItemDetail {
   const option = (allElements: number, attack: number, fame: number) => [
     { name: '모든 속성 강화', value: String(allElements) },
