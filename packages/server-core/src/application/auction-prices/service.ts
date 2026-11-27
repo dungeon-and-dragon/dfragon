@@ -13,6 +13,9 @@ const LEVEL_LISTING_TYPE_DETAILS: ReadonlyMap<string, string> = new Map([
   ['CREATURE', '크리쳐'],
   ['AURA', '오라']
 ])
+const AURA_CATEGORY = 'AURA'
+// 오라는 경매장에 본체가 아니라 상자로만 올라, 오라 이름에 상자 이름을 붙인 매물을 받는다.
+const AURA_BOX_SUFFIX = ' 오라 상자'
 
 type ItemPrice = {
   itemId: string | null
@@ -48,7 +51,13 @@ export class AuctionPriceService {
       return listing
     }
 
-    return this.fetchLowestLevelListing(itemName, itemTypeDetails)
+    const levelListing = await this.fetchLowestLevelListing(itemName, itemTypeDetails)
+
+    if (levelListing !== null || !categories.includes(AURA_CATEGORY)) {
+      return levelListing
+    }
+
+    return this.fetchLowestListing(`${itemName}${AURA_BOX_SUFFIX}`)
   }
 
   // 재화로 교환하는 아이템은 경매장을 부르지 않고, 경매장 매물이 없는 아이템과 함께 아이템 검색으로 아이콘만 찾는다.
