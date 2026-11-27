@@ -90,7 +90,7 @@ function roleChip(label: string): HTMLButtonElement {
   )!
 }
 
-it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이고, 가격은 쉼표를 넣고 매물이 없으면 -로 보인다', async () => {
+it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이고, 최저가 왼쪽에 명성을 보이며, 가격은 쉼표를 넣고 매물이 없으면 -로 보인다', async () => {
   await renderLoaded()
 
   expect(roleChip('딜러').getAttribute('aria-pressed')).toBe('true')
@@ -98,14 +98,21 @@ it('딜러 마법부여 표는 부위와 등급 칸을 합쳐 한 번만 보이�
     '부위',
     '등급',
     '카드',
+    '명성',
     '최저가'
   ])
   expect(cellTexts(enchantTable())).toEqual([
-    ['무기', '종결', '멸절의 폭룡왕 바칼 카드', '1,480,000,000'],
-    ['준종결', '허망한 맹신, 호스디그 카드', '-'],
-    ['합성 무기 보주', '5'],
-    ['상의', '종결', '천해천 딜러 상의 카드 (최종 데미지 3%)', '268,000,000'],
-    ['준종결', '중천 딜러 상의 카드 (최종 데미지 2%)', '41,500,000']
+    ['무기', '종결', '멸절의 폭룡왕 바칼 카드', '210', '1,480,000,000'],
+    ['준종결', '합성 무기 보주', '232', '5'],
+    ['허망한 맹신, 호스디그 카드', '210', '-'],
+    ['상의', '종결', '천해천 딜러 상의 카드 (최종 데미지 3%)', '232', '268,000,000'],
+    ['준종결', '중천 딜러 상의 카드 (최종 데미지 2%)', '221', '41,500,000']
+  ])
+  expect([...accessoryTable().querySelectorAll('thead th')].map((th) => th.textContent)).toEqual([
+    '종류',
+    '등급',
+    '아이템',
+    '최저가'
   ])
   const weapon = enchantTable().querySelector('tbody th')!
   expect(weapon.getAttribute('rowspan')).toBe('3')
@@ -138,11 +145,11 @@ it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, �
 
   expect(roleChip('버퍼').getAttribute('aria-pressed')).toBe('true')
   expect(cellTexts(enchantTable())).toEqual([
-    ['무기', '종결', '뒤쫓는 자 제논 카드', '612,000,000'],
-    ['준종결', '대천사 미카엘 카드', '88,000,000'],
-    ['혼돈의 천사 루치펠 카드', '-'],
-    ['상의', '종결', '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)', '233,000,000'],
-    ['준종결', '합성 여신 카드', '51,000,000']
+    ['무기', '종결', '뒤쫓는 자 제논 카드', '210', '612,000,000'],
+    ['준종결', '대천사 미카엘 카드', '196', '88,000,000'],
+    ['혼돈의 천사 루치펠 카드', '-', '-'],
+    ['상의', '종결', '천해천 버퍼 상의 카드 (힘, 지능, 체력, 정신력 +210)', '232', '233,000,000'],
+    ['준종결', '합성 여신 카드', '240', '51,000,000']
   ])
   expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
 })
@@ -594,7 +601,7 @@ it('등급표에 없는 벨트 버퍼 준종결 묶음도 DB에 아이템이 있
   await act(async () => roleChip('버퍼').click())
 
   await vi.waitFor(() =>
-    expect(cellTexts(enchantTable())).toEqual([['벨트', '준종결', '합성 벨트 카드', '300']])
+    expect(cellTexts(enchantTable())).toEqual([['벨트', '준종결', '합성 벨트 카드', '-', '300']])
   )
 })
 
@@ -642,7 +649,7 @@ it('API가 배럭 묶음을 주면 등급 열에 배럭으로 보인다', async 
   await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
 
   expect(cellTexts(enchantTable())).toEqual([
-    ['무기', '준종결', '합성 카드', '200'],
-    ['배럭', '합성 배럭 카드', '100']
+    ['무기', '준종결', '합성 카드', '-', '200'],
+    ['배럭', '합성 배럭 카드', '-', '100']
   ])
 })
