@@ -18,7 +18,6 @@ const CLEARS_PATH = /^\/clears(\/|$)/
 const CHARACTER_SIMULATOR_PATH = /^\/c\/[^/]+\/[^/]+\/simulator$/
 
 const GLOBAL_MENU: readonly GlobalMenuItem[] = [
-  { label: '멀티서치', to: '/multisearch' },
   { label: '검색', to: '/rankings' },
   { label: '통계', to: '/stats', currentOn: CLEARS_PATH },
   { label: '모험단', to: '/adventures' },

@@ -1,8 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { MultisearchPage } from '#pages/multisearch'
-import { pageHead } from '#shared/lib/page-head'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/multisearch')({
-  head: () => pageHead({ title: '멀티서치', path: '/multisearch' }),
-  component: MultisearchPage
+  ssr: true,
+  beforeLoad: () => {
+    throw redirect({ to: '/lab/multisearch', replace: true })
+  }
 })
