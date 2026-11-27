@@ -44,9 +44,6 @@ export interface LabItemTooltip {
   card: ItemCard | null
 }
 
-// itemId는 Neople 아이템이고, itemRarity, iconPath, description은 소유자가 넣은 값을 Neople 값보다 먼저 쓴 결과다.
-// tooltip은 소유자가 아이템 상세를 넣은 아이템에만 있다.
-// fame은 마법부여 카드의 가장 높은 단계 모험가 명성이고, 소유자가 넣은 명성을 Neople 카드 값보다 먼저 쓴다.
 export interface LabItemPrice {
   itemName: string
   itemId: string | null
@@ -104,17 +101,9 @@ function itemIconPath(itemName: string, updatedAt: Date): string {
   return `/lab/item-icon?${query}`
 }
 
-function uploadedIconPath(itemName: string, { iconUpdatedAt }: LabItemPriceDetail): string | null {
-  if (iconUpdatedAt === null) {
-    return null
-  }
-
-  return itemIconPath(itemName, iconUpdatedAt)
-}
-
 type ItemLook = Pick<LabItemPrice, 'itemRarity' | 'iconPath' | 'description' | 'tooltip'>
 
-// 소유자는 버프 스킬 줄을 넣지 않는다.
+// 저장한 카드는 버프 스킬 줄을 담지 않는다.
 function toItemCard({ slots, enchants }: LabItemCard): ItemCard {
   const stages = enchants.map(({ upgrade, status }) => ({ upgrade, status, reinforceSkill: [] }))
 
@@ -135,17 +124,17 @@ function toTooltip({
 function lookOf(
   itemName: string,
   neopleRarity: string | null,
-  detail: LabItemPriceDetail | null
+  detail: LabItemPriceDetail | null,
+  candidate: LabItemPriceDetail | null
 ): ItemLook {
-  if (detail === null) {
-    return { itemRarity: neopleRarity, iconPath: null, description: null, tooltip: null }
-  }
+  const itemRarity = detail?.itemRarity ?? candidate?.itemRarity ?? neopleRarity
+  const iconUpdatedAt = detail?.iconUpdatedAt ?? candidate?.iconUpdatedAt ?? null
+  const iconPath = iconUpdatedAt !== null ? itemIconPath(itemName, iconUpdatedAt) : null
+  const description = detail?.description ?? candidate?.description ?? null
+  const tooltipDetail = detail ?? candidate
+  const tooltip = tooltipDetail !== null ? toTooltip(tooltipDetail) : null
 
-  const itemRarity = detail.itemRarity ?? neopleRarity
-  const iconPath = uploadedIconPath(itemName, detail)
-  const tooltip = toTooltip(detail)
-
-  return { itemRarity, iconPath, description: detail.description, tooltip }
+  return { itemRarity, iconPath, description, tooltip }
 }
 
 function toCurrencyCost({
@@ -245,9 +234,10 @@ function chunks<T>(values: readonly T[], size: number): T[][] {
 // 재화 비용을 붙인 아이템은 경매장 가격을 내지 않는다.
 function toPrice(
   { itemName, itemId, itemRarity, unitPrice, checkedAt, cost, detail }: LabItemPriceRow,
-  fame: number | null
+  fame: number | null,
+  candidate: LabItemPriceDetail | null
 ): LabItemPrice {
-  const look = lookOf(itemName, itemRarity, detail)
+  const look = lookOf(itemName, itemRarity, detail, candidate)
 
   if (cost !== null) {
     const currencyCost = toCurrencyCost(cost)
@@ -282,7 +272,7 @@ function enchantEntryOf(
 }
 
 function toEnchantCard(row: LabItemPriceRow): LabEnchantCard {
-  const { itemName, itemId, itemRarity, iconPath, unitPrice, cost } = toPrice(row, null)
+  const { itemName, itemId, itemRarity, iconPath, unitPrice, cost } = toPrice(row, null, null)
 
   return { itemName, itemId, itemRarity, iconPath, unitPrice, cost }
 }
@@ -319,34 +309,28 @@ function digestOptionKey(key: string): string {
 }
 
 function needsNeopleFame(row: LabItemPriceRow): row is LabItemPriceRow & { itemId: string } {
-  return row.itemId !== null && ENCHANT_CATEGORIES.has(row.category) && row.detail?.fame == null
+  return row.itemId !== null && isEnchantRow(row) && row.detail?.fame == null
 }
 
 function fameOf(
   row: LabItemPriceRow,
   neopleFames: ReadonlyMap<string, number | null>
 ): number | null {
-  if (!ENCHANT_CATEGORIES.has(row.category)) {
-    return null
-  }
-
   const ownerFame = row.detail?.fame
 
   if (ownerFame != null) {
     return ownerFame
   }
 
-  if (row.itemId === null) {
-    return null
+  const candidateFame = row.candidate?.fame ?? null
+
+  if (isEnchantRow(row) && row.itemId !== null) {
+    const fame = neopleFames.get(row.itemId) ?? candidateFame
+
+    return fame
   }
 
-  const neopleFame = neopleFames.get(row.itemId)
-
-  if (neopleFame === undefined) {
-    return null
-  }
-
-  return neopleFame
+  return candidateFame
 }
 
 export class LabItemService {
@@ -393,7 +377,7 @@ export class LabItemService {
   async get(signal: AbortSignal): Promise<LabItems> {
     const rows = await this.repository.readLabItemPrices()
     const fames = await this.neopleFames(rows, signal)
-    const toItem = (row: LabItemPriceRow) => toPrice(row, fameOf(row, fames))
+    const toItem = (row: LabItemPriceRow) => toPrice(row, fameOf(row, fames), row.candidate)
     const keys = LAB_ITEM_CATEGORIES.flatMap((category) =>
       labItemRolesOf(category).flatMap((role) =>
         LAB_ITEM_TIERS.map((tier) => ({ category, role, tier }))
