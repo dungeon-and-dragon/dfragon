@@ -23,8 +23,8 @@ const postgresImage =
   'docker.io/library/postgres:18.6-trixie@sha256:4ef4dbc939d61acea57712655ddb4b4ab27419c913f94cca0cd57cb3ea3c2280'
 const runtimeCheckPath = fileURLToPath(new URL('./container-runtime-check.mjs', import.meta.url))
 const timelineCheckPath = fileURLToPath(new URL('./container-timeline-check.mjs', import.meta.url))
-const timelineReadCheckPath = fileURLToPath(
-  new URL('./container-timeline-read-check.mjs', import.meta.url)
+const timelineRequestServiceCheckPath = fileURLToPath(
+  new URL('./container-timeline-request-service-check.mjs', import.meta.url)
 )
 const backfillCheckPath = fileURLToPath(new URL('./container-backfill-check.mjs', import.meta.url))
 const seasonBackfillCheckPath = fileURLToPath(
@@ -421,7 +421,7 @@ try {
         '--mount',
         `type=bind,source=${timelineCheckPath},target=/app/container-timeline-check.mjs,readonly`,
         '--mount',
-        `type=bind,source=${timelineReadCheckPath},target=/app/container-timeline-read-check.mjs,readonly`,
+        `type=bind,source=${timelineRequestServiceCheckPath},target=/app/container-timeline-request-service-check.mjs,readonly`,
         '--mount',
         `type=bind,source=${backfillCheckPath},target=/app/container-backfill-check.mjs,readonly`,
         '--mount',
@@ -888,14 +888,14 @@ try {
     '/app/container-season-backfill-check.mjs'
   ])
 
-  stage = 'timeline read'
+  stage = 'timeline sync request service'
   await podman([
     'exec',
     '--env',
     'DB_PASSWORD_FILE=/run/secrets/db_password',
     apiNames[0],
     'node',
-    '/app/container-timeline-read-check.mjs'
+    '/app/container-timeline-request-service-check.mjs'
   ])
 
   stage = 'character and adventure'

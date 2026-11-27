@@ -166,8 +166,6 @@ async function listen(
       ...reader
     },
     timeline: {
-      read: unused,
-      readPage: unused,
       requests,
       close: async () => undefined
     },

@@ -146,8 +146,6 @@ test('history는 기본 정보, 점수, 섹션별 변경 시각을 주고 타임
     details: { fetchDetails: unused, catalog: new CatalogService(unused) },
     characterHistory: repository(),
     timeline: {
-      read: unused,
-      readPage: unused,
       requests: memoryTimelineRequests().repository,
       close: async () => undefined
     }

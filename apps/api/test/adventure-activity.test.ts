@@ -778,8 +778,6 @@ async function listen(
       ...reader
     },
     timeline: {
-      read: unused,
-      readPage: unused,
       requests: syncRequestRecorder(syncTimeline),
       close: async () => undefined
     },
