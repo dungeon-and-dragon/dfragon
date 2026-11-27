@@ -269,7 +269,9 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       checkedAt: row.checkedAt
     }
 
-    const normals = variants.filter((variant) => !isPlatinumVariant(variant.itemName))
+    const normals = isVariantGroupedKind(category)
+      ? variants.filter((variant) => !isPlatinumVariant(variant.itemName))
+      : variants
     const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf([own, ...normals])
     const platinum = platinumPriceOf(category, variants)
     const cost = toPriceCost(row)
