@@ -623,7 +623,8 @@ function labRow(
     unitPrice: null,
     checkedAt: null,
     cost: null,
-    detail
+    detail,
+    candidate: null
   }
 }
 

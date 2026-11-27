@@ -14,8 +14,33 @@ export type {
   BatchNeopleKeySummary,
   UsableBatchNeopleKey
 } from './batch-neople-key.js'
-export { readLabItemPriceTargets, recordAuctionPrice } from './auction-price.js'
-export type { AuctionPriceEntry, LabItemPriceTarget } from './auction-price.js'
+export {
+  deleteAuctionPriceHistoryBefore,
+  readAuctionPriceHistory,
+  readLabItemPriceTargets,
+  recordAuctionPrice
+} from './auction-price.js'
+export type {
+  AuctionPriceEntry,
+  AuctionPriceHistoryEntry,
+  LabItemPriceTarget
+} from './auction-price.js'
+export {
+  deleteLabCandidatesOtherVersions,
+  readLabCandidateIcon,
+  readLabCandidatePriceTargets,
+  readLabCandidates,
+  saveLabCandidateIcon,
+  upsertLabCandidates
+} from './lab-candidate.js'
+export type {
+  LabCandidateBatch,
+  LabCandidateInput,
+  LabCandidateKind,
+  LabCandidatePreviousPrice,
+  LabCandidateQuery,
+  LabCandidateSummary
+} from './lab-candidate.js'
 export {
   readItemDictionary,
   readUnlistedAcquisitionItemIds,
