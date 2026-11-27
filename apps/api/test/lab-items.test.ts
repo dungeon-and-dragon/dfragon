@@ -2,10 +2,13 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { LabItemPriceRow } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
+import type { FetchCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
-const unusedProvider = async () => assert.fail('실험실 아이템 경로는 Neople을 부르면 안 된다')
+const unusedProvider = async () =>
+  assert.fail('실험실 아이템 경로는 카드 상세 말고 Neople을 부르면 안 된다')
+const noCatalog: FetchCatalog = async () => new Map()
 
 const CHECKED_AT = '2026-11-26T00:00:00.000Z'
 
@@ -55,7 +58,8 @@ async function startApi(
   t: test.TestContext,
   rows: LabItemPriceRow[],
   readCurrencyIcon: LabItemRepository['readCurrencyIcon'] = async () => null,
-  readItemIcon: LabItemRepository['readItemIcon'] = async () => null
+  readItemIcon: LabItemRepository['readItemIcon'] = async () => null,
+  fetchCatalog: FetchCatalog = noCatalog
 ) {
   const labItems: LabItemRepository = {
     readLabItemPrices: async () => rows,
@@ -64,7 +68,7 @@ async function startApi(
   }
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
-    details: { fetchDetails: unusedProvider, catalog: new CatalogService(unusedProvider) },
+    details: { fetchDetails: unusedProvider, catalog: new CatalogService(fetchCatalog) },
     todayGrade: { fetchShopGrade: unusedProvider },
     labItems,
     writeAccessLog: () => undefined
@@ -77,8 +81,12 @@ async function startApi(
   return (path: string) => fetch(`${origin}${path}`)
 }
 
-async function requestLabItems(t: test.TestContext, rows: LabItemPriceRow[]) {
-  const request = await startApi(t, rows)
+async function requestLabItems(
+  t: test.TestContext,
+  rows: LabItemPriceRow[],
+  fetchCatalog: FetchCatalog = noCatalog
+) {
+  const request = await startApi(t, rows, undefined, undefined, fetchCatalog)
 
   return request('/lab/items')
 }
@@ -133,6 +141,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: 900,
             checkedAt: CHECKED_AT,
             cost: null
@@ -144,6 +153,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: 10_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -155,6 +165,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: 3_000_000_000,
             checkedAt: CHECKED_AT,
             cost: null
@@ -166,6 +177,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -177,6 +189,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: null
@@ -195,6 +208,7 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: null,
             checkedAt: null,
             cost: null
@@ -264,6 +278,7 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
             iconPath: null,
             description: null,
             tooltip: null,
+            fame: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
             cost: {
@@ -484,4 +499,114 @@ test('배럭 묶음은 같은 부위와 역할에서 종결, 준종결 뒤에 �
       ['TITLE', 'all', '배럭']
     ]
   )
+})
+
+// Neople 카드 상세의 cardInfo 모양이고, 마지막 단계의 모험가 명성이 카드 명성이다.
+function cardPayload(stageFames: number[]) {
+  return {
+    itemName: '합성 카드',
+    cardInfo: {
+      slots: [{ slotName: '무기' }],
+      enchant: stageFames.map((fame, upgrade) => ({
+        upgrade,
+        status: [{ name: '모험가 명성', value: fame }]
+      }))
+    }
+  }
+}
+
+function cardRow(itemName: string, itemId: string, unitPrice: number | null): LabItemPriceRow {
+  return { ...row('WEAPON', 'dealer', '종결', itemName, unitPrice), itemId }
+}
+
+const fameOfCard: Readonly<Record<string, number[]>> = {
+  'card-high': [200, 232],
+  'card-high-cheap': [232],
+  'card-low': [196, 210]
+}
+
+const cardCatalog: FetchCatalog = async (itemIds) =>
+  new Map(
+    itemIds.flatMap((itemId) => {
+      const fames = fameOfCard[itemId]
+
+      if (fames === undefined) {
+        return []
+      }
+
+      return [[itemId, cardPayload(fames)] as const]
+    })
+  )
+
+test('마법부여 카드는 소유자 명성을 Neople 카드 명성보다 먼저 쓰고, 묶음은 명성이 높은 순, 같은 명성은 경매장 가격이 낮은 순, 재화 비용, 가격 없음 순이고 명성이 없는 카드는 뒤에 둔다', async (t) => {
+  const exchanged: LabItemPriceRow = {
+    ...row('WEAPON', 'dealer', '종결', '합성 교환 카드', null, false),
+    itemId: 'card-low',
+    cost: {
+      currencyId: 1,
+      currencyName: '합성 재화',
+      currencyDescription: null,
+      currencyUpdatedAt: new Date(CHECKED_AT),
+      count: 10
+    },
+    detail: {
+      description: null,
+      itemRarity: null,
+      iconUpdatedAt: null,
+      itemTypeDetail: null,
+      availableLevel: null,
+      fame: 232,
+      card: null
+    }
+  }
+  const response = await requestLabItems(
+    t,
+    [
+      cardRow('합성 낮은 명성', 'card-low', 100),
+      cardRow('합성 명성 없음', 'card-missing', 50),
+      cardRow('합성 비싼 카드', 'card-high', 9_000),
+      exchanged,
+      cardRow('합성 싼 카드', 'card-high-cheap', 1_000),
+      { ...row('WEAPON', 'dealer', '종결', '합성 가격 없음', null), itemId: 'card-high' },
+      row('TITLE', 'all', '종결', '합성 칭호 비싼', 900),
+      row('TITLE', 'all', '종결', '합성 칭호 싼', 100)
+    ],
+    cardCatalog
+  )
+
+  const { groups } = (await response.json()) as {
+    groups: { items: { itemName: string; fame: number | null }[] }[]
+  }
+  const items = groups.map(({ items }) => items.map(({ itemName, fame }) => [itemName, fame]))
+
+  assert.deepEqual(items, [
+    [
+      ['합성 싼 카드', 232],
+      ['합성 비싼 카드', 232],
+      ['합성 교환 카드', 232],
+      ['합성 가격 없음', 232],
+      ['합성 낮은 명성', 210],
+      ['합성 명성 없음', null]
+    ],
+    [
+      ['합성 칭호 싼', null],
+      ['합성 칭호 비싼', null]
+    ]
+  ])
+})
+
+test('카드가 한 번에 읽는 상한보다 많아도 모든 카드의 명성을 낸다', async (t) => {
+  const itemIds = Array.from({ length: 130 }, (_, index) => `card-${index}`)
+  const catalog: FetchCatalog = async (ids) => new Map(ids.map((id) => [id, cardPayload([210])]))
+  const response = await requestLabItems(
+    t,
+    itemIds.map((itemId) => cardRow(`합성 카드 ${itemId}`, itemId, 100)),
+    catalog
+  )
+
+  const { groups } = (await response.json()) as { groups: { items: { fame: number | null }[] }[] }
+  const fames = groups.flatMap(({ items }) => items.map(({ fame }) => fame))
+
+  assert.equal(fames.length, 130)
+  assert.ok(fames.every((fame) => fame === 210))
 })
