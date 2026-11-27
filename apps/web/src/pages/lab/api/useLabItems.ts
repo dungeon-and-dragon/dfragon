@@ -29,7 +29,7 @@ function browserApiUrl(path: string | null): string | null {
   return `${BROWSER_API_PATH}${path}`
 }
 
-// 운영 화면에서 넣은 tooltip 값이다. 이 필드를 내기 전의 API 응답은 tooltip이 없는 것으로 읽는다.
+// 이 필드를 내기 전의 API 응답은 tooltip이 없는 것으로 읽는다.
 const tooltipSchema = z.object({
   typeDetail: z.string().nullable(),
   availableLevel: z.number().int().nullable(),

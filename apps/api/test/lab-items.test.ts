@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import type { LabItemPriceRow } from '@dfragon/database'
+import type { DatabaseClient, LabItemPriceDetail, LabItemPriceRow } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { FetchCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
+import { DatabaseLabItemRepository } from '../src/infrastructure/database/lab-items.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
 
 const unusedProvider = async () =>
@@ -11,6 +12,15 @@ const unusedProvider = async () =>
 const noCatalog: FetchCatalog = async () => new Map()
 
 const CHECKED_AT = '2026-11-26T00:00:00.000Z'
+const EMPTY_DETAIL: LabItemPriceDetail = {
+  description: null,
+  itemRarity: null,
+  iconUpdatedAt: null,
+  itemTypeDetail: null,
+  availableLevel: null,
+  fame: null,
+  card: null
+}
 
 // 아이템 이름은 모두 지어낸 이름이다.
 function row(
@@ -433,6 +443,78 @@ test('소유자가 넣은 tooltip 값은 아이템 상세와 같은 이름과 �
   ])
 })
 
+test('후보는 비어 있는 등급, 아이콘, 설명을 채우고 tooltip은 소유자 상세가 없을 때 후보 상세로 만든다', async (t) => {
+  const candidate: LabItemPriceDetail = {
+    itemRarity: '유니크',
+    iconUpdatedAt: new Date(1000),
+    description: '합성 후보 설명',
+    itemTypeDetail: '카드',
+    availableLevel: 115,
+    fame: 210,
+    card: {
+      slots: ['무기'],
+      enchants: [{ upgrade: 0, status: [{ name: '힘', value: '90' }] }]
+    }
+  }
+  const response = await requestLabItems(t, [
+    { ...row('WEAPON', 'dealer', '종결', 'candidate', 300), candidate },
+    {
+      ...row('WEAPON', 'dealer', '종결', 'owner', 200),
+      candidate,
+      detail: {
+        ...EMPTY_DETAIL,
+        itemRarity: '태초',
+        iconUpdatedAt: new Date(2000),
+        description: '합성 소유자 설명',
+        itemTypeDetail: '보주',
+        availableLevel: 110,
+        fame: 220
+      }
+    },
+    {
+      ...row('WEAPON', 'dealer', '종결', 'partial', 100),
+      candidate,
+      detail: { ...EMPTY_DETAIL, description: '합성 소유자 설명' }
+    }
+  ])
+  const { groups } = (await response.json()) as { groups: { items: Record<string, unknown>[] }[] }
+  const looks = Object.fromEntries(
+    groups[0]!.items.map(({ itemName, itemRarity, iconPath, description, tooltip }) => [
+      String(itemName),
+      { itemRarity, iconPath, description, tooltip }
+    ])
+  )
+
+  assert.deepEqual(looks, {
+    candidate: {
+      itemRarity: '유니크',
+      iconPath: '/lab/item-icon?itemName=candidate&v=1000',
+      description: '합성 후보 설명',
+      tooltip: {
+        typeDetail: '카드',
+        availableLevel: 115,
+        fame: 210,
+        card: {
+          slots: ['무기'],
+          enchants: [{ upgrade: 0, status: [{ name: '힘', value: '90' }], reinforceSkill: [] }]
+        }
+      }
+    },
+    owner: {
+      itemRarity: '태초',
+      iconPath: '/lab/item-icon?itemName=owner&v=2000',
+      description: '합성 소유자 설명',
+      tooltip: { typeDetail: '보주', availableLevel: 110, fame: 220, card: null }
+    },
+    partial: {
+      itemRarity: '유니크',
+      iconPath: '/lab/item-icon?itemName=partial&v=1000',
+      description: '합성 소유자 설명',
+      tooltip: { typeDetail: null, availableLevel: null, fame: null, card: null }
+    }
+  })
+})
+
 test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없는 이름과 빠진 이름은 404로 답한다', async (t) => {
   // 합성 바이트다.
   const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 9])
@@ -458,6 +540,45 @@ test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없
   assert.equal((await request('/lab/item-icon?itemName=%ED%95%A9%EC%84%B1')).status, 404)
   assert.equal((await request('/lab/item-icon')).status, 404)
   assert.deepEqual(requested, [itemName, '합성'])
+})
+
+test('아이템 아이콘은 소유자 아이콘이 비어 있을 때 후보 아이콘을 낸다', async (t) => {
+  type IconQuery = { where: { itemName: string } }
+
+  const ownerIcon = { icon: new Uint8Array([1]), iconContentType: 'image/png' }
+  const candidateIcon = { icon: new Uint8Array([2]), iconContentType: 'image/webp' }
+  const otherCandidateIcon = { icon: new Uint8Array([3]), iconContentType: 'image/webp' }
+  const ownerIcons = new Map<string, { icon: Uint8Array | null; iconContentType: string | null }>([
+    ['owner', ownerIcon],
+    ['candidate', { icon: null, iconContentType: null }]
+  ])
+  const candidateIcons = new Map([
+    ['owner', otherCandidateIcon],
+    ['candidate', candidateIcon]
+  ])
+  const client = {
+    labItemDetail: {
+      findUnique: async ({ where }: IconQuery) => ownerIcons.get(where.itemName) ?? null
+    },
+    labCandidate: {
+      findUnique: async ({ where }: IconQuery) => candidateIcons.get(where.itemName) ?? null
+    }
+  } as unknown as DatabaseClient
+  const repository = new DatabaseLabItemRepository(client)
+  const request = await startApi(t, [], undefined, (itemName) => repository.readItemIcon(itemName))
+
+  const candidate = await request('/lab/item-icon?itemName=candidate&v=1000')
+  const owner = await request('/lab/item-icon?itemName=owner&v=2000')
+  const missing = await request('/lab/item-icon?itemName=missing&v=1000')
+
+  assert.equal(candidate.status, 200)
+  assert.equal(candidate.headers.get('content-type'), 'image/webp')
+  assert.equal(candidate.headers.get('cache-control'), 'public, max-age=31536000, immutable')
+  assert.deepEqual(new Uint8Array(await candidate.arrayBuffer()), new Uint8Array([2]))
+  assert.equal(owner.status, 200)
+  assert.equal(owner.headers.get('content-type'), 'image/png')
+  assert.deepEqual(new Uint8Array(await owner.arrayBuffer()), new Uint8Array([1]))
+  assert.equal(missing.status, 404)
 })
 
 test('벨트 버퍼 준종결 묶음도 아이템이 있으면 응답에 낸다', async (t) => {
@@ -540,7 +661,7 @@ const cardCatalog: FetchCatalog = async (itemIds) =>
     })
   )
 
-test('마법부여 카드는 소유자 명성을 Neople 카드 명성보다 먼저 쓰고, 묶음은 명성이 높은 순, 같은 명성은 경매장 가격이 낮은 순, 재화 비용, 가격 없음 순이고 명성이 없는 카드는 뒤에 둔다', async (t) => {
+test('마법부여 명성은 소유자, Neople 카드, 후보 순으로 쓰고, 같은 명성에서는 경매장 가격이 낮은 순, 재화 비용, 가격 없음 순으로 정렬한다', async (t) => {
   const exchanged: LabItemPriceRow = {
     ...row('WEAPON', 'dealer', '종결', '합성 교환 카드', null, false),
     itemId: 'card-low',
@@ -551,21 +672,25 @@ test('마법부여 카드는 소유자 명성을 Neople 카드 명성보다 먼�
       currencyUpdatedAt: new Date(CHECKED_AT),
       count: 10
     },
-    detail: {
-      description: null,
-      itemRarity: null,
-      iconUpdatedAt: null,
-      itemTypeDetail: null,
-      availableLevel: null,
-      fame: 232,
-      card: null
-    }
+    detail: { ...EMPTY_DETAIL, fame: 232 },
+    candidate: { ...EMPTY_DETAIL, fame: 300 }
   }
   const response = await requestLabItems(
     t,
     [
-      cardRow('합성 낮은 명성', 'card-low', 100),
+      {
+        ...cardRow('합성 낮은 명성', 'card-low', 100),
+        candidate: { ...EMPTY_DETAIL, fame: 300 }
+      },
       cardRow('합성 명성 없음', 'card-missing', 50),
+      {
+        ...cardRow('합성 후보 카드', 'candidate-only', 500),
+        candidate: { ...EMPTY_DETAIL, fame: 205 }
+      },
+      {
+        ...row('WEAPON', 'dealer', '종결', '합성 후보 보주', null, false),
+        candidate: { ...EMPTY_DETAIL, fame: 200 }
+      },
       cardRow('합성 비싼 카드', 'card-high', 9_000),
       exchanged,
       cardRow('합성 싼 카드', 'card-high-cheap', 1_000),
@@ -588,6 +713,8 @@ test('마법부여 카드는 소유자 명성을 Neople 카드 명성보다 먼�
       ['합성 교환 카드', 232],
       ['합성 가격 없음', 232],
       ['합성 낮은 명성', 210],
+      ['합성 후보 카드', 205],
+      ['합성 후보 보주', 200],
       ['합성 명성 없음', null]
     ],
     [
@@ -595,6 +722,44 @@ test('마법부여 카드는 소유자 명성을 Neople 카드 명성보다 먼�
       ['합성 칭호 비싼', null]
     ]
   ])
+})
+
+test('칭호, 크리쳐, 오라는 소유자 명성을 먼저 쓰고 칭호 묶음은 후보 명성이 높은 순으로 정렬한다', async (t) => {
+  const response = await requestLabItems(t, [
+    {
+      ...row('TITLE', 'all', '종결', '합성 저가 칭호', 100),
+      candidate: { ...EMPTY_DETAIL, fame: 700 }
+    },
+    {
+      ...row('TITLE', 'all', '종결', '합성 고가 칭호', 900),
+      candidate: { ...EMPTY_DETAIL, fame: 900 }
+    },
+    {
+      ...row('CREATURE', 'all', '종결', '합성 크리쳐', 500),
+      candidate: { ...EMPTY_DETAIL, fame: 750 },
+      detail: { ...EMPTY_DETAIL, fame: 800 }
+    },
+    {
+      ...row('AURA', 'all', '종결', '합성 오라', 600),
+      candidate: { ...EMPTY_DETAIL, fame: 550 },
+      detail: EMPTY_DETAIL
+    }
+  ])
+  const { groups } = (await response.json()) as {
+    groups: { items: { itemName: string; fame: number | null }[] }[]
+  }
+
+  assert.deepEqual(
+    groups.map(({ items }) => items.map(({ itemName, fame }) => [itemName, fame])),
+    [
+      [
+        ['합성 고가 칭호', 900],
+        ['합성 저가 칭호', 700]
+      ],
+      [['합성 크리쳐', 800]],
+      [['합성 오라', 550]]
+    ]
+  )
 })
 
 test('카드가 한 번에 읽는 상한보다 많아도 모든 카드의 명성을 낸다', async (t) => {
