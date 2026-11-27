@@ -230,8 +230,11 @@ function candidatesApi(): FakeOpsApi {
     labCandidate({
       itemName: '합성 칭호 플래티넘[80Lv]',
       fame: 1123,
+      availableLevel: 1,
+      itemTypeDetail: '칭호',
       options: TITLE_OPTIONS,
       buffLines: TITLE_BUFF,
+      description: '<합성 왕국>',
       unitPrice: 2_150_000_000,
       previousPrice: previous(2_063_000_000),
       checkedAt,
@@ -303,6 +306,8 @@ function candidatesApi(): FakeOpsApi {
       categories: ['JACKET', 'PANTS'],
       roles: ['dealer'],
       fame: 232,
+      availableLevel: 1,
+      itemTypeDetail: '전문직업 재료',
       card: {
         slots: ['상의', '하의'],
         enchants: [
