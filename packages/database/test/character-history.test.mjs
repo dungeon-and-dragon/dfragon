@@ -6,8 +6,10 @@ import {
   readCharacterHistory,
   readCharacterHistorySnapshot,
   readCharacterSectionHistory,
+  readLoweredHistoryCharacters,
   recordCharacter,
-  recordCharacterHistory
+  recordCharacterHistory,
+  trimLoweredCharacterHistory
 } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_CHARACTER_HISTORY_PORT
@@ -430,6 +432,7 @@ test('두 시각 사이의 T로 읽으면 섹션마다 T 이전의 최신 행과
 })
 
 const strippedEquipment = { equipment: [] }
+const changedAvatar = { avatar: [{ slotId: 'HEADGEAR' }] }
 const upgradedEquipment = { equipment: [{ slotId: 'WEAPON', itemId: 'item-a', reinforce: 13 }] }
 const scoreOf = (score, scoreEngine = engine) => ({
   kind: 'equipment',
@@ -521,6 +524,173 @@ test('엔진 버전이나 근사 방식이 직전 점수와 다르면 낮은 점
       { observedAt: nov17At0900, score: 1500 },
       { observedAt: nov17At1000, score: 1200 }
     ]
+  )
+})
+
+// 낮아진 관측을 건너뛰기 전의 저장 함수가 남겼을 행이다. 그 함수처럼 바뀐 값만 받는다.
+async function insertLegacyRows(
+  key,
+  observedAt,
+  { basic: basicRow, lastSeenAt = observedAt, sections: sectionRows = {}, score }
+) {
+  if (basicRow !== undefined) {
+    await client.characterBasicHistory.create({
+      data: { ...key, observedAt, lastSeenAt, ...basicRow }
+    })
+  }
+
+  for (const [section, data] of Object.entries(sectionRows)) {
+    const json = JSON.stringify(data)
+    await client.$executeRaw`
+      INSERT INTO "character_section_history"
+        ("server_id", "character_id", "section", "observed_at", "content_hash", "data")
+      VALUES (${key.serverId}, ${key.characterId}, ${section}, ${observedAt},
+        md5(${json}::jsonb::text)::uuid, ${json}::jsonb)`
+  }
+
+  if (score !== undefined) {
+    const storedEngine = await client.scoreEngine.upsert({
+      where: { package_rulesRev_bundleId: score.engine },
+      create: score.engine,
+      update: {}
+    })
+
+    await client.characterScoreHistory.create({
+      data: { ...key, observedAt, kind: score.kind, score: score.score, engineId: storedEngine.id }
+    })
+  }
+}
+
+async function readRows(key) {
+  const { basics, scores } = await readCharacterHistory(client, key)
+  const sectionRows = await readCharacterSectionHistory(client, key, Object.keys(sections))
+
+  return {
+    basics: basics.map(({ observedAt, fame }) => ({ observedAt, fame })),
+    lastSeenAt: basics.at(-1).lastSeenAt,
+    scores,
+    sections: sectionRows
+  }
+}
+
+test('장비를 벗었다 다시 낀 옛 이력을 정리하면 낮아진 시점이 사라지고, 같은 관측을 지금 규칙으로 저장한 이력과 같아진다', {
+  skip: port === undefined
+}, async () => {
+  const stripped = { ...basic, fame: 13100 }
+  const raised = { ...basic, fame: 99000 }
+  const observations = [
+    [nov10At2200, {}],
+    [
+      nov12At2200,
+      {
+        basic: stripped,
+        sections: { ...sections, equipment: strippedEquipment },
+        score: scoreOf(0)
+      }
+    ],
+    [
+      nov14At2200,
+      {
+        basic: stripped,
+        sections: { ...sections, equipment: strippedEquipment, avatar: changedAvatar },
+        score: scoreOf(0)
+      }
+    ],
+    [nov16At2200, { sections: { ...sections, avatar: changedAvatar } }],
+    [
+      nov17At0900,
+      {
+        basic: raised,
+        sections: { ...sections, equipment: upgradedEquipment, avatar: changedAvatar },
+        score: scoreOf(1800)
+      }
+    ]
+  ]
+  const recorded = await createCharacter('history-trim-recorded')
+
+  for (const [observedAt, overrides] of observations) {
+    await recordCharacterHistory(client, historyOf(recorded, observedAt, overrides))
+  }
+
+  const legacy = await createCharacter('history-trim-legacy')
+  await insertLegacyRows(legacy, nov10At2200, { basic, sections, score: scoreOf(1741) })
+  await insertLegacyRows(legacy, nov12At2200, {
+    basic: stripped,
+    lastSeenAt: nov14At2200,
+    sections: { equipment: strippedEquipment },
+    score: scoreOf(0)
+  })
+  await insertLegacyRows(legacy, nov14At2200, { sections: { avatar: changedAvatar } })
+  await insertLegacyRows(legacy, nov16At2200, {
+    basic,
+    sections: { equipment: sections.equipment },
+    score: scoreOf(1741)
+  })
+  await insertLegacyRows(legacy, nov17At0900, {
+    basic: raised,
+    sections: { equipment: upgradedEquipment },
+    score: scoreOf(1800)
+  })
+
+  assert.equal(await trimLoweredCharacterHistory(client, legacy), true)
+
+  const trimmed = await readRows(legacy)
+  assert.deepEqual(trimmed.basics, [
+    { observedAt: nov10At2200, fame: basic.fame },
+    { observedAt: nov17At0900, fame: 99000 }
+  ])
+  assert.deepEqual(
+    trimmed.scores.map(({ observedAt, score }) => ({ observedAt, score })),
+    [
+      { observedAt: nov10At2200, score: 1741 },
+      { observedAt: nov17At0900, score: 1800 }
+    ]
+  )
+  assert.deepEqual(
+    trimmed.sections.filter(({ section }) => section === 'equipment' || section === 'avatar'),
+    [
+      { section: 'avatar', observedAt: nov10At2200, data: sections.avatar },
+      { section: 'equipment', observedAt: nov10At2200, data: sections.equipment },
+      // 벗은 동안 바꾼 아바타는 다시 낀 시각에도 그대로였으므로 그 시각의 변경으로 남는다.
+      { section: 'avatar', observedAt: nov16At2200, data: changedAvatar },
+      { section: 'equipment', observedAt: nov17At0900, data: upgradedEquipment }
+    ]
+  )
+  assert.deepEqual(trimmed, await readRows(recorded))
+})
+
+test('끝까지 낮은 채인 옛 이력은 낮아진 뒤의 행을 모두 지우고, 다시 정리하면 바꾸지 않는다', {
+  skip: port === undefined
+}, async () => {
+  const key = await createCharacter('history-trim-tail')
+  const untouched = await createCharacter('history-trim-untouched')
+  await recordCharacterHistory(client, historyOf(untouched, nov10At2200))
+  await insertLegacyRows(key, nov10At2200, { basic, sections, score: scoreOf(1741) })
+  await insertLegacyRows(key, nov12At2200, {
+    basic: { ...basic, fame: 13100 },
+    lastSeenAt: nov14At2200,
+    sections: { equipment: strippedEquipment },
+    score: scoreOf(0)
+  })
+  await insertLegacyRows(key, nov14At2200, { sections: { avatar: changedAvatar } })
+  const lowered = await readLoweredHistoryCharacters(client)
+  const loweredIds = lowered.map(({ characterId }) => characterId)
+  assert.equal(loweredIds.includes(key.characterId), true)
+  assert.equal(loweredIds.includes(untouched.characterId), false)
+
+  assert.equal(await trimLoweredCharacterHistory(client, key), true)
+
+  assert.deepEqual(await countRows(key), { basic: 1, section: 10, score: 1 })
+  const { basics } = await readCharacterHistory(client, key)
+  assert.deepEqual(
+    basics.map(({ observedAt, lastSeenAt, fame }) => ({ observedAt, lastSeenAt, fame })),
+    [{ observedAt: nov10At2200, lastSeenAt: nov14At2200, fame: basic.fame }]
+  )
+  assert.equal(await trimLoweredCharacterHistory(client, key), false)
+  const remaining = await readLoweredHistoryCharacters(client)
+  assert.equal(
+    remaining.some(({ characterId }) => characterId === key.characterId),
+    false
   )
 })
 
