@@ -3,7 +3,7 @@ import {
   type EnchantGradeRole,
   type EnchantGradeSlot
 } from '@dfragon/lib/enchant-grades'
-import { LAB_ITEM_TIERS, type LabItemTier } from '@dfragon/lib/lab-items'
+import { LAB_ITEM_TIERS, type LabItemTier, labItemBaseName } from '@dfragon/lib/lab-items'
 import { Button, Select, StatusChip, type StatusChipTone, Tabs } from '@dfragon/ui'
 import { Fragment, useState } from 'react'
 import type { LabCandidateQuery } from '#ops-api/ops-client'
@@ -42,6 +42,7 @@ import {
   groupsToSave,
   pendingTierChanges,
   savedCostOf,
+  isSavedAs,
   savedTierOf,
   type TierChanges,
   type TierSlot,
@@ -63,6 +64,9 @@ const KIND_TABS: readonly { kind: LabCandidateKind; label: string }[] = [
 ]
 
 const ENCHANT_ROLES: readonly EnchantGradeRole[] = ['dealer', 'buffer']
+
+// 운영 app이 플래티넘과 레벨 변형을 기본 이름 한 줄로 묶어 주는 종류다.
+const VARIANT_GROUPED_KINDS: readonly LabCandidateKind[] = ['TITLE', 'CREATURE']
 
 const SLOT_ITEMS = ENCHANT_GRADE_SLOTS.map((value) => ({ value, label: CATEGORY_NAMES[value] }))
 const ROLE_ITEMS = ENCHANT_ROLES.map((value) => ({ value, label: ROLE_NAMES[value] }))
@@ -596,7 +600,9 @@ function CandidateTable({
                   onTierChange={onTierChange}
                   onExclude={onExclude}
                 />
-                {open && <PriceHistoryRow itemName={itemName} columns={COLUMN_COUNT} />}
+                {open && (
+                  <PriceHistoryRow itemName={candidate.priceItemName} columns={COLUMN_COUNT} />
+                )}
               </Fragment>
             )
           })}
@@ -642,7 +648,14 @@ export function LabCandidatePanel(): React.JSX.Element {
   }
 
   function isSelected(itemName: string): boolean {
-    return groups.some(({ items }) => items.some((item) => item.itemName === itemName))
+    const grouped = VARIANT_GROUPED_KINDS.includes(kind)
+
+    return groups.some(({ items }) =>
+      items.some(
+        (item) =>
+          item.itemName === itemName || (grouped && labItemBaseName(item.itemName) === itemName)
+      )
+    )
   }
 
   function exclude(itemName: string): void {
@@ -667,7 +680,7 @@ export function LabCandidatePanel(): React.JSX.Element {
     const id = tierChangeIdOf(slot, itemName)
     const next = new Map(changes)
 
-    if (tier === savedTierOf(groups, slot, itemName)) {
+    if (isSavedAs(groups, slot, itemName, tier)) {
       next.delete(id)
     } else {
       const cost = changeCostOf(itemName)
