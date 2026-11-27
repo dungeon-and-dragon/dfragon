@@ -21,7 +21,7 @@ export type EnchantGradeRole = 'dealer' | 'buffer'
 
 export type EnchantGradeTier = '종결' | '준종결'
 
-interface EnchantStatus {
+export interface EnchantStatus {
   readonly name: string
   readonly value: number | string
 }
@@ -31,15 +31,18 @@ interface EnchantSkill {
   readonly value: number | string
 }
 
-interface EnchantReinforceSkill {
+export interface EnchantReinforceSkill {
   readonly jobName: string
   readonly skills: readonly EnchantSkill[]
 }
 
-export interface EnchantGrade {
-  readonly id: string
+export interface EnchantEntry {
   readonly status: readonly EnchantStatus[]
   readonly reinforceSkill: readonly EnchantReinforceSkill[]
+}
+
+export interface EnchantGrade extends EnchantEntry {
+  readonly id: string
   readonly fame: number
   readonly cardName: string
   readonly cardId: number
@@ -83,6 +86,13 @@ export interface EnchantGradeOption {
   readonly id: string
   readonly display: readonly EnchantDisplayStatus[]
   readonly members: readonly EnchantGrade[]
+}
+
+/** 표시가 같은 항목의 묶음이다. key는 표시와 직업별 스킬 강화가 같으면 같은 문자열이다. */
+export interface EnchantEntryGroup<T extends EnchantEntry> {
+  readonly key: string
+  readonly display: readonly EnchantDisplayStatus[]
+  readonly members: readonly T[]
 }
 
 export type EnchantGradeOptionTiers = Readonly<
@@ -173,8 +183,8 @@ export function displayStatusOf(grade: Pick<EnchantGrade, 'status'>): EnchantDis
   return display
 }
 
-function optionKey(display: readonly EnchantDisplayStatus[], grade: EnchantGrade): string {
-  const skills = grade.reinforceSkill.map((job) => {
+function optionKey(display: readonly EnchantDisplayStatus[], entry: EnchantEntry): string {
+  const skills = entry.reinforceSkill.map((job) => {
     const jobSkills = job.skills.map(({ name, value }) => {
       const { amount } = amountOf(value)
 
@@ -190,22 +200,29 @@ function optionKey(display: readonly EnchantDisplayStatus[], grade: EnchantGrade
   return JSON.stringify([sorted, skills])
 }
 
-function optionsOf(grades: readonly EnchantGrade[]): EnchantGradeOption[] {
-  const options = new Map<string, { display: EnchantDisplayStatus[]; members: EnchantGrade[] }>()
+/** 처음 나온 순서대로 묶고, 묶음 안의 항목도 받은 순서를 지킨다. */
+export function groupEnchantEntries<T extends EnchantEntry>(
+  entries: readonly T[]
+): EnchantEntryGroup<T>[] {
+  const groups = new Map<string, { key: string; display: EnchantDisplayStatus[]; members: T[] }>()
 
-  for (const grade of grades) {
-    const display = displayStatusOf(grade)
-    const key = optionKey(display, grade)
-    const option = options.get(key)
+  for (const entry of entries) {
+    const display = displayStatusOf(entry)
+    const key = optionKey(display, entry)
+    const group = groups.get(key)
 
-    if (option === undefined) {
-      options.set(key, { display, members: [grade] })
+    if (group === undefined) {
+      groups.set(key, { key, display, members: [entry] })
     } else {
-      option.members.push(grade)
+      group.members.push(entry)
     }
   }
 
-  return [...options.values()].map(({ display, members }) => ({
+  return [...groups.values()]
+}
+
+function optionsOf(grades: readonly EnchantGrade[]): EnchantGradeOption[] {
+  return groupEnchantEntries(grades).map(({ display, members }) => ({
     id: members[0]!.id,
     display,
     members
@@ -241,20 +258,24 @@ export function findEnchantOption(
   return option
 }
 
-function hasAllMainStats(grade: EnchantGrade): boolean {
-  return MAIN_STATS.every((name) => grade.status.some((status) => status.name === name))
+function hasAllMainStats(entry: EnchantEntry): boolean {
+  return MAIN_STATS.every((name) => entry.status.some((status) => status.name === name))
+}
+
+export interface EnchantMembers<T extends EnchantEntry> {
+  readonly members: readonly T[]
 }
 
 /** 네 주스탯을 모두 올리는 항목이 없는 여러 항목 묶음만 캐릭터의 주스탯으로 고른다. */
-export function optionNeedsMainStat(option: EnchantGradeOption): boolean {
+export function optionNeedsMainStat(option: EnchantMembers<EnchantEntry>): boolean {
   return option.members.length > 1 && !option.members.some(hasAllMainStats)
 }
 
 /** 네 주스탯을 모두 올리는 항목, 주스탯을 올리는 항목, 첫 항목 순으로 고른다. */
-export function chooseEnchantGrade(
-  option: EnchantGradeOption,
+export function chooseEnchantGrade<T extends EnchantEntry>(
+  option: EnchantMembers<T>,
   mainStat: EnchantMainStat | null
-): EnchantGrade {
+): T {
   const allStats = option.members.find(hasAllMainStats)
 
   if (allStats !== undefined) {
