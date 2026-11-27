@@ -229,7 +229,7 @@ it('표 위에 제목 없이 한 줄 헤더에 세트 열과 줄인 레이드 �
     ['#', '캐릭터', '세트', '명성', '점수', '디레지에', '미카엘라', '다 레기온']
   ])
   const [first, second] = bodyRows()
-  expect(first.slice(2)).toEqual(['합성 장비 세트합성 서약', '89,999', '버프4,120,000', '', '', ''])
+  expect(first.slice(2)).toEqual(['합성 장비 세트합성 서약', '89,999', '4,120,000', '', '', ''])
   expect(second.slice(2)).toEqual(['-', '89,998', '-', '', '', ''])
   expect(clearMarks()).toEqual([
     [false, true, true],

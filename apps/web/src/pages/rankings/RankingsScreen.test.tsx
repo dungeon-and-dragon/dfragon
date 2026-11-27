@@ -258,10 +258,10 @@ it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 �
     '카인합성1합성 전직99,9991,388,832모험단1',
     '황금향용투 : 용제 강림',
     '99,999',
-    '장비1,388,832',
+    '1,388,832',
     '모험단1'
   ])
-  expect(second?.[3]).toBe('버프4,120,000')
+  expect(second?.[3]).toBe('4,120,000')
   expect(fourth).toEqual(['카인합성4합성 직업99,996-모험단4', '-', '99,996', '-', '모험단4'])
   expect(bodyRows()[0].querySelector('a')?.getAttribute('href')).toBe('/c/cain/character-1')
 })

@@ -116,7 +116,7 @@ it('제목 상자에 길드 이름과 길드원 수만 두고 열은 순번, 캐
     '1',
     '카인합성1합성 전직89,9991,234,567모험단1',
     '89,999',
-    '장비1,234,567',
+    '1,234,567',
     '모험단1'
   ])
   expect(
@@ -133,7 +133,7 @@ it('근사값으로 저장한 점수는 ≈를 붙여 보이고 근사 방법을
   await render(guildOf(1, { members: [{ ...member(1), score }] }))
 
   const cells = [...bodyRows()[0].querySelectorAll('td')]
-  expect(cells[3]?.textContent).toBe('버프≈4,120,000')
+  expect(cells[3]?.textContent).toBe('≈4,120,000')
   expect(cells[3]?.querySelector('[title]')?.getAttribute('title')).toBe(
     '근사값. 판별하지 못한 버프 강화 아이템을 빼고 계산한 값이라 게임 버프 점수와 1% 넘게 다를 수 있습니다.'
   )

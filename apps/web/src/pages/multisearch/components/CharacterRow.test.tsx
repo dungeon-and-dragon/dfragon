@@ -170,7 +170,7 @@ it('한 행은 자리부터 스냅샷까지 아홉 열을 채운다', async () =
   expect(cell('길드')?.textContent).toBe('찾은길드')
   expect(cell('직업')?.textContent).toBe('웨펀마스터')
   expect(cell('명성')?.textContent).toBe('125,850')
-  expect(visibleText(cell('점수')!)).toBe('장비330,556')
+  expect(visibleText(cell('점수')!)).toBe('330,556')
   expect(cell('스냅샷')?.textContent).toBe('1')
 })
 
@@ -392,17 +392,16 @@ it('명성 숫자는 명성 색이고, 상위와 랭커는 이름 옆 배지와 
   expect(toneClassesOf(cell('명성')!)).toEqual(['fame'])
 })
 
-it('점수 열은 딜러 장비 라벨과 파란 숫자, 버퍼 버프 라벨과 초록 숫자이고 역할을 모르면 기본색이다', async () => {
+it('점수 열은 종류 라벨 없이 딜러는 파란 숫자, 버퍼는 초록 숫자이고 역할을 모르면 기본색이다', async () => {
   const score = async (card: CardCharacter['card']): Promise<[string, string[]]> => {
     await render({ state: 'success', character: { ...found, card } })
-    const value = cell('점수')!.lastElementChild!
 
-    return [cell('점수')!.firstElementChild!.textContent!, toneClassesOf(value)]
+    return [visibleText(cell('점수')!), toneClassesOf(cell('점수')!.lastElementChild!)]
   }
 
-  expect(await score(dealerCard)).toEqual(['장비', ['dealer']])
-  expect(await score(bufferCard)).toEqual(['버프', ['buffer']])
-  expect(await score({ ...dealerCard, role: null })).toEqual(['장비', []])
+  expect(await score(dealerCard)).toEqual(['330,556', ['dealer']])
+  expect(await score(bufferCard)).toEqual(['55,358', ['buffer']])
+  expect(await score({ ...dealerCard, role: null })).toEqual(['330,556', []])
 })
 
 it('근사값 점수는 ≈를 붙이고 이유를 마우스 설명으로 전한다', async () => {
@@ -445,7 +444,7 @@ it('검색 응답에 없는 길드, 명성, 점수는 -로 보이고 계산하�
 
   expect(cell('길드')?.textContent).toBe('-')
   expect(cell('명성')?.textContent).toBe('-')
-  expect(visibleText(cell('점수')!)).toBe('장비-')
+  expect(visibleText(cell('점수')!)).toBe('-')
   expect(cell('점수')!.lastElementChild!.getAttribute('title')).toBe(
     '계산하지 못함, 장비 정보 부족'
   )

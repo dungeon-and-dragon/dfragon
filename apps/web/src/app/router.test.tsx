@@ -1375,7 +1375,7 @@ it('서버를 고른 캐릭터 검색은 그 서버로 찾고 명성 순 응답�
   await waitForPath('/search')
   await vi.waitFor(() =>
     expect(searchResultRows()).toEqual([
-      ['/c/cain/server-1', '카인카인검색1크루세이더(남)90,0004,120,00090,000버프4,120,000'],
+      ['/c/cain/server-1', '카인카인검색1크루세이더(남)90,0004,120,00090,0004,120,000'],
       ['/c/cain/server-2', '카인카인검색크루세이더(남)----']
     ])
   )
