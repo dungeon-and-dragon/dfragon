@@ -1,7 +1,7 @@
 # @dfragon/http-server
 
-API의 공개 app과 운영 app이 함께 쓰는 HTTP 코드입니다.
-`hono`, `@hono/node-server` 의존성을 이 package가 갖고(`@dfragon/lib`에도 의존), API는 `"@dfragon/http-server": "workspace:*"`로 공개 export만 씁니다.
+API, 운영 app(`apps/ops`), worker가 함께 쓰는 HTTP 코드입니다.
+`hono`, `@hono/node-server` 의존성을 이 package가 갖고(`@dfragon/lib`에도 의존), 소비 앱은 `"@dfragon/http-server": "workspace:*"`로 공개 export만 씁니다.
 이 package는 `apps/api`, `@dfragon/database`, `@dfragon/neople`을 import하지 않습니다.
 
 ## 파일

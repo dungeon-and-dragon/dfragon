@@ -1,7 +1,7 @@
 # @dfragon/server-core
 
 API와 캐릭터 수집 worker가 함께 쓰는 캐릭터 상세, 공용 아이템, 점수, 타임라인, 클리어 통계 코드입니다.
-API는 `"@dfragon/server-core": "workspace:*"`로 파일 단위 export를 씁니다.
+API와 worker는 `"@dfragon/server-core": "workspace:*"`로 파일 단위 export를 씁니다.
 이 package는 `apps/` 아래 앱, `@dfragon/http-server`, `hono`를 import하지 않습니다.
 
 ## 코드 위치
