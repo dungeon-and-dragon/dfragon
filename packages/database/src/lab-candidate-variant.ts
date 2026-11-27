@@ -1,12 +1,15 @@
-import { labItemBaseName } from '@dfragon/lib/lab-items'
+import {
+  isLabItemVariantGrouped,
+  LAB_ITEM_VARIANT_GROUPED_CATEGORIES,
+  labItemBaseName
+} from '@dfragon/lib/lab-items'
 
-// 오라와 마법부여 카드에는 플래티넘, 레벨 변형이 없어 이름마다 한 줄로 둔다.
-export const VARIANT_GROUPED_KINDS: readonly string[] = ['TITLE', 'CREATURE']
+export const VARIANT_GROUPED_KINDS: readonly string[] = LAB_ITEM_VARIANT_GROUPED_CATEGORIES
 
 const PLATINUM = '플래티넘'
 
 export function isVariantGroupedKind(kind: string): boolean {
-  return VARIANT_GROUPED_KINDS.includes(kind)
+  return isLabItemVariantGrouped(kind)
 }
 
 // 기본 이름 줄이 없는 묶음도 명성, 옵션 같은 값을 정할 줄 하나가 필요해, 기본 이름 줄, 플래티넘이 아닌 변형, 플래티넘 변형 순으로 고른다.

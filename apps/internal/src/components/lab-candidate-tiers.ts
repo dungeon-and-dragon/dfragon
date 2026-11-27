@@ -1,6 +1,6 @@
 import {
+  isSameLabItem,
   LAB_ITEM_TIERS,
-  labItemBaseName,
   type LabItemCategory,
   type LabItemGroupKey,
   type LabItemRole,
@@ -22,17 +22,6 @@ export type TierChanges = ReadonlyMap<string, TierChange>
 
 type SavedEntry = { tier: LabItemTier; cost: LabItemCost | null; exact: boolean }
 
-const VARIANT_GROUPED_CATEGORIES: readonly LabItemCategory[] = ['TITLE', 'CREATURE']
-
-// 칭호, 크리쳐 후보는 기본 이름 한 줄이라, 예전에 변형 이름으로 저장한 아이템도 그 줄의 등급으로 본다.
-function matchesItem({ category }: TierSlot, savedName: string, itemName: string): boolean {
-  if (savedName === itemName) {
-    return true
-  }
-
-  return VARIANT_GROUPED_CATEGORIES.includes(category) && labItemBaseName(savedName) === itemName
-}
-
 export function tierChangeIdOf({ category, role }: TierSlot, itemName: string): string {
   return `${category}:${role}:${itemName}`
 }
@@ -50,7 +39,7 @@ function savedEntriesOf(
     }
 
     return group.items
-      .filter((item) => matchesItem(slot, item.itemName, itemName))
+      .filter((item) => isSameLabItem(slot.category, item.itemName, itemName))
       .map((item) => ({ tier, cost: item.cost, exact: item.itemName === itemName }))
   })
 }
@@ -158,7 +147,9 @@ export function groupsToSave(
 
     for (const { tier } of savedEntriesOf(groups, slot, itemName)) {
       const group = groupOf({ category, role, tier })
-      group.items = group.items.filter((item) => !matchesItem(slot, item.itemName, itemName))
+      group.items = group.items.filter(
+        (item) => !isSameLabItem(slot.category, item.itemName, itemName)
+      )
     }
   }
 
