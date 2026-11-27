@@ -636,6 +636,9 @@ describe('batch key 패널', () => {
 // 실험실 아이템 이름은 모두 지어낸 이름이다.
 const WEAPON_DEALER_FINAL = { category: 'WEAPON', role: 'dealer', tier: '종결' }
 const TITLE_FINAL = { category: 'TITLE', role: 'all', tier: '종결' }
+const NO_TOOLTIP = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
+// 운영 화면은 아이템 종류를 입력 칸의 글자 그대로 보낸다.
+const EMPTY_TOOLTIP_DRAFT = { ...NO_TOOLTIP, itemTypeDetail: '' }
 
 function unpriced(itemName: string) {
   return { itemName, cost: null }
@@ -1059,6 +1062,7 @@ describe('실험실 아이템 상세', () => {
         itemName: '합성 상자',
         description: '합성 설명',
         itemRarity: '유니크',
+        ...NO_TOOLTIP,
         hasIcon: true,
         updatedAt: NOW.toISOString()
       }
@@ -1078,8 +1082,129 @@ describe('실험실 아이템 상세', () => {
     await waitFor(() => expect(api.labItemDetails[0]?.hasIcon).toBe(false))
 
     expect(api.writes().map(({ body }) => body)).toEqual([
-      { itemName: '합성 상자', description: '합성 설명', itemRarity: null },
-      { itemName: '합성 상자', description: '합성 설명', itemRarity: null, icon: null }
+      { itemName: '합성 상자', description: '합성 설명', itemRarity: null, ...EMPTY_TOOLTIP_DRAFT },
+      {
+        itemName: '합성 상자',
+        description: '합성 설명',
+        itemRarity: null,
+        ...EMPTY_TOOLTIP_DRAFT,
+        icon: null
+      }
     ])
+  })
+
+  it('저장한 아이템 종류, 레벨제한, 명성, 부위, 옵션을 칸에 보이고, 고친 옵션 줄을 단계별 카드로 바꿔 보낸다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [{ ...TITLE_FINAL, items: [unpriced('합성 상자')] }]
+    api.labItemDetails = [
+      {
+        itemName: '합성 상자',
+        description: null,
+        itemRarity: null,
+        itemTypeDetail: '합성 재료',
+        availableLevel: 115,
+        fame: 232,
+        card: {
+          slots: ['상의', '하의'],
+          enchants: [
+            { upgrade: 0, status: [{ name: '힘', value: '90' }] },
+            {
+              upgrade: 1,
+              status: [
+                { name: '힘', value: '100' },
+                { name: '지능', value: '20' }
+              ]
+            }
+          ]
+        },
+        hasIcon: false,
+        updatedAt: NOW.toISOString()
+      }
+    ]
+    await openLabItems(api)
+    await waitFor(() => expect(detailRow('합성 상자')).toBeDefined())
+    // 저장하면 form을 새로 그리므로 칸은 그때마다 찾는다.
+    const field = (name: string) =>
+      labelled<HTMLInputElement>(detailRow('합성 상자'), `합성 상자 ${name}`)
+
+    expect(
+      ['아이템 종류', '레벨제한', '모험가 명성', '부위', '옵션'].map((name) => field(name).value)
+    ).toEqual(['합성 재료', '115', '232', '상의, 하의', '힘 | 90 | 100\n지능 | - | 20'])
+    expect(buttonIn(detailRow('합성 상자'), '저장').disabled).toBe(true)
+
+    typeInto(field('레벨제한'), '')
+    typeInto(field('부위'), ' 상의 ,, 벨트 ')
+    typeInto(field('옵션'), '힘|90|100|110\n\n지능 | - | - | 20')
+    await click(buttonIn(detailRow('합성 상자'), '저장'))
+    await waitFor(() => expect(api.writes()).toHaveLength(1))
+
+    expect(api.writes()[0]?.body).toEqual({
+      itemName: '합성 상자',
+      description: '',
+      itemRarity: null,
+      itemTypeDetail: '합성 재료',
+      availableLevel: null,
+      fame: 232,
+      card: {
+        slots: ['상의', '벨트'],
+        enchants: [
+          { upgrade: 0, status: [{ name: '힘', value: '90' }] },
+          { upgrade: 1, status: [{ name: '힘', value: '100' }] },
+          {
+            upgrade: 2,
+            status: [
+              { name: '힘', value: '110' },
+              { name: '지능', value: '20' }
+            ]
+          }
+        ]
+      }
+    })
+    await waitFor(() => expect(field('옵션').value).toBe('힘 | 90 | 100 | 110\n지능 | - | - | 20'))
+    expect(buttonIn(detailRow('합성 상자'), '저장').disabled).toBe(true)
+  })
+
+  it('양의 정수가 아닌 레벨제한, 부위나 옵션 한쪽만, 값 개수가 다르거나 빈 옵션 칸, 운영 app 상한을 넘는 옵션은 저장하지 않는다', async () => {
+    const api = new FakeOpsApi()
+    api.labItems = [{ ...TITLE_FINAL, items: [unpriced('합성 상자')] }]
+    await openLabItems(api)
+    await waitFor(() => expect(detailRow('합성 상자')).toBeDefined())
+    const row = detailRow('합성 상자')
+    const field = (name: string) => labelled<HTMLInputElement>(row, `합성 상자 ${name}`)
+    const expectUnsaved = (label: string) => {
+      expect(buttonIn(row, '저장').disabled, label).toBe(true)
+      expect(row.querySelector('[role="alert"]'), label).not.toBeNull()
+    }
+    const singleCases: [string, string][] = [
+      ['레벨제한', '0'],
+      ['레벨제한', '1.5'],
+      ['모험가 명성', '많음'],
+      ['옵션', '힘 | 90'],
+      ['부위', '상의']
+    ]
+
+    for (const [name, value] of singleCases) {
+      typeInto(field(name), value)
+      expectUnsaved(`${name} ${value}`)
+      typeInto(field(name), '')
+    }
+
+    typeInto(field('부위'), '상의')
+    const optionCases = [
+      '힘 | 90 | 100\n지능 | 20',
+      '힘',
+      '힘 | 90 | ',
+      `힘${' | 90'.repeat(6)}`,
+      `${'가'.repeat(41)} | 90`
+    ]
+
+    for (const options of optionCases) {
+      typeInto(field('옵션'), options)
+      expectUnsaved(options)
+    }
+
+    typeInto(field('옵션'), '힘 | 90')
+    expect(buttonIn(row, '저장').disabled).toBe(false)
+    expect(api.writes()).toEqual([])
   })
 })

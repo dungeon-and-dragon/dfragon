@@ -11,9 +11,20 @@ import {
 } from '#ops-app/ops-queries'
 import { DescriptionInput, ICON_SIZE, IconInput } from './lab-fields'
 import { uniqueNames } from './lab-item-candidates'
+import { readTooltipText, type TooltipText, tooltipText } from './lab-item-tooltip'
 import { FIELD_INPUT, panelClasses } from './panel-classes'
 
 const NEOPLE_RARITY = ''
+const EMPTY_TOOLTIP = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
+const TOOLTIP_FAILURE =
+  '레벨제한과 명성은 양의 정수로, 부위와 옵션은 함께 적고 옵션은 줄마다 값 개수를 같게 적어야 합니다.'
+const TOOLTIP_FIELDS: readonly (keyof TooltipText)[] = [
+  'typeDetail',
+  'level',
+  'fame',
+  'slots',
+  'options'
+]
 
 function failureMessage(error: Error | null): string | undefined {
   if (error === null) {
@@ -47,6 +58,75 @@ function DetailIcon({
   )
 }
 
+function TooltipInputs({
+  itemName,
+  value,
+  onChange
+}: {
+  itemName: string
+  value: TooltipText
+  onChange: (field: keyof TooltipText, next: string) => void
+}): React.JSX.Element {
+  function inputOf(field: keyof TooltipText) {
+    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+      onChange(field, event.currentTarget.value)
+    }
+  }
+
+  return (
+    <div className="flex basis-full flex-wrap items-start gap-3 pl-[40px]">
+      <div className="w-[160px] shrink-0">
+        <input
+          aria-label={`${itemName} 아이템 종류`}
+          placeholder="아이템 종류"
+          value={value.typeDetail}
+          onChange={inputOf('typeDetail')}
+          className={`${FIELD_INPUT} field-box-sm`}
+        />
+      </div>
+      <div className="w-[96px] shrink-0">
+        <input
+          aria-label={`${itemName} 레벨제한`}
+          placeholder="레벨제한"
+          inputMode="numeric"
+          value={value.level}
+          onChange={inputOf('level')}
+          className={`${FIELD_INPUT} field-box-sm`}
+        />
+      </div>
+      <div className="w-[96px] shrink-0">
+        <input
+          aria-label={`${itemName} 모험가 명성`}
+          placeholder="모험가 명성"
+          inputMode="numeric"
+          value={value.fame}
+          onChange={inputOf('fame')}
+          className={`${FIELD_INPUT} field-box-sm`}
+        />
+      </div>
+      <div className="w-[200px] shrink-0">
+        <input
+          aria-label={`${itemName} 부위`}
+          placeholder="상의, 하의"
+          value={value.slots}
+          onChange={inputOf('slots')}
+          className={`${FIELD_INPUT} field-box-sm`}
+        />
+      </div>
+      <div className="w-[320px] shrink-0">
+        <textarea
+          aria-label={`${itemName} 옵션`}
+          placeholder="힘 | 90 | 100"
+          rows={3}
+          value={value.options}
+          onChange={inputOf('options')}
+          className={`${FIELD_INPUT} h-auto resize-y py-2 font-mono text-sm`}
+        />
+      </div>
+    </div>
+  )
+}
+
 function ItemDetailRow({
   itemName,
   detail
@@ -62,10 +142,14 @@ function ItemDetailRow({
   const [icon, setIcon] = useState<string>()
   const [removing, setRemoving] = useState(false)
   const [formKey, setFormKey] = useState(0)
+  const savedTooltip = tooltipText(detail ?? EMPTY_TOOLTIP)
+  const [tooltip, setTooltip] = useState(savedTooltip)
+  const tooltipValues = readTooltipText(tooltip)
   const message = failureMessage(saveDetail.error)
   const changed =
     description.trim() !== savedDescription ||
     rarity !== savedRarity ||
+    TOOLTIP_FIELDS.some((field) => tooltip[field].trim() !== savedTooltip[field]) ||
     icon !== undefined ||
     removing
 
@@ -76,6 +160,11 @@ function ItemDetailRow({
 
   function handleRarityChange(event: ChangeEvent<HTMLSelectElement>): void {
     setRarity(event.currentTarget.value)
+    saveDetail.reset()
+  }
+
+  function handleTooltipChange(field: keyof TooltipText, next: string): void {
+    setTooltip((current) => ({ ...current, [field]: next }))
     saveDetail.reset()
   }
 
@@ -108,15 +197,24 @@ function ItemDetailRow({
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault()
 
-    if (!changed) {
+    if (!changed || tooltipValues === undefined) {
       return
     }
 
     const itemRarity = rarity === NEOPLE_RARITY ? null : rarity
     const changedIcon = iconChange()
-    const draft = { itemName, description, itemRarity, icon: changedIcon }
+    const draft = { itemName, description, itemRarity, ...tooltipValues, icon: changedIcon }
 
-    saveDetail.mutate(draft, { onSuccess: clearIcon })
+    // 저장한 값을 다시 읽은 모양으로 칸을 맞춰, 저장 뒤에도 바뀜으로 보이지 않게 한다.
+    const itemTypeDetail = tooltip.typeDetail.trim()
+    const savedText = tooltipText({ ...tooltipValues, itemTypeDetail })
+
+    saveDetail.mutate(draft, {
+      onSuccess: () => {
+        setTooltip(savedText)
+        clearIcon()
+      }
+    })
   }
 
   return (
@@ -160,9 +258,19 @@ function ItemDetailRow({
             아이콘 지우기
           </label>
         )}
-        <Button type="submit" size="sm" disabled={saveDetail.isPending || !changed}>
+        <Button
+          type="submit"
+          size="sm"
+          disabled={saveDetail.isPending || !changed || tooltipValues === undefined}
+        >
           저장
         </Button>
+        <TooltipInputs itemName={itemName} value={tooltip} onChange={handleTooltipChange} />
+        {tooltipValues === undefined && (
+          <p role="alert" className="field-error m-0">
+            {TOOLTIP_FAILURE}
+          </p>
+        )}
         {message !== undefined && (
           <p role="alert" className="field-error m-0">
             {message}

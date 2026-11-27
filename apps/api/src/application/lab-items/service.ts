@@ -1,5 +1,6 @@
 import type {
   LabCurrencyIcon,
+  LabItemCard,
   LabItemPriceCost,
   LabItemPriceDetail,
   LabItemPriceRow
@@ -12,6 +13,7 @@ import {
   type LabItemTier,
   labItemRolesOf
 } from '@dfragon/lib/lab-items'
+import type { ItemCard } from '#domain/item-detail/index.js'
 import type { LabItemRepository } from './repository.js'
 
 export interface LabItemCurrencyCost {
@@ -21,13 +23,23 @@ export interface LabItemCurrencyCost {
   iconPath: string
 }
 
+// 아이템 상세 응답과 같은 이름과 카드 모양이라 웹이 같은 tooltip으로 그린다.
+export interface LabItemTooltip {
+  typeDetail: string | null
+  availableLevel: number | null
+  fame: number | null
+  card: ItemCard | null
+}
+
 // itemId는 Neople 아이템이고, itemRarity, iconPath, description은 소유자가 넣은 값을 Neople 값보다 먼저 쓴 결과다.
+// tooltip은 소유자가 아이템 상세를 넣은 아이템에만 있다.
 export interface LabItemPrice {
   itemName: string
   itemId: string | null
   itemRarity: string | null
   iconPath: string | null
   description: string | null
+  tooltip: LabItemTooltip | null
   unitPrice: number | null
   checkedAt: Date | null
   cost: LabItemCurrencyCost | null
@@ -70,7 +82,25 @@ function uploadedIconPath(itemName: string, { iconUpdatedAt }: LabItemPriceDetai
   return itemIconPath(itemName, iconUpdatedAt)
 }
 
-type ItemLook = Pick<LabItemPrice, 'itemRarity' | 'iconPath' | 'description'>
+type ItemLook = Pick<LabItemPrice, 'itemRarity' | 'iconPath' | 'description' | 'tooltip'>
+
+// 소유자는 버프 스킬 줄을 넣지 않는다.
+function toItemCard({ slots, enchants }: LabItemCard): ItemCard {
+  const stages = enchants.map(({ upgrade, status }) => ({ upgrade, status, reinforceSkill: [] }))
+
+  return { slots, enchants: stages }
+}
+
+function toTooltip({
+  itemTypeDetail,
+  availableLevel,
+  fame,
+  card
+}: LabItemPriceDetail): LabItemTooltip {
+  const itemCard = card !== null ? toItemCard(card) : null
+
+  return { typeDetail: itemTypeDetail, availableLevel, fame, card: itemCard }
+}
 
 function lookOf(
   itemName: string,
@@ -78,13 +108,14 @@ function lookOf(
   detail: LabItemPriceDetail | null
 ): ItemLook {
   if (detail === null) {
-    return { itemRarity: neopleRarity, iconPath: null, description: null }
+    return { itemRarity: neopleRarity, iconPath: null, description: null, tooltip: null }
   }
 
   const itemRarity = detail.itemRarity ?? neopleRarity
   const iconPath = uploadedIconPath(itemName, detail)
+  const tooltip = toTooltip(detail)
 
-  return { itemRarity, iconPath, description: detail.description }
+  return { itemRarity, iconPath, description: detail.description, tooltip }
 }
 
 function toCurrencyCost({

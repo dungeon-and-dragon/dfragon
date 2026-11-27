@@ -42,9 +42,11 @@ export {
   saveLabItemDetail
 } from './lab-item-detail.js'
 export type {
+  LabItemCard,
   LabItemDetailIconChange,
   LabItemDetailInput,
-  LabItemDetailSummary
+  LabItemDetailSummary,
+  LabItemTooltipFields
 } from './lab-item-detail.js'
 export { readLabItemGroups, readLabItemPrices, replaceLabItemGroup } from './lab-item.js'
 export type {
