@@ -35,12 +35,19 @@ export {
 } from './lab-candidate.js'
 export type {
   LabCandidateBatch,
+  LabCandidateBatchResult,
   LabCandidateInput,
   LabCandidateKind,
   LabCandidatePreviousPrice,
   LabCandidateQuery,
   LabCandidateSummary
 } from './lab-candidate.js'
+export {
+  excludeLabCandidate,
+  includeLabCandidate,
+  readLabCandidateExclusions
+} from './lab-candidate-exclusion.js'
+export type { LabCandidateExclusion } from './lab-candidate-exclusion.js'
 export { replaceLabCandidateWearCounts } from './lab-candidate-wear-count.js'
 export {
   readItemDictionary,
