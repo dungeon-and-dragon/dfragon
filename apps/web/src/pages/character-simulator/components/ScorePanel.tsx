@@ -13,7 +13,7 @@ const integer = new Intl.NumberFormat('ko-KR')
 const signedInteger = new Intl.NumberFormat('ko-KR', { signDisplay: 'exceptZero' })
 
 const SCORE_TONES = { dealer: 'text-score-dealer', buffer: 'text-score-buffer' } as const
-const APPROXIMATE_CLASS = 'border-b border-dotted border-fg-subtle'
+const APPROXIMATE_CLASS = 'border-0 border-b border-dotted border-fg-subtle'
 const LAYOUTS = {
   stacked: {
     section: 'flex min-w-0 flex-col gap-2',
