@@ -6,6 +6,7 @@ import {
   chooseEnchantGrade,
   enchantOptionsOf,
   findEnchantOption,
+  groupEnchantEntries,
   optionNeedsMainStat
 } from '@dfragon/lib/enchant-grades'
 
@@ -187,4 +188,39 @@ for (const [name, slotId, role, id, mainStat, expected] of [
 test('chooseEnchantGrade는 주스탯을 가진 멤버를 고르고 없으면 첫 멤버를 고른다', () => {
   assert.equal(chooseEnchantGrade(mainStatOption, '지능'), INTELLIGENCE_GRADE)
   assert.equal(chooseEnchantGrade(mainStatOption, '체력'), STRENGTH_GRADE)
+})
+
+// 실험실 항목처럼 등급표 밖에서 만든 항목이다.
+function entryOf(name, status, reinforceSkill = []) {
+  return { name, status, reinforceSkill }
+}
+
+const BUFF_SKILL_3 = [{ jobName: '아처', skills: [{ name: '센세이션', value: '3' }] }]
+const BUFF_SKILL_4 = [{ jobName: '아처', skills: [{ name: '센세이션', value: '4' }] }]
+
+test('groupEnchantEntries는 칸 순서와 % 표기가 달라도 표시가 같으면 받은 순서대로 한 묶음으로 두고, 직업별 스킬 강화가 다르면 나눈다', () => {
+  const groups = groupEnchantEntries([
+    entryOf('a', [
+      { name: '최종 데미지 증가', value: '3%' },
+      { name: '힘', value: 90 }
+    ]),
+    entryOf('b', [
+      { name: '힘', value: 90 },
+      { name: '지능', value: 90 },
+      { name: '최종 데미지 증가', value: '3.0%' }
+    ]),
+    entryOf('c', [{ name: '힘', value: 100 }], BUFF_SKILL_3),
+    entryOf('d', [{ name: '힘', value: 100 }], BUFF_SKILL_4),
+    entryOf('e', [{ name: '지능', value: 100 }], BUFF_SKILL_3)
+  ])
+
+  assert.deepEqual(
+    groups.map(({ members }) => members.map(({ name }) => name)),
+    [['a', 'b'], ['c', 'e'], ['d']]
+  )
+  assert.deepEqual(groups[0].display, [
+    { name: '최종 데미지 증가', value: '3%' },
+    { name: '올스탯', value: 90 }
+  ])
+  assert.notEqual(groups[1].key, groups[2].key)
 })

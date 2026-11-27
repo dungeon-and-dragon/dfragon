@@ -2,7 +2,7 @@ import type { AccessLogEnv } from '@dfragon/http-server'
 import { Hono } from 'hono'
 import type { LabItemService } from '#application/lab-items/index.js'
 import { respondUnlessDisconnected } from '#presentation/http/disconnected-request.js'
-import { type LabItemsResponse, readCurrencyId } from './dto.js'
+import { type LabItemsResponse, readCurrencyId, toEnchantOptionsResponse } from './dto.js'
 
 // 아이콘 주소에 바꾼 시각이 들어가 같은 주소의 본문은 바뀌지 않는다.
 const ICON_CACHE_CONTROL = 'public, max-age=31536000, immutable'
@@ -26,6 +26,14 @@ export class LabItemController {
         const labItems: LabItemsResponse = await this.service.get(signal)
 
         return c.json(labItems)
+      })
+    )
+
+    routes.get('/enchant-options', (c) =>
+      respondUnlessDisconnected(c, async (signal) => {
+        const options = await this.service.enchantOptions(signal)
+
+        return c.json(toEnchantOptionsResponse(options))
       })
     )
 

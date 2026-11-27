@@ -28,6 +28,7 @@ import {
   addsSlotItems,
   avatarItemIds,
   avatarPresetJobOf,
+  changesEnchant,
   editAvatar,
   editBuffLevel,
   editEquipment,
@@ -55,7 +56,7 @@ import {
   withWeapon,
   wornMainStat
 } from '#domain/equipment-simulation/index.js'
-import type { LoadCharacterScoreSource, LoadItemDetails } from './ports.js'
+import type { LoadCharacterScoreSource, LoadEnchantOptions, LoadItemDetails } from './ports.js'
 
 export interface EquipmentSimulationRequest {
   /** 고른 장비 세트의 setItemId이고, null이면 그대로 둔다. */
@@ -86,7 +87,8 @@ export class EquipmentSimulationService {
   constructor(
     private readonly loadScoreSource: LoadCharacterScoreSource,
     private readonly loadItemDetails: LoadItemDetails,
-    private readonly calculateScore: CalculateScore
+    private readonly calculateScore: CalculateScore,
+    private readonly loadEnchantOptions: LoadEnchantOptions
   ) {}
 
   /** 가상 점수는 상세 응답 캐시, 조회 알림, DB에 남기지 않는다. */
@@ -116,7 +118,10 @@ export class EquipmentSimulationService {
     )
     const weaponEdit = editWeapon(payloads, request.equipment)
     const addedSlots = new Set([...addedItemSlots(itemEdits), ...addedWeaponSlots(weaponEdit)])
-    const edits = editEquipment(payloads.equipment, request.equipment, role, addedSlots)
+    const labOptions = changesEnchant(request.equipment)
+      ? await this.loadEnchantOptions(signal)
+      : []
+    const edits = editEquipment(payloads.equipment, request.equipment, role, addedSlots, labOptions)
     const oathEdit = editOath(payloads.oath, request.oath)
     const slotEdits = editSlotItems(payloads, request.slotItems)
     const buffLevel = editBuffLevel(payloads, role, request.buffLevel)

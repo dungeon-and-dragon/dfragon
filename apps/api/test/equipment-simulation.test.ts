@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import { readFileSync } from 'node:fs'
 import test, { type TestContext } from 'node:test'
-import type { CharacterBasicInput, CharacterScoreInput } from '@dfragon/database'
+import type { CharacterBasicInput, CharacterScoreInput, LabItemPriceRow } from '@dfragon/database'
 import { equipmentVariantsOf } from '@dfragon/lib/equipment-variants'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import { CharacterDetailFailure } from '@dfragon/server-core/domain/character-failure.js'
@@ -592,6 +592,187 @@ for (const [name, body] of invalidBodies) {
     assert.equal(engine.requests.length, 0)
   })
 }
+
+// 실험실 항목과 카드 상세는 지어낸 값이고, 카드 값은 아이템 상세처럼 문자열이다.
+function labRow(
+  category: string,
+  role: string,
+  itemName: string,
+  itemId: string | null,
+  ownerStatus: { name: string; value: string }[] | null = null
+): LabItemPriceRow {
+  const detail =
+    ownerStatus === null
+      ? null
+      : {
+          description: null,
+          itemRarity: null,
+          iconUpdatedAt: null,
+          itemTypeDetail: null,
+          availableLevel: null,
+          fame: null,
+          card: { slots: [], enchants: [{ upgrade: 0, status: ownerStatus }] }
+        }
+
+  return {
+    category,
+    role,
+    tier: '배럭',
+    itemName,
+    itemId,
+    itemRarity: null,
+    unitPrice: null,
+    checkedAt: null,
+    cost: null,
+    detail
+  }
+}
+
+const LAB_JACKET_CARD = {
+  itemName: '합성 상의 카드',
+  cardInfo: {
+    slots: [{ slotName: '상의' }],
+    enchant: [
+      { upgrade: 0, status: [{ name: '힘', value: '10' }] },
+      {
+        upgrade: 1,
+        status: [
+          { name: '힘', value: '25' },
+          { name: '최종 데미지 증가', value: '1%' },
+          { name: '모험가 명성', value: '150' }
+        ]
+      }
+    ]
+  }
+}
+
+async function labOptionIds(origin: string) {
+  const response = await fetch(new URL('/lab/enchant-options', origin))
+  const { slots } = (await response.json()) as {
+    slots: { slotId: string; role: string; tiers: { options: { id: string }[] }[] }[]
+  }
+
+  return new Map(
+    slots.map(({ slotId, role, tiers }) => [`${slotId}:${role}`, tiers[0]!.options[0]!.id])
+  )
+}
+
+test('실험실 선택지 id로 계산하면 그 부위 enchant에 카드의 가장 높은 단계 옵션을 명성 줄 없이 정수는 숫자로 넣는다', async (t) => {
+  const { original, details, path } = fixture('dealer-blade', undefined, {
+    'lab-jacket-card': LAB_JACKET_CARD
+  })
+  const engine = scoring()
+  const rows = [labRow('JACKET', 'dealer', '합성 상의 카드', 'lab-jacket-card')]
+  const labItems = {
+    readLabItemPrices: async () => rows,
+    readCurrencyIcon: async () => null,
+    readItemIcon: async () => null
+  }
+  const origin = await listen(t, { details, labItems, ...engine.options })
+  const enchantId = (await labOptionIds(origin)).get('JACKET:dealer')
+
+  const response = await simulate(origin, path, {
+    equipment: [{ slotId: 'JACKET', reinforce: 12, amplified: false, enchantId }]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [
+      {
+        ...itemOf(original.equipment.equipment as unknown[], 'JACKET'),
+        reinforce: 12,
+        amplificationName: null,
+        enchant: {
+          status: [
+            { name: '힘', value: 25 },
+            { name: '최종 데미지 증가', value: '1%' }
+          ]
+        }
+      }
+    ]
+  })
+})
+
+test('소유자가 넣은 버프 패시브 스킬 항목으로 계산하면 직업별 스킬 강화 다섯 개를 그 값으로 넣는다', async (t) => {
+  const { original, details, path } = fixture('buffer-muse')
+  const engine = scoring()
+  const rows = [
+    labRow('WAIST', 'buffer', '합성 선택 상자', null, [
+      { name: '버프 패시브 스킬', value: '3' },
+      { name: '힘', value: '30' },
+      { name: '지능', value: '30' },
+      { name: '체력', value: '30' },
+      { name: '정신력', value: '30' }
+    ])
+  ]
+  const labItems = {
+    readLabItemPrices: async () => rows,
+    readCurrencyIcon: async () => null,
+    readItemIcon: async () => null
+  }
+  const origin = await listen(t, { details, labItems, ...engine.options })
+  const enchantId = (await labOptionIds(origin)).get('WAIST:buffer')
+
+  const response = await simulate(origin, path, {
+    equipment: [{ slotId: 'WAIST', reinforce: 11, amplified: false, enchantId }]
+  })
+
+  assert.equal(response.status, 200)
+  assert.deepEqual(engine.requests[0]!.input.simulation, {
+    equipment: [
+      {
+        ...itemOf(original.equipment.equipment as unknown[], 'WAIST'),
+        reinforce: 11,
+        amplificationName: null,
+        enchant: {
+          reinforceSkill: [
+            { jobName: '프리스트(남)', skills: [{ name: '수호의 은총', value: '3' }] },
+            { jobName: '프리스트(여)', skills: [{ name: '계시 : 아리아', value: '3' }] },
+            { jobName: '마법사(여)', skills: [{ name: '퍼페티어', value: '3' }] },
+            { jobName: '아처', skills: [{ name: '센세이션', value: '3' }] },
+            { jobName: '거너(여)', skills: [{ name: 'apius::전장정보();', value: '3' }] }
+          ],
+          status: [
+            { name: '힘', value: 30 },
+            { name: '지능', value: 30 },
+            { name: '체력', value: 30 },
+            { name: '정신력', value: 30 }
+          ]
+        }
+      }
+    ]
+  })
+})
+
+test('다른 부위, 다른 역할의 실험실 선택지 id와 지운 뒤의 카드 id는 400으로 거절하고, 지우기 전의 같은 id는 계산한다', async (t) => {
+  const { details, path } = fixture('dealer-blade', undefined, {
+    'lab-jacket-card': LAB_JACKET_CARD
+  })
+  const engine = scoring()
+  let rows = [
+    labRow('JACKET', 'dealer', '합성 상의 카드', 'lab-jacket-card'),
+    labRow('JACKET', 'buffer', '합성 버퍼 상의 카드', 'lab-jacket-card'),
+    labRow('PANTS', 'dealer', '합성 하의 카드', 'lab-jacket-card')
+  ]
+  const labItems = {
+    readLabItemPrices: async () => rows,
+    readCurrencyIcon: async () => null,
+    readItemIcon: async () => null
+  }
+  const origin = await listen(t, { details, labItems, ...engine.options })
+  const ids = await labOptionIds(origin)
+  const jacket = (enchantId: string | undefined) => ({
+    equipment: [{ slotId: 'JACKET', reinforce: 12, amplified: false, enchantId }]
+  })
+  const rejected = { status: 400, body: { error: { code: INVALID_REQUEST } } }
+
+  assert.deepEqual(await simulate(origin, path, jacket(ids.get('PANTS:dealer'))), rejected)
+  assert.deepEqual(await simulate(origin, path, jacket(ids.get('JACKET:buffer'))), rejected)
+  assert.equal((await simulate(origin, path, jacket(ids.get('JACKET:dealer')))).status, 200)
+  rows = rows.filter(({ category, role }) => category !== 'JACKET' || role !== 'dealer')
+  assert.deepEqual(await simulate(origin, path, jacket(ids.get('JACKET:dealer'))), rejected)
+  assert.equal(engine.requests.length, 1)
+})
 
 test('원본 수치가 20보다 높은 부위는 원본 수치까지 받는다', async (t) => {
   const { details, path } = fixture('dealer-blade', (items) =>
