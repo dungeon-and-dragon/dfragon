@@ -8,7 +8,7 @@ import {
 } from '#entities/character'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { Tooltip } from '@dfragon/ui'
-import { ItemTooltip } from '#widgets/item-tooltip'
+import { ItemDetailTooltip, ItemTooltip } from '#widgets/item-tooltip'
 import type { LabItemCategory } from '@dfragon/lib/lab-items'
 import type { LabCurrencyCost, LabItem } from './api/useLabItems'
 import type { EnchantRole, LabCategoryRows } from './lab-tables'
@@ -143,42 +143,6 @@ function LabItemIcon({
   )
 }
 
-// Neople 아이템 정보가 없는 재화와 아이템은 운영 화면에서 넣은 이름과 설명을 아이템 정보 tooltip과 같은 모양의 상자로 보인다.
-function InfoTooltip({
-  trigger,
-  side,
-  iconUrl,
-  name,
-  nameClassName,
-  description
-}: {
-  trigger: React.JSX.Element
-  side: 'left' | 'right'
-  iconUrl: string | null
-  name: string
-  nameClassName: string
-  description: string | null
-}): React.JSX.Element {
-  return (
-    <Tooltip.Root>
-      <Tooltip.Trigger delay={0} closeDelay={0} render={trigger} />
-      <Tooltip.Popup side={side} align="start" sideOffset={8}>
-        <div className="tooltip-item">
-          <div className="flex max-w-[280px] flex-col gap-2 text-fg">
-            <div className="flex items-center gap-2">
-              {iconUrl !== null && <img src={iconUrl} alt="" className="size-[24px]" />}
-              <b className={`min-w-0 grow text-sm ${nameClassName}`}>{name}</b>
-            </div>
-            {description !== null && (
-              <p className="m-0 border-t border-line pt-2 whitespace-pre-line">{description}</p>
-            )}
-          </div>
-        </div>
-      </Tooltip.Popup>
-    </Tooltip.Root>
-  )
-}
-
 function LabItemName({
   item,
   role
@@ -203,32 +167,54 @@ function LabItemName({
     )
   }
 
-  if (item.description === null) {
+  if (item.tooltip === null) {
     return name
   }
 
+  const detail = {
+    name: item.itemName,
+    rarity: item.itemRarity,
+    itemType: null,
+    ...item.tooltip,
+    status: [],
+    explain: item.description,
+    flavorText: null
+  }
+
   return (
-    <InfoTooltip
-      trigger={name}
-      side="right"
-      iconUrl={item.iconUrl}
-      name={item.itemName}
-      nameClassName={nameClassName}
-      description={item.description}
-    />
+    <ItemDetailTooltip item={detail} iconUrl={item.iconUrl} role={role}>
+      {name}
+    </ItemDetailTooltip>
   )
 }
 
+// 재화는 Neople 아이템 정보가 없어 운영 화면에서 넣은 이름과 설명을 아이템 정보 tooltip과 같은 모양의 상자로 보인다.
 function CurrencyTooltip({ cost }: { cost: LabCurrencyCost }): React.JSX.Element {
+  const icon = <img src={cost.iconUrl} alt="" className="size-[24px]" />
+
   return (
-    <InfoTooltip
-      trigger={<img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />}
-      side="left"
-      iconUrl={cost.iconUrl}
-      name={cost.currencyName}
-      nameClassName=""
-      description={cost.description}
-    />
+    <Tooltip.Root>
+      <Tooltip.Trigger
+        delay={0}
+        closeDelay={0}
+        render={<img src={cost.iconUrl} alt={cost.currencyName} className="size-[24px]" />}
+      />
+      <Tooltip.Popup side="left" align="start" sideOffset={8}>
+        <div className="tooltip-item">
+          <div className="flex max-w-[280px] flex-col gap-2 text-fg">
+            <div className="flex items-center gap-2">
+              {icon}
+              <b className="min-w-0 grow text-sm">{cost.currencyName}</b>
+            </div>
+            {cost.description !== null && (
+              <p className="m-0 border-t border-line pt-2 whitespace-pre-line">
+                {cost.description}
+              </p>
+            )}
+          </div>
+        </div>
+      </Tooltip.Popup>
+    </Tooltip.Root>
   )
 }
 

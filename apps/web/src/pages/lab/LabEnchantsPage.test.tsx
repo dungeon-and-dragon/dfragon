@@ -372,7 +372,7 @@ it('올린 아이콘이 있으면 Neople 아이콘 대신 같은 origin의 /api 
   expect(name.classList).toContain('text-rarity-unique')
 })
 
-it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면 아이템 정보를 받지 않고 아이콘, 등급 색 이름, 설명을 보인다', async () => {
+it('itemId가 없고 운영 화면에서 넣은 상세가 있는 아이템은 아이템 정보를 받지 않고 tooltip에 올린 아이콘, 등급, 레벨제한, 종류, 명성, 부위, 강조한 옵션 줄, 설명을 보인다', async () => {
   const requestedItemIds: string[] = []
   const iconPath = '/lab/item-icon?itemName=y&v=2'
   server.use(
@@ -385,9 +385,9 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
       HttpResponse.json({
         groups: [
           {
-            category: 'TITLE',
-            role: 'all',
-            tier: '종결',
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '준종결',
             items: [
               {
                 itemName: '합성 상자',
@@ -397,7 +397,30 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
                 description: '합성 설명\n둘째 줄',
                 unitPrice: null,
                 checkedAt: null,
-                cost: null
+                cost: null,
+                tooltip: {
+                  typeDetail: '합성 재료',
+                  availableLevel: 115,
+                  fame: 232,
+                  card: {
+                    slots: ['무기', '보조장비'],
+                    enchants: [
+                      {
+                        upgrade: 0,
+                        status: [
+                          { name: '모든 속성 강화', value: '13' },
+                          { name: '힘', value: '90' }
+                        ],
+                        reinforceSkill: []
+                      },
+                      {
+                        upgrade: 1,
+                        status: [{ name: '모든 속성 강화', value: '15' }],
+                        reinforceSkill: []
+                      }
+                    ]
+                  }
+                }
               }
             ]
           }
@@ -408,12 +431,25 @@ it('itemId가 없고 설명이 있는 아이템 이름에 마우스를 올리면
   await render()
   await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
 
-  await hover(nameOf(accessoryTable(), '합성 상자').parentElement!)
+  await hover(nameOf(enchantTable(), '합성 상자').parentElement!)
 
-  expect(openTooltips()).toEqual(['합성 상자합성 설명\n둘째 줄'])
   const box = document.querySelector('.tooltip-item')!
+  const rows = [...box.querySelectorAll('[data-card-option]')]
+  const lines = rows.map((row) => [...row.children].map((cell) => cell.textContent).join(' '))
+  const emphasized = rows
+    .filter((row) => row.firstElementChild?.classList.contains('text-game-enchant'))
+    .map((row) => row.firstElementChild?.textContent)
+  const name = box.querySelector('b')!
   expect(box.querySelector('img')?.getAttribute('src')).toBe(`/api${iconPath}`)
-  expect(box.querySelector('b')?.classList).toContain('text-rarity-unique')
+  expect(name.textContent).toBe('합성 상자')
+  expect(name.classList).toContain('text-rarity-unique')
+  for (const text of ['유니크', '레벨제한 115', '합성 재료', '모험가 명성 232']) {
+    expect(box.textContent).toContain(text)
+  }
+  expect(box.querySelector('[data-card-slots]')?.textContent).toBe('무기, 보조장비')
+  expect(lines).toEqual(['모든 속성 강화 13 | 15', '힘 90 | -'])
+  expect(emphasized).toEqual(['모든 속성 강화'])
+  expect(box.textContent).toContain('합성 설명\n둘째 줄')
   expect(requestedItemIds).toEqual([])
 })
 

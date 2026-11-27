@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, BROWSER_API_PATH, dfragonHttp } from '#shared/api/dfragon-api'
 import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
+import { itemCardSchema } from '#widgets/item-tooltip'
 
 export const LAB_ITEMS_PATH = '/lab/items'
 
@@ -28,6 +29,14 @@ function browserApiUrl(path: string | null): string | null {
   return `${BROWSER_API_PATH}${path}`
 }
 
+// 운영 화면에서 넣은 tooltip 값이다. 이 필드를 내기 전의 API 응답은 tooltip이 없는 것으로 읽는다.
+const tooltipSchema = z.object({
+  typeDetail: z.string().nullable(),
+  availableLevel: z.number().int().nullable(),
+  fame: z.number().int().nullable(),
+  card: itemCardSchema.nullable()
+})
+
 const labItemsSchema = z.object({
   groups: z.array(
     z.object({
@@ -44,7 +53,8 @@ const labItemsSchema = z.object({
             description: z.string().nullable(),
             unitPrice: z.number().int().positive().nullable(),
             checkedAt: z.iso.datetime().nullable(),
-            cost: currencyCostSchema.nullable()
+            cost: currencyCostSchema.nullable(),
+            tooltip: tooltipSchema.nullable().default(null)
           })
           .transform(({ iconPath, ...item }) => {
             const iconUrl = browserApiUrl(iconPath)

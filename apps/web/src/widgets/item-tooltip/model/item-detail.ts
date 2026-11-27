@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 const statusSchema = z.object({ name: z.string(), value: z.string() })
 
-const cardSchema = z.object({
+export const itemCardSchema = z.object({
   slots: z.array(z.string()),
   enchants: z.array(
     z.object({
@@ -24,8 +24,9 @@ export const itemDetailSchema = z.object({
   status: z.array(statusSchema),
   explain: z.string().nullable(),
   flavorText: z.string().nullable(),
-  card: cardSchema.nullable()
+  card: itemCardSchema.nullable()
 })
 
 export type ItemDetail = z.infer<typeof itemDetailSchema>
 export type ItemCard = NonNullable<ItemDetail['card']>
+export type ItemTooltipDetail = Omit<ItemDetail, 'itemId'>
