@@ -6,8 +6,8 @@ import { createAuctionPriceJob } from '../src/application/auction-prices/index.j
 // 이름은 지금은 지운 마법부여 등급표에 있던 카드 이름이다. 경매장 조회, 아이템 검색과 가격 저장은 fake이며,
 // 고르는 규칙은 server-core, 저장 SQL은 @dfragon/database의 테스트가 확인한다.
 const targets = [
-  { itemName: '거짓의 베리디쿠스 카드', exchanged: false },
-  { itemName: '허망한 맹신, 호스디그 카드', exchanged: true }
+  { itemName: '거짓의 베리디쿠스 카드', exchanged: false, categories: ['WEAPON'] },
+  { itemName: '허망한 맹신, 호스디그 카드', exchanged: true, categories: ['WEAPON'] }
 ]
 
 test('경매장 가격 job은 실험실 아이템 이름마다 가격을 저장하고 받은 이름 수를 남긴다', async () => {
@@ -20,6 +20,7 @@ test('경매장 가격 job은 실험실 아이템 이름마다 가격을 저장�
           recorded.push(itemName)
         }
       },
+      async () => null,
       async () => null,
       async () => null
     )

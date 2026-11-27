@@ -64,7 +64,7 @@ const readPrices = () =>
     orderBy: { itemName: 'asc' }
   })
 
-test('두 묶음에 겹친 이름은 한 번만 읽고, 한 묶음에서라도 재화 비용이 있으면 교환 아이템으로 읽는다', {
+test('두 묶음에 겹친 이름은 한 번만 읽어 종류를 모으고, 한 묶음에서라도 재화 비용이 있으면 교환 아이템으로 읽는다', {
   skip: port === undefined
 }, async () => {
   const currency = await client.labCurrency.create({
@@ -75,6 +75,7 @@ test('두 묶음에 겹친 이름은 한 번만 읽고, 한 묶음에서라도 �
     data: [
       { category: 'WEAPON', role: 'dealer', tier: 'semi', itemName: shared, ...cost },
       { category: 'WEAPON', role: 'buffer', tier: 'end', itemName: shared },
+      { category: 'JACKET', role: 'buffer', tier: 'end', itemName: shared },
       { category: 'TITLE', role: 'all', tier: 'end', itemName: single }
     ]
   })
@@ -84,8 +85,8 @@ test('두 묶음에 겹친 이름은 한 번만 읽고, 한 묶음에서라도 �
   assert.deepEqual(
     targets.toSorted((left, right) => left.itemName.localeCompare(right.itemName)),
     [
-      { itemName: shared, exchanged: true },
-      { itemName: single, exchanged: false }
+      { itemName: shared, exchanged: true, categories: ['JACKET', 'WEAPON'] },
+      { itemName: single, exchanged: false, categories: ['TITLE'] }
     ].toSorted((left, right) => left.itemName.localeCompare(right.itemName))
   )
 })

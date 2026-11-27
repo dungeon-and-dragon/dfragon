@@ -42,7 +42,7 @@ export interface CharactersFameQuery {
 
 export interface AuctionQuery {
   itemName: string
-  wordType: 'match'
+  wordType: 'match' | 'front'
   sort: 'unitPrice:asc'
   limit: number
 }

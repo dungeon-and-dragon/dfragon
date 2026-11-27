@@ -6,6 +6,11 @@ export interface AuctionListing {
 
 export type FetchLowestListing = (itemName: string) => Promise<AuctionListing | null>
 
+export type FetchLowestLevelListing = (
+  itemName: string,
+  itemTypeDetails: readonly string[]
+) => Promise<AuctionListing | null>
+
 export interface FoundItem {
   itemId: string
   itemRarity: string

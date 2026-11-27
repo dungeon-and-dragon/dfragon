@@ -11,6 +11,7 @@ export type AuctionPriceEntry = {
 export type LabItemPriceTarget = {
   itemName: string
   exchanged: boolean
+  categories: string[]
 }
 
 // 같은 이름이 여러 묶음에 있으면, 한 묶음에서라도 재화 비용을 붙인 이름은 경매장에서 찾지 않는다.
@@ -18,7 +19,10 @@ export async function readLabItemPriceTargets(
   client: DatabaseClient
 ): Promise<LabItemPriceTarget[]> {
   return client.$queryRaw<LabItemPriceTarget[]>`
-    SELECT "item_name" AS "itemName", bool_or("currency_id" IS NOT NULL) AS "exchanged"
+    SELECT
+      "item_name" AS "itemName",
+      bool_or("currency_id" IS NOT NULL) AS "exchanged",
+      array_agg(DISTINCT "category" ORDER BY "category") AS "categories"
     FROM "lab_items"
     GROUP BY "item_name"
     ORDER BY "item_name"`
