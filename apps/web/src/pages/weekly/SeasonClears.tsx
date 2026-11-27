@@ -23,6 +23,8 @@ import { useArrowNudge } from './animations/useArrowNudge'
 import { useAdventureActivity } from './api/useAdventureActivity'
 
 const HARD_BADGE = 'badge bg-danger-weak text-fg-danger'
+// 깨어난 숲의 극은 레이드 하드와 같은 어려운 단계다.
+const HARD_STAGES = new Set(['하드', '극'])
 const MUTED_LABEL = 'text-xs font-medium text-fg-muted'
 const ROW =
   'relative flex h-12 items-center gap-2 overflow-hidden rounded-control bg-control px-4 whitespace-nowrap'
@@ -48,8 +50,7 @@ const BACKGROUNDS = new Map<string, string>([
   ['코드네임 게이볼그', gaeBolg],
   ['아포칼립스', apocalypse],
   ['베누스', venus],
-  ['깨어난 숲(극)', awakenedForest],
-  ['깨어난 숲(일반)', awakenedForest],
+  ['깨어난 숲', awakenedForest],
   ['어둑섬', darkIsland],
   ['차원회랑', dimensionCorridor],
   ['이스핀즈', ispins]
@@ -65,8 +66,7 @@ const RELEASED_AT = new Map<string, number>(
     ['이내 황혼전', '2025-08-21'],
     ['만들어진 신 나벨', '2025-04-17'],
     ['베누스', '2025-02-06'],
-    ['깨어난 숲(극)', '2024-07-18'],
-    ['깨어난 숲(일반)', '2024-07-18'],
+    ['깨어난 숲', '2024-07-18'],
     ['아스라한', '2024-02-22'],
     ['어둑섬', '2023-11-09'],
     ['차원회랑', '2022-12-29'],
@@ -99,28 +99,41 @@ type ClearRow = Readonly<{
   stages: readonly StageCount[]
 }>
 
-// API가 출시 순서와 단계 순서로 정렬해 주므로, 같은 레이드의 단계를 나온 순서대로 한 줄에 모은다.
+// 레기온은 단계 없이 `깨어난 숲(극)`처럼 이름 뒤 괄호에 단계를 적는다.
+const LEGION_STAGE = /^(.+)\((극|일반)\)$/
+
+function splitLegionName(name: string): { name: string; stage: string | null } {
+  const match = LEGION_STAGE.exec(name)
+
+  if (match === null) {
+    return { name, stage: null }
+  }
+
+  return { name: match[1]!, stage: match[2]! }
+}
+
+// API가 출시 순서와 단계 순서로 정렬해 주므로, 같은 컨텐츠의 단계를 나온 순서대로 한 줄에 모은다.
 function toClearRows({ raids, legions }: ActivitySummary): ClearRow[] {
   const rows = new Map<string, ClearRow & { stages: StageCount[] }>()
 
-  for (const { name, raid = name, stage = null, count } of raids) {
-    const key = `raid/${raid}`
-    const row = rows.get(key) ?? { key, kind: 'raid', name: raid, stages: [] }
+  function add(kind: ClearRow['kind'], name: string, stage: string | null, count: number): void {
+    const key = `${kind}/${name}`
+    const row = rows.get(key) ?? { key, kind, name, stages: [] }
 
     row.stages.push({ stage, count })
     rows.set(key, row)
   }
 
-  const legionRows = legions.map(
-    ({ name, count }): ClearRow => ({
-      key: `legion/${name}`,
-      kind: 'legion',
-      name,
-      stages: [{ stage: null, count }]
-    })
-  )
+  for (const { name, raid = name, stage = null, count } of raids) {
+    add('raid', raid, stage, count)
+  }
 
-  return [...rows.values(), ...legionRows]
+  for (const legion of legions) {
+    const { name, stage } = splitLegionName(legion.name)
+    add('legion', name, stage, legion.count)
+  }
+
+  return [...rows.values()]
 }
 
 function isPastSeasonContent({ name }: ClearRow, seasonStartsAt: number): boolean {
@@ -130,7 +143,7 @@ function isPastSeasonContent({ name }: ClearRow, seasonStartsAt: number): boolea
 }
 
 function stageSlotOf(stage: string | null): number {
-  if (stage === '하드') {
+  if (stage !== null && HARD_STAGES.has(stage)) {
     return 0
   }
 
@@ -146,7 +159,7 @@ function StageCountItem({ stage, count }: StageCount): React.JSX.Element {
 
   return (
     <span className="inline-flex items-baseline gap-1 max-sm:flex-col max-sm:items-end max-sm:gap-0">
-      <span className={label === '하드' ? HARD_BADGE : MUTED_LABEL}>{label}</span>
+      <span className={HARD_STAGES.has(label) ? HARD_BADGE : MUTED_LABEL}>{label}</span>
       <span className="num inline-block min-w-[5ch] text-right text-xl font-semibold max-sm:text-base">
         {numberFormat.format(count)}
       </span>
