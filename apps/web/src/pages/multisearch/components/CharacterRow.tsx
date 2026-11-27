@@ -50,11 +50,6 @@ const noticeToneClasses: Readonly<Record<SlotNotice['tone'], string>> = {
   estimate: 'text-fg-warning'
 }
 
-const shortScoreLabels: Readonly<Record<ScoreView['label'], string>> = {
-  '장비 점수': '장비',
-  '버프 점수': '버프'
-}
-
 export function CharacterRow({
   cardKey,
   card,
@@ -493,7 +488,6 @@ function ScoreCell({ score }: { score: ScoreView }): React.JSX.Element {
 
   return (
     <td className="text-right">
-      <span className="mr-2 text-2xs text-fg-subtle">{shortScoreLabels[score.label]}</span>
       {value != null ? (
         <span
           title={description}
