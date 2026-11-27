@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { BatchKeyPanel } from '#ops-components/BatchKeyPanel'
 import { CollectionPanel } from '#ops-components/CollectionPanel'
 import { JobTable } from '#ops-components/JobTable'
+import { LabCandidateExclusionPanel } from '#ops-components/LabCandidateExclusionPanel'
 import { LabCandidatePanel } from '#ops-components/LabCandidatePanel'
 import { LabCurrencyPanel } from '#ops-components/LabCurrencyPanel'
 import { LabItemDetailPanel } from '#ops-components/LabItemDetailPanel'
@@ -79,6 +80,15 @@ function OperationsContent(): React.JSX.Element {
   )
 }
 
+function LabCandidatesContent(): React.JSX.Element {
+  return (
+    <>
+      <LabCandidatePanel />
+      <LabCandidateExclusionPanel />
+    </>
+  )
+}
+
 export function OpsScreen({ page }: { page: OpsPageId }): React.JSX.Element {
   const queryClient = useQueryClient()
   const jobs = useJobs()
@@ -97,7 +107,7 @@ export function OpsScreen({ page }: { page: OpsPageId }): React.JSX.Element {
         onRefresh={handleRefresh}
       />
       <main className="page page-wide screen">
-        {page === 'lab-candidates' ? <LabCandidatePanel /> : <OperationsContent />}
+        {page === 'lab-candidates' ? <LabCandidatesContent /> : <OperationsContent />}
       </main>
     </div>
   )

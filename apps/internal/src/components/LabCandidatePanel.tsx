@@ -17,6 +17,7 @@ import type {
 } from '#ops-api/ops-schemas'
 import { formatCount, formatDateSecond } from '#ops-app/format'
 import {
+  useExcludeLabCandidate,
   useJobs,
   useLabCandidateIconUrl,
   useLabCandidates,
@@ -80,7 +81,7 @@ const BADGE_TONES: Readonly<Record<LabCandidateBadge, StatusChipTone>> = {
   '매물 없음': 'warning'
 }
 
-const COLUMN_COUNT = 9
+const COLUMN_COUNT = 10
 
 function queryOf(
   kind: LabCandidateKind,
@@ -358,9 +359,11 @@ type CandidateRowProps = {
   tier: LabItemTier | null
   pending: boolean
   locked: boolean
+  selected: boolean
   expanded: boolean
   onToggle: (itemName: string) => void
   onTierChange: (itemName: string, tier: LabItemTier | null) => void
+  onExclude: (itemName: string) => void
 }
 
 function CandidateRow({
@@ -368,13 +371,19 @@ function CandidateRow({
   tier,
   pending,
   locked,
+  selected,
   expanded,
   onToggle,
-  onTierChange
+  onTierChange,
+  onExclude
 }: CandidateRowProps): React.JSX.Element {
   const { name } = rarityClassesOf(candidate.itemRarity)
   const options = optionsOf(candidate)
   const buff = candidate.buffLines.join(', ')
+
+  function handleExclude(): void {
+    onExclude(candidate.itemName)
+  }
 
   return (
     <tr>
@@ -416,6 +425,16 @@ function CandidateRow({
           locked={locked}
           onChange={onTierChange}
         />
+      </td>
+      <td className="table-num">
+        <Button
+          size="sm"
+          disabled={locked || selected}
+          aria-label={`${candidate.itemName} 제외`}
+          onClick={handleExclude}
+        >
+          제외
+        </Button>
       </td>
     </tr>
   )
@@ -487,10 +506,12 @@ type CandidateTableProps = {
   expanded: string | null
   tierOf: (itemName: string) => LabItemTier | null
   isPending: (itemName: string) => boolean
+  isSelected: (itemName: string) => boolean
   locked: boolean
   onSort: (key: SortKey) => void
   onToggle: (itemName: string) => void
   onTierChange: (itemName: string, tier: LabItemTier | null) => void
+  onExclude: (itemName: string) => void
 }
 
 function CandidateTable({
@@ -499,24 +520,27 @@ function CandidateTable({
   expanded,
   tierOf,
   isPending,
+  isSelected,
   locked,
   onSort,
   onToggle,
-  onTierChange
+  onTierChange,
+  onExclude
 }: CandidateTableProps): React.JSX.Element {
   return (
     <div className="table-scroll">
       <table className="table table-fixed table-wide table-wrap">
         <colgroup>
-          <col className="w-[280px]" />
-          <col className="w-[84px]" />
+          <col className="w-[240px]" />
+          <col className="w-[76px]" />
           <col />
-          <col className="w-[220px]" />
           <col className="w-[150px]" />
-          <col className="w-[72px]" />
+          <col className="w-[140px]" />
+          <col className="w-[64px]" />
           <col className="w-[112px]" />
           <col className="w-[72px]" />
-          <col className="w-[132px]" />
+          <col className="w-[112px]" />
+          <col className="w-[88px]" />
         </colgroup>
         <thead>
           <tr>
@@ -531,6 +555,7 @@ function CandidateTable({
               추천
             </th>
             <th scope="col">등급</th>
+            <th scope="col" aria-label="제외" />
           </tr>
         </thead>
         <tbody>
@@ -545,9 +570,11 @@ function CandidateTable({
                   tier={tierOf(itemName)}
                   pending={isPending(itemName)}
                   locked={locked}
+                  selected={isSelected(itemName)}
                   expanded={open}
                   onToggle={onToggle}
                   onTierChange={onTierChange}
+                  onExclude={onExclude}
                 />
                 {open && <PriceHistoryRow itemName={itemName} columns={COLUMN_COUNT} />}
               </Fragment>
@@ -573,6 +600,7 @@ export function LabCandidatePanel(): React.JSX.Element {
   const candidates = useLabCandidates(query)
   const labItems = useLabItems()
   const replaceLabItems = useReplaceLabItems()
+  const excludeLabCandidate = useExcludeLabCandidate()
   const groups = labItems.data?.groups ?? []
   // 저장된 묶음을 읽기 전에 저장하면 빈 묶음에서 시작한 목록이 다른 아이템을 지운다.
   const ready = candidates.data !== undefined && labItems.data !== undefined && !labItems.isError
@@ -591,6 +619,28 @@ export function LabCandidatePanel(): React.JSX.Element {
 
   function isPending(itemName: string): boolean {
     return pendingIds.has(tierChangeIdOf(slot, itemName))
+  }
+
+  function isSelected(itemName: string): boolean {
+    return groups.some(({ items }) => items.some((item) => item.itemName === itemName))
+  }
+
+  function exclude(itemName: string): void {
+    excludeLabCandidate.mutate(itemName, {
+      onSuccess: () => {
+        setChanges((current) => {
+          const next = new Map(current)
+
+          for (const [id, change] of current) {
+            if (change.itemName === itemName) {
+              next.delete(id)
+            }
+          }
+
+          return next
+        })
+      }
+    })
   }
 
   function changeTier(itemName: string, tier: LabItemTier | null): void {
@@ -715,10 +765,12 @@ export function LabCandidatePanel(): React.JSX.Element {
         expanded={expanded}
         tierOf={tierOf}
         isPending={isPending}
-        locked={saving}
+        isSelected={isSelected}
+        locked={saving || excludeLabCandidate.isPending}
         onSort={changeSort}
         onToggle={toggleHistory}
         onTierChange={changeTier}
+        onExclude={exclude}
       />
     )
   }
@@ -771,6 +823,11 @@ export function LabCandidatePanel(): React.JSX.Element {
       {saveFailed && (
         <p role="alert" className="state state-error">
           저장하지 못했습니다.
+        </p>
+      )}
+      {excludeLabCandidate.isError && (
+        <p role="alert" className="state state-error">
+          제외하지 못했습니다.
         </p>
       )}
       {body()}

@@ -89,6 +89,13 @@ type LabItemDetailRequest = {
 
 type LabCurrencyRequest = { name: string; description: string; icon?: string }
 
+export type LabCandidateExclusionBody = {
+  itemName: string
+  excludedAt: string
+}
+
+type LabCandidateExclusionRequest = { itemName: string }
+
 export type LabCandidateBody = {
   itemName: string
   kind: 'TITLE' | 'CREATURE' | 'AURA' | 'ENCHANT'
@@ -263,6 +270,7 @@ export class FakeOpsApi {
   labCandidates: LabCandidateBody[] = []
   labCandidateHistory: Record<string, PriceHistoryBody[]> = {}
   labCandidateQueries: Record<string, string>[] = []
+  labCandidateExclusions: LabCandidateExclusionBody[] = []
   now = () => new Date().toISOString()
   requests: RecordedRequest[] = []
   private nextRunId = 1000
@@ -358,6 +366,18 @@ export class FakeOpsApi {
       const history = this.labCandidateHistory[itemName] ?? []
 
       return json(200, { history })
+    }
+
+    if (method === 'GET' && path === 'lab-candidates/exclusions') {
+      return json(200, { exclusions: this.labCandidateExclusions })
+    }
+
+    if (method === 'POST' && path === 'lab-candidates/exclusions') {
+      return this.excludeLabCandidate(body as LabCandidateExclusionRequest)
+    }
+
+    if (method === 'DELETE' && path === 'lab-candidates/exclusions') {
+      return this.includeLabCandidate(body as LabCandidateExclusionRequest)
     }
 
     if (method === 'GET' && path === 'lab-candidates/icon') {
@@ -501,6 +521,34 @@ export class FakeOpsApi {
     }
 
     return new Response(PNG_SIGNATURE, { status: 200, headers: { 'Content-Type': 'image/png' } })
+  }
+
+  /** 운영 app처럼 실험실 아이템 묶음에 든 이름은 409로 거절하고, 제외하면 후보 줄을 지워 최근 순 목록 앞에 넣는다. */
+  private excludeLabCandidate({ itemName }: LabCandidateExclusionRequest): Response {
+    const selected = this.labItems.some(({ items }) =>
+      items.some((item) => item.itemName === itemName)
+    )
+
+    if (selected) {
+      return failure(409, 'LAB_CANDIDATE_IN_LAB_ITEMS')
+    }
+
+    if (!this.labCandidateExclusions.some((exclusion) => exclusion.itemName === itemName)) {
+      const excludedAt = this.now()
+      this.labCandidateExclusions = [{ itemName, excludedAt }, ...this.labCandidateExclusions]
+    }
+
+    this.labCandidates = this.labCandidates.filter((candidate) => candidate.itemName !== itemName)
+
+    return new Response(null, { status: 204 })
+  }
+
+  private includeLabCandidate({ itemName }: LabCandidateExclusionRequest): Response {
+    this.labCandidateExclusions = this.labCandidateExclusions.filter(
+      (exclusion) => exclusion.itemName !== itemName
+    )
+
+    return new Response(null, { status: 204 })
   }
 
   /** 운영 app처럼 묶음 하나만 바꾸고, 비운 묶음은 목록에서 뺀다. 입력 검증은 운영 app 테스트가 맡는다. */

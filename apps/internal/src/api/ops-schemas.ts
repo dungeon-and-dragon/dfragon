@@ -170,6 +170,12 @@ export const labCandidatePriceHistorySchema = z.object({
   history: z.array(priceHistoryEntrySchema)
 })
 
+const labCandidateExclusionSchema = z.object({ itemName: z.string(), excludedAt: timestamp })
+
+export const labCandidateExclusionListSchema = z.object({
+  exclusions: z.array(labCandidateExclusionSchema)
+})
+
 export const failureSchema = z.object({ error: z.object({ code: z.string() }) })
 
 export type RunTrigger = z.infer<typeof runTriggerSchema>
@@ -198,3 +204,5 @@ export type LabCandidateBadge = NonNullable<LabCandidate['badge']>
 export type LabCandidateList = z.infer<typeof labCandidateListSchema>
 export type PriceHistoryEntry = z.infer<typeof priceHistoryEntrySchema>
 export type LabCandidatePriceHistory = z.infer<typeof labCandidatePriceHistorySchema>
+export type LabCandidateExclusion = z.infer<typeof labCandidateExclusionSchema>
+export type LabCandidateExclusionList = z.infer<typeof labCandidateExclusionListSchema>
