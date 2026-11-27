@@ -2,7 +2,7 @@ import type { AuctionPriceService } from '@dfragon/server-core/application/aucti
 import { subHours } from 'date-fns'
 import { z } from 'zod'
 import { defineJob, NEOPLE_APIS } from '#application/jobs/index.js'
-import type { LabCandidatePriceRepository } from './candidate-repository.js'
+import type { LabCandidatePriceRepository } from './repository.js'
 
 const HISTORY_RETENTION_DAYS = 180
 

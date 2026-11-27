@@ -4,7 +4,7 @@ import {
   type LabItemPriceTarget,
   readLabCandidatePriceTargets
 } from '@dfragon/database'
-import type { LabCandidatePriceRepository } from '#application/auction-prices/candidate-repository.js'
+import type { LabCandidatePriceRepository } from '#application/auction-prices/repository.js'
 
 export class DatabaseLabCandidatePriceRepository implements LabCandidatePriceRepository {
   constructor(private readonly client: DatabaseClient) {}
