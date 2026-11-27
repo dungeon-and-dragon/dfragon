@@ -115,7 +115,7 @@ export function SeasonClears({
 }): React.JSX.Element {
   return (
     <TimelineGroup
-      title="시즌 클리어 횟수"
+      title="이번 시즌 클리어"
       count={counts.length}
       emptyText="이번 시즌 클리어 기록이 없습니다."
     >
