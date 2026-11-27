@@ -27,7 +27,10 @@ import { ItemDictionaryService } from '@dfragon/server-core/application/item-dic
 import { parseCharacterSkillStyle } from '@dfragon/server-core/infrastructure/neople/index.js'
 import type { FetchItemDetails } from '@dfragon/server-core/application/item-dictionary/ports.js'
 import { createItemDictionaryFillJob } from '#application/item-dictionary/index.js'
-import { createAuctionPriceJob } from '#application/auction-prices/index.js'
+import {
+  createAuctionPriceJob,
+  createLabCandidatePriceJob
+} from '#application/auction-prices/index.js'
 import {
   DatabaseAcquisitionItemRepository,
   DatabaseCharacterActivityRepository,
@@ -38,6 +41,7 @@ import {
   DatabaseSkillStyleCollectionRepository,
   DatabaseStatsJobRepository,
   DatabaseJobRunCleanupRepository,
+  DatabaseLabCandidatePriceRepository,
   DatabaseLabItemRepository,
   DatabaseScoreCalculationRepository
 } from '#infrastructure/database/index.js'
@@ -179,6 +183,7 @@ export function createWorkerJobs(
     createItemAdoptionJob(statsService),
     createScoreCalculationJob(scoreService, scoreSchedule),
     createItemDictionaryFillJob(new DatabaseAcquisitionItemRepository(client), itemDictionary),
-    createAuctionPriceJob(new DatabaseLabItemRepository(client), auctionPrices)
+    createAuctionPriceJob(new DatabaseLabItemRepository(client), auctionPrices),
+    createLabCandidatePriceJob(new DatabaseLabCandidatePriceRepository(client), auctionPrices)
   ]
 }
