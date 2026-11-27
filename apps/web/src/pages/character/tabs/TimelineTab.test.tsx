@@ -266,7 +266,7 @@ it('받는 동안 받는 중을 알리고, 받은 뒤 묶음을 시즌, 강화, 
 
   expect(container.querySelector('[role="status"]')).toBeNull()
   expect([...container.querySelectorAll('section')].map((section) => section.ariaLabel)).toEqual([
-    '시즌 클리어 횟수',
+    '이번 시즌 클리어',
     '강화, 증폭, 재련',
     '획득'
   ])
@@ -277,7 +277,7 @@ it('시즌 클리어는 종류 뒤 하드 배지로 나눈 횟수 칩을 보이�
   respond('/timeline', [json(FILLED)])
   await open(detailOf())
 
-  expect(rowsOf('시즌 클리어 횟수')).toEqual([
+  expect(rowsOf('이번 시즌 클리어')).toEqual([
     ['레이드', '하드', '디레지에 레이드', '3'],
     ['레이드', '하드', '나벨 레이드', '2'],
     ['레이드', '나벨 레이드', '1'],
@@ -348,7 +348,7 @@ it('탭을 숨겼다가 다시 열거나 같은 캐릭터의 상세를 새로 �
   await hide()
   await render(detailOf())
 
-  expect(rowsOf('시즌 클리어 횟수')).toHaveLength(4)
+  expect(rowsOf('이번 시즌 클리어')).toHaveLength(4)
   expect(requested).toEqual([timelineUrl()])
 })
 
