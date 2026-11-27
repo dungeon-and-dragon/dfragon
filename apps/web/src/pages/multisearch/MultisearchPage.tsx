@@ -9,6 +9,7 @@ import {
   type BrowserHost
 } from '#features/capture-search'
 import { SearchScreen } from './SearchScreen'
+import { LabTabs } from '#widgets/lab-tabs'
 
 const ARROW_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 
@@ -63,7 +64,12 @@ function AutoRounds({ host }: { host: BrowserHost }): null {
 export function MultisearchPage(): React.JSX.Element {
   const host = useBrowserHost()
 
-  return <MultisearchBoard host={host} />
+  return (
+    <div className="flex flex-col">
+      <LabTabs />
+      <MultisearchBoard host={host} />
+    </div>
+  )
 }
 
 export function MultisearchBoard({ host }: { host: BrowserHost }): React.JSX.Element {

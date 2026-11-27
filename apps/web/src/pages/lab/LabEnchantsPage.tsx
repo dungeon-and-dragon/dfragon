@@ -4,7 +4,7 @@ import { PageNote } from '#shared/ui/PageNote'
 import { RelativeTime } from '#shared/ui/RelativeTime'
 import { useLabItems } from './api/useLabItems'
 import { LabItemTable } from './LabItemTable'
-import { LabTabs } from './LabTabs'
+import { LabTabs } from '#widgets/lab-tabs'
 import {
   accessoryRowsOf,
   type EnchantRole,

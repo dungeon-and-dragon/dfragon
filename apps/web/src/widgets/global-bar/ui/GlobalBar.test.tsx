@@ -93,14 +93,14 @@ it('지금 항목이 바뀌면 메뉴의 밑줄 하나가 새 항목 아래로 �
   await render('/rankings')
 
   expect(underlines()).toHaveLength(1)
-  expect(underline()).toEqual({ left: '90px', width: '75px', visibility: 'visible' })
+  expect(underline()).toEqual({ left: '0px', width: '70px', visibility: 'visible' })
 
   const adventures = menuLinks().find((link) => link.textContent === '모험단')!
   await act(async () => adventures.click())
 
   expect(adventures.getAttribute('aria-current')).toBe('page')
   expect(underlines()).toHaveLength(1)
-  expect(underline()).toEqual({ left: '270px', width: '85px', visibility: 'visible' })
+  expect(underline()).toEqual({ left: '180px', width: '80px', visibility: 'visible' })
 })
 
 it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면으로 오면 그 항목 아래에 다시 보인다', async () => {
@@ -110,7 +110,7 @@ it('메뉴에 없는 화면에서는 밑줄을 숨기고, 메뉴 항목 화면�
 
   await act(async () => router.navigate({ to: '/stats' }))
 
-  expect(underline()).toEqual({ left: '180px', width: '80px', visibility: 'visible' })
+  expect(underline()).toEqual({ left: '90px', width: '75px', visibility: 'visible' })
 })
 
 it('클리어 집계 주소에서는 통계 메뉴를 현재 화면으로 표시한다', async () => {
@@ -121,21 +121,11 @@ it('클리어 집계 주소에서는 통계 메뉴를 현재 화면으로 표시
   expect(menuLinks().map((link) => link.textContent)).not.toContain('클리어')
 })
 
-it('멀티서치 주소에서 메뉴 항목을 현재 화면으로 표시한다', async () => {
-  await render('/multisearch')
-
-  expect(menuLinks()[0].getAttribute('href')).toBe('/multisearch')
-  expect(menuLinks()[0].getAttribute('aria-current')).toBe('page')
-  expect(underline()).toEqual({ left: '0px', width: '70px', visibility: 'visible' })
-})
-
 it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화면으로 가면 검색창을 다시 보인다', async () => {
   await render('/')
 
   expect(container.querySelector('form[role="search"]')).toBeNull()
   expect(menuLinks().map((link) => link.getAttribute('aria-current'))).toEqual([
-    null,
-    null,
     null,
     null,
     null,
@@ -148,16 +138,14 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
   expect(container.querySelector('form[role="search"]')).not.toBeNull()
 })
 
-it('장비 시뮬레이터 항목은 즐겨찾기 바로 왼쪽에서 시뮬레이터 검색 주소로 간다', async () => {
+it('장비 시뮬레이터 항목은 메뉴 맨 끝에서 시뮬레이터 검색 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
   await render('/rankings')
 
   expect(menuLinks().map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
-    ['멀티서치', '/multisearch'],
     ['검색', '/rankings'],
     ['통계', '/stats'],
     ['모험단', '/adventures'],
-    ['장비 시뮬레이터', '/simulator'],
-    ['즐겨찾기', '/favorites']
+    ['장비 시뮬레이터', '/simulator']
   ])
 })
 
@@ -181,9 +169,14 @@ it('캐릭터 상세 주소에서는 장비 시뮬레이터를 지금 항목으�
   expect(currentLabels()).toEqual([])
 })
 
-it('실험실 아래 주소에서는 메뉴에 실험실 항목이 없고 지금 항목도 두지 않는다', async () => {
-  await render('/lab/enchants')
+it.each(['/lab/enchants', '/lab/multisearch'])(
+  '실험실 아래 주소(%s)에서는 메뉴에 실험실과 멀티서치 항목이 없고 지금 항목도 두지 않는다',
+  async (path) => {
+    await render(path)
 
-  expect(menuLinks().map((link) => link.textContent)).not.toContain('실험실')
-  expect(currentLabels()).toEqual([])
-})
+    const labels = menuLinks().map((link) => link.textContent)
+    expect(labels).not.toContain('실험실')
+    expect(labels).not.toContain('멀티서치')
+    expect(currentLabels()).toEqual([])
+  }
+)
