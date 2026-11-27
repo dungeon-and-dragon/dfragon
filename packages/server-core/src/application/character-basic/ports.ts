@@ -21,5 +21,5 @@ export type ParseCharacterSkillStyle = (
 ) => Omit<CharacterSkillStyleInput, 'serverId' | 'characterId' | 'fetchedAt'> | undefined
 
 export type ParseCharacterSets = (
-  payloads: Pick<CharacterPayloads, 'equipment' | 'oath'>
+  payloads: Pick<CharacterPayloads, 'equipment' | 'oath' | 'avatar' | 'creature'>
 ) => CharacterSets | undefined

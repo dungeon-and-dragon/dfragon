@@ -63,6 +63,14 @@ const oathSchema = z.looseObject({
     .nullish()
 })
 
+const wornItemFields = { itemId: z.string().nullish(), itemName: z.string().nullish() }
+
+const avatarSchema = z.looseObject({
+  avatar: z.array(z.looseObject({ slotId: z.string().nullish(), ...wornItemFields })).nullish()
+})
+
+const creatureSchema = z.looseObject({ creature: z.looseObject(wornItemFields).nullish() })
+
 function toEquipmentSet({
   equipment,
   setItemInfo
@@ -84,12 +92,15 @@ function toEquipmentSet({
   return { id: active.setItemId, name }
 }
 
-const WEAPON_SLOT_ID = 'WEAPON'
+const KEPT_EQUIPMENT_SLOT_IDS = new Set(['WEAPON', 'TITLE'])
+const AURA_SLOT_ID = 'AURORA'
+// 크리쳐 응답에는 부위가 없어 character_items에 이 부위 id로 둔다.
+const CREATURE_SLOT_ID = 'CREATURE'
 
 // 유일 장비는 exaltedInfo가 있는 부위라, 유일 장비가 다른 부위에 생겨도 부위 목록을 고치지 않는다.
-function toItems({ equipment }: z.output<typeof equipmentSchema>): CharacterItem[] {
+function toEquipmentItems({ equipment }: z.output<typeof equipmentSchema>): CharacterItem[] {
   return (equipment ?? []).flatMap(({ slotId, itemId, itemName, itemTypeDetail, exaltedInfo }) => {
-    const kept = slotId === WEAPON_SLOT_ID || exaltedInfo != null
+    const kept = (slotId != null && KEPT_EQUIPMENT_SLOT_IDS.has(slotId)) || exaltedInfo != null
 
     if (!kept || !slotId || !itemId || !itemName) {
       return []
@@ -97,6 +108,26 @@ function toItems({ equipment }: z.output<typeof equipmentSchema>): CharacterItem
 
     return [{ slotId, itemId, itemName, typeDetail: itemTypeDetail }]
   })
+}
+
+function toAuraItems({ avatar }: z.output<typeof avatarSchema>): CharacterItem[] {
+  return (avatar ?? []).flatMap(({ slotId, itemId, itemName }) => {
+    if (slotId !== AURA_SLOT_ID || !itemId || !itemName) {
+      return []
+    }
+
+    return [{ slotId, itemId, itemName, typeDetail: null }]
+  })
+}
+
+function toCreatureItems({ creature }: z.output<typeof creatureSchema>): CharacterItem[] {
+  if (!creature?.itemId || !creature.itemName) {
+    return []
+  }
+
+  const { itemId, itemName } = creature
+
+  return [{ slotId: CREATURE_SLOT_ID, itemId, itemName, typeDetail: null }]
 }
 
 function toOathSet({ oath }: z.output<typeof oathSchema>): CharacterOathSet | null {
@@ -112,14 +143,20 @@ function toOathSet({ oath }: z.output<typeof oathSchema>): CharacterOathSet | nu
 export const parseCharacterSets: ParseCharacterSets = (payloads) => {
   const equipment = equipmentSchema.safeParse(payloads.equipment)
   const oath = oathSchema.safeParse(payloads.oath)
+  const avatar = avatarSchema.safeParse(payloads.avatar)
+  const creature = creatureSchema.safeParse(payloads.creature)
 
-  if (!equipment.success || !oath.success) {
+  if (!equipment.success || !oath.success || !avatar.success || !creature.success) {
     return undefined
   }
 
   const equipmentSet = toEquipmentSet(equipment.data)
   const oathSet = toOathSet(oath.data)
-  const items = toItems(equipment.data)
+  const items = [
+    ...toEquipmentItems(equipment.data),
+    ...toAuraItems(avatar.data),
+    ...toCreatureItems(creature.data)
+  ]
 
   return { equipmentSet, oathSet, items }
 }

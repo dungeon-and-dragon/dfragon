@@ -135,6 +135,7 @@ function candidate(overrides: Partial<LabCandidateSummary>): LabCandidateSummary
     checkedAt: new Date('2026-11-28T01:00:00.000Z'),
     previousPrice: null,
     wearCount: null,
+    wearCountedAt: null,
     ...overrides
   }
 }
@@ -345,6 +346,30 @@ test('조회는 명성 dense rank 1위를 종결, 2위를 준종결로 추천하
     ]
   )
   assert.equal(listed[0].checkedAt, '2026-11-28T01:00:00.000Z')
+})
+
+test('조회는 착용 수와 착용 집계 시각을 후보마다 낸다', async (t) => {
+  const wearCountedAt = new Date('2026-11-28T15:30:00.000Z')
+  const candidates = [
+    candidate({ itemName: '합성 1', wearCount: 3417, wearCountedAt }),
+    candidate({ itemName: '합성 2', wearCount: 0, wearCountedAt })
+  ]
+  const request = await startOpsApp(t, memoryStore(candidates).store)
+
+  const response = await request('?kind=TITLE')
+  const { candidates: listed } = await response.json()
+
+  assert.deepEqual(
+    listed.map(({ itemName, wearCount, wearCountedAt }: Record<string, unknown>) => [
+      itemName,
+      wearCount,
+      wearCountedAt
+    ]),
+    [
+      ['합성 1', 3417, '2026-11-28T15:30:00.000Z'],
+      ['합성 2', 0, '2026-11-28T15:30:00.000Z']
+    ]
+  )
 })
 
 test('가격 이력은 이름을 query로 받아 저장소가 준 순서의 앞 200건까지 낸다', async (t) => {

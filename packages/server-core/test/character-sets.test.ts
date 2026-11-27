@@ -13,6 +13,7 @@ function readSections(role: 'dealer' | 'buffer'): CharacterPayloads {
 
 const header = { serverId: 'cain', characterId: 'synthetic', characterName: '합성캐릭터' }
 const effect = [{ name: '최종 데미지 증가', value: '100%' }]
+const unworn = { avatar: { ...header, avatar: [] }, creature: { ...header, creature: null } }
 
 test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위의 고정 이름으로, 효과가 켜진 서약은 세트와 고른 선택지로 뽑는다', () => {
   assert.deepEqual(parseCharacterSets(readSections('dealer')), {
@@ -24,6 +25,24 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
         itemId: '89c42c1d02e6749244ce518e9b34e1c7',
         itemName: '재앙의 송곳니',
         typeDetail: '낫'
+      },
+      {
+        slotId: 'TITLE',
+        itemId: '6f008c0c92c0346b114d2ffdafb92292',
+        itemName: '프로스트의 전설 플래티넘[35Lv]',
+        typeDetail: '칭호'
+      },
+      {
+        slotId: 'AURORA',
+        itemId: '25e7652de779ccea0d8559a3e5bf7e01',
+        itemName: '고결한 영혼의 잔상',
+        typeDetail: null
+      },
+      {
+        slotId: 'CREATURE',
+        itemId: 'bf04e5b415fea3989e8607efb4987d14',
+        itemName: '운명을 담는 재단사',
+        typeDetail: null
       }
     ]
   })
@@ -37,6 +56,24 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
         itemId: '4c2c36b92f60155c579d36eea9786324',
         itemName: '시크릿 듀엣',
         typeDetail: '선현궁'
+      },
+      {
+        slotId: 'TITLE',
+        itemId: '74711128d2d0739c4f5d38b488d2be2c',
+        itemName: '[EVENT]세리아의 풍성한 선물 Ver.2',
+        typeDetail: '칭호'
+      },
+      {
+        slotId: 'AURORA',
+        itemId: 'e3a8f465174ad184ee15dafb221634d2',
+        itemName: '[EVENT]세리아의 파스텔 버블 Ver.2',
+        typeDetail: null
+      },
+      {
+        slotId: 'CREATURE',
+        itemId: 'ece0c0fe0f7164f43337f0abd172471b',
+        itemName: 'SD 히만 스텔라',
+        typeDetail: null
       }
     ]
   })
@@ -63,7 +100,8 @@ test('setItemInfo에 세트가 여럿이면 현재 세트 포인트가 가장 �
         }
       ]
     },
-    oath: { ...header, oath: null }
+    oath: { ...header, oath: null },
+    ...unworn
   })
 
   assert.deepEqual(sets?.equipmentSet, { id: 'set-b', name: '합성 B 세트' })
@@ -72,11 +110,13 @@ test('setItemInfo에 세트가 여럿이면 현재 세트 포인트가 가장 �
 test('setItemInfo가 빈 배열이면 장비 세트가, oath.setInfo가 없으면 서약 세트가 null이다', () => {
   const noOath = parseCharacterSets({
     equipment: { ...header, equipment: [], setItemInfo: [] },
-    oath: { ...header, oath: null }
+    oath: { ...header, oath: null },
+    ...unworn
   })
   const noSetInfo = parseCharacterSets({
     equipment: { ...header, equipment: null, setItemInfo: null },
-    oath: { ...header, oath: { info: null, crystal: [] } }
+    oath: { ...header, oath: { info: null, crystal: [] } },
+    ...unworn
   })
 
   assert.deepEqual(noOath, { equipmentSet: null, oathSet: null, items: [] })
@@ -86,21 +126,31 @@ test('setItemInfo가 빈 배열이면 장비 세트가, oath.setInfo가 없으�
 test('세트 항목의 모양이 다르면 세트 값을 뽑지 않는다', () => {
   const sets = parseCharacterSets({
     equipment: { ...header, equipment: [], setItemInfo: [{ setItemId: 'set-a' }] },
-    oath: { ...header, oath: null }
+    oath: { ...header, oath: null },
+    ...unworn
   })
 
   assert.equal(sets, undefined)
 })
 
-test('가명 처리한 실응답에서 무기와 exaltedInfo가 있는 유일 장비 부위만 뽑는다', () => {
+test('가명 처리한 실응답의 장비에서 무기, 칭호와 exaltedInfo가 있는 유일 장비 부위만 뽑는다', () => {
   const payloads = payloadsFromEngineInput(readEngineInput('buffer-muse'))
+  const equipmentItems = parseCharacterSets(payloads)?.items.filter(
+    ({ slotId }) => slotId !== 'AURORA' && slotId !== 'CREATURE'
+  )
 
-  assert.deepEqual(parseCharacterSets(payloads)?.items, [
+  assert.deepEqual(equipmentItems, [
     {
       slotId: 'WEAPON',
       itemId: '8a79cefa4aec25884139327f093ef696',
       itemName: '검은 질병의 시크릿 콘서트',
       typeDetail: '선현궁'
+    },
+    {
+      slotId: 'TITLE',
+      itemId: '8926f2ed6cd9e9c7929d738e333abac1',
+      itemName: '찢어지는 독기',
+      typeDetail: '칭호'
     },
     {
       slotId: 'SUPPORT',
@@ -111,7 +161,7 @@ test('가명 처리한 실응답에서 무기와 exaltedInfo가 있는 유일 �
   ])
 })
 
-test('유일 장비가 어느 부위에 있든 뽑고, 세트 부위와 칭호, exaltedInfo가 null인 부위는 뽑지 않는다', () => {
+test('유일 장비가 어느 부위에 있든 뽑고, 칭호도 뽑으며, 세트 부위와 exaltedInfo가 null인 부위는 뽑지 않는다', () => {
   const exalted = { damage: '50.2%' }
   const sets = parseCharacterSets({
     equipment: {
@@ -128,12 +178,13 @@ test('유일 장비가 어느 부위에 있든 뽑고, 세트 부위와 칭호, 
       ],
       setItemInfo: []
     },
-    oath: { ...header, oath: null }
+    oath: { ...header, oath: null },
+    ...unworn
   })
 
   assert.deepEqual(
     sets?.items.map(({ slotId }) => slotId),
-    ['WEAPON', 'RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
+    ['WEAPON', 'TITLE', 'RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
   )
 })
 
@@ -161,11 +212,16 @@ test('효과가 켜지지 않은 장비 세트는 고르지 않고, 켜진 세�
     active: { setPoint: { current: 1650, min: 1540, max: 1650 } }
   }
 
-  const mixed = parseCharacterSets({ equipment: equipmentWith([pointsOnly, effective]), oath })
-  const onlyOff = parseCharacterSets({ equipment: equipmentWith([pointsOnly]), oath })
+  const mixed = parseCharacterSets({
+    equipment: equipmentWith([pointsOnly, effective]),
+    oath,
+    ...unworn
+  })
+  const onlyOff = parseCharacterSets({ equipment: equipmentWith([pointsOnly]), oath, ...unworn })
   const noActive = parseCharacterSets({
     equipment: equipmentWith([{ setItemId: 'set-b', setItemName: '등급 B 세트', active: null }]),
-    oath
+    oath,
+    ...unworn
   })
 
   assert.deepEqual(mixed?.equipmentSet, { id: 'set-a', name: '합성 A 세트' })
@@ -173,7 +229,7 @@ test('효과가 켜지지 않은 장비 세트는 고르지 않고, 켜진 세�
   assert.equal(noActive?.equipmentSet, null)
 })
 
-test('효과가 켜지지 않은 서약 세트는 세트와 선택지를 모두 null로 두고, 무기 저장은 그대로다', () => {
+test('효과가 켜지지 않은 서약 세트는 세트와 선택지를 모두 null로 두고, 아이템 줄은 그대로다', () => {
   const sections = readSections('dealer')
   const oath = sections.oath as { oath: { setInfo: { active: Record<string, unknown> } } }
   const {
@@ -195,14 +251,7 @@ test('효과가 켜지지 않은 서약 세트는 세트와 선택지를 모두 
     id: '4ee7bd5912cda6e2a24c1f36d5202b46',
     name: '소울 페어리 세트'
   })
-  assert.deepEqual(sets?.items, [
-    {
-      slotId: 'WEAPON',
-      itemId: '89c42c1d02e6749244ce518e9b34e1c7',
-      itemName: '재앙의 송곳니',
-      typeDetail: '낫'
-    }
-  ])
+  assert.deepEqual(sets?.items, parseCharacterSets(sections)?.items)
 })
 
 test('빈 itemTypeDetail은 종류를 모르는 것으로 null로 뽑는다', () => {
@@ -214,10 +263,68 @@ test('빈 itemTypeDetail은 종류를 모르는 것으로 null로 뽑는다', ()
       ],
       setItemInfo: []
     },
-    oath: { ...header, oath: null }
+    oath: { ...header, oath: null },
+    ...unworn
   })
 
   assert.deepEqual(sets?.items, [
     { slotId: 'WEAPON', itemId: 'weapon', itemName: '합성 무기', typeDetail: null }
   ])
+})
+
+test('아바타에서는 오라 부위만, 크리쳐는 CREATURE 부위로 뽑고 다른 아바타 부위는 뽑지 않는다', () => {
+  const sets = parseCharacterSets({
+    equipment: { ...header, equipment: [], setItemInfo: [] },
+    oath: { ...header, oath: null },
+    avatar: {
+      ...header,
+      avatar: [
+        { slotId: 'HEADGEAR', itemId: 'headgear', itemName: '합성 모자 아바타' },
+        { slotId: 'AURORA', itemId: 'aura', itemName: '합성 오라' },
+        { slotId: 'WEAPON', itemId: 'weapon-avatar', itemName: '합성 무기 아바타' }
+      ]
+    },
+    creature: { ...header, creature: { itemId: 'creature', itemName: '합성 크리쳐[30Lv]' } }
+  })
+
+  assert.deepEqual(sets?.items, [
+    { slotId: 'AURORA', itemId: 'aura', itemName: '합성 오라', typeDetail: null },
+    { slotId: 'CREATURE', itemId: 'creature', itemName: '합성 크리쳐[30Lv]', typeDetail: null }
+  ])
+})
+
+test('크리쳐가 없거나 아이템 id, 이름이 빈 크리쳐와 오라는 뽑지 않는다', () => {
+  const base = {
+    equipment: { ...header, equipment: [], setItemInfo: [] },
+    oath: { ...header, oath: null }
+  }
+  const emptyCreature = parseCharacterSets({
+    ...base,
+    avatar: { ...header, avatar: [{ slotId: 'AURORA', itemId: null, itemName: '합성 오라' }] },
+    creature: { ...header, creature: { itemId: null, itemName: null } }
+  })
+  const noSections = parseCharacterSets({
+    ...base,
+    avatar: { ...header, avatar: null },
+    creature: { ...header }
+  })
+
+  assert.deepEqual(emptyCreature?.items, [])
+  assert.deepEqual(noSections?.items, [])
+})
+
+test('아바타나 크리쳐 응답의 모양이 다르면 세트 값을 뽑지 않는다', () => {
+  const base = {
+    equipment: { ...header, equipment: [], setItemInfo: [] },
+    oath: { ...header, oath: null }
+  }
+
+  assert.equal(
+    parseCharacterSets({ ...base, ...unworn, avatar: { ...header, avatar: 'aura' } }),
+    undefined
+  )
+  assert.equal(
+    parseCharacterSets({ ...base, ...unworn, creature: { ...header, creature: [] } }),
+    undefined
+  )
 })

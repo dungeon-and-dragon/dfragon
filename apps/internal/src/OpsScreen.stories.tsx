@@ -215,6 +215,7 @@ const TITLE_BUFF = ['50레벨 액티브 스킬 Lv +2', '1~95레벨 모든 스킬
 function candidatesApi(): FakeOpsApi {
   const api = new FakeOpsApi()
   const checkedAt = minutesAgo(12)
+  const wearCountedAt = minutesAgo(600)
   const previousCheckedAt = minutesAgo(1_440)
   const previous = (unitPrice: number) => ({
     itemId: 'synthetic-item',
@@ -235,6 +236,7 @@ function candidatesApi(): FakeOpsApi {
       previousPrice: previous(2_063_000_000),
       checkedAt,
       wearCount: 1284,
+      wearCountedAt,
       recommendedTier: '종결'
     }),
     labCandidate({
@@ -246,6 +248,7 @@ function candidatesApi(): FakeOpsApi {
       previousPrice: previous(1_254_000_000),
       checkedAt,
       wearCount: 6902,
+      wearCountedAt,
       recommendedTier: '종결'
     }),
     labCandidate({
@@ -268,6 +271,7 @@ function candidatesApi(): FakeOpsApi {
       previousPrice: previous(216_000_000),
       checkedAt,
       wearCount: 3417,
+      wearCountedAt,
       recommendedTier: '준종결'
     }),
     labCandidate({
@@ -278,6 +282,7 @@ function candidatesApi(): FakeOpsApi {
       unitPrice: null,
       checkedAt,
       wearCount: 412,
+      wearCountedAt,
       recommendedTier: '준종결',
       badge: '매물 없음'
     }),

@@ -116,6 +116,25 @@ function LastRun({ run }: { run: Run | null }): React.JSX.Element | null {
   )
 }
 
+// 착용 수는 표를 통째로 바꾸므로 집계 시각이 모든 후보에 같다. 마법부여 후보는 착용 수를 세지 않아 비어 있다.
+function WearCountedAt({
+  candidates
+}: {
+  candidates: LabCandidate[] | undefined
+}): React.JSX.Element | null {
+  const countedAt = candidates?.find(({ wearCountedAt }) => wearCountedAt !== null)?.wearCountedAt
+
+  if (countedAt == null) {
+    return null
+  }
+
+  return (
+    <span className="text-xs text-fg-subtle">
+      착용 집계 <b className="num font-medium text-fg-muted">{formatDateSecond(countedAt)}</b>
+    </span>
+  )
+}
+
 function lastRunIdOf(jobs: JobList | undefined): number | null | undefined {
   if (jobs === undefined) {
     return undefined
@@ -731,6 +750,7 @@ export function LabCandidatePanel(): React.JSX.Element {
           />
         )}
         <span className="grow" />
+        <WearCountedAt candidates={candidates.data?.candidates} />
         {pending.length > 0 && (
           <span className="text-xs text-fg-subtle">
             변경 <b className="num">{pending.length}</b>

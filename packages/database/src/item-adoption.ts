@@ -5,6 +5,7 @@ import {
   adoptionConditions,
   sampledCharactersSql
 } from './set-adoption.js'
+import { LAB_CANDIDATE_WEAR_SLOT_IDS } from './lab-candidate-wear-count.js'
 
 export type ItemCount = {
   itemId: string
@@ -75,6 +76,7 @@ export async function replaceItemAdoption(
         FROM ${sampled} c
         JOIN character_items item
           ON item.server_id = c.server_id AND item.character_id = c.character_id
+            AND item.slot_id <> ALL(${LAB_CANDIDATE_WEAR_SLOT_IDS}::text[])
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8`
     },
     { timeout: REPLACE_TIMEOUT_MS }

@@ -35,7 +35,8 @@ const MIGRATIONS = [
   '20261127100000_add_lab_currency_description',
   '20261127200000_add_lab_item_details',
   '20261128100000_add_lab_item_tooltip_fields',
-  '20261128200000_add_lab_candidates_auction_price_history'
+  '20261128200000_add_lab_candidates_auction_price_history',
+  '20261128210000_add_lab_candidate_wear_counts'
 ]
 
 const noTooltip = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
@@ -82,7 +83,7 @@ async function connectWithEmptyTables(t) {
 
   t.after(() => client.$disconnect())
   await client.$executeRawUnsafe(
-    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details", "lab_candidates", "auction_price_history"'
+    'DROP TABLE IF EXISTS "lab_items", "auction_prices", "lab_currencies", "lab_item_details", "lab_candidates", "auction_price_history", "lab_candidate_wear_counts"'
   )
 
   for (const name of MIGRATIONS) {
@@ -434,7 +435,8 @@ test('후보를 다른 판으로 다시 넣으면 값을 바꾸고 아이콘과 
       unitPrice: null,
       checkedAt: null,
       previousPrice: null,
-      wearCount: null
+      wearCount: null,
+      wearCountedAt: null
     }
   ])
   await saveLabCandidateIcon(client, itemName, webpIcon)
