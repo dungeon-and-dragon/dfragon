@@ -365,10 +365,13 @@ function performanceOptionsOf(
     return NO_PERFORMANCE_OPTIONS
   }
 
-  const card = candidate.card !== null ? cardPerformanceOf(candidate.card) : NO_PERFORMANCE_OPTIONS
-  const options = [...card.options, ...statusLinesOf(candidate.options)]
+  if (candidate.card !== null) {
+    return cardPerformanceOf(candidate.card)
+  }
 
-  return { slots: card.slots, options }
+  const options = statusLinesOf(candidate.options)
+
+  return { slots: [], options }
 }
 
 function sorted(values: readonly string[]): string[] {
@@ -385,7 +388,7 @@ function performanceKeyOf(
   const { slots, options } = performanceOptionsOf(detail, candidate)
   const buffLines = candidate?.buffLines ?? []
 
-  if (options.length === 0 && buffLines.length === 0) {
+  if (options.length === 0) {
     return null
   }
 
