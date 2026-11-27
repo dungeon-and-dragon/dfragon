@@ -419,6 +419,27 @@ export function hasClearTimes({ weekdays }: ClearTimes): boolean {
   return weekdays.some(({ cleared }) => cleared > 0)
 }
 
+function scaledToMax(columns: readonly ColumnBar[]): ColumnBar[] {
+  const max = Math.max(0, ...columns.map(({ count }) => count))
+
+  return columns.map((column) => {
+    const ratio = max > 0 ? column.count / max : 0
+
+    return { ...column, ratio }
+  })
+}
+
+// 적은 인원 모험단이 대부분이라 한 높이에 두면 뒤 칸이 보이지 않아, 앞뒤 묶음을 나눠 각 묶음의 가장 큰 칸에 높이를 맞춘다.
+export function splitAdventureColumns(
+  columns: readonly ColumnBar[],
+  frontCount: number
+): ColumnBar[][] {
+  const front = scaledToMax(columns.slice(0, frontCount))
+  const back = scaledToMax(columns.slice(frontCount))
+
+  return [front, back]
+}
+
 // 마지막 칸은 그 인원 이상을 모두 센다.
 export function adventureColumns(
   adventures: readonly ClearAdventureSize[],
