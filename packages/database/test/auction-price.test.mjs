@@ -3,12 +3,15 @@ import { after, before, test } from 'node:test'
 import {
   applyMigrations,
   createDatabaseClient,
+  deleteAuctionPriceHistoryBefore,
+  readAuctionPriceHistory,
   readLabItemPriceTargets,
   recordAuctionPrice
 } from '../dist/index.js'
 
 const port = process.env.DFRAGON_TEST_AUCTION_PRICE_PORT
 const database = 'auction_price'
+const rejectedHistoryPricePattern = /test_reject_price/
 
 const connect = (name) =>
   createDatabaseClient({
@@ -125,4 +128,113 @@ test('가격을 다시 받으면 그 이름의 행만 바꾸고, 매물이 없�
     { ...singlePrice, unitPrice: 15_000n },
     { itemName: shared, itemId: null, itemRarity: null, unitPrice: null, checkedAt: later }
   ])
+})
+
+test('가격 이력은 같은 값을 24시간 안에 생략하고 가격, 아이템 id 변경과 24시간 경계에 기록한다', {
+  skip: port === undefined
+}, async () => {
+  const price = {
+    itemName: '합성 이력 아이템',
+    itemId: 'synthetic-a',
+    itemRarity: '레어',
+    unitPrice: 3_000_000_000,
+    checkedAt: new Date('2026-11-01T00:00:00Z')
+  }
+  await recordAuctionPrice(client, price)
+  await recordAuctionPrice(client, {
+    ...price,
+    itemRarity: '유니크',
+    checkedAt: new Date('2026-11-01T23:59:59.999Z')
+  })
+  assert.equal((await readAuctionPriceHistory(client, price.itemName)).length, 1)
+  const daily = { ...price, checkedAt: new Date('2026-11-02T00:00:00Z') }
+  const changed = {
+    ...price,
+    unitPrice: 4_000_000_000,
+    checkedAt: new Date('2026-11-02T00:10:00Z')
+  }
+  const otherId = { ...changed, itemId: 'synthetic-b', checkedAt: new Date('2026-11-02T00:20:00Z') }
+  const noListing = { ...otherId, unitPrice: null, checkedAt: new Date('2026-11-02T00:30:00Z') }
+  const noItem = { ...noListing, itemId: null, checkedAt: new Date('2026-11-02T00:40:00Z') }
+  for (const entry of [daily, changed, otherId, noListing, noItem]) {
+    await recordAuctionPrice(client, entry)
+  }
+  await recordAuctionPrice(client, { ...noItem, checkedAt: new Date('2026-11-02T00:50:00Z') })
+  const history = await readAuctionPriceHistory(client, price.itemName)
+  assert.deepEqual(
+    history.map(({ id, ...entry }) => entry),
+    [noItem, noListing, otherId, changed, daily, price].map(({ itemRarity, ...entry }) => entry)
+  )
+  assert.ok(history.every(({ id }) => typeof id === 'number'))
+  assert.deepEqual(await readAuctionPriceHistory(client, '없는 합성 아이템'), [])
+
+  const before = await client.auctionPriceHistory.count({
+    where: { checkedAt: { lt: daily.checkedAt } }
+  })
+  assert.equal(await deleteAuctionPriceHistoryBefore(client, daily.checkedAt), before)
+  assert.deepEqual(
+    (await readAuctionPriceHistory(client, price.itemName)).map(({ checkedAt }) => checkedAt),
+    [noItem.checkedAt, noListing.checkedAt, otherId.checkedAt, changed.checkedAt, daily.checkedAt]
+  )
+  assert.equal(await deleteAuctionPriceHistoryBefore(client, daily.checkedAt), 0)
+  const latest = await client.auctionPrice.findUnique({ where: { itemName: price.itemName } })
+  assert.deepEqual(latest.checkedAt, new Date('2026-11-02T00:50:00Z'))
+})
+
+test('같은 이름과 가격을 동시에 처음 저장해도 이력은 한 줄이다', {
+  skip: port === undefined
+}, async () => {
+  const price = {
+    itemName: '합성 동시 저장',
+    itemId: 'synthetic-concurrent',
+    itemRarity: null,
+    unitPrice: 100,
+    checkedAt: new Date('2026-11-03T00:00:00Z')
+  }
+  await Promise.all([recordAuctionPrice(client, price), recordAuctionPrice(client, price)])
+  const history = await readAuctionPriceHistory(client, price.itemName)
+  assert.deepEqual(
+    history.map(({ id, ...entry }) => entry),
+    [
+      {
+        itemName: price.itemName,
+        itemId: price.itemId,
+        unitPrice: 100,
+        checkedAt: price.checkedAt
+      }
+    ]
+  )
+})
+
+test('이력 저장이 실패하면 최신 가격 변경도 rollback한다', {
+  skip: port === undefined
+}, async () => {
+  const price = {
+    itemName: '합성 rollback',
+    itemId: 'synthetic-rollback',
+    itemRarity: null,
+    unitPrice: 100,
+    checkedAt: new Date('2026-11-04T00:00:00Z')
+  }
+  await recordAuctionPrice(client, price)
+  await client.$executeRaw`
+    ALTER TABLE "auction_price_history" ADD CONSTRAINT "test_reject_price" CHECK ("unit_price" <> 200)`
+  try {
+    await assert.rejects(
+      recordAuctionPrice(client, {
+        ...price,
+        unitPrice: 200,
+        checkedAt: new Date('2026-11-04T01:00:00Z')
+      }),
+      rejectedHistoryPricePattern
+    )
+    const latest = await client.auctionPrice.findUnique({ where: { itemName: price.itemName } })
+    assert.deepEqual(latest, { ...price, unitPrice: 100n })
+    assert.deepEqual(
+      (await readAuctionPriceHistory(client, price.itemName)).map(({ unitPrice }) => unitPrice),
+      [100]
+    )
+  } finally {
+    await client.$executeRaw`ALTER TABLE "auction_price_history" DROP CONSTRAINT "test_reject_price"`
+  }
 })
