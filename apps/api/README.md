@@ -1,6 +1,6 @@
 # DFragon API
 
-`apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople API에서 조회한 캐릭터는 API 메모리에 1시간, 공용 아이템 정보는 24시간 캐시하며, 캐시는 노드마다 따로 둡니다.
+`apps/api`는 로그인 없는 공개 캐릭터 API(Hono)입니다. Neople 응답 캐시는 API 메모리에 있어 노드마다 따로 둡니다.
 DB 설정이 있으면 상세 조회한 캐릭터의 기본 정보를 PostgreSQL에 저장하고 타임라인 동기화 요청을 넣으며, 모험단, 길드, 랭킹, 통계 경로가 저장한 값을 읽습니다.
 캐릭터 수집 worker는 [`apps/worker`](../worker/README.md)에 있습니다.
 
@@ -54,7 +54,7 @@ Repository와 port를 쓰지 않는 경로(`health`, `version`)는 Controller만
 
 여러 기능이 함께 쓰는 코드는 `src/presentation/http/disconnected-request.ts`처럼 그 계층 폴더 바로 아래에 둡니다.
 여러 기능이 함께 쓰는 실패는 `packages/server-core/src/domain/character-failure.ts`처럼 종류만 두고, 응답 표는 `src/presentation/http/character-failures.ts`처럼 둡니다.
-두 앱이 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
+API, 운영 app, worker가 함께 쓰는 access log, 404와 실패 응답, 공통 header, 공통 middleware 등록과 server 시작, 종료는 [`@dfragon/http-server`](../../packages/http-server/README.md)에 있습니다.
 API와 캐릭터 수집 worker가 함께 쓰는 캐릭터 상세, 공용 아이템, 점수 엔진, 타임라인, 클리어 통계 코드는 [`@dfragon/server-core`](../../packages/server-core/README.md)에 있습니다.
 오류 chain 정제는 `@dfragon/lib/error-chain`, 빌드 정보 읽기는 `src/infrastructure/build-info.ts`, 버전 route는 `src/presentation/http/version/controller.ts`에 있습니다.
 
@@ -139,7 +139,7 @@ node apps/api/test-support/container-deployment.mjs dfragon-api:local
 node apps/api/test-support/container-database.mjs dfragon-api:local dfragon-ops:local dfragon-worker:local
 ```
 
-## 비공개 스킬 패키지 검증
+## 스킬 패키지 검증
 
-`pnpm --filter @dfragon/api verify:skills`는 별도로 설치한 비공개 스킬 패키지로 실제 캐릭터의 스킬 계수, 쿨타임을 계산해 보는 선택 명령입니다.
-서버를 시작하지 않고 DB를 쓰지 않습니다. 비공개 패키지는 dependency와 lockfile에 넣지 않으며, 일반 `test`는 합성 입력으로만 검사합니다.
+`pnpm --filter @dfragon/api verify:skills`는 소유자가 따로 준비한 스킬 패키지로 실제 캐릭터의 스킬 계수, 쿨타임을 계산해 보는 선택 명령입니다.
+서버를 시작하지 않고 DB를 쓰지 않습니다. 스킬 패키지는 dependency와 lockfile에 넣지 않으며, 일반 `test`는 합성 입력으로만 검사합니다.

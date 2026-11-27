@@ -1,58 +1,12 @@
 # @dfragon/database
 
-API가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적용과 migration CLI를 담은 package입니다.
-`prisma`, `@prisma/client`, `@prisma/adapter-pg`(모두 7.10.1) 의존성을 이 package가 갖고, API는 `"@dfragon/database": "workspace:*"`로 공개 export만 씁니다.
+API, worker, 운영 app(`apps/ops`)과 `@dfragon/server-core`가 쓰는 PostgreSQL 설정 읽기, Prisma 설정, 시작 때 migration 적용과 migration CLI를 담은 package입니다.
+`prisma`, `@prisma/client`, `@prisma/adapter-pg`(모두 7.10.1) 의존성을 이 package가 갖고, 소비 workspace는 `"@dfragon/database": "workspace:*"`로 공개 export만 씁니다.
 이 package는 `apps/api`를 import하지 않습니다. 동작은 [API README의 DB와 migration](../../apps/api/README.md#db와-migration)을 따릅니다.
 
 ## 공개 export
 
-- `readDatabaseConfiguration(environment)`: DB 입력 다섯 개를 읽어 설정이나 `undefined`를 돌려주고, 일부만 있으면 던집니다.
-- `applyMigrations()`: 현재 프로세스의 DB 입력으로 `prisma migrate deploy`를 실행합니다.
-- `createDatabaseClient(configuration, pool?)`: `@prisma/adapter-pg`를 쓰는 Prisma client(`DatabaseClient`)를 만듭니다. `pool`로 연결 수, 연결 대기 상한, statement timeout을 정합니다. 끝낼 때 호출자가 `$disconnect()`를 부릅니다.
-- `recordCharacter(client, character)`: 캐릭터의 서버, id, 이름과 모험단을 기록합니다.
-- `recordCharacterBasic(client, basic)`: Neople 기본 정보를 저장하고 기본 정보 대기열 행을 지웁니다.
-- `recordCharacterSkillStyle(client, style)`: 캐릭터의 스킬 스타일과 스킬 체인을 덮어씁니다.
-- `recordCharacterScore(client, score)`: 캐릭터의 점수(근사값 포함)를 계산한 전직과 함께 저장합니다. 엔진 버전, 점수 종류, 전직, 근사 방식이 같으면 더 높은 점수만 남기고, 다르면 새 점수로 덮어씁니다.
-- `readCharacterScores(client, characters)`: 고른 캐릭터 가운데 점수가 저장된 캐릭터의 점수 종류, 값, 근사 방식을 읽습니다.
-- `recordCharacterSets(client, sets)`: 캐릭터의 장비 세트, 서약 세트, 무기와 유일 장비, 받은 시각을 한 transaction에서 저장합니다. 값이 같거나 저장된 시각이 더 늦으면 바꾸지 않습니다.
-- `recordCharacterHistory(client, history)`: 캐릭터 상세를 받은 결과(받은 시각, 기본 정보, 섹션 본문, 점수)에서 직전과 달라진 것만 이력에 더합니다. 명성이나 점수가 직전 기록보다 낮은 결과는 더하지 않습니다.
-- `readLoweredHistoryCharacters(client)`, `trimLoweredCharacterHistory(client, character)`: 명성이나 점수가 낮아진 행이 이력에 있는 캐릭터를 읽고, 한 캐릭터의 이력에서 낮아진 구간을 지웁니다.
-- `readCharacterHistory(client, character)`, `readCharacterHistorySnapshot(client, character, at)`: 캐릭터의 기본 정보, 점수 이력과 섹션별 변경 시각을 읽고, 한 시각 이전의 최신 기본 정보, 점수, 섹션 본문과 그 값을 받은 시각을 읽습니다.
-- `readCharacterSectionHistory(client, character, sections)`: 고른 섹션의 이력 행을 받은 시각 순으로 본문과 함께 읽습니다.
-- `readSampleCharactersWithoutSkillStyle(client)`: 전직별 명성 상위 표본 가운데 지금 전직의 스킬 스타일이 저장되지 않은 활성 캐릭터를 읽습니다.
-- `readSkillStyleChainBackfillPage(client, page)`, `fillCharacterSkillStyleChain(client, style)`: 스킬 체인이 없는 스킬 스타일 행을 그 캐릭터의 가장 새 스킬 스타일 이력 원문, 원문을 받을 때의 전직과 함께 key 순으로 읽고, 아직 체인이 없고 전직이 같은 행만 원문 값으로 다시 씁니다.
-- `enqueueCollectedCharacters`, `takeCollectionBatch`, `recordCollectionFailure`: 기본 정보 대기열에 넣고, 꺼내고, 실패를 남깁니다.
-- `readAdventureCharacters`, `readAdventureNames`, `readGuild`: 모험단, 길드의 캐릭터와 캐릭터의 모험단 이름을 읽습니다.
-- `readFameRanking`, `readCharacterStats`, `readJobSkillAdoption`: 명성 랭킹, 캐릭터 통계, 전직별 스킬 채택 수와 스킬 체인 조합 상위 5개를 읽습니다.
-- `readAdventureSetCharacters`: 모험단 캐릭터를 장비, 서약 세트와 함께 읽습니다.
-- `saveCharacterStats`, `readFamedJobGrows`, `saveJobSkillAdoption`, `deleteJobSkillAdoptionComputedBefore`: 통계 저장분을 덮어쓰고, 명성 있는 캐릭터의 전직 목록을 읽고, 스킬 채택 수 저장분을 덮어쓰거나 지난 행을 지웁니다.
-- `replaceItemAdoption`, `readItemAdoption`: 세트 값을 받은 캐릭터가 낀 무기, 유일 장비 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 부위별 선택 수를 읽습니다.
-- `replaceSetAdoption`, `readSetAdoption`: 세트 값을 받은 캐릭터의 세트 선택 수 저장분을 표본마다 한 transaction에서 다시 쓰고, 표본, 직업, 전직, 역할로 거른 세트 선택 수를 읽습니다.
-- `readCharacterStatsSnapshot`, `readJobSkillAdoptionSnapshot`: 통계와 전직별 스킬 채택 수 저장분을 읽고, 없으면 `null`을 돌려줍니다.
-- `recordContentClears`, `recordContentClearPopulation`, `readClearPopulation`: 클리어 집계의 클리어 기록과 주별 분모를 저장하고, 최고 명성이 하한 이상인 수집 대상 캐릭터를 읽습니다.
-- `readClearPopulationPage`, `countClearPopulation`, `readClearPopulationJobs`: 최고 명성이 하한 이상인 수집 대상 캐릭터를 서버, 캐릭터 순으로 나눠 읽고, 그 수와 직업별 수를 셉니다.
-- `recordLegionContentClears`: 레기온 하나와 주 하나의 클리어를 레이드, 레기온 기록 테이블에서 클리어 집계로 옮깁니다.
-- `readContentClearCollection`, `startContentClearCollection`, `recordContentClearCollectionProgress`, `finishContentClearCollection`: 클리어 수집의 진행 위치를 읽고 씁니다.
-- `readContentClearCollectedAt`, `readContentClearPopulations`, `readContentClearWeekRatioCounts`, `readContentClearAdventureSizes`: 클리어 집계의 마지막 수집 시각, 주별 분모, 주와 배율별 클리어 수, 한 주의 모험단 크기 분포를 읽습니다.
-- `readContentClearFames`, `readContentClearJobFames`, `readContentClearRaidTimes`: 한 주의 모든 컨텐츠에서 클리어 캐릭터의 명성 분위수, 전직별 클리어 수와 명성 분위수, 레이드 클리어의 요일과 시간대별 수를 읽습니다.
-- `readSelectedContentClearJobFames`, `readSelectedContentClearTimes`, `readContentClearFirstWeeks`, `readContentClearFameBands`, `readContentClearWeekGroups`, `readContentClearStageMoves`, `readContentClearStreaks`: 컨텐츠 하나와 주 하나에서 전직별 클리어 수와 명성 분위수, 요일과 시간대별 수, 캐릭터가 처음 깬 주별 수, 명성 구간별 캐릭터 수와 클리어 수, 지난주 대비 그룹별 수와 명성 분위수, 일반과 하드 사이 이동 수, 연속 클리어 주 수 분포를 읽습니다.
-- `readContentClearScores`, `readContentClearJobScores`, `readSelectedContentClearJobScores`, `readContentClearWeekGroupScores`, `readContentClearScoreBands`: 클리어 행에 복사한 점수로 한 주의 컨텐츠별, 전직별, 지난주 대비 그룹별 점수 분위수와 점수 구간별 캐릭터 수와 클리어 수를 장비 점수와 버프 점수로 나누어 읽습니다.
-- `recordClearRecords`: 레이드, 레기온 클리어 기록을 캐릭터의 한 번 깬 기록마다 한 행으로 저장하고, 이미 있는 기록은 건너뜁니다.
-- `readClearRecordBackfill`, `startClearRecordBackfill`, `recordClearRecordBackfillProgress`, `finishClearRecordBackfill`: 지난 클리어 기록 받기의 진행 위치를 읽고 씁니다.
-- `readClearRecordRaidModes`, `readClearRecordRaidStageCounts`: 레이드 하나와 주 하나의 단계 기록 종류와 단계별 클리어 캐릭터 수를 읽습니다.
-- `registerJobs`, `startJobRun`, `claimRequestedJobRun`, `finishJobRun`과 나머지 job 함수: 배치 job 목록과 실행 이력을 쓰고 읽습니다.
-- 스킬 채택 표본 순위 `SKILL_STYLE_SAMPLE_TOP_COUNT`(5000)는 `@dfragon/lib`에서 가져옵니다.
-- `replaceTimelineRange`, `replaceEnhancementBackfillRange`, `replaceSeasonBackfillRange`: 캐릭터 하나의 타임라인 구간을 한 transaction에서 교체합니다.
-- `recordSeasonBackfillCompleted`, `readSeasonBackfillStates`, `readEnhancementBackfilledUntil`: 옛 시즌 받기와 강화 백필 위치를 기록, 조회합니다.
-- `readTimelineSyncState`, `readTimelineSyncStates`, `recordTimelineSyncSuccess`, `recordTimelineSyncFailure`: 타임라인 동기화 상태를 읽고 기록합니다.
-- `requestTimelineSync`, `claimTimelineSyncRequests`, `deleteTimelineSyncRequest`, `releaseTimelineSyncRequest`, `releaseStartedTimelineSyncRequests`, `hasTimelineSyncRequest`, `readSeasonBackfillRequestSeasons`, `countTimelineSyncRequests`: 타임라인 동기화 요청을 넣고, 집고, 지우고, 되돌리고, 남았는지 보고, 종류별로 셉니다.
-- `readCurrentSeasonStart`, `readSeasons`: 지금 시즌의 시작 시각과 시즌 목록을 읽습니다.
-- `readTimelineEvents`, `readCharactersTimelineEvents`, `readCharactersTimelineItems`, `readRecentTimelineItems`: 저장한 타임라인 행을 읽습니다.
-- `recordItemDictionary`, `readItemDictionary`, `readUnlistedItemIds`, `readUnlistedAcquisitionItemIds`: 아이템 사전에 itemId의 레벨, 종류, 부위, 등급, 세트를 저장하고 읽으며, 받은 itemId나 타임라인 획득 행 가운데 사전에 없거나 등급을 아직 받지 않은 itemId를 읽습니다.
-- `readBatchNeopleKeys`, `addBatchNeopleKey`, `setBatchNeopleKeyEnabled`, `deleteBatchNeopleKey`: 운영 화면의 batch Neople key를 끝 4자로 읽고, 더하고, 켜고 끄고, 지웁니다.
-- `readUsableBatchNeopleKeys`, `recordBatchNeopleKeyRejected`: worker가 켜졌고 거절되지 않은 batch key의 id와 원문을 읽고, Neople이 거절한 key의 시각을 id로 남깁니다.
-- `readSecretInput(value, file)`: 직접 입력과 절대 경로 파일 중 하나에서 secret을 읽습니다.
-- 위 함수의 입력, 결과 타입을 함께 export합니다.
+공개 export와 입력, 결과 타입의 원본은 `src/index.ts`입니다. `createDatabaseClient`로 만든 client는 끝낼 때 호출자가 `$disconnect()`를 부릅니다.
 
 ## 연결 URL
 
@@ -76,42 +30,6 @@ pnpm --filter @dfragon/database db:migrate:reset
 운영 이미지 안에서는 pnpm 없이 `node node_modules/@dfragon/database/dist/cli.js <prisma 명령>`으로 같은 설정의 Prisma 명령을 실행합니다.
 실패한 migration은 `migrate status`로 이름을 확인하고 `migrate resolve --rolled-back <migration 이름>`으로 기록을 정리한 뒤 고친 이미지를 다시 배포합니다.
 
-## 테이블
-
-- `adventures`: 자체 id를 붙인 모험단과 지금 이름
-- `characters`: 캐릭터와 Neople 기본 정보, 장비 세트와 서약 세트, 마지막 활동 시각과 비활성 판정 시각
-- `character_skill_styles`: 캐릭터마다 최신 스킬 스타일과 스킬 체인 한 행
-- `character_items`: 캐릭터가 낀 무기와 유일 장비, 부위마다 한 행
-- `item_adoption`: 표본, 전직, 역할, 부위, 아이템마다 캐릭터 수 한 행과 표본, 전직, 역할마다 전체 캐릭터 수 한 행
-- `set_adoption`: 표본, 전직, 역할, 장비 세트, 서약 세트와 선택지 조합마다 캐릭터 수 한 행
-- `character_scores`: 캐릭터마다 장비 점수나 버프 점수 한 행과 계산 시각, 엔진 버전, 점수를 계산할 때의 전직, 근사값이면 근사 방식
-- `character_basic_history`, `character_section_history`, `character_score_history`: 캐릭터의 기본 정보, 상세 섹션 본문, 점수가 바뀔 때마다 한 행. 점수 이력은 근사값이면 근사 방식, 경고, 건너뛴 사유도 담습니다
-- `score_engines`: 점수 이력이 참조하는 엔진 버전
-- `character_collection`: 기본 정보를 받을 캐릭터 대기열
-- `seasons`: 게임 시즌 번호, 이름, 시작 시각
-- `timeline_events`: 코드 1xx, 2xx, 3xx 타임라인
-- `timeline_items`: 코드 4xx, 5xx, 55x, 6xx 타임라인. 시즌별 range partition `timeline_items_season_<시즌 id>`입니다
-- `items`: 타임라인 획득 아이템의 itemId마다 레벨, 종류, 부위, 등급, 세트 한 행
-- `timeline_sync_state`: 캐릭터별 동기화, 강화 백필 위치
-- `timeline_sync_requests`: 캐릭터의 종류, 시즌별 타임라인 동기화 요청
-- `timeline_season_backfill`: 캐릭터와 시즌별 옛 시즌 받기 위치
-- `clear_records`: 캐릭터의 레이드(모든 단계), 레기온 클리어 기록 한 번이 한 행
-- `clear_record_backfills`: 진행 중인 지난 클리어 기록 받기의 진행 위치
-- `content_clear_week_samples`: worker job이 계산한 마감한 주의 컨텐츠별 클리어 상세 재료
-- `content_clear_overview_samples`: worker job이 계산한 마감한 주의 클리어 전체 개요 재료
-- `jobs`: worker가 시작할 때 올린 배치 job 목록
-- `job_runs`: 배치 job 실행 한 번이 한 행인 실행 이력
-- `character_stats`: worker job이 계산한 최신 캐릭터 통계 한 행
-- `job_skill_adoption`: worker job이 계산한 전직, 역할별 최신 스킬 채택 수와 스킬 체인 조합 상위 5개
-- `batch_neople_keys`: worker가 쓰는 batch Neople key와 켜짐 여부, 거절 시각
-- `worker_events`: worker가 남긴 이벤트(Neople 실패, 잡 시작과 끝 등) 한 번이 한 행
-- `lab_items`: 실험실 화면에 보일 아이템. 종류, 역할, 등급, 아이템 이름마다 한 행. 특수 재화로 교환하는 아이템은 재화와 개수를 함께 둡니다
-- `lab_currencies`: 실험실 아이템을 교환하는 특수 재화의 이름, 아이콘 이미지와 설명
-- `lab_item_details`: Neople에 없는 실험실 아이템에 저장소 소유자가 넣은 아이콘 이미지, 설명, 등급과 tooltip의 아이템 종류, 레벨제한, 모험가 명성, 부위와 단계별 옵션. 아이템 이름마다 한 행
-- `auction_prices`: 아이템 이름마다 경매장 최저가의 최신 값 한 행. 매물이 없거나 재화로 교환하는 아이템은 가격 열이 비고, 아이템 검색으로 찾은 itemId, 등급과 확인한 시각만 있습니다
-- `lab_candidates`: 데이터 묶음에서 import한 실험실 후보. 아이템 이름마다 한 행
-- `auction_price_history`: 아이템 이름별 경매장 최저가 이력
-
 ## 검증
 
 `pnpm --filter @dfragon/database test`는 package를 빌드한 뒤 `test/*.test.mjs`를 실행합니다.
@@ -120,4 +38,4 @@ pnpm --filter @dfragon/database db:migrate:reset
 ## 고지
 
 이 package는 제3자 코드나 생성 데이터를 담지 않아 `@dfragon/lib`처럼 고지를 복사하지 않습니다.
-`prisma`와 그 전이 의존성의 라이선스 원문은 API 이미지의 `node_modules`에 패키지와 함께 들어갑니다.
+`prisma`와 그 전이 의존성의 라이선스 원문은 API, worker, 운영 app 이미지의 `node_modules`에 패키지와 함께 들어갑니다.

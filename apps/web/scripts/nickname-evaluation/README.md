@@ -42,7 +42,7 @@ pnpm --filter @dfragon/web run test:nickname-evaluation
 | `DFRAGON_NICKNAME_OCR_DICTIONARY` | OCR 사전 경로. 기본은 `packages/models/ocr-finetuned/characters.txt`입니다. |
 
 운영 모델은 `git submodule update --init packages/models/ocr-finetuned`로 받습니다.
-새 모델은 ONNX로 내보내 `scripts/validate-ocr-model.mjs`로 검증한 뒤 `DFRAGON_NICKNAME_OCR_MODEL`로 같은 표본에 돌려 비교합니다.
+새 모델은 ONNX로 내보내 `DFRAGON_NICKNAME_OCR_MODEL`로 같은 표본에 돌려 비교합니다. 웹에 넣을 모델은 `apps/web/ocr-model.config.mjs`에서 고르고, 웹의 `dev`, `build`가 `prepare-ocr-assets.mjs`로 모델의 입력, 출력 모양을 검사합니다.
 
 ## manifest 형식
 

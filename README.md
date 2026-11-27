@@ -28,13 +28,15 @@ pnpm workspace 모노레포입니다.
 | --- | --- |
 | [`apps/api`](apps/api/README.md) | Neople 오픈 API를 조회해 캐시하는 공개 캐릭터 API |
 | [`apps/worker`](apps/worker/README.md) | 캐릭터 목록 수집과 배치 job을 돌리는 worker |
-| [`apps/ops`](apps/ops/README.md) | 운영 화면이 부르는 job, queue, 수집 대기열, batch Neople key 경로를 내는 운영 app |
+| [`apps/ops`](apps/ops/README.md) | 운영 화면이 부르는 job, queue, 수집 대기열, batch Neople key, 실험실 아이템과 재화 경로를 내는 운영 app |
+| [`apps/internal`](apps/internal/README.md) | 저장소 소유자가 쓰는 운영 화면(internal.dfragon.com) |
 | [`apps/web`](apps/web/README.md) | 웹 앱의 화면, 브라우저 host, OCR과 검색 로직(dfragon.com) |
 | [`apps/storybook`](apps/storybook/README.md) | 토큰, 공용 컴포넌트, 화면을 실제 코드로 미리 보는 Storybook |
-| [`packages/database`](packages/database/README.md) | API의 PostgreSQL 설정, Prisma migration과 migration CLI |
-| [`packages/lib`](packages/lib/README.md) | API와 웹 앱이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
-| [`packages/neople`](packages/neople/README.md) | API가 쓰는 Neople 오픈 API, 이미지 서버 client와 응답 schema |
-| [`packages/http-server`](packages/http-server/README.md) | API의 공개 app과 운영 app이 함께 쓰는 Hono app 생성, access log, 실패 응답 |
+| [`packages/database`](packages/database/README.md) | API, worker, 운영 app의 PostgreSQL 설정, Prisma migration과 migration CLI |
+| [`packages/lib`](packages/lib/README.md) | API, worker, 운영 app, 웹, 운영 화면이 함께 쓰는 입력 규칙, 게임 UI 좌표, 픽셀 계산 |
+| [`packages/neople`](packages/neople/README.md) | API와 worker가 쓰는 Neople 오픈 API, 이미지 서버 client와 응답 schema |
+| [`packages/http-server`](packages/http-server/README.md) | API, 운영 app, worker가 함께 쓰는 Hono app 생성, access log, 실패 응답 |
+| [`packages/server-core`](packages/server-core/README.md) | API와 worker가 함께 쓰는 캐릭터 상세, 공용 아이템, 점수 엔진, 타임라인, 클리어 통계 코드 |
 | [`packages/design`](packages/design/README.md) | 디자인 토큰, 기본 CSS와 글꼴 |
 | [`packages/ui`](packages/ui/README.md) | 공용 컴포넌트 |
 | [`packages/licenses`](packages/licenses/README.md) | 배포물에 넣는 오픈소스 고지 수집 |
