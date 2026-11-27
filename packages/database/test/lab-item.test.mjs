@@ -26,8 +26,23 @@ const MIGRATIONS = [
   '20261126100000_add_lab_items_auction_prices',
   '20261126200000_add_lab_currencies',
   '20261127100000_add_lab_currency_description',
-  '20261127200000_add_lab_item_details'
+  '20261127200000_add_lab_item_details',
+  '20261128100000_add_lab_item_tooltip_fields'
 ]
+
+const noTooltip = { itemTypeDetail: null, availableLevel: null, fame: null, card: null }
+const tooltip = {
+  itemTypeDetail: '합성 재료',
+  availableLevel: 115,
+  fame: 232,
+  card: {
+    slots: ['상의', '하의'],
+    enchants: [
+      { upgrade: 0, status: [{ name: '힘', value: '90' }] },
+      { upgrade: 1, status: [{ name: '힘', value: '100' }] }
+    ]
+  }
+}
 
 function currency(name, description = null) {
   return { name, description }
@@ -262,14 +277,20 @@ test('재화 설명은 추가할 때 넣을 수 있고, 가격 읽기의 비용�
   assert.equal((await readLabCurrencies(client))[0].description, '합성 설명')
 })
 
-test('아이템 상세는 이름마다 한 행으로 저장하고, 아이콘을 주지 않으면 그대로 두며 null이면 지운다', {
+test('아이템 상세는 이름마다 한 행으로 저장해 tooltip 값을 바꾸고, 아이콘을 주지 않으면 그대로 두며 null이면 지운다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
-  const detail = { description: '합성 설명', itemRarity: '유니크' }
+  const detail = { description: '합성 설명', itemRarity: '유니크', ...tooltip }
 
   await saveLabItemDetail(client, '합성 상자', detail, pngIcon)
-  await saveLabItemDetail(client, '합성 상자', { description: null, itemRarity: '에픽' }, undefined)
+  assert.deepEqual((await readLabItemDetails(client))[0].card, tooltip.card)
+  await saveLabItemDetail(
+    client,
+    '합성 상자',
+    { description: null, itemRarity: '에픽', ...noTooltip },
+    undefined
+  )
 
   assert.deepEqual(await readLabItemDetailIcon(client, '합성 상자'), pngIcon)
   const savedDetails = await readLabItemDetails(client)
@@ -281,6 +302,7 @@ test('아이템 상세는 이름마다 한 행으로 저장하고, 아이콘을 
       itemName: '합성 상자',
       description: null,
       itemRarity: '에픽',
+      ...noTooltip,
       hasIcon: true,
       updatedAt: undefined
     }
@@ -293,7 +315,7 @@ test('아이템 상세는 이름마다 한 행으로 저장하고, 아이콘을 
   assert.equal(await readLabItemDetailIcon(client, '없는 상자'), null)
 })
 
-test('가격 읽기는 이름으로 아이템 상세를 붙이고, 아이콘이 있을 때만 아이콘 시각을 낸다', {
+test('가격 읽기는 이름으로 아이템 상세와 tooltip 값을 붙이고, 아이콘이 있을 때만 아이콘 시각을 낸다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
@@ -304,10 +326,15 @@ test('가격 읽기는 이름으로 아이템 상세를 붙이고, 아이콘이 
   await saveLabItemDetail(
     client,
     '합성 상자',
-    { description: '합성 설명', itemRarity: '유니크' },
+    { description: '합성 설명', itemRarity: '유니크', ...tooltip },
     pngIcon
   )
-  await saveLabItemDetail(client, '합성 칭호', { description: null, itemRarity: '레어' }, undefined)
+  await saveLabItemDetail(
+    client,
+    '합성 칭호',
+    { description: null, itemRarity: '레어', ...noTooltip },
+    undefined
+  )
   const [{ updatedAt }] = await readLabItemDetails(client)
 
   const details = (await readLabItemPrices(client)).map(({ itemName, detail }) => ({
@@ -318,11 +345,16 @@ test('가격 읽기는 이름으로 아이템 상세를 붙이고, 아이콘이 
   assert.deepEqual(details, [
     {
       itemName: '합성 상자',
-      detail: { description: '합성 설명', itemRarity: '유니크', iconUpdatedAt: updatedAt }
+      detail: {
+        description: '합성 설명',
+        itemRarity: '유니크',
+        iconUpdatedAt: updatedAt,
+        ...tooltip
+      }
     },
     {
       itemName: '합성 칭호',
-      detail: { description: null, itemRarity: '레어', iconUpdatedAt: null }
+      detail: { description: null, itemRarity: '레어', iconUpdatedAt: null, ...noTooltip }
     },
     { itemName: '합성 카드', detail: null }
   ])
