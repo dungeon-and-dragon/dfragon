@@ -129,7 +129,6 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
     null,
     null,
     null,
-    null,
     null
   ])
   expect(underline().visibility).toBe('hidden')
@@ -139,15 +138,14 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
   expect(container.querySelector('form[role="search"]')).not.toBeNull()
 })
 
-it('장비 시뮬레이터 항목은 즐겨찾기 바로 왼쪽에서 시뮬레이터 검색 주소로 간다', async () => {
+it('장비 시뮬레이터 항목은 메뉴 맨 끝에서 시뮬레이터 검색 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
   await render('/rankings')
 
   expect(menuLinks().map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
     ['검색', '/rankings'],
     ['통계', '/stats'],
     ['모험단', '/adventures'],
-    ['장비 시뮬레이터', '/simulator'],
-    ['즐겨찾기', '/favorites']
+    ['장비 시뮬레이터', '/simulator']
   ])
 })
 

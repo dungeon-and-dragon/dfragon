@@ -310,8 +310,7 @@ it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, �
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   const buttons = [...header.querySelectorAll('button')]
@@ -349,8 +348,7 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
 
   const main = container.querySelector('main')!
@@ -378,8 +376,7 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
   expect(container.querySelector('button[aria-label^="화면 공유"]')).toBeNull()
@@ -409,8 +406,7 @@ it.each([
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
 })
 
@@ -513,8 +509,7 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
     ['검색', 'page'],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
 })
 
@@ -564,8 +559,7 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
 
   const statusTab = [...container.querySelectorAll<HTMLElement>('[role="tab"]')].find(
@@ -600,8 +594,7 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', 'page'],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', 'page']
   ])
 })
 
@@ -619,8 +612,7 @@ it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
 })
 
@@ -682,8 +674,7 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
   expect(adventureRequests()).toEqual([
     `${SITE_API_URL}/adventures/${encodedName}/activity`,
@@ -1570,12 +1561,6 @@ function favoriteRows(): (string | null)[] {
   )
 }
 
-function globalMenuLink(label: string): HTMLAnchorElement {
-  return [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="전역 메뉴"] a')].find(
-    (link) => link.textContent === label
-  )!
-}
-
 it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐겨찾기 화면에서 해제하면 목록에서 빠지고 상세의 하트도 꺼진다', async () => {
   serveDetail()
   window.history.replaceState(null, '', DETAIL_PATH)
@@ -1596,7 +1581,10 @@ it('상세의 하트로 켠 즐겨찾기는 다시 열어도 켜져 있고, 즐�
   await act(async () => root.render(<WebApp host={host} />))
   await vi.waitFor(() => expect(summaryHeart()?.getAttribute('aria-label')).toBe('즐겨찾기 해제'))
 
-  await act(async () => globalMenuLink('즐겨찾기').click())
+  await act(async () => root.unmount())
+  window.history.pushState(null, '', '/favorites')
+  root = createRoot(container)
+  await act(async () => root.render(<WebApp host={host} />))
 
   await waitForPath('/favorites')
   expect(container.querySelector('main h1')).toBeNull()
@@ -1701,8 +1689,7 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
-    ['장비 시뮬레이터', null],
-    ['즐겨찾기', null]
+    ['장비 시뮬레이터', null]
   ])
   const form = container.querySelector<HTMLFormElement>('main form')!
   const input = form.querySelector<HTMLInputElement>('input[aria-label="모험단"]')!
