@@ -110,10 +110,24 @@ const labCurrencySchema = z.object({
 
 export const labCurrencyListSchema = z.object({ currencies: z.array(labCurrencySchema) })
 
+const labItemCardSchema = z.object({
+  slots: z.array(z.string()),
+  enchants: z.array(
+    z.object({
+      upgrade: z.int(),
+      status: z.array(z.object({ name: z.string(), value: z.string() }))
+    })
+  )
+})
+
 const labItemDetailSchema = z.object({
   itemName: z.string(),
   description: z.string().nullable(),
   itemRarity: z.string().nullable(),
+  itemTypeDetail: z.string().nullable(),
+  availableLevel: z.int().nullable(),
+  fame: z.int().nullable(),
+  card: labItemCardSchema.nullable(),
   hasIcon: z.boolean(),
   updatedAt: timestamp
 })
@@ -140,6 +154,7 @@ export type LabItem = z.infer<typeof labItemSchema>
 export type LabItemGroup = z.infer<typeof labItemGroupSchema>
 export type LabCurrency = z.infer<typeof labCurrencySchema>
 export type LabCurrencyList = z.infer<typeof labCurrencyListSchema>
+export type LabItemCard = z.infer<typeof labItemCardSchema>
 export type LabItemDetail = z.infer<typeof labItemDetailSchema>
 export type LabItemDetailList = z.infer<typeof labItemDetailListSchema>
 export type LabItemList = z.infer<typeof labItemListSchema>

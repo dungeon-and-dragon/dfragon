@@ -10,6 +10,7 @@ import {
   type JobList,
   jobListSchema,
   type LabCurrencyList,
+  type LabItemCard,
   type LabItemDetailList,
   type LabItemGroup,
   type LabItemList,
@@ -46,6 +47,10 @@ export type LabItemDetailDraft = {
   itemName: string
   description: string
   itemRarity: string | null
+  itemTypeDetail: string
+  availableLevel: number | null
+  fame: number | null
+  card: LabItemCard | null
   icon?: string | null
 }
 

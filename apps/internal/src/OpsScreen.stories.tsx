@@ -161,6 +161,22 @@ function filledApi(): FakeOpsApi {
       itemName: '합성 보주',
       description: '합성 교환처에서 받는 상자.',
       itemRarity: '유니크',
+      itemTypeDetail: '합성 재료',
+      availableLevel: 115,
+      fame: 232,
+      card: {
+        slots: ['무기'],
+        enchants: [
+          { upgrade: 0, status: [{ name: '힘', value: '90' }] },
+          {
+            upgrade: 1,
+            status: [
+              { name: '힘', value: '100' },
+              { name: '지능', value: '20' }
+            ]
+          }
+        ]
+      },
       hasIcon: false,
       updatedAt: minutesAgo(10)
     }
