@@ -112,6 +112,7 @@ export type LabCandidateBody = {
   checkedAt: string | null
   previousPrice: { itemId: string | null; unitPrice: number | null; checkedAt: string } | null
   wearCount: number | null
+  wearCountedAt: string | null
   recommendedTier: '종결' | '준종결' | null
   badge: '미조회' | '검색 없음' | '매물 없음' | null
 }
@@ -150,6 +151,7 @@ export function labCandidate(
     checkedAt: '2026-11-10T05:00:00.000Z',
     previousPrice: null,
     wearCount: null,
+    wearCountedAt: null,
     recommendedTier: null,
     badge: null,
     ...overrides

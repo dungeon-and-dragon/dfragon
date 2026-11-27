@@ -269,6 +269,31 @@ describe('실험실 후보 페이지', () => {
     })
   })
 
+  it('착용 수를 센 후보는 0명도 수로 보이고 착용 집계 시각을 보이며, 마법부여 탭에는 집계 시각이 없다', async () => {
+    const api = new FakeOpsApi()
+    const wearCountedAt = '2026-11-09T15:30:00.000Z'
+    api.labCandidates = [
+      labCandidate({ itemName: '합성 칭호 A', fame: 300, wearCount: 6902, wearCountedAt }),
+      labCandidate({ itemName: '합성 칭호 B', fame: 200, wearCount: 0, wearCountedAt }),
+      labCandidate({
+        itemName: '합성 상의 카드',
+        kind: 'ENCHANT',
+        categories: ['WEAPON'],
+        roles: ['dealer']
+      })
+    ]
+    await openCandidates(api)
+
+    expect(cellsOf('합성 칭호 A')[5]).toBe('6,902')
+    expect(cellsOf('합성 칭호 B')[5]).toBe('0')
+    expect(container.textContent).toContain('착용 집계 11-10 00:30:00')
+
+    await openTab('마법부여')
+    await waitFor(() => expect(rowNames()).toEqual(['합성 상의 카드']))
+    expect(cellsOf('합성 상의 카드')[5]).toBe('-')
+    expect(container.textContent).not.toContain('착용 집계')
+  })
+
   it('이름, 명성, 옵션, 버프, 최저가와 직전 대비, 착용 수를 보이고 카드는 부여 부위와 마지막 단계 옵션을 보인다', async () => {
     const api = new FakeOpsApi()
     api.labCandidates = [
