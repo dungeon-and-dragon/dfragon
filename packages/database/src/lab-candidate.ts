@@ -190,9 +190,13 @@ export type LabCandidateSummary = LabCandidateInput & {
   previousPrice: LabCandidatePreviousPrice | null
   wearCount: number | null
   wearCountedAt: Date | null
+  priceItemName: string
 }
 
-type StoredLabCandidate = Omit<LabCandidateSummary, 'unitPrice' | 'previousPrice'> & {
+type StoredLabCandidate = Omit<
+  LabCandidateSummary,
+  'unitPrice' | 'previousPrice' | 'priceItemName'
+> & {
   unitPrice: bigint | null
   previousItemId: string | null
   previousUnitPrice: bigint | null
@@ -250,7 +254,7 @@ export async function readLabCandidates(
 
       const price = unitPrice !== null ? Number(unitPrice) : null
 
-      return { ...row, unitPrice: price, previousPrice }
+      return { ...row, unitPrice: price, previousPrice, priceItemName: row.itemName }
     }
   )
 
@@ -273,7 +277,7 @@ function mergeVariants(baseName: string, rows: LabCandidateSummary[]): LabCandid
   )
 
   const representative = sorted[0]
-  const { itemId, unitPrice, checkedAt, previousPrice } = cheapestVariantOf(sorted)
+  const { itemId, unitPrice, checkedAt, previousPrice, priceItemName } = cheapestVariantOf(sorted)
   const wearCount = sumWearCounts(sorted)
 
   return {
@@ -283,7 +287,8 @@ function mergeVariants(baseName: string, rows: LabCandidateSummary[]): LabCandid
     unitPrice,
     checkedAt,
     previousPrice,
-    wearCount
+    wearCount,
+    priceItemName
   }
 }
 

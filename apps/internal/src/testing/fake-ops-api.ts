@@ -120,6 +120,7 @@ export type LabCandidateBody = {
   previousPrice: { itemId: string | null; unitPrice: number | null; checkedAt: string } | null
   wearCount: number | null
   wearCountedAt: string | null
+  priceItemName: string
   recommendedTier: '종결' | '준종결' | null
   badge: '미조회' | '검색 없음' | '매물 없음' | null
 }
@@ -159,6 +160,7 @@ export function labCandidate(
     previousPrice: null,
     wearCount: null,
     wearCountedAt: null,
+    priceItemName: overrides.itemName,
     recommendedTier: null,
     badge: null,
     ...overrides

@@ -3,7 +3,7 @@ import {
   type EnchantGradeRole,
   type EnchantGradeSlot
 } from '@dfragon/lib/enchant-grades'
-import { LAB_ITEM_TIERS, type LabItemTier } from '@dfragon/lib/lab-items'
+import { isSameLabItem, LAB_ITEM_TIERS, type LabItemTier } from '@dfragon/lib/lab-items'
 import { Button, Select, StatusChip, type StatusChipTone, Tabs } from '@dfragon/ui'
 import { Fragment, useState } from 'react'
 import type { LabCandidateQuery } from '#ops-api/ops-client'
@@ -42,6 +42,7 @@ import {
   groupsToSave,
   pendingTierChanges,
   savedCostOf,
+  isSavedAs,
   savedTierOf,
   type TierChanges,
   type TierSlot,
@@ -596,7 +597,9 @@ function CandidateTable({
                   onTierChange={onTierChange}
                   onExclude={onExclude}
                 />
-                {open && <PriceHistoryRow itemName={itemName} columns={COLUMN_COUNT} />}
+                {open && (
+                  <PriceHistoryRow itemName={candidate.priceItemName} columns={COLUMN_COUNT} />
+                )}
               </Fragment>
             )
           })}
@@ -642,7 +645,9 @@ export function LabCandidatePanel(): React.JSX.Element {
   }
 
   function isSelected(itemName: string): boolean {
-    return groups.some(({ items }) => items.some((item) => item.itemName === itemName))
+    return groups.some(({ items }) =>
+      items.some((item) => isSameLabItem(kind, item.itemName, itemName))
+    )
   }
 
   function exclude(itemName: string): void {
@@ -667,7 +672,7 @@ export function LabCandidatePanel(): React.JSX.Element {
     const id = tierChangeIdOf(slot, itemName)
     const next = new Map(changes)
 
-    if (tier === savedTierOf(groups, slot, itemName)) {
+    if (isSavedAs(groups, slot, itemName, tier)) {
       next.delete(id)
     } else {
       const cost = changeCostOf(itemName)

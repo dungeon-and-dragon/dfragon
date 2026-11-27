@@ -153,6 +153,8 @@ const enchantCard = {
 }
 
 function candidate(overrides: Partial<LabCandidateSummary>): LabCandidateSummary {
+  const priceItemName = overrides.itemName ?? title.itemName
+
   return {
     ...title,
     versionId: 'synthetic-v1',
@@ -165,6 +167,7 @@ function candidate(overrides: Partial<LabCandidateSummary>): LabCandidateSummary
     previousPrice: null,
     wearCount: null,
     wearCountedAt: null,
+    priceItemName,
     ...overrides
   }
 }

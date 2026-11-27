@@ -65,3 +65,24 @@ export function labItemBaseName(itemName: string): string {
     .replace(WHITESPACE_RUN_PATTERN, ' ')
     .trim()
 }
+
+// 오라와 마법부여 카드에는 플래티넘, 레벨 변형이 없어 칭호, 크리쳐만 기본 이름으로 묶는다.
+export const LAB_ITEM_VARIANT_GROUPED_CATEGORIES = [
+  'TITLE',
+  'CREATURE'
+] as const satisfies readonly LabItemCategory[]
+
+const VARIANT_GROUPED_CATEGORIES: readonly string[] = LAB_ITEM_VARIANT_GROUPED_CATEGORIES
+
+export function isLabItemVariantGrouped(category: string): boolean {
+  return VARIANT_GROUPED_CATEGORIES.includes(category)
+}
+
+// 묶는 종류는 예전에 변형 이름으로 저장한 아이템도 기본 이름과 같은 아이템으로 본다.
+export function isSameLabItem(category: string, savedName: string, itemName: string): boolean {
+  if (savedName === itemName) {
+    return true
+  }
+
+  return isLabItemVariantGrouped(category) && labItemBaseName(savedName) === itemName
+}

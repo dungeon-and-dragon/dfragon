@@ -157,6 +157,7 @@ const labCandidateSchema = z.object({
   previousPrice: z.object({ unitPrice: z.number().nullable() }).nullable(),
   wearCount: z.int().nullable(),
   wearCountedAt: timestamp.nullable(),
+  priceItemName: z.string(),
   recommendedTier: z.enum(LAB_ITEM_TIERS).nullable(),
   badge: z.enum(['미조회', '검색 없음', '매물 없음']).nullable()
 })

@@ -1,4 +1,5 @@
 import {
+  isSameLabItem,
   LAB_ITEM_TIERS,
   type LabItemCategory,
   type LabItemGroupKey,
@@ -19,32 +20,47 @@ export type TierChange = TierSlot & {
 
 export type TierChanges = ReadonlyMap<string, TierChange>
 
-type SavedEntry = { tier: LabItemTier; cost: LabItemCost | null }
+type SavedEntry = { tier: LabItemTier; cost: LabItemCost | null; exact: boolean }
 
 export function tierChangeIdOf({ category, role }: TierSlot, itemName: string): string {
   return `${category}:${role}:${itemName}`
 }
 
-function savedEntryOf(
+function savedEntriesOf(
   groups: readonly LabItemGroup[],
-  { category, role }: TierSlot,
+  slot: TierSlot,
   itemName: string
-): SavedEntry | null {
-  for (const group of groups) {
+): SavedEntry[] {
+  return groups.flatMap((group) => {
     const tier = LAB_ITEM_TIERS.find((candidate) => candidate === group.tier)
 
-    if (group.category !== category || group.role !== role || tier === undefined) {
-      continue
+    if (group.category !== slot.category || group.role !== slot.role || tier === undefined) {
+      return []
     }
 
-    const item = group.items.find((candidate) => candidate.itemName === itemName)
+    return group.items
+      .filter((item) => isSameLabItem(slot.category, item.itemName, itemName))
+      .map((item) => ({ tier, cost: item.cost, exact: item.itemName === itemName }))
+  })
+}
 
-    if (item !== undefined) {
-      return { tier, cost: item.cost }
-    }
+function savedEntryOf(
+  groups: readonly LabItemGroup[],
+  slot: TierSlot,
+  itemName: string
+): SavedEntry | null {
+  const entries = savedEntriesOf(groups, slot, itemName)
+  const exact = entries.find((entry) => entry.exact)
+
+  if (exact !== undefined) {
+    return exact
   }
 
-  return null
+  if (entries.length === 0) {
+    return null
+  }
+
+  return entries[0]
 }
 
 export function savedCostOf(
@@ -75,13 +91,29 @@ export function savedTierOf(
   return saved.tier
 }
 
+// 기본 이름 그대로 그 등급에만 저장돼 있을 때만 바꿀 것이 없다고 본다. 변형 이름으로 저장된 줄은 같은 등급을 골라도 기본 이름으로 바꿔 저장한다.
+export function isSavedAs(
+  groups: readonly LabItemGroup[],
+  slot: TierSlot,
+  itemName: string,
+  tier: LabItemTier | null
+): boolean {
+  const entries = savedEntriesOf(groups, slot, itemName)
+
+  if (tier === null) {
+    return entries.length === 0
+  }
+
+  return entries.length === 1 && entries[0].exact && entries[0].tier === tier
+}
+
 // 일부 묶음만 저장된 뒤 다시 읽으면 이미 저장된 변경은 저장할 것에서 빠진다.
 export function pendingTierChanges(
   groups: readonly LabItemGroup[],
   changes: TierChanges
 ): TierChange[] {
   return [...changes.values()].filter(
-    (change) => change.tier !== savedTierOf(groups, change, change.itemName)
+    (change) => !isSavedAs(groups, change, change.itemName, change.tier)
   )
 }
 
@@ -111,11 +143,13 @@ export function groupsToSave(
   }
 
   for (const { category, role, itemName } of pending) {
-    const saved = savedEntryOf(groups, { category, role }, itemName)
+    const slot = { category, role }
 
-    if (saved !== null) {
-      const group = groupOf({ category, role, tier: saved.tier })
-      group.items = group.items.filter((item) => item.itemName !== itemName)
+    for (const { tier } of savedEntriesOf(groups, slot, itemName)) {
+      const group = groupOf({ category, role, tier })
+      group.items = group.items.filter(
+        (item) => !isSameLabItem(slot.category, item.itemName, itemName)
+      )
     }
   }
 
