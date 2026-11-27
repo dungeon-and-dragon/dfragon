@@ -341,7 +341,7 @@ async function columnTooltips(name: string): Promise<(string | null)[]> {
   const tooltip = box.querySelector('ul + [aria-hidden="true"]')!
   const texts: (string | null)[] = []
 
-  for (const column of box.querySelectorAll('li')) {
+  for (const column of box.querySelectorAll('li:not([aria-hidden])')) {
     await act(async () => {
       column.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     })
@@ -517,6 +517,18 @@ it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주�
   expect(columns.at(11)).toMatch(/^12명3 /)
   expect(columns.at(12)).toMatch(/^13명 이상7 /)
   expect(columns).toHaveLength(13)
+})
+
+it('모험단 기준 클리어 횟수는 1~5명과 6명 이상을 나눠 각 묶음의 가장 큰 칸에 막대 높이를 맞춘다', async () => {
+  await open(undefined)
+
+  const box = panel('모험단 기준 클리어 횟수')!
+  const heights = [...box.querySelectorAll('li:not([aria-hidden])')].map((column) =>
+    column.querySelector('[data-chart-mark]')?.getAttribute('style')
+  )
+
+  expect(heights[0]).toContain('100%')
+  expect(heights[12]).toContain('100%')
 })
 
 it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async () => {

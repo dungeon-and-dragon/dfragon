@@ -323,7 +323,7 @@ async function columnTooltips(name: string): Promise<(string | null)[]> {
   const tooltip = box.querySelector('ul + [aria-hidden="true"]')!
   const texts: (string | null)[] = []
 
-  for (const column of box.querySelectorAll('li')) {
+  for (const column of box.querySelectorAll('li:not([aria-hidden])')) {
     await act(async () => {
       column.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     })
@@ -495,6 +495,22 @@ it('모험단 기준 클리어 횟수는 16명까지 1명씩, 17명부터 구간
   expect(columns.at(19)).toMatch(/^30~39명1 /)
   expect(columns.at(20)).toMatch(/^40~49명2 /)
   expect(columns.at(21)).toMatch(/^50명 이상10 /)
+})
+
+it('모험단 기준 클리어 횟수는 1~5명과 6명 이상을 나눠 각 묶음의 가장 큰 칸에 막대 높이를 맞추고 비율은 전체 기준으로 둔다', async () => {
+  await open({ contentKey: 'michaela' })
+
+  const box = panel('모험단 기준 클리어 횟수')!
+  const heights = [...box.querySelectorAll('li:not([aria-hidden])')].map((column) =>
+    column.querySelector('[data-chart-mark]')?.getAttribute('style')
+  )
+
+  expect(heights[0]).toContain('100%')
+  expect(heights[15]).toContain('30%')
+  expect(heights[21]).toContain('100%')
+
+  const columns = await columnTooltips('모험단 기준 클리어 횟수')
+  expect(columns.at(0)).toMatch(/^1명40 +53\.3%$/)
 })
 
 it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
