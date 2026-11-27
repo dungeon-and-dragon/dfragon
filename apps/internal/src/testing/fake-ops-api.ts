@@ -89,6 +89,86 @@ type LabItemDetailRequest = {
 
 type LabCurrencyRequest = { name: string; description: string; icon?: string }
 
+export type LabCandidateBody = {
+  itemName: string
+  kind: 'TITLE' | 'CREATURE' | 'AURA' | 'ENCHANT'
+  categories: string[]
+  roles: string[]
+  itemRarity: string | null
+  fame: number | null
+  availableLevel: number | null
+  itemTypeDetail: string | null
+  options: { name: string; value: string }[]
+  buffLines: string[]
+  card: LabItemCardBody | null
+  description: string | null
+  sourceItemId: string
+  versionId: string
+  importedAt: string
+  hasIcon: boolean
+  iconUpdatedAt: string | null
+  itemId: string | null
+  unitPrice: number | null
+  checkedAt: string | null
+  previousPrice: { itemId: string | null; unitPrice: number | null; checkedAt: string } | null
+  wearCount: number | null
+  recommendedTier: '종결' | '준종결' | null
+  badge: '미조회' | '검색 없음' | '매물 없음' | null
+}
+
+export type PriceHistoryBody = {
+  id: number
+  itemName: string
+  itemId: string | null
+  unitPrice: number | null
+  checkedAt: string
+}
+
+/** 추천 등급과 배지는 운영 app이 계산하므로 테스트가 기대하는 값을 그대로 넣는다. */
+export function labCandidate(
+  overrides: Partial<LabCandidateBody> & Pick<LabCandidateBody, 'itemName'>
+): LabCandidateBody {
+  return {
+    kind: 'TITLE',
+    categories: ['TITLE'],
+    roles: ['all'],
+    itemRarity: '레어',
+    fame: 100,
+    availableLevel: null,
+    itemTypeDetail: null,
+    options: [],
+    buffLines: [],
+    card: null,
+    description: null,
+    sourceItemId: 'synthetic-item',
+    versionId: 'synthetic-version',
+    importedAt: '2026-11-10T00:00:00.000Z',
+    hasIcon: false,
+    iconUpdatedAt: null,
+    itemId: 'synthetic-item',
+    unitPrice: 1_000_000,
+    checkedAt: '2026-11-10T05:00:00.000Z',
+    previousPrice: null,
+    wearCount: null,
+    recommendedTier: null,
+    badge: null,
+    ...overrides
+  }
+}
+
+const CANDIDATE_KINDS: readonly string[] = ['TITLE', 'CREATURE', 'AURA']
+
+/** 운영 app처럼 종류 밖의 query 키를 받지 않고, 마법부여는 부위와 역할을 함께 받는다. */
+function isCandidateQuery(query: Record<string, string>): boolean {
+  const keys = Object.keys(query).sort().join(',')
+
+  if (query.kind === 'ENCHANT') {
+    return keys === 'category,kind,role'
+  }
+
+  return keys === 'kind' && CANDIDATE_KINDS.includes(query.kind ?? '')
+}
+
 /** 운영 app처럼 빈 설명과 아이템 종류는 값 없음으로 둔다. */
 function storedText(value: string): string | null {
   const trimmed = value.trim()
@@ -159,6 +239,8 @@ const LAB_CURRENCY_PATH_PATTERN = /^lab-currencies\/(\d+)$/
 
 const failure = (status: number, code: string) => json(status, { error: { code } })
 
+const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
 /** 운영 포트의 경로와 응답 형태를 흉내 내는 메모리 API다. 화면이 보낸 요청은 `requests`에 남는다. */
 export class FakeOpsApi {
   workerSeenAt: string | null = '2026-11-10T05:31:00.000Z'
@@ -176,6 +258,9 @@ export class FakeOpsApi {
   labCurrencies: LabCurrencyBody[] = []
   labCurrencyIcons = new Map<number, string>()
   labItemDetails: LabItemDetailBody[] = []
+  labCandidates: LabCandidateBody[] = []
+  labCandidateHistory: Record<string, PriceHistoryBody[]> = {}
+  labCandidateQueries: Record<string, string>[] = []
   now = () => new Date().toISOString()
   requests: RecordedRequest[] = []
   private nextRunId = 1000
@@ -260,6 +345,21 @@ export class FakeOpsApi {
 
     if (method === 'PUT' && path === 'lab-item-details') {
       return this.saveLabItemDetail(body as LabItemDetailRequest)
+    }
+
+    if (method === 'GET' && path === 'lab-candidates') {
+      return this.readLabCandidates(url)
+    }
+
+    if (method === 'GET' && path === 'lab-candidates/history') {
+      const itemName = url.searchParams.get('itemName') ?? ''
+      const history = this.labCandidateHistory[itemName] ?? []
+
+      return json(200, { history })
+    }
+
+    if (method === 'GET' && path === 'lab-candidates/icon') {
+      return this.readLabCandidateIcon(url)
     }
 
     if (method === 'GET' && path === 'lab-currencies') {
@@ -369,6 +469,36 @@ export class FakeOpsApi {
     })
 
     return json(201, { id: added.id })
+  }
+
+  private readLabCandidates(url: URL): Response {
+    const query = Object.fromEntries(url.searchParams)
+    this.labCandidateQueries.push(query)
+
+    if (!isCandidateQuery(query)) {
+      return failure(400, 'INVALID_REQUEST')
+    }
+
+    const { kind, category, role } = query
+    const candidates = this.labCandidates.filter(
+      (candidate) =>
+        candidate.kind === kind &&
+        (category === undefined || candidate.categories.includes(category)) &&
+        (role === undefined || candidate.roles.includes(role))
+    )
+
+    return json(200, { candidates })
+  }
+
+  private readLabCandidateIcon(url: URL): Response {
+    const itemName = url.searchParams.get('itemName')
+    const candidate = this.labCandidates.find((entry) => entry.itemName === itemName)
+
+    if (candidate === undefined || !candidate.hasIcon) {
+      return failure(404, 'LAB_CANDIDATE_ICON_NOT_FOUND')
+    }
+
+    return new Response(PNG_SIGNATURE, { status: 200, headers: { 'Content-Type': 'image/png' } })
   }
 
   /** 운영 app처럼 묶음 하나만 바꾸고, 비운 묶음은 목록에서 뺀다. 입력 검증은 운영 app 테스트가 맡는다. */

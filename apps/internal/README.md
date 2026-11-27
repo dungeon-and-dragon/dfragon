@@ -36,8 +36,9 @@ podman run --rm --read-only --user 1000:1000 --cap-drop ALL --tmpfs /tmp -p 8080
 다른 폴더는 `#ops-api/*`, `#ops-components/*`, `#ops-testing/*`, `src/` 바로 아래 파일은 `#ops-app/*` alias로 가져옵니다.
 Alias 원본은 `tsconfig.paths.json`이며, 같은 폴더의 파일만 `./` 상대 경로로 가져옵니다.
 
-- `src/OpsScreen.tsx`: 헤더, 수집 대기열, 탭(job 목록과 상세, 타임라인 queue, batch key, 실험실 아이템)을 한 화면에 둡니다.
-- `src/ops-queries.ts`: 1초마다 다시 읽는 조회와 실행, 정지, 되돌리기, batch key 요청, 실험실 아이템과 재화의 조회, 저장 요청을 둡니다.
+- `src/pages.ts`: 주소마다 열 페이지(운영, 실험실 후보)를 정합니다.
+- `src/OpsScreen.tsx`: 헤더 아래에 운영 페이지(수집 대기열, job 목록과 상세, 타임라인 queue, batch key, 실험실 아이템 탭)나 실험실 후보 페이지를 둡니다.
+- `src/ops-queries.ts`: 1초마다 다시 읽는 조회와 실행, 정지, 되돌리기, batch key 요청, 실험실 아이템, 재화, 후보의 조회, 저장 요청을 둡니다.
 - `src/api/`: 운영 API 요청 함수와 응답 schema를 둡니다.
 - `src/components/`: 화면의 표, 상세, 팝오버와 스타일을 둡니다.
 - `src/format.ts`: 시각, 걸린 시간, 스케줄, 결과 요약 표시 함수를 둡니다.
