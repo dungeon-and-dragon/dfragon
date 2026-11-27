@@ -108,6 +108,8 @@ pnpm --filter @dfragon/database db:migrate:reset
 - `lab_currencies`: 실험실 아이템을 교환하는 특수 재화의 이름, 아이콘 이미지와 설명
 - `lab_item_details`: Neople에 없는 실험실 아이템에 저장소 소유자가 넣은 아이콘 이미지, 설명, 등급과 tooltip의 아이템 종류, 레벨제한, 모험가 명성, 부위와 단계별 옵션. 아이템 이름마다 한 행
 - `auction_prices`: 아이템 이름마다 경매장 최저가의 최신 값 한 행. 매물이 없거나 재화로 교환하는 아이템은 가격 열이 비고, 아이템 검색으로 찾은 itemId, 등급과 확인한 시각만 있습니다
+- `lab_candidates`: 데이터 묶음에서 import한 실험실 후보. 아이템 이름마다 한 행
+- `auction_price_history`: 아이템 이름별 경매장 최저가 이력
 
 ## 검증
 

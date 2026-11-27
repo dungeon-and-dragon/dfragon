@@ -654,6 +654,79 @@ try {
   )
   await psql("DELETE FROM lab_item_details WHERE item_name = '합성 검증 상자'")
 
+  stage = 'lab candidates and auction price history'
+  const insertCandidate = (name, kind, categories, roles) =>
+    psql(
+      `INSERT INTO lab_candidates (item_name, kind, categories, roles, options, buff_lines, version_id, source_item_id, imported_at) VALUES ('${name}', '${kind}', ARRAY[${categories}]::text[], ARRAY[${roles}]::text[], '[]', '[]', 'synthetic-version', 'synthetic-item', now())`
+    )
+  await insertCandidate('합성 검증 칭호', 'TITLE', "'TITLE'", "'all'")
+  await insertCandidate('합성 검증 카드', 'ENCHANT', "'WEAPON', 'JACKET'", "'dealer', 'buffer'")
+  assert.equal(
+    (
+      await psql(
+        "SELECT item_name, array_length(categories, 1), icon IS NULL, card IS NULL FROM lab_candidates WHERE item_name LIKE '합성 검증 %' ORDER BY item_name"
+      )
+    ).stdout.trim(),
+    '합성 검증 칭호|1|t|t\n합성 검증 카드|2|t|t'
+  )
+  for (const [kind, categories, roles] of [
+    ['TITLE', "'CREATURE'", "'all'"],
+    ['TITLE', "'TITLE', 'AURA'", "'all'"],
+    ['AURA', "'AURA'", "'dealer'"],
+    ['WEAPON', "'WEAPON'", "'all'"]
+  ]) {
+    await assert.rejects(insertCandidate('합성 검증 거부', kind, categories, roles))
+  }
+  await psql(
+    `UPDATE lab_candidates SET icon = '\\x89504e47'::bytea, icon_content_type = 'image/png', card = '{"slots":["무기"],"enchants":[]}' WHERE item_name = '합성 검증 카드'`
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT icon_content_type, card->'slots'->>0 FROM lab_candidates WHERE item_name = '합성 검증 카드'"
+      )
+    ).stdout.trim(),
+    'image/png|무기'
+  )
+  await assert.rejects(
+    psql(
+      "UPDATE lab_candidates SET icon_content_type = 'image/png' WHERE item_name = '합성 검증 칭호'"
+    )
+  )
+  await assert.rejects(
+    psql("UPDATE lab_candidates SET icon = '\\x89504e47'::bytea WHERE item_name = '합성 검증 칭호'")
+  )
+  await assert.rejects(
+    psql("UPDATE lab_candidates SET options = '{}' WHERE item_name = '합성 검증 칭호'")
+  )
+  await assert.rejects(
+    psql("UPDATE lab_candidates SET buff_lines = '{}' WHERE item_name = '합성 검증 칭호'")
+  )
+  await assert.rejects(
+    psql("UPDATE lab_candidates SET card = '[]' WHERE item_name = '합성 검증 카드'")
+  )
+  await psql(
+    "INSERT INTO auction_price_history (item_name, unit_price, checked_at) VALUES ('합성 검증 칭호', 1000, now()), ('합성 검증 칭호', NULL, now())"
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT count(DISTINCT id), count(*) FILTER (WHERE unit_price IS NULL) FROM auction_price_history WHERE item_name = '합성 검증 칭호'"
+      )
+    ).stdout.trim(),
+    '2|1'
+  )
+  assert.equal(
+    (
+      await psql(
+        "SELECT is_identity, identity_generation FROM information_schema.columns WHERE table_name = 'auction_price_history' AND column_name = 'id'"
+      )
+    ).stdout.trim(),
+    'YES|ALWAYS'
+  )
+  await psql("DELETE FROM lab_candidates WHERE item_name LIKE '합성 검증 %'")
+  await psql("DELETE FROM auction_price_history WHERE item_name LIKE '합성 검증 %'")
+
   stage = 'timeline tables'
   assert.equal(
     (

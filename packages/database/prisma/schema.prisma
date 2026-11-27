@@ -532,3 +532,39 @@ model AuctionPrice {
 
   @@map("auction_prices")
 }
+
+model LabCandidate {
+  itemName        String    @id @map("item_name")
+  kind            String
+  categories      String[]
+  roles           String[]
+  itemRarity      String?   @map("item_rarity")
+  fame            Int?
+  availableLevel  Int?      @map("available_level")
+  itemTypeDetail  String?   @map("item_type_detail")
+  options         Json
+  buffLines       Json      @map("buff_lines")
+  card            Json?
+  description     String?
+  icon            Bytes?
+  iconContentType String?   @map("icon_content_type")
+  iconUpdatedAt   DateTime? @map("icon_updated_at") @db.Timestamptz(3)
+  versionId       String    @map("version_id")
+  sourceItemId    String    @map("source_item_id")
+  importedAt      DateTime  @map("imported_at") @db.Timestamptz(3)
+
+  @@index([kind, fame(sort: Desc)])
+  @@index([versionId])
+  @@map("lab_candidates")
+}
+
+model AuctionPriceHistory {
+  id        BigInt   @id @default(autoincrement())
+  itemName  String   @map("item_name")
+  itemId    String?  @map("item_id")
+  unitPrice BigInt?  @map("unit_price")
+  checkedAt DateTime @map("checked_at") @db.Timestamptz(3)
+
+  @@index([itemName, checkedAt(sort: Desc)])
+  @@map("auction_price_history")
+}
