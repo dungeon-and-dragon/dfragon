@@ -2,6 +2,8 @@ import type { DatabaseClient } from './client.js'
 import {
   cheapestVariantOf,
   groupByBaseName,
+  isPlatinumVariant,
+  isVariantGroupedKind,
   representativeOf,
   VARIANT_GROUPED_KINDS
 } from './lab-candidate-variant.js'
@@ -93,6 +95,13 @@ export type LabItemPriceDetail = LabItemTooltipFields & {
   iconUpdatedAt: Date | null
 }
 
+export type LabItemPlatinumPrice = {
+  itemId: string | null
+  itemRarity: string | null
+  unitPrice: number | null
+  checkedAt: Date | null
+}
+
 export type LabItemPriceRow = {
   category: string
   role: string
@@ -102,6 +111,7 @@ export type LabItemPriceRow = {
   itemRarity: string | null
   unitPrice: number | null
   checkedAt: Date | null
+  platinum: LabItemPlatinumPrice | null
   cost: LabItemPriceCost | null
   detail: LabItemPriceDetail | null
   candidate: LabItemPriceDetail | null
@@ -109,7 +119,7 @@ export type LabItemPriceRow = {
 
 type StoredLabItemPriceRow = Omit<
   LabItemPriceRow,
-  'unitPrice' | 'cost' | 'detail' | 'candidate'
+  'unitPrice' | 'platinum' | 'cost' | 'detail' | 'candidate'
 > & {
   hasCandidate: boolean
   candidateDescription: string | null
@@ -203,6 +213,21 @@ function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceDetail | null
   }
 }
 
+function platinumPriceOf(
+  category: string,
+  variants: readonly CandidateVariantPrice[]
+): LabItemPlatinumPrice | null {
+  const platinums = variants.filter(({ itemName }) => isPlatinumVariant(itemName))
+
+  if (!isVariantGroupedKind(category) || platinums.length === 0) {
+    return null
+  }
+
+  const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf(platinums)
+
+  return { itemId, itemRarity, unitPrice, checkedAt }
+}
+
 // 가격은 foreign key 없이 아이템 이름으로만 잇고, 재화는 currency_id로 잇는다.
 export async function readLabItemPrices(client: DatabaseClient): Promise<LabItemPriceRow[]> {
   const rows = await client.$queryRaw<StoredLabItemPriceRow[]>`
@@ -244,7 +269,11 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       checkedAt: row.checkedAt
     }
 
-    const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf([own, ...variants])
+    const normals = isVariantGroupedKind(category)
+      ? variants.filter((variant) => !isPlatinumVariant(variant.itemName))
+      : variants
+    const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf([own, ...normals])
+    const platinum = platinumPriceOf(category, variants)
     const cost = toPriceCost(row)
     const detail = toPriceDetail(row)
     const candidate = toPriceCandidate(row) ?? variantCandidateOf(itemName, variants)
@@ -258,6 +287,7 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       itemRarity,
       unitPrice,
       checkedAt,
+      platinum,
       cost,
       detail,
       candidate

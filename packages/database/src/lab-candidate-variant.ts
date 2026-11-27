@@ -12,13 +12,17 @@ export function isVariantGroupedKind(kind: string): boolean {
   return isLabItemVariantGrouped(kind)
 }
 
+export function isPlatinumVariant(itemName: string): boolean {
+  return itemName.includes(PLATINUM)
+}
+
 // 기본 이름 줄이 없는 묶음도 명성, 옵션 같은 값을 정할 줄 하나가 필요해, 기본 이름 줄, 플래티넘이 아닌 변형, 플래티넘 변형 순으로 고른다.
 function representativeRank(itemName: string, baseName: string): number {
   if (itemName === baseName) {
     return 0
   }
 
-  if (!itemName.includes(PLATINUM)) {
+  if (!isPlatinumVariant(itemName)) {
     return 1
   }
 

@@ -622,6 +622,7 @@ function labRow(
     itemRarity: null,
     unitPrice: null,
     checkedAt: null,
+    platinum: null,
     cost: null,
     detail,
     candidate: null
