@@ -561,7 +561,8 @@ test('아이템 아이콘은 소유자 아이콘이 비어 있을 때 후보 아
       findUnique: async ({ where }: IconQuery) => ownerIcons.get(where.itemName) ?? null
     },
     labCandidate: {
-      findUnique: async ({ where }: IconQuery) => candidateIcons.get(where.itemName) ?? null
+      findUnique: async ({ where }: IconQuery) => candidateIcons.get(where.itemName) ?? null,
+      findMany: async () => []
     }
   } as unknown as DatabaseClient
   const repository = new DatabaseLabItemRepository(client)

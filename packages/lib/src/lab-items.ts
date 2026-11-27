@@ -52,3 +52,16 @@ export const LAB_ITEM_RARITIES = [
 ] as const
 
 export type LabItemRarity = (typeof LAB_ITEM_RARITIES)[number]
+
+const LEVEL_TAG_PATTERN = /\[\d+Lv\]/g
+const PLATINUM_PATTERN = / 플래티넘/g
+const WHITESPACE_RUN_PATTERN = /\s+/g
+
+// 칭호, 크리쳐는 같은 아이템이 플래티넘과 레벨 꼬리표만 다른 이름으로 여러 개 있어, 둘을 뗀 이름으로 묶는다.
+export function labItemBaseName(itemName: string): string {
+  return itemName
+    .replace(LEVEL_TAG_PATTERN, ' ')
+    .replace(PLATINUM_PATTERN, ' ')
+    .replace(WHITESPACE_RUN_PATTERN, ' ')
+    .trim()
+}
