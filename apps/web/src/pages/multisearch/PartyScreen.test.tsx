@@ -133,7 +133,7 @@ it('비동기 식별 성공은 OCR 첫 이름 대신 선택된 이름과 서버�
   )
   expect(columnText(row, '서버')).toBe('카인')
   expect(columnText(row, '명성')).toBe('0')
-  expect(columnText(row, '점수')).toBe('장비-')
+  expect(columnText(row, '점수')).toBe('-')
   expect(row.querySelector('img')?.getAttribute('src')).toBe(character.image)
 })
 
