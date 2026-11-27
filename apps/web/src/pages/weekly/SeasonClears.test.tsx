@@ -41,10 +41,6 @@ async function renderClears(activity: AdventureActivity): Promise<void> {
   )
 }
 
-function title(): string | null | undefined {
-  return container.querySelector('section[aria-label="이번 시즌 클리어"] h2')?.textContent
-}
-
 function rows(): string[][] {
   return [...container.querySelectorAll('li')].map((row) =>
     [...row.querySelectorAll('span:not([aria-hidden])')]
@@ -53,7 +49,7 @@ function rows(): string[][] {
   )
 }
 
-it('모험단 전체의 레이드 단계를 레이드마다 한 줄에 모으고 레기온을 뒤에 두며, 제목 옆에 줄 수를 적는다', async () => {
+it('모험단 전체의 레이드 단계를 레이드마다 한 줄에 모으고 레기온을 뒤에 둔다', async () => {
   await renderClears(
     activityWith({
       raids: [
@@ -66,12 +62,13 @@ it('모험단 전체의 레이드 단계를 레이드마다 한 줄에 모으고
     })
   )
 
-  await vi.waitFor(() => expect(title()).toBe('이번 시즌 클리어3'))
-  expect(rows()).toEqual([
-    ['레이드', '디레지에 레이드', '하드', '15', '일반', '1,203', '매칭', '4'],
-    ['레이드', '이내 황혼전', '7'],
-    ['레기온', '베누스', '12']
-  ])
+  await vi.waitFor(() =>
+    expect(rows()).toEqual([
+      ['레이드', '디레지에 레이드', '하드', '15', '일반', '1,203', '매칭', '4'],
+      ['레이드', '이내 황혼전', '7'],
+      ['레기온', '베누스', '12']
+    ])
+  )
   expect([...container.querySelectorAll('li .badge')].map((badge) => badge.textContent)).toEqual([
     '하드'
   ])
@@ -121,11 +118,13 @@ it('깨어난 숲처럼 이름 뒤 괄호에 극, 일반을 적은 레기온은 
   expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
 })
 
-it('클리어가 없는 시즌은 제목과 빈 상태 한 줄을 보인다', async () => {
+it('클리어가 없는 시즌은 제목 없이 빈 상태 한 줄만 보인다', async () => {
   await renderClears(activityWith({ raids: [], legions: [] }))
 
-  await vi.waitFor(() => expect(title()).toBe('이번 시즌 클리어0'))
-  expect(container.querySelector('section p')?.textContent).toBe(
-    '이번 시즌 클리어 기록이 없습니다.'
+  await vi.waitFor(() =>
+    expect(container.querySelector('section[aria-label="시즌 클리어"]')?.textContent).toBe(
+      '클리어 기록이 없습니다.'
+    )
   )
+  expect(container.querySelector('section h2')).toBeNull()
 })
