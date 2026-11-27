@@ -7,6 +7,7 @@ import {
   countInactiveCharacters,
   createDatabaseClient,
   readClearPopulation,
+  readClearPopulationJobs,
   readClearPopulationPage,
   readFameRefreshTargets,
   readInactiveCharacters,
@@ -69,7 +70,7 @@ after(() => client?.$disconnect())
 const at = (time) => new Date(`2026-11-${time}+09:00`)
 
 // 합성 캐릭터다. 실제 Neople 응답이나 credential이 아니다.
-async function createFetched(serverId, characterId) {
+async function createFetched(serverId, characterId, grow = { id: 'grow-a1', name: '眞 합성전직' }) {
   await recordCharacterBasic(client, {
     serverId,
     characterId,
@@ -77,9 +78,9 @@ async function createFetched(serverId, characterId) {
     adventureName: '합성모험단',
     level: 115,
     jobId: 'job-a',
-    jobGrowId: 'grow-a1',
+    jobGrowId: grow.id,
     jobName: '합성직업',
-    jobGrowName: '합성전직',
+    jobGrowName: grow.name,
     fame: 50000,
     guildId: null,
     guildName: null
@@ -194,6 +195,31 @@ test('클리어 수집 대상은 활성만 읽으면 비활성 캐릭터를 빼�
     await countClearPopulation(client, { minMaxFame: 50000, activity: 'include-inactive' }),
     includingInactivePage.length
   )
+})
+
+test('클리어 수집 대상과 전직별 수는 眞 각성 전 캐릭터를 뺌', {
+  skip: port === undefined
+}, async () => {
+  await createFetched('prey', 'awakened')
+  await createFetched('prey', 'unawakened', { id: 'grow-a0', name: '합성전직' })
+
+  const page = await readClearPopulationPage(
+    client,
+    { minMaxFame: 50000, activity: 'include-inactive' },
+    { after: undefined, skip: 0, limit: 1000 }
+  )
+
+  assert.deepEqual(
+    keysOf(page).filter((key) => key.startsWith('prey/')),
+    ['prey/awakened']
+  )
+  assert.equal(
+    await countClearPopulation(client, { minMaxFame: 50000, activity: 'include-inactive' }),
+    page.length
+  )
+
+  const grows = (await readClearPopulationJobs(client, 50000)).map(({ jobGrowId }) => jobGrowId)
+  assert.deepEqual(grows, ['grow-a1'])
 })
 
 test('스킬 스타일 수집 대상에서 비활성 캐릭터를 뺌', {
