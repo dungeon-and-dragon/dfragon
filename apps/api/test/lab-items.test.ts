@@ -349,7 +349,7 @@ async function performanceKeys(
   return new Map(items.map(({ itemName, performanceKey }) => [itemName, performanceKey]))
 }
 
-test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성, 구매 방법이 같으면 같은 performanceKey이고 낮은 단계 옵션은 보지 않는다', async (t) => {
+test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성, 구매 방법이 같으면 같은 performanceKey이고 낮은 단계 옵션과 후보 옵션 열은 보지 않는다', async (t) => {
   const card = (itemName: string, candidate: LabItemPriceCandidate | null) => ({
     ...row('WEAPON', 'dealer', '종결', itemName, 1_000),
     candidate
@@ -360,6 +360,10 @@ test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성,
     card('합성 높은 단계 다름', cardCandidate(210, '90', '110')),
     card('합성 명성 다름', cardCandidate(220, '90', '100')),
     card('합성 부위 다름', cardCandidate(210, '90', '100', ['무기', '상의'])),
+    card('합성 후보 옵션 있음', {
+      ...cardCandidate(210, '90', '100'),
+      options: [{ name: '지능', value: '50' }]
+    }),
     exchangedRow('합성 재화 1', 1),
     exchangedRow('합성 재화 2', 2),
     card('합성 옵션 없음', null)
@@ -368,6 +372,7 @@ test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성,
   const base = keys.get('합성 기준')
   assert.equal(typeof base, 'string')
   assert.equal(keys.get('합성 낮은 단계만 다름'), base)
+  assert.equal(keys.get('합성 후보 옵션 있음'), base)
   const differents = ['합성 높은 단계 다름', '합성 명성 다름', '합성 부위 다름', '합성 재화 1']
 
   for (const itemName of differents) {
@@ -377,7 +382,7 @@ test('마법부여 카드는 부위, 가장 높은 강화 단계 옵션, 명성,
   assert.equal(keys.get('합성 옵션 없음'), null)
 })
 
-test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanceKey이고 소유자 상세 옵션이 있으면 그 값으로 비교한다', async (t) => {
+test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanceKey이고 소유자 상세 옵션이 있으면 그 값으로 비교하며, 버프 줄만 있으면 null이다', async (t) => {
   const titleCandidate = (
     options: { name: string; value: string }[],
     buffLines = ['합성 스킬 Lv +1'],
@@ -401,6 +406,7 @@ test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanc
       ...title('합성 칭호 명성 다름'),
       candidate: titleCandidate([strength, intelligence], undefined, 800)
     },
+    { ...title('합성 칭호 버프만'), candidate: titleCandidate([]) },
     {
       ...title('합성 칭호 소유자 A'),
       candidate: titleCandidate([strength, intelligence]),
@@ -413,6 +419,7 @@ test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanc
   assert.equal(keys.get('합성 칭호 B'), keys.get('합성 칭호 A'))
   assert.notEqual(keys.get('합성 칭호 버프 다름'), keys.get('합성 칭호 A'))
   assert.notEqual(keys.get('합성 칭호 명성 다름'), keys.get('합성 칭호 A'))
+  assert.equal(keys.get('합성 칭호 버프만'), null)
   assert.notEqual(keys.get('합성 칭호 소유자 A'), keys.get('합성 칭호 A'))
   assert.equal(keys.get('합성 칭호 소유자 B'), keys.get('합성 칭호 소유자 A'))
 })
