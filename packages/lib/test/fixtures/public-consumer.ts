@@ -31,14 +31,11 @@ import {
 import {
   chooseEnchantGrade,
   displayStatusOf,
-  enchantOptionsOf,
-  findEnchantOption,
+  groupEnchantEntries,
   optionNeedsMainStat,
   type EnchantDisplayStatus,
-  type EnchantGrade,
-  type EnchantGradeOption,
-  type EnchantGradeRole,
-  type EnchantGradeSlot,
+  type EnchantEntry,
+  type EnchantEntryGroup,
   type EnchantMainStat
 } from '@dfragon/lib/enchant-grades'
 import {
@@ -203,22 +200,17 @@ export function versionResponse(value: unknown, service: ServerService): ServerB
   return parseServerBuildInfo(value, service)
 }
 
-export function enchantCards(
-  slotId: EnchantGradeSlot,
-  role: EnchantGradeRole,
-  id: string,
-  mainStat: EnchantMainStat | null
-) {
-  const finals: readonly EnchantGradeOption[] = enchantOptionsOf(slotId, role).종결
-  const found: EnchantGradeOption | null = findEnchantOption(slotId, role, id)
-  const labels = finals.map((option) => option.display)
+export function enchantCards(entries: readonly EnchantEntry[], mainStat: EnchantMainStat | null) {
+  const groups: readonly EnchantEntryGroup<EnchantEntry>[] = groupEnchantEntries(entries)
+  const labels = groups.map((group) => group.display)
+  const [first] = groups
 
-  if (found === null) {
+  if (first === undefined) {
     return { labels, needsMainStat: false, display: [] }
   }
 
-  const needsMainStat = optionNeedsMainStat(found)
-  const chosen: EnchantGrade = chooseEnchantGrade(found, mainStat)
+  const needsMainStat = optionNeedsMainStat(first)
+  const chosen: EnchantEntry = chooseEnchantGrade(first, mainStat)
   const display: readonly EnchantDisplayStatus[] = displayStatusOf(chosen)
 
   return { labels, needsMainStat, display }
