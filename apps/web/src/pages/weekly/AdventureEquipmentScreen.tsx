@@ -8,7 +8,7 @@ import {
 import { equipmentSetShortName } from '#entities/ranking'
 import { serverNames } from '#shared/config/servers/servers'
 import { ChoiceField } from '#shared/ui/ChoiceField'
-import { AdventureTabsForm } from './AdventureNameForm'
+import { AdventureTabsForm } from './AdventureTabsForm'
 import { AdventureTabs } from './AdventureTabs'
 import { useAdventureEquipment, useRefreshAdventureEquipment } from './api/useAdventureEquipment'
 import { EquipmentSection, EquipmentSkeleton, OathSection } from './EquipmentBoard'
