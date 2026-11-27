@@ -411,7 +411,7 @@ it.each([
   ])
 })
 
-it('화면 상자 아래 푸터에 Neople 로고 링크, 두 약관 화면 링크, 디스코드 링크를 두고 지금 화면 표시는 하지 않는다', async () => {
+it('화면 상자 아래 푸터에 Neople 로고 링크, 두 약관 화면 링크, 디스코드, 카카오톡 링크를 두고 지금 화면 표시는 하지 않는다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const main = container.querySelector('main')!
@@ -433,9 +433,11 @@ it('화면 상자 아래 푸터에 Neople 로고 링크, 두 약관 화면 링�
     ['', 'https://developers.neople.co.kr', null],
     ['이용약관', '/terms', null],
     ['개인정보처리방침', '/privacy', null],
-    ['디스코드', 'https://discord.gg/MMRhM22RXN', null]
+    ['디스코드', 'https://discord.gg/MMRhM22RXN', null],
+    ['카카오톡', 'https://open.kakao.com/o/svKSo0Yi', null]
   ])
   expect(footerLink('디스코드').target).toBe('_blank')
+  expect(footerLink('카카오톡').target).toBe('_blank')
 })
 
 it('푸터의 약관 링크를 누르면 그 화면으로 가고 지금 화면의 링크만 현재 위치로 알린다', async () => {
