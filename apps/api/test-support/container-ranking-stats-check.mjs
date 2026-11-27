@@ -91,7 +91,7 @@ try {
       ...basic('cain', 'rank-a1', 'grow-a', 80000),
       fetchedAt: undefined,
       dealerSkillLearned: null,
-      score: { kind: 'equipment', value: 1234567 },
+      score: { kind: 'equipment', value: 1234567, approximateSource: null },
       equipmentSet: null,
       oathSet: null
     }
@@ -99,10 +99,10 @@ try {
   assert.deepEqual(
     ranking.map(({ characterId, score }) => [characterId, score]),
     [
-      ['rank-a1', { kind: 'equipment', value: 1234567 }],
+      ['rank-a1', { kind: 'equipment', value: 1234567, approximateSource: null }],
       ['rank-a2', null],
       ['rank-b1', null],
-      ['rank-b2', { kind: 'buff', value: 4321000 }]
+      ['rank-b2', { kind: 'buff', value: 4321000, approximateSource: null }]
     ]
   )
   assert.deepEqual(ids(await readFameRanking(client, { jobId, jobGrowId: 'grow-b' }, 100)), [
@@ -184,7 +184,7 @@ try {
     rankingAnswer.characters.map(({ characterId, score }) => [characterId, score]),
     [
       ['rank-b1', null],
-      ['rank-b2', { calculator: 'buff', value: 4321000 }]
+      ['rank-b2', { calculator: 'buff', value: 4321000, approximate: null }]
     ]
   )
   assert.equal(
@@ -513,7 +513,7 @@ try {
     scoreRows.map(({ characterId, score }) => [characterId, score]),
     equipmentExpected.map(({ characterId, score }) => [
       characterId,
-      { calculator: 'equipment', value: score }
+      { calculator: 'equipment', value: score, approximate: null }
     ])
   )
   assert.equal(scoreRows[99].score.value, scoreRows[100].score.value)

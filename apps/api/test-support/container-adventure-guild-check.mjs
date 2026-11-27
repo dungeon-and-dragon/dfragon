@@ -678,7 +678,7 @@ try {
       score
     ]),
     [
-      ['adventure-high', { kind: 'equipment', value: 1234567 }],
+      ['adventure-high', { kind: 'equipment', value: 1234567, approximateSource: null }],
       ['adventure-low', null],
       ['adventure-no-fame', null],
       ['adventure-no-basic', null]
@@ -690,7 +690,7 @@ try {
   assert.deepEqual(
     searched.rows.map(({ serverId, characterId, score }) => [serverId, characterId, score]),
     [
-      ['siroco', 'adventure-high', { calculator: 'equipment', value: 1234567 }],
+      ['siroco', 'adventure-high', { calculator: 'equipment', value: 1234567, approximate: null }],
       ['hilder', 'guild-no-fame', null],
       ['cain', 'candidate-not-stored', null]
     ]
