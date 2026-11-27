@@ -113,12 +113,11 @@ const EQUIPMENT_SLOT_NAMES: Readonly<Record<EnchantGradeSlot | typeof TITLE_SLOT
 }
 export const TUNED_WEAPON_NAME = '레거시 조율 완료'
 
-/** card는 그 선택지에서 가장 싼 카드다. */
 export type EnchantChoice = Readonly<{
   id: string
   tier: LabItemTier
   options: EnchantOption[]
-  card: LabEnchantCard
+  cards: LabEnchantCard[]
 }>
 
 export type EnchantChoicesStatus = LoadedResult<EnchantOptions>['status']
@@ -342,12 +341,25 @@ function enchantChoicesOf(
   const choices = tiers.flatMap(({ tier, options }) =>
     options.map((option) => {
       const labels = optionEnchantLabels(option, role)
+      const cards = shownCardsOf(option.cards)
 
-      return { id: option.id, tier, options: labels, card: option.cards[0]! }
+      return { id: option.id, tier, options: labels, cards }
     })
   )
 
   return { choices, status }
+}
+
+// API가 골드 가격이 있는 카드를 재화로 사는 카드보다 앞에 둔다.
+function shownCardsOf(cards: readonly LabEnchantCard[]): LabEnchantCard[] {
+  const cheapest = cards[0]!
+  const costCard = cards.find(({ cost }) => cost !== null)
+
+  if (costCard === undefined || costCard === cheapest) {
+    return [cheapest]
+  }
+
+  return [cheapest, costCard]
 }
 
 function labelKey(options: readonly EnchantOption[]): string {
@@ -373,7 +385,7 @@ function wornEnchantCardOf(
     return null
   }
 
-  return choice.card
+  return choice.cards[0]!
 }
 
 function maxTuneOf(tuneSetPoints: readonly number[]): number {

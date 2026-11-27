@@ -20,12 +20,28 @@ function card(itemName: string, unitPrice: number | null, overrides: Partial<Car
   }
 }
 
+// 소유자가 넣은 보주는 Neople 아이템 id가 없고 올린 아이콘과 재화 값이 있다.
+function orb(itemName: string, count: number): Card {
+  return card(itemName, null, {
+    itemId: null,
+    itemRarity: '유니크',
+    iconPath: ENCHANT_CARD_ICON_PATH,
+    cost: {
+      currencyName: '합성 교환 주화',
+      description: null,
+      count,
+      iconPath: ENCHANT_CURRENCY_ICON_PATH
+    }
+  })
+}
+
 const ATTACK_110 = { name: '공격력', value: 110 }
 const ALL_STATS_90 = { name: '올스탯', value: 90 }
 
 export const DEALER_PANTS_FINAL = 'lab:PANTS:dealer:final'
 export const DEALER_PANTS_WORN = 'lab:PANTS:dealer:worn'
 export const DEALER_PANTS_BARRACKS = 'lab:PANTS:dealer:barracks'
+export const DEALER_PANTS_ORB = 'lab:PANTS:dealer:orb'
 export const DEALER_JACKET_FINAL = 'lab:JACKET:dealer:final'
 export const DEALER_AMULET_FINAL = 'lab:AMULET:dealer:final'
 export const DEALER_EARRING_FINAL = 'lab:EARRING:dealer:final'
@@ -66,19 +82,16 @@ const slots: Slot[] = [
             display: [ATTACK_110, { name: '올스탯', value: 80 }],
             skillLevel: null,
             cards: [
-              card('합성 하의 보주', null, {
-                itemId: null,
-                itemRarity: '유니크',
-                iconPath: ENCHANT_CARD_ICON_PATH,
-                cost: {
-                  currencyName: '합성 교환 주화',
-                  description: null,
-                  count: 240,
-                  iconPath: ENCHANT_CURRENCY_ICON_PATH
-                }
-              }),
-              card('합성 배럭 하의 카드', 48_888)
+              card('합성 배럭 하의 카드', 48_888),
+              orb('합성 하의 보주', 240),
+              orb('합성 남는 하의 보주', 300)
             ]
+          },
+          {
+            id: DEALER_PANTS_ORB,
+            display: [ATTACK_110, { name: '올스탯', value: 70 }],
+            skillLevel: null,
+            cards: [orb('합성 교환 하의 보주', 120)]
           }
         ]
       }
