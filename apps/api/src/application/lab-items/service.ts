@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import type { CatalogDetail } from '@dfragon/server-core/domain/character-catalog/index.js'
 import type {
   LabCurrencyIcon,
@@ -16,7 +17,15 @@ import {
   labItemRolesOf
 } from '@dfragon/lib/lab-items'
 import { CATALOG_LIMITS } from '@dfragon/server-core/domain/character-catalog/index.js'
+import type { EnchantEntry } from '@dfragon/lib/enchant-grades'
 import { type ItemCard, projectItemDetail } from '#domain/item-detail/index.js'
+import {
+  type LabEnchantSlot,
+  type LabEnchantSource,
+  labEnchantOptions,
+  neopleCardEntry,
+  ownerCardEntry
+} from '#domain/lab-enchant-options/index.js'
 import type { LoadItemDetails } from './ports.js'
 import type { LabItemRepository } from './repository.js'
 
@@ -62,7 +71,17 @@ export interface LabItems {
   groups: LabItemGroupPrices[]
 }
 
+export type LabEnchantCard = Pick<
+  LabItemPrice,
+  'itemName' | 'itemId' | 'itemRarity' | 'iconPath' | 'unitPrice' | 'cost'
+>
+
+export interface LabEnchantOptions {
+  slots: LabEnchantSlot<LabEnchantCard>[]
+}
+
 const FAME_STATUS = '모험가 명성'
+const ENCHANT_ROLES = ['dealer', 'buffer'] as const
 const ENCHANT_CATEGORIES: ReadonlySet<string> = new Set(
   LAB_ITEM_CATEGORIES.filter(isEnchantCategory)
 )
@@ -191,13 +210,23 @@ function comparePrices(left: LabItemPrice, right: LabItemPrice): number {
   return left.itemName.localeCompare(right.itemName, 'ko')
 }
 
-function cardFame(itemId: string, detail: CatalogDetail): number | null {
-  if (detail.data === null) {
+function neopleCard(itemId: string, detail: CatalogDetail | undefined): ItemCard | null {
+  if (detail === undefined || detail.data === null) {
     return null
   }
 
   const item = projectItemDetail(itemId, detail.data)
-  const fame = item?.card?.enchants.at(-1)?.status.find(({ name }) => name === FAME_STATUS)
+
+  if (item === null) {
+    return null
+  }
+
+  return item.card
+}
+
+function cardFame(itemId: string, detail: CatalogDetail): number | null {
+  const card = neopleCard(itemId, detail)
+  const fame = card?.enchants.at(-1)?.status.find(({ name }) => name === FAME_STATUS)
   const value = Number(fame?.value)
 
   if (!Number.isInteger(value) || value <= 0) {
@@ -227,6 +256,66 @@ function toPrice(
   }
 
   return { itemName, itemId, ...look, fame, unitPrice, checkedAt, cost: null }
+}
+
+function enchantEntryOf(
+  row: LabItemPriceRow,
+  details: ReadonlyMap<string, CatalogDetail>
+): EnchantEntry | null {
+  if (row.itemId !== null) {
+    const card = neopleCard(row.itemId, details.get(row.itemId))
+
+    if (card === null) {
+      return null
+    }
+
+    return neopleCardEntry(card)
+  }
+
+  const ownerCard = row.detail?.card
+
+  if (ownerCard == null) {
+    return null
+  }
+
+  return ownerCardEntry(ownerCard)
+}
+
+function toEnchantCard(row: LabItemPriceRow): LabEnchantCard {
+  const { itemName, itemId, itemRarity, iconPath, unitPrice, cost } = toPrice(row, null)
+
+  return { itemName, itemId, itemRarity, iconPath, unitPrice, cost }
+}
+
+function isEnchantRow(row: LabItemPriceRow): boolean {
+  return ENCHANT_CATEGORIES.has(row.category)
+}
+
+function enchantSourceOf(
+  row: LabItemPriceRow,
+  details: ReadonlyMap<string, CatalogDetail>
+): LabEnchantSource<LabEnchantCard>[] {
+  const category = LAB_ITEM_CATEGORIES.find((candidate) => candidate === row.category)
+  const role = ENCHANT_ROLES.find((candidate) => candidate === row.role)
+  const tier = LAB_ITEM_TIERS.find((candidate) => candidate === row.tier)
+
+  if (category === undefined || !isEnchantCategory(category) || role === undefined) {
+    return []
+  }
+
+  const entry = enchantEntryOf(row, details)
+
+  if (entry === null || tier === undefined) {
+    return []
+  }
+
+  const card = toEnchantCard(row)
+
+  return [{ slotId: category, role, tier, entry, card }]
+}
+
+function digestOptionKey(key: string): string {
+  return createHash('sha256').update(key).digest('hex').slice(0, 16)
 }
 
 function needsNeopleFame(row: LabItemPriceRow): row is LabItemPriceRow & { itemId: string } {
@@ -266,19 +355,39 @@ export class LabItemService {
     private readonly loadItemDetails: LoadItemDetails
   ) {}
 
+  private async itemDetails(
+    itemIds: readonly string[],
+    signal: AbortSignal
+  ): Promise<Map<string, CatalogDetail>> {
+    const unique = [...new Set(itemIds)]
+    const loaded = await Promise.all(
+      chunks(unique, CATALOG_LIMITS.maximumReferencesPerLoad).map((ids) =>
+        this.loadItemDetails(ids, signal)
+      )
+    )
+
+    return new Map(loaded.flatMap((map) => [...map]))
+  }
+
   private async neopleFames(
     rows: readonly LabItemPriceRow[],
     signal: AbortSignal
   ): Promise<Map<string, number | null>> {
-    const itemIds = [...new Set(rows.filter(needsNeopleFame).map(({ itemId }) => itemId))]
-    const loaded = await Promise.all(
-      chunks(itemIds, CATALOG_LIMITS.maximumReferencesPerLoad).map((ids) =>
-        this.loadItemDetails(ids, signal)
-      )
-    )
-    const details = loaded.flatMap((map) => [...map])
+    const itemIds = rows.filter(needsNeopleFame).map(({ itemId }) => itemId)
+    const details = await this.itemDetails(itemIds, signal)
 
-    return new Map(details.map(([itemId, detail]) => [itemId, cardFame(itemId, detail)]))
+    return new Map([...details].map(([itemId, detail]) => [itemId, cardFame(itemId, detail)]))
+  }
+
+  /** 아이템 상세를 받지 못한 카드는 빼고 나머지로 선택지를 만든다. */
+  async enchantOptions(signal: AbortSignal): Promise<LabEnchantOptions> {
+    const rows = (await this.repository.readLabItemPrices()).filter(isEnchantRow)
+    const itemIds = rows.flatMap(({ itemId }) => (itemId !== null ? [itemId] : []))
+    const details = await this.itemDetails(itemIds, signal)
+    const sources = rows.flatMap((row) => enchantSourceOf(row, details))
+    const slots = labEnchantOptions(sources, digestOptionKey)
+
+    return { slots }
   }
 
   async get(signal: AbortSignal): Promise<LabItems> {
