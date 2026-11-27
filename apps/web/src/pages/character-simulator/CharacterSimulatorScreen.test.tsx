@@ -1834,18 +1834,30 @@ it('마법부여는 현재, 종결, 준종결, 배럭 구획 순서이고 선택
   expect(enchantTiers('목걸이')).toEqual(['현재', '종결'])
 })
 
-it('선택지마다 첫 카드의 이름과 가격만 보이고, 재화로 사는 카드는 개수와 재화를, 올린 아이콘이 있으면 그 아이콘을 보인다', async () => {
+it('골드 카드만 있는 선택지는 가장 싼 카드만 보이고, 재화로 사는 카드는 개수와 재화를, 올린 아이콘이 있으면 그 아이콘을 보인다', async () => {
   await openDealerPants()
-  const [, final, , barracks] = buttonsIn('하의 마법부여')
+  const [, final, , , orb] = buttonsIn('하의 마법부여')
 
   expect(final!.textContent).toContain('합성 하의 카드26,498,500')
   expect(final!.textContent).not.toContain('합성 비싼 하의 카드')
   expect(final!.querySelector('img')!.getAttribute('src')).toContain(
     '42ee831ce6b283ecd8b06969caad7894'
   )
+  expect(orb!.textContent).toContain('합성 교환 하의 보주120')
+  expect(orb!.querySelector('img[alt="합성 교환 주화"]')).not.toBeNull()
+  expect(orb!.querySelector('img')!.getAttribute('src')).toContain('/api/lab/item-icon?')
+})
+
+it('골드 카드와 재화로 사는 카드가 한 선택지에 있으면 가장 싼 골드 카드와 첫 재화 카드를 보이고 아이콘은 골드 카드의 것이다', async () => {
+  await openDealerPants()
+  const [, , , barracks] = buttonsIn('하의 마법부여')
+
+  expect(barracks!.textContent).toContain('합성 배럭 하의 카드48,888')
   expect(barracks!.textContent).toContain('합성 하의 보주240')
-  expect(barracks!.querySelector('img[alt="합성 교환 주화"]')).not.toBeNull()
-  expect(barracks!.querySelector('img')!.getAttribute('src')).toContain('/api/lab/item-icon?')
+  expect(barracks!.textContent).not.toContain('합성 남는 하의 보주')
+  expect(barracks!.querySelector('img')!.getAttribute('src')).toContain(
+    '42ee831ce6b283ecd8b06969caad7894'
+  )
 })
 
 it('버퍼 캐릭터에는 버퍼 선택지만 보인다', async () => {
