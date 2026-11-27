@@ -39,7 +39,8 @@ import { enchantOptionsHandlers } from './api/enchant-options.handlers'
 import { simulationScore, withSwitchingEquipment } from './api/simulation.fixture'
 import { simulationUrl } from './api/simulation.handlers'
 import { CharacterSimulatorScreen } from './CharacterSimulatorScreen'
-import type { SimulationBody } from './model/simulator-draft'
+import { NO_CHANGES, type SimulationBody } from './model/simulator-draft'
+import { encodeChanges } from './model/simulator-share'
 
 type Respond = (body: SimulationBody) => Response | Promise<Response>
 
@@ -102,10 +103,16 @@ function scoresFor({ equipment, oath = [], ...chosen }: SimulationBody): Respons
   return HttpResponse.json({ baseline: score(BASELINE), simulated: score(BASELINE + added) })
 }
 
+type SavedChangesProps = Readonly<{
+  savedChanges?: string
+  onChangesSave?: (saved: string | undefined) => void
+}>
+
 async function render(
   detail: CharacterDetailView,
   respond: Respond = scoresFor,
-  detailResponse: () => Response | Promise<void> = () => HttpResponse.json(detail)
+  detailResponse: () => Response | Promise<void> = () => HttpResponse.json(detail),
+  saved: SavedChangesProps = {}
 ): Promise<void> {
   const identity = identityOf(detail)
   server.use(
@@ -124,6 +131,8 @@ async function render(
           <CharacterSimulatorScreen
             serverId={identity.serverId}
             characterId={identity.characterId}
+            savedChanges={saved.savedChanges}
+            onChangesSave={saved.onChangesSave}
           />
         </TestQueryClient>
       </TestRouter>
@@ -1907,4 +1916,99 @@ it('마법부여 목록을 받는 동안에는 현재 줄만 빈 아이콘 칸�
   expect(enchantTiers('하의')).toEqual(['현재'])
   expect(wornEnchantIcon('하의').tagName).toBe('SPAN')
   expect(control('하의 마법부여').textContent).not.toContain('불러오지 못했습니다')
+})
+
+async function reopen(detail: CharacterDetailView, saved: SavedChangesProps): Promise<void> {
+  await act(async () => root.unmount())
+  root = createRoot(container)
+  bodies = []
+  await render(detail, scoresFor, () => HttpResponse.json(detail), saved)
+}
+
+it('바꾼 값을 주소에 남기고, 그 주소로 다시 열면 같은 값으로 같은 변경을 요청한다', async () => {
+  const detail = characterDetailFixture('dealer')
+  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
+  const saves: (string | undefined)[] = []
+  await render(detail, scoresFor, () => HttpResponse.json(detail), {
+    onChangesSave: (saved) => saves.push(saved)
+  })
+  await waitForScores(UNCHANGED_SCORES)
+
+  await choose('세트')
+  await press('장비 세트', '그림자에 숨은 죽음 세트')
+  await choose('무기')
+  await step('무기 수치 올리기', 2)
+  await choose('하의')
+  await press('하의 마법부여', '최종 데미지 증가 +3%')
+  await choose('칭호')
+  await press('칭호 교체', titleItem!.name)
+  await chooseOath('세트')
+  await press('서약 세트', '어둠에 잠긴 그림자 서약')
+  await chooseCrystal(7)
+  await press('결정 8 조율', 'III')
+  await choose('묵언의 진의')
+  await act(async () => control('세 번째 진의').click())
+  await act(async () => control('다섯 번째 진의').click())
+  await choose('아바타')
+  await press('아바타', '종결 아바타와 엠블렘')
+  await choose('스위칭')
+  await pick('스위칭 레벨', '20레벨')
+  await step('짙편린 부위 수 올리기', 2)
+  await vi.waitFor(() => expect(bodies.at(-1)?.switchingEquipment).toBe(2))
+  const changedBody = bodies.at(-1)
+  const saved = saves.at(-1)
+
+  expect(saved).toBeDefined()
+
+  await reopen(detail, { savedChanges: saved })
+
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual(changedBody))
+  expect(bodies).not.toContainEqual({ equipment: [] })
+  expect(reinforceOf('무기')).toBe('+12')
+  expect(resetButton().disabled).toBe(false)
+})
+
+it('초기화하면 주소에서 바꾼 값을 지운다', async () => {
+  const saves: (string | undefined)[] = []
+  await render(characterDetailFixture('dealer'), scoresFor, undefined, {
+    onChangesSave: (saved) => saves.push(saved)
+  })
+  await waitForScores(UNCHANGED_SCORES)
+  await step('무기 수치 올리기', 1)
+
+  await act(async () => resetButton().click())
+
+  expect(saves.at(-2)).toBeDefined()
+  expect(saves.at(-1)).toBeUndefined()
+})
+
+it('주소의 값을 읽을 수 없으면 착용한 값으로 연다', async () => {
+  await render(characterDetailFixture('dealer'), scoresFor, undefined, {
+    savedChanges: 'not-a-saved-value'
+  })
+
+  await waitForScores(UNCHANGED_SCORES)
+  expect(bodies).toEqual([{ equipment: [] }])
+  expect(resetButton().disabled).toBe(true)
+})
+
+it('주소의 값 가운데 지금 고를 수 없는 부위와 스위칭 레벨은 착용한 값으로 두고 나머지는 그대로 연다', async () => {
+  const weapon = { reinforce: 10, amplified: false, enchantId: null, potency: null, release: null }
+  const savedChanges = encodeChanges({
+    ...NO_CHANGES,
+    equipment: {
+      WEAPON: { ...weapon, variantId: SCYTHE_LEGACY_PRIMEVAL, tune: 0 },
+      // 선택 목록에 없는 합성 id다.
+      JACKET: { ...weapon, reinforce: 0, variantId: 'f'.repeat(32), tune: 0 }
+    },
+    buffLevel: 999
+  })
+  await render(characterDetailFixture('dealer'), scoresFor, undefined, { savedChanges })
+
+  await vi.waitFor(() =>
+    expect(bodies.at(-1)).toEqual({
+      equipment: [{ ...WEAPON_CHANGE, ...KEPT_ITEM, variantId: SCYTHE_LEGACY_PRIMEVAL, tune: 0 }]
+    })
+  )
+  expect(weaponCell()).toBe('레거시')
 })
