@@ -49,24 +49,86 @@ function rows(): string[][] {
   )
 }
 
-it('모험단 전체의 레이드 단계를 레이드마다 한 줄에 모으고 레기온을 뒤에 둔다', async () => {
+function button(): HTMLButtonElement | null {
+  return container.querySelector('section button')
+}
+
+async function togglePast(): Promise<void> {
+  await act(async () => button()!.click())
+}
+
+it('고른 시즌에 나온 컨텐츠만 보이고, 그 전에 나온 컨텐츠는 아래 화살표 버튼으로 펼치고 접는다', async () => {
   await renderClears(
     activityWith({
       raids: [
-        { name: '디레지에 레이드 (하드)', raid: '디레지에 레이드', stage: '하드', count: 15 },
-        { name: '디레지에 레이드 (일반)', raid: '디레지에 레이드', stage: '일반', count: 1203 },
-        { name: '디레지에 레이드 (매칭)', raid: '디레지에 레이드', stage: '매칭', count: 4 },
-        { name: '이내 황혼전', raid: '이내 황혼전', stage: null, count: 7 }
+        {
+          name: '무너진 성자 미카엘라 (하드)',
+          raid: '무너진 성자 미카엘라',
+          stage: '하드',
+          count: 3
+        },
+        { name: '디레지에 레이드 (하드)', raid: '디레지에 레이드', stage: '하드', count: 15 }
       ],
-      legions: [{ name: '베누스', count: 12 }]
+      legions: [
+        { name: '아포칼립스', count: 2 },
+        { name: '베누스', count: 12 }
+      ]
+    })
+  )
+
+  await vi.waitFor(() =>
+    expect(rows().map((row) => row[1])).toEqual(['무너진 성자 미카엘라', '아포칼립스'])
+  )
+  expect(button()?.getAttribute('aria-label')).toBe('지난 시즌 컨텐츠 2개 보기')
+  expect(button()?.getAttribute('aria-expanded')).toBe('false')
+
+  await togglePast()
+
+  expect(rows().map((row) => row[1])).toEqual([
+    '무너진 성자 미카엘라',
+    '디레지에 레이드',
+    '아포칼립스',
+    '베누스'
+  ])
+  expect(button()?.getAttribute('aria-label')).toBe('지난 시즌 컨텐츠 접기')
+  expect(button()?.getAttribute('aria-expanded')).toBe('true')
+
+  await togglePast()
+
+  expect(rows()).toHaveLength(2)
+})
+
+it('레이드 단계를 한 줄에 모으고, 단계가 없는 횟수는 클리어로 적으며 하드만 붉은 배지다', async () => {
+  await renderClears(
+    activityWith({
+      raids: [
+        {
+          name: '무너진 성자 미카엘라 (하드)',
+          raid: '무너진 성자 미카엘라',
+          stage: '하드',
+          count: 15
+        },
+        {
+          name: '무너진 성자 미카엘라 (일반)',
+          raid: '무너진 성자 미카엘라',
+          stage: '일반',
+          count: 1203
+        },
+        {
+          name: '무너진 성자 미카엘라 (싱글/매칭)',
+          raid: '무너진 성자 미카엘라',
+          stage: '싱글/매칭',
+          count: 4
+        }
+      ],
+      legions: [{ name: '아포칼립스', count: 12 }]
     })
   )
 
   await vi.waitFor(() =>
     expect(rows()).toEqual([
-      ['레이드', '디레지에 레이드', '하드', '15', '일반', '1,203', '매칭', '4'],
-      ['레이드', '이내 황혼전', '7'],
-      ['레기온', '베누스', '12']
+      ['레이드', '무너진 성자 미카엘라', '하드', '15', '일반', '1,203', '싱글/매칭', '4'],
+      ['레기온', '아포칼립스', '클리어', '12']
     ])
   )
   expect([...container.querySelectorAll('li .badge')].map((badge) => badge.textContent)).toEqual([
@@ -75,7 +137,29 @@ it('모험단 전체의 레이드 단계를 레이드마다 한 줄에 모으고
   expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
 })
 
-it('레이드 이름과 단계를 보내지 않는 API의 레이드는 이름 그대로 한 줄씩 숫자만 보인다', async () => {
+it('깨어난 숲의 극과 일반은 다른 레기온처럼 이름마다 한 줄이고, 모두 지난 시즌 컨텐츠면 빈 상태 문구 없이 펼치기 버튼만 둔다', async () => {
+  await renderClears(
+    activityWith({
+      raids: [],
+      legions: [
+        { name: '깨어난 숲(극)', count: 5 },
+        { name: '깨어난 숲(일반)', count: 3 }
+      ]
+    })
+  )
+  await vi.waitFor(() => expect(button()).not.toBeNull())
+  expect(container.querySelector('section p')).toBeNull()
+  expect(rows()).toEqual([])
+
+  await togglePast()
+
+  expect(rows()).toEqual([
+    ['레기온', '깨어난 숲(극)', '클리어', '5'],
+    ['레기온', '깨어난 숲(일반)', '클리어', '3']
+  ])
+})
+
+it('레이드 이름과 단계를 보내지 않는 API의 레이드와 출시일을 모르는 이름은 숨기지 않고 이름마다 한 줄로 보인다', async () => {
   await renderClears(
     activityWith({
       raids: [
@@ -88,34 +172,11 @@ it('레이드 이름과 단계를 보내지 않는 API의 레이드는 이름 �
 
   await vi.waitFor(() =>
     expect(rows()).toEqual([
-      ['레이드', '가 레이드 (하드)', '3'],
-      ['레이드', '가 레이드 (일반)', '5']
+      ['레이드', '가 레이드 (하드)', '클리어', '3'],
+      ['레이드', '가 레이드 (일반)', '클리어', '5']
     ])
   )
-})
-
-it('깨어난 숲처럼 이름 뒤 괄호에 극, 일반을 적은 레기온은 한 줄에 모으고 극을 하드처럼 붉은 배지로 보인다', async () => {
-  await renderClears(
-    activityWith({
-      raids: [],
-      legions: [
-        { name: '깨어난 숲(극)', count: 5 },
-        { name: '깨어난 숲(일반)', count: 3 },
-        { name: '어둑섬', count: 2 }
-      ]
-    })
-  )
-
-  await vi.waitFor(() =>
-    expect(rows()).toEqual([
-      ['레기온', '깨어난 숲', '극', '5', '일반', '3'],
-      ['레기온', '어둑섬', '2']
-    ])
-  )
-  expect([...container.querySelectorAll('li .badge')].map((badge) => badge.textContent)).toEqual([
-    '극'
-  ])
-  expect(container.querySelector('li .badge')?.className).toContain('text-fg-danger')
+  expect(button()).toBeNull()
 })
 
 it('클리어가 없는 시즌은 제목 없이 빈 상태 한 줄만 보인다', async () => {
@@ -127,4 +188,5 @@ it('클리어가 없는 시즌은 제목 없이 빈 상태 한 줄만 보인다'
     )
   )
   expect(container.querySelector('section h2')).toBeNull()
+  expect(button()).toBeNull()
 })
