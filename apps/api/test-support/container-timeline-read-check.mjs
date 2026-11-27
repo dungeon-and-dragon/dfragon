@@ -94,7 +94,7 @@ try {
     }
   ])
   assert.deepEqual(timeline.seasonClears, [
-    { kind: 'raid', name: '디레지에 레이드', hard: true, count: 2 },
+    { kind: 'raid', name: '디레지에 레이드', hard: true, count: 3 },
     { kind: 'raid', name: '디레지에 레이드', hard: false, count: 1 },
     { kind: 'raid', name: '이내 황혼전', hard: false, count: 1 },
     { kind: 'legion', name: '베누스', hard: false, count: 1 }

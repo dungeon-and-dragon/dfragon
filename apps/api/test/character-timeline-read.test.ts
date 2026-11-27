@@ -54,9 +54,8 @@ test('한 주는 목요일 06:00(KST)에 시작한다', () => {
   }
 })
 
-test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 종류, 이름, 하드 여부별로 세어 최근에 나온 컨텐츠부터 둔다', () => {
+test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시즌 클리어는 중천, 천해천 기록을 합쳐 종류, 이름, 하드 여부별로 세어 최근에 나온 컨텐츠부터 둔다', () => {
   const weekStart = new Date('2026-11-05T06:00:00+09:00')
-  const seasonStart = new Date('2026-03-26T06:00:00+09:00')
   const raid = { raidName: '만들어진 신 나벨', data: { modeName: '나벨 : 무지의 악' } }
   const hardRaid = {
     raidName: '만들어진 신 나벨',
@@ -65,6 +64,8 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
   const timeline = parseCharacterTimelineRows(
     {
       clears: [
+        event({ code: 201, occurredAt: new Date('2025-01-09T05:59:00+09:00'), ...raid }),
+        event({ code: 201, occurredAt: new Date('2025-01-09T06:00:00+09:00'), ...raid }),
         event({ code: 201, occurredAt: new Date('2026-03-26T05:59:00+09:00'), ...raid }),
         event({ code: 201, occurredAt: new Date('2026-11-05T05:58:00+09:00'), ...raid }),
         event({ code: 201, occurredAt: new Date('2026-11-05T05:59:00+09:00'), ...hardRaid }),
@@ -83,8 +84,7 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
       enhancements: [],
       acquisitions: []
     },
-    weekStart,
-    seasonStart
+    weekStart
   )
 
   assert.deepEqual(timeline.weeklyClears, [
@@ -112,7 +112,7 @@ test('레이드는 raid_name, 레기온은 regionName을 이름으로 쓰고 시
   ])
   assert.deepEqual(timeline.seasonClears, [
     { kind: 'raid', name: '이내 황혼전', hard: false, count: 1 },
-    { kind: 'raid', name: '만들어진 신 나벨', hard: false, count: 1 },
+    { kind: 'raid', name: '만들어진 신 나벨', hard: false, count: 3 },
     { kind: 'raid', name: '만들어진 신 나벨', hard: true, count: 2 },
     { kind: 'legion', name: '베누스', hard: false, count: 1 }
   ])
@@ -134,7 +134,6 @@ test('강화, 증폭, 재련의 종류를 나누고 재련에 없는 before, saf
       ],
       acquisitions: []
     },
-    occurredAt,
     occurredAt
   )
 
@@ -172,7 +171,6 @@ test('형식이 다른 선택 필드는 null이나 false로 두고 이름, after
       ],
       acquisitions: []
     },
-    occurredAt,
     occurredAt
   )
 
@@ -298,7 +296,6 @@ test('강화, 획득은 최근 50개를 주고, 더 있으면 50번째 행을 �
       enhancements: rows(50, 401, { after: 10, result: true }),
       acquisitions
     },
-    now,
     now
   )
 
