@@ -171,10 +171,27 @@ function homeLink(): HTMLAnchorElement {
   )!
 }
 
-async function openMultisearch(): Promise<void> {
-  const link = container.querySelector<HTMLAnchorElement>('nav[aria-label="전역 메뉴"] a')!
+function labTabs(): [string | null, string | null, string | null][] {
+  return [...container.querySelectorAll('nav[aria-label="실험실 종류"] a')].map((link) => [
+    link.textContent,
+    link.getAttribute('href'),
+    link.getAttribute('aria-current')
+  ])
+}
+
+async function openLabMultisearch(): Promise<void> {
+  const link = [
+    ...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="실험실 종류"] a')
+  ].find((tab) => tab.textContent === '멀티서치')!
+
   await act(async () => link.click())
-  await waitForPath('/multisearch')
+  await waitForPath('/lab/multisearch')
+}
+
+async function openHome(): Promise<void> {
+  const brand = container.querySelector<HTMLAnchorElement>('a[aria-label="DFragon 첫 화면"]')!
+  await act(async () => brand.click())
+  await waitForPath('/')
 }
 
 async function waitForPath(pathname: string): Promise<void> {
@@ -208,7 +225,7 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  window.history.replaceState(null, '', '/multisearch')
+  window.history.replaceState(null, '', '/lab/multisearch')
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true)
   // 라우터는 화면을 옮길 때 창 스크롤을 처음으로 돌리는데 jsdom에는 scrollTo가 없다.
   vi.stubGlobal('scrollTo', vi.fn())
@@ -280,7 +297,7 @@ it('통계 화면의 표본 정보를 화면 밖 빌드 commit 위에 둔다', a
   )
 })
 
-it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항목인 멀티서치 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 게임 바와 표는 화면 상자에 둔다', async () => {
+it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 지금 항목 없는 전역 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 화면 상자에 멀티서치를 고른 실험실 탭과 게임 바, 표를 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -289,9 +306,7 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
   expect(brand.getAttribute('href')).toBe('/')
   expect(brand.textContent).toBe('DFragon')
   expect(brand.querySelector('img')).toBeNull()
-  expect(header.querySelector('nav a')?.getAttribute('href')).toBe('/multisearch')
   expect(globalMenu()).toEqual([
-    ['멀티서치', 'page'],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -308,8 +323,14 @@ it('멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 현재 항�
   expect(grade.compareDocumentPosition(buttons[2]) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
 
   const main = container.querySelector('main')!
+  expect(labTabs()).toEqual([
+    ['마법부여', '/lab/enchants', null],
+    ['멀티서치', '/lab/multisearch', 'page']
+  ])
+  const labNav = main.querySelector('nav[aria-label="실험실 종류"]')!
   const tabs = main.querySelector('[role="tablist"][aria-label="화면"]')!
   const boardTitle = main.querySelector('h1')!
+  expect(labNav.compareDocumentPosition(tabs) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   expect(boardTitle.textContent).toBe('파티')
   expect(tabs.compareDocumentPosition(boardTitle) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   expect(seats()).toHaveLength(4)
@@ -325,7 +346,6 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     [...header.querySelectorAll('button')].map((button) => button.getAttribute('aria-label'))
   ).toEqual(['다크 모드로 바꾸기'])
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -355,7 +375,6 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
   expect(main.querySelector('p')?.textContent).toBe(`${window.location.host}/guide?from=1`)
   expect(homeLink().getAttribute('href')).toBe('/')
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -387,7 +406,6 @@ it.each([
   expect(heading.textContent).toBe(title)
   expect(article.getAttribute('aria-labelledby')).toBe(heading.id)
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -492,7 +510,6 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
   await act(async () => root.render(<WebApp host={host} />))
 
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', 'page'],
     ['통계', null],
     ['모험단', null],
@@ -544,7 +561,6 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
   // 브라우저에서는 loader가 상세를 기다리지 않으므로, 받은 뒤에 제목이 캐릭터 이름으로 바뀐다.
   await vi.waitFor(() => expect(document.title).toBe('하늘 - DFragon'))
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -581,7 +597,6 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
   expect(container.querySelector('section[aria-label="캐릭터 요약"]')).toBeNull()
   expect(container.querySelector('[role="tablist"]')).toBeNull()
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
@@ -601,13 +616,23 @@ it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸
   expect(document.title).toBe('실험실 마법부여 - DFragon')
   await vi.waitFor(() => expect(container.querySelector('main table')).not.toBeNull())
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', null],
     ['장비 시뮬레이터', null],
     ['즐겨찾기', null]
   ])
+})
+
+it('옛 멀티서치 주소는 기록을 늘리지 않고 실험실 멀티서치 주소로 바꾼다', async () => {
+  window.history.replaceState(null, '', '/multisearch')
+  const historyLength = window.history.length
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await waitForPath('/lab/multisearch')
+  expect(window.history.length).toBe(historyLength)
+  expect(document.title).toBe('실험실 멀티서치 - DFragon')
+  await vi.waitFor(() => expect(seats()).toHaveLength(4))
 })
 
 it('길드 주소를 열면 길드를 받은 뒤 제목이 길드 이름으로 바뀐다', async () => {
@@ -654,7 +679,6 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     '동네커피'
   )
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
@@ -936,9 +960,7 @@ it('없는 주소 화면에서는 Alt+방향키를 브라우저의 뒤로, 앞�
 })
 
 it('멀티서치에서 고친 이름과 맞바꾼 자리는 메인 화면에 다녀와도 남는다', async () => {
-  window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
-  await openMultisearch()
   const input = seats()[0].querySelector<HTMLInputElement>('input[aria-label$="번 캐릭터 이름"]')!
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
@@ -956,11 +978,10 @@ it('멀티서치에서 고친 이름과 맞바꾼 자리는 메인 화면에 다
   expect(before).not.toEqual(['남는이름', '', '', ''])
   expect(before).toContain('남는이름')
 
-  await act(async () => window.history.back())
-  await waitForPath('/')
+  await openHome()
   expect(seats()).toHaveLength(0)
-  await act(async () => window.history.forward())
-  await waitForPath('/multisearch')
+  await act(async () => window.history.back())
+  await waitForPath('/lab/multisearch')
 
   await vi.waitFor(() => expect(seats().map(nameOf)).toEqual(before))
 })
@@ -972,9 +993,7 @@ it('화면 공유는 메인 화면에 다녀와도 연결된 채 남고, 다른 
     mediaDevices: { getDisplayMedia: vi.fn(async () => ({ getVideoTracks: () => [track] })) }
   })
   vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
-  window.history.replaceState(null, '', '/')
   await act(async () => root.render(<WebApp host={host} />))
-  await openMultisearch()
   const chip = (): HTMLButtonElement =>
     container.querySelector<HTMLButtonElement>('button[aria-label^="화면 공유"]')!
   await act(async () => chip().click())
@@ -982,30 +1001,30 @@ it('화면 공유는 메인 화면에 다녀와도 연결된 채 남고, 다른 
     expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
   )
 
+  await openHome()
   await act(async () => window.history.back())
-  await waitForPath('/')
-  await act(async () => window.history.forward())
-  await waitForPath('/multisearch')
+  await waitForPath('/lab/multisearch')
   await vi.waitFor(() =>
     expect(chip().getAttribute('aria-label')).toBe('화면 공유 중지, 게임 연결됨')
   )
 
-  await act(async () => window.history.back())
+  await act(async () => window.history.forward())
   await waitForPath('/')
   await act(async () => track.dispatchEvent(new Event('ended')))
-  await act(async () => window.history.forward())
-  await waitForPath('/multisearch')
+  await act(async () => window.history.back())
+  await waitForPath('/lab/multisearch')
 
   await vi.waitFor(() => expect(chip().getAttribute('aria-label')).toBe('화면 공유, 게임 연결'))
   expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
 })
 
 it('다른 화면에서 붙여 넣은 이미지는 회차를 시작하지 않는다', async () => {
-  window.history.replaceState(null, '', '/guide')
+  server.use(labItemsHandlers.items)
+  window.history.replaceState(null, '', '/lab/enchants')
   await act(async () => root.render(<WebApp host={host} />))
 
   await act(async () => pasteImage())
-  await openMultisearch()
+  await openLabMultisearch()
 
   expect(decodeBrowserImage).not.toHaveBeenCalled()
   expect(await captureStatus()).toBe(WEB_CAPTURE_TEXTS.noSource)
@@ -1679,7 +1698,6 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
   await waitForPath('/adventures')
   expect(container.querySelector('main h1')?.textContent).toBe('모험단')
   expect(globalMenu()).toEqual([
-    ['멀티서치', null],
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
