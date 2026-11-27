@@ -7,13 +7,21 @@ import { LAB_ITEM_TIERS, type LabItemTier } from '@dfragon/lib/lab-items'
 import { Button, Select, StatusChip, type StatusChipTone, Tabs } from '@dfragon/ui'
 import { Fragment, useState } from 'react'
 import type { LabCandidateQuery } from '#ops-api/ops-client'
-import type { LabCandidate, LabCandidateBadge, LabCandidateKind, Run } from '#ops-api/ops-schemas'
+import type {
+  JobList,
+  LabCandidate,
+  LabCandidateBadge,
+  LabCandidateKind,
+  LabItemCost,
+  Run
+} from '#ops-api/ops-schemas'
 import { formatCount, formatDateSecond } from '#ops-app/format'
 import {
   useJobs,
   useLabCandidateIconUrl,
   useLabCandidates,
   useLabItems,
+  useRefreshLabCandidatesAfterRun,
   useReplaceLabItems,
   useRequestRun
 } from '#ops-app/ops-queries'
@@ -32,6 +40,7 @@ import {
 import {
   groupsToSave,
   pendingTierChanges,
+  savedCostOf,
   savedTierOf,
   type TierChanges,
   type TierSlot,
@@ -107,9 +116,25 @@ function LastRun({ run }: { run: Run | null }): React.JSX.Element | null {
   )
 }
 
+function lastRunIdOf(jobs: JobList | undefined): number | null | undefined {
+  if (jobs === undefined) {
+    return undefined
+  }
+
+  const job = jobs.jobs.find(({ name }) => name === PRICE_JOB_NAME)
+  const run = job?.lastFinishedRun ?? null
+
+  if (run === null) {
+    return null
+  }
+
+  return run.id
+}
+
 function PriceJobActions(): React.JSX.Element | null {
   const jobs = useJobs()
   const requestRun = useRequestRun()
+  useRefreshLabCandidatesAfterRun(lastRunIdOf(jobs.data))
 
   if (jobs.data === undefined) {
     return null
@@ -258,11 +283,13 @@ function TierSelect({
   itemName,
   tier,
   pending,
+  locked,
   onChange
 }: {
   itemName: string
   tier: LabItemTier | null
   pending: boolean
+  locked: boolean
   onChange: (itemName: string, tier: LabItemTier | null) => void
 }): React.JSX.Element {
   const label = `${itemName} 등급`
@@ -279,7 +306,12 @@ function TierSelect({
 
   return (
     <span className="inline-flex items-center">
-      <Select.Root value={tier ?? NO_TIER} onValueChange={handleChange} items={TIER_ITEMS}>
+      <Select.Root
+        value={tier ?? NO_TIER}
+        onValueChange={handleChange}
+        items={TIER_ITEMS}
+        disabled={locked}
+      >
         <Select.Trigger size="sm" aria-label={label}>
           <Select.Value />
         </Select.Trigger>
@@ -306,6 +338,7 @@ type CandidateRowProps = {
   candidate: LabCandidate
   tier: LabItemTier | null
   pending: boolean
+  locked: boolean
   expanded: boolean
   onToggle: (itemName: string) => void
   onTierChange: (itemName: string, tier: LabItemTier | null) => void
@@ -315,6 +348,7 @@ function CandidateRow({
   candidate,
   tier,
   pending,
+  locked,
   expanded,
   onToggle,
   onTierChange
@@ -360,6 +394,7 @@ function CandidateRow({
           itemName={candidate.itemName}
           tier={tier}
           pending={pending}
+          locked={locked}
           onChange={onTierChange}
         />
       </td>
@@ -433,6 +468,7 @@ type CandidateTableProps = {
   expanded: string | null
   tierOf: (itemName: string) => LabItemTier | null
   isPending: (itemName: string) => boolean
+  locked: boolean
   onSort: (key: SortKey) => void
   onToggle: (itemName: string) => void
   onTierChange: (itemName: string, tier: LabItemTier | null) => void
@@ -444,6 +480,7 @@ function CandidateTable({
   expanded,
   tierOf,
   isPending,
+  locked,
   onSort,
   onToggle,
   onTierChange
@@ -488,6 +525,7 @@ function CandidateTable({
                   candidate={candidate}
                   tier={tierOf(itemName)}
                   pending={isPending(itemName)}
+                  locked={locked}
                   expanded={open}
                   onToggle={onToggle}
                   onTierChange={onTierChange}
@@ -517,6 +555,8 @@ export function LabCandidatePanel(): React.JSX.Element {
   const labItems = useLabItems()
   const replaceLabItems = useReplaceLabItems()
   const groups = labItems.data?.groups ?? []
+  // 저장된 묶음을 읽기 전에 저장하면 빈 묶음에서 시작한 목록이 다른 아이템을 지운다.
+  const ready = candidates.data !== undefined && labItems.data !== undefined && !labItems.isError
   const pending = pendingTierChanges(groups, changes)
   const pendingIds = new Set(pending.map((change) => tierChangeIdOf(change, change.itemName)))
 
@@ -541,18 +581,40 @@ export function LabCandidatePanel(): React.JSX.Element {
     if (tier === savedTierOf(groups, slot, itemName)) {
       next.delete(id)
     } else {
-      next.set(id, { ...slot, itemName, tier })
+      const cost = changeCostOf(itemName)
+      next.set(id, { ...slot, itemName, tier, cost })
     }
 
     setChanges(next)
   }
 
+  function changeCostOf(itemName: string): LabItemCost | null {
+    const saved = savedCostOf(groups, slot, itemName)
+
+    if (saved !== null) {
+      return saved
+    }
+
+    const change = changes.get(tierChangeIdOf(slot, itemName))
+
+    if (change === undefined) {
+      return null
+    }
+
+    return change.cost
+  }
+
   function applyRecommendations(): void {
+    if (!ready || saving) {
+      return
+    }
+
     const next = new Map(changes)
 
-    for (const { itemName, recommendedTier } of candidates.data?.candidates ?? []) {
+    for (const { itemName, recommendedTier } of candidates.data.candidates) {
       if (recommendedTier !== null && tierOf(itemName) === null) {
-        next.set(tierChangeIdOf(slot, itemName), { ...slot, itemName, tier: recommendedTier })
+        const cost = changeCostOf(itemName)
+        next.set(tierChangeIdOf(slot, itemName), { ...slot, itemName, tier: recommendedTier, cost })
       }
     }
 
@@ -576,6 +638,10 @@ export function LabCandidatePanel(): React.JSX.Element {
   }
 
   async function save(): Promise<void> {
+    if (!ready) {
+      return
+    }
+
     setSaving(true)
     setSaveFailed(false)
 
@@ -630,6 +696,7 @@ export function LabCandidatePanel(): React.JSX.Element {
         expanded={expanded}
         tierOf={tierOf}
         isPending={isPending}
+        locked={saving}
         onSort={changeSort}
         onToggle={toggleHistory}
         onTierChange={changeTier}
@@ -669,13 +736,13 @@ export function LabCandidatePanel(): React.JSX.Element {
             변경 <b className="num">{pending.length}</b>
           </span>
         )}
-        <Button size="sm" onClick={applyRecommendations}>
+        <Button size="sm" disabled={!ready || saving} onClick={applyRecommendations}>
           추천 적용
         </Button>
         <Button
           size="sm"
           variant="primary"
-          disabled={saving || pending.length === 0}
+          disabled={!ready || saving || pending.length === 0}
           onClick={save}
         >
           저장

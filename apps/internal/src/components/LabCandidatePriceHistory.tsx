@@ -86,6 +86,13 @@ function HistoryList({ entries }: { entries: readonly PriceHistoryEntry[] }): Re
   )
 }
 
+// 이력에는 값이 같아도 24시간마다 확인한 줄이 남으므로, 값이 이어지는 구간마다 가장 오래된 줄만 둔다.
+function changedEntries(entries: readonly PriceHistoryEntry[]): PriceHistoryEntry[] {
+  return entries.filter(
+    (entry, index) => index === 0 || entries[index - 1].unitPrice !== entry.unitPrice
+  )
+}
+
 function HistoryBody({ itemName }: { itemName: string }): React.JSX.Element {
   const history = useLabCandidatePriceHistory(itemName)
 
@@ -115,7 +122,7 @@ function HistoryBody({ itemName }: { itemName: string }): React.JSX.Element {
     (left, right) => left.checkedAt.getTime() - right.checkedAt.getTime()
   )
 
-  return <HistoryList entries={entries} />
+  return <HistoryList entries={changedEntries(entries)} />
 }
 
 export function PriceHistoryRow({

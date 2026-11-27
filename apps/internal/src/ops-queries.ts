@@ -5,7 +5,7 @@ import {
   useQueryClient,
   type UseMutationResult
 } from '@tanstack/react-query'
-import { createContext, use } from 'react'
+import { createContext, use, useEffect, useRef } from 'react'
 import type {
   LabCandidateQuery,
   LabCurrencyDraft,
@@ -249,4 +249,24 @@ export function useLabCandidatePriceHistory(itemName: string) {
 
 export function useLabCandidateIconUrl(): OpsClient['labCandidateIconUrl'] {
   return useOpsClient().labCandidateIconUrl
+}
+
+// 후보 가격 job이 새로 끝나면 최저가와 배지가 바뀌므로 후보를 다시 읽는다. 처음 읽은 실행은 이미 반영된 값이다.
+// runId가 undefined면 job 목록을 아직 읽지 못한 것이고, null이면 끝난 실행이 없는 것이다.
+export function useRefreshLabCandidatesAfterRun(runId: number | null | undefined): void {
+  const queryClient = useQueryClient()
+  const seenRunId = useRef<number | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (runId === undefined) {
+      return
+    }
+
+    const seen = seenRunId.current
+    seenRunId.current = runId
+
+    if (seen !== undefined && seen !== runId) {
+      queryClient.invalidateQueries({ queryKey: LAB_CANDIDATES_KEY })
+    }
+  }, [runId, queryClient])
 }

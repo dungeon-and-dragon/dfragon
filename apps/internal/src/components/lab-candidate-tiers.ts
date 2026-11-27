@@ -10,7 +10,12 @@ import { groupIdOf } from './lab-item-candidates'
 
 export type TierSlot = { category: LabItemCategory; role: LabItemRole }
 
-export type TierChange = TierSlot & { itemName: string; tier: LabItemTier | null }
+// cost는 등급을 바꿀 때 저장돼 있던 재화 비용이다. 옛 묶음 PUT만 성공한 뒤 다시 저장해도 비용을 잃지 않게 한다.
+export type TierChange = TierSlot & {
+  itemName: string
+  tier: LabItemTier | null
+  cost: LabItemCost | null
+}
 
 export type TierChanges = ReadonlyMap<string, TierChange>
 
@@ -40,6 +45,20 @@ function savedEntryOf(
   }
 
   return null
+}
+
+export function savedCostOf(
+  groups: readonly LabItemGroup[],
+  slot: TierSlot,
+  itemName: string
+): LabItemCost | null {
+  const saved = savedEntryOf(groups, slot, itemName)
+
+  if (saved === null) {
+    return null
+  }
+
+  return saved.cost
 }
 
 export function savedTierOf(
@@ -100,12 +119,13 @@ export function groupsToSave(
     }
   }
 
-  for (const { category, role, itemName, tier } of pending) {
+  for (const { category, role, itemName, tier, cost: changedCost } of pending) {
     if (tier === null) {
       continue
     }
 
-    const cost = savedEntryOf(groups, { category, role }, itemName)?.cost ?? null
+    const saved = savedEntryOf(groups, { category, role }, itemName)
+    const cost = saved !== null ? saved.cost : changedCost
     const group = groupOf({ category, role, tier })
     group.items = [...group.items, { itemName, cost }]
   }
