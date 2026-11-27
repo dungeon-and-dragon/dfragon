@@ -289,9 +289,30 @@ try {
   const seasonActivity = {
     summary: {
       raids: [
-        { name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 },
-        { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
-        { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
+        {
+          name: '무너진 성자 미카엘라 (일반)',
+          raid: '무너진 성자 미카엘라',
+          stage: '일반',
+          count: 1,
+          hard: 0,
+          normal: 1
+        },
+        {
+          name: '디레지에 레이드 (하드)',
+          raid: '디레지에 레이드',
+          stage: '하드',
+          count: 1,
+          hard: 1,
+          normal: 0
+        },
+        {
+          name: '합성 목록 밖 레이드',
+          raid: '합성 목록 밖 레이드',
+          stage: null,
+          count: 1,
+          hard: 0,
+          normal: 1
+        }
       ],
       legions: [{ name: '아포칼립스', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 1, mythic: 0 },
@@ -440,7 +461,16 @@ try {
   )
   const returnedActivity = {
     summary: {
-      raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
+      raids: [
+        {
+          name: '합성 귀환 레이드',
+          raid: '합성 귀환 레이드',
+          stage: null,
+          count: 1,
+          hard: 0,
+          normal: 1
+        }
+      ],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: { legendary: 0, epic: 0, primeval: 0, mythic: 1 },
       oaths: { legendary: 0, epic: 0, primeval: 0 },
@@ -492,7 +522,16 @@ try {
     ),
     {
       date: '2021-05-01',
-      raids: [{ name: '합성 귀환 레이드', count: 1, hard: 0, normal: 1 }],
+      raids: [
+        {
+          name: '합성 귀환 레이드',
+          raid: '합성 귀환 레이드',
+          stage: null,
+          count: 1,
+          hard: 0,
+          normal: 1
+        }
+      ],
       legions: [{ name: '합성 귀환 레기온', count: 1 }],
       items: [{ at: '2021-05-01T14:00:00+09:00', name: null, rarity: '신화' }],
       oaths: [],
@@ -506,8 +545,22 @@ try {
   const activityDay = {
     date: '2026-04-02',
     raids: [
-      { name: '디레지에 레이드 (하드)', count: 1, hard: 1, normal: 0 },
-      { name: '합성 목록 밖 레이드', count: 1, hard: 0, normal: 1 }
+      {
+        name: '디레지에 레이드 (하드)',
+        raid: '디레지에 레이드',
+        stage: '하드',
+        count: 1,
+        hard: 1,
+        normal: 0
+      },
+      {
+        name: '합성 목록 밖 레이드',
+        raid: '합성 목록 밖 레이드',
+        stage: null,
+        count: 1,
+        hard: 0,
+        normal: 1
+      }
     ],
     legions: [{ name: '아포칼립스', count: 1 }],
     items: [{ at: '2026-04-02T10:00:00+09:00', name: null, rarity: '태초' }],
@@ -523,7 +576,16 @@ try {
     seasonDays.days.find(({ date }) => date === '2026-04-01'),
     {
       date: '2026-04-01',
-      raids: [{ name: '무너진 성자 미카엘라 (일반)', count: 1, hard: 0, normal: 1 }],
+      raids: [
+        {
+          name: '무너진 성자 미카엘라 (일반)',
+          raid: '무너진 성자 미카엘라',
+          stage: '일반',
+          count: 1,
+          hard: 0,
+          normal: 1
+        }
+      ],
       legions: [],
       items: [],
       oaths: [],
