@@ -23,6 +23,7 @@ import {
   overviewWeeks,
   RATE_PERIODS,
   type RatePeriod,
+  splitAdventureColumns,
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
@@ -45,6 +46,7 @@ import { clearContentsOf } from './clear-groups'
 
 const OVERVIEW_LAST_SINGLE_ADVENTURE_SIZE = 12
 const OVERVIEW_ADVENTURE_RANGE_STARTS = [13]
+const OVERVIEW_FRONT_ADVENTURE_COLUMNS = 5
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -405,13 +407,14 @@ function AdventureStats({
       )}
       {result.status === 'success' && (
         <Columns
-          groups={[
+          groups={splitAdventureColumns(
             adventureColumns(
               result.value.adventures,
               OVERVIEW_LAST_SINGLE_ADVENTURE_SIZE,
               OVERVIEW_ADVENTURE_RANGE_STARTS
-            )
-          ]}
+            ),
+            OVERVIEW_FRONT_ADVENTURE_COLUMNS
+          )}
         />
       )}
     </Panel>

@@ -305,11 +305,14 @@ export type ClearPopulationPage = {
   limit: number
 }
 
+// 眞 각성 전 캐릭터는 클리어 집계에 드러내지 않아, 클리어를 모으지 않고 분모와 전직별 수에서도 뺀다.
+const awakenedSql = Prisma.sql`job_grow_name LIKE '眞%'`
+
 function populationWhereSql({ minMaxFame, activity }: ClearPopulationSelection): Prisma.Sql {
   const activeOnly =
     activity === 'active-only' ? Prisma.sql`AND inactive_since IS NULL` : Prisma.empty
 
-  return Prisma.sql`max_fame >= ${minMaxFame} ${activeOnly}`
+  return Prisma.sql`max_fame >= ${minMaxFame} AND ${awakenedSql} ${activeOnly}`
 }
 
 // 수집이 도는 동안 최고 명성이 올라도 읽는 위치가 바뀌지 않게 서버, 캐릭터 순으로 읽는다.
@@ -358,7 +361,7 @@ export function readClearPopulationJobs(
       min(job_grow_name) AS "jobGrowName",
       count(*)::int AS count
     FROM characters
-    WHERE max_fame >= ${minMaxFame}
+    WHERE max_fame >= ${minMaxFame} AND ${awakenedSql}
     GROUP BY job_id, job_grow_id`
 }
 
@@ -643,7 +646,7 @@ export function readContentClearFameBands(
     WITH population AS (
       SELECT (max_fame / 2000) * 2000 AS fame, count(*)::int AS population
       FROM characters
-      WHERE max_fame >= ${minFame}
+      WHERE max_fame >= ${minFame} AND ${awakenedSql}
       GROUP BY 1
     ),
     cleared AS (
@@ -955,7 +958,7 @@ export function readContentClearScoreBands(
         AND engine.engine_bundle_id = stored.engine_bundle_id
       JOIN width ON width.kind = stored.kind
       ${bestScoreJoinSql('stored', 'stored')}
-      WHERE c.max_fame >= ${minFame}
+      WHERE c.max_fame >= ${minFame} AND ${awakenedSql}
       GROUP BY 1, 2
     ),
     cleared AS (

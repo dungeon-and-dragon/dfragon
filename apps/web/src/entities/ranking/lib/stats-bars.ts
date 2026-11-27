@@ -28,8 +28,12 @@ export function serverBars({ servers, total }: CharacterStats): Bar[] {
   }))
 }
 
+export function isAwakenedJob({ jobGrowName }: Readonly<{ jobGrowName: string | null }>): boolean {
+  return jobGrowName !== null && jobGrowName.startsWith(AWAKENING_MARK)
+}
+
 function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
-  return jobs.filter(({ jobGrowName }) => jobGrowName.startsWith(AWAKENING_MARK))
+  return jobs.filter(isAwakenedJob)
 }
 
 export function jobBars(stats: CharacterStats): Bar[] {

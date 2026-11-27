@@ -3,6 +3,7 @@ import test from 'node:test'
 import {
   applyMigrations,
   createDatabaseClient,
+  readContentClearFameBands,
   readContentClearScoreBands,
   recordCharacterBasic,
   recordCharacterHistory,
@@ -259,5 +260,25 @@ test('점수 구간의 분모와 클리어 수를 같은 엔진 버전의 이력
   assert.deepEqual(bands, [
     { kind: 'equipment', score: 1_150_000, population: 1, cleared: 0 },
     { kind: 'equipment', score: 1_250_000, population: 1, cleared: 1 }
+  ])
+})
+
+test('명성 구간과 점수 구간의 분모는 眞 각성 전 캐릭터를 빼고 센다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await prepareDatabase(t, 'content_clear_awakened_bands')
+  const selection = { contentId: 'raid-a', kind: 'raid', weekStart }
+
+  await recordCharacterBasic(client, basic('awakened', 66_000))
+  await recordCharacterBasic(client, { ...basic('unawakened', 66_000), jobGrowName: '웨펀마스터' })
+  await recordCharacterScore(client, score('awakened', 1_160_000))
+  await recordCharacterScore(client, score('unawakened', 1_160_000))
+  await recordContentClears(client, [clear('raid-a', 'raid', 'awakened', '2026-11-13T12:00:00Z')])
+
+  assert.deepEqual(await readContentClearFameBands(client, selection, 60_000), [
+    { fame: 66_000, population: 1, cleared: 1 }
+  ])
+  assert.deepEqual(await readContentClearScoreBands(client, selection, 60_000), [
+    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 1 }
   ])
 })

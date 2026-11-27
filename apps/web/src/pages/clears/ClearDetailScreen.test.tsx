@@ -323,7 +323,7 @@ async function columnTooltips(name: string): Promise<(string | null)[]> {
   const tooltip = box.querySelector('ul + [aria-hidden="true"]')!
   const texts: (string | null)[] = []
 
-  for (const column of box.querySelectorAll('li')) {
+  for (const column of box.querySelectorAll('li:not([aria-hidden])')) {
     await act(async () => {
       column.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     })
@@ -497,6 +497,22 @@ it('모험단 기준 클리어 횟수는 16명까지 1명씩, 17명부터 구간
   expect(columns.at(21)).toMatch(/^50명 이상10 /)
 })
 
+it('모험단 기준 클리어 횟수는 1~5명과 6명 이상을 나눠 각 묶음의 가장 큰 칸에 막대 높이를 맞추고 비율은 전체 기준으로 둔다', async () => {
+  await open({ contentKey: 'michaela' })
+
+  const box = panel('모험단 기준 클리어 횟수')!
+  const heights = [...box.querySelectorAll('li:not([aria-hidden])')].map((column) =>
+    column.querySelector('[data-chart-mark]')?.getAttribute('style')
+  )
+
+  expect(heights[0]).toContain('100%')
+  expect(heights[15]).toContain('30%')
+  expect(heights[21]).toContain('100%')
+
+  const columns = await columnTooltips('모험단 기준 클리어 횟수')
+  expect(columns.at(0)).toMatch(/^1명40 +53\.3%$/)
+})
+
 it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 두고, 정렬을 바꾸거나 모두 볼 수 있다', async () => {
   await open({ contentKey: 'michaela' })
 
@@ -516,6 +532,25 @@ it('전직별 클리어는 클리어율 순 10줄에 분포와 클리어율을 �
 
   await click(buttonNamed('전직 12개 모두 보기'))
   expect(jobNames()).toHaveLength(12)
+})
+
+it('전직별 클리어는 眞 각성 전 전직을 클리어율이 가장 높아도 두지 않는다', async () => {
+  await open(
+    { contentKey: 'michaela' },
+    {
+      contentStats: (contentId, weekStart) => {
+        const stats = statsOf(contentId, weekStart)
+        const unawakened = { ...job(12, 2, 2, 120000), jobName: '나이트', jobGrowName: '나이트' }
+
+        return HttpResponse.json({ ...stats, jobs: [...stats.jobs, unawakened] })
+      }
+    }
+  )
+
+  await click(buttonNamed('전직 12개 모두 보기'))
+
+  expect(jobNames()).toHaveLength(12)
+  expect(jobNames()).not.toContain('나이트')
 })
 
 it('전직별 클리어 줄에 마우스를 올리면 전직명 아래 클리어 / 캐릭터 수와 분포 값 여섯 개를 띄운다', async () => {
@@ -663,6 +698,33 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
   )
   expect(heights[0]).toContain('100%')
   expect(heights[1]).toContain('50%')
+})
+
+it('장비 점수 구간별 클리어율은 캐릭터가 5% 이상 처음 몰리는 구간 아래를 한 막대로 접고 그 위는 사람이 적어도 구간마다 그린다', async () => {
+  await open(
+    { contentKey: 'michaela' },
+    {
+      contentStats: (contentId, weekStart) => {
+        const stats = scoredStatsOf(contentId, weekStart)
+        const equipment = [
+          { score: 0, population: 10, cleared: 1 },
+          { score: 50000, population: 10, cleared: 0 },
+          { score: 300000, population: 900, cleared: 90 },
+          { score: 350000, population: 70, cleared: 35 },
+          { score: 400000, population: 10, cleared: 10 }
+        ]
+
+        return HttpResponse.json({ ...stats, scoreBands: { ...stats.scoreBands, equipment } })
+      }
+    }
+  )
+
+  expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
+    '~300,0001  5.0%',
+    '300,000~90  10.0%',
+    '350,000~35  50.0%',
+    '400,000~10  100.0%'
+  ])
 })
 
 it('전직 표는 전직 점수가 있으면 명성, 장비 점수 전환을 두고 장비 점수로 바꾸면 그 축을 쓴다', async () => {

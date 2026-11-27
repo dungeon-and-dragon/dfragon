@@ -16,6 +16,7 @@ import {
   type ClearStageMoves,
   type ClearWeek,
   type ClearWeekOverWeek,
+  isAwakenedJob,
   shareText
 } from '#entities/ranking'
 import { type ContentChoice, type GroupedContent, groupsOf } from './clear-groups'
@@ -257,22 +258,65 @@ export function weekGroupRows(
 }
 
 const SCORE_TICK_COUNT = 5
+// 캐릭터가 이만큼 처음 몰리는 구간 아래는 그 컨텐츠를 볼 만한 점수가 아니라서 막대 하나로 접는다.
+// 높은 점수 쪽은 사람이 적어도 구간마다 따로 그린다.
+const DENSE_BAND_POPULATION_SHARE = 0.05
+
+interface ScoreBandColumn {
+  band: ClearScoreBand
+  label: string
+  range: string
+}
+
+function joinBands(lower: ClearScoreBand, upper: ClearScoreBand): ClearScoreBand {
+  const population = lower.population + upper.population
+  const cleared = lower.cleared + upper.cleared
+
+  return { score: lower.score, population, cleared }
+}
+
+function openBandColumn(band: ClearScoreBand): ScoreBandColumn {
+  const label = formatScoreTick(band.score)
+  const range = `${integer.format(band.score)}~`
+
+  return { band, label, range }
+}
+
+function scoreBandColumnsOf(bands: readonly ClearScoreBand[]): ScoreBandColumn[] {
+  const total = bands.reduce((sum, { population }) => sum + population, 0)
+  const denseStart = bands.findIndex(
+    ({ population }) => population >= total * DENSE_BAND_POPULATION_SHARE
+  )
+  const dense = bands[denseStart]
+
+  if (denseStart < 2 || dense === undefined) {
+    return bands.map(openBandColumn)
+  }
+
+  const folded = bands.slice(0, denseStart).reduce(joinBands)
+  const label = `~${formatScoreTick(dense.score)}`
+  const range = `~${integer.format(dense.score)}`
+
+  return [{ band: folded, label, range }, ...bands.slice(denseStart).map(openBandColumn)]
+}
 
 // 막대 높이는 그 구간 캐릭터 가운데 클리어한 비율이고, 가장 높은 구간을 기준으로 맞춘다.
-export function scoreBandColumns(bands: readonly ClearScoreBand[]): ColumnBar[] {
-  const step = Math.max(1, Math.ceil(bands.length / SCORE_TICK_COUNT))
-  const rates = bands.map(({ population, cleared }) => (population > 0 ? cleared / population : 0))
+export function scoreBandColumns(scoreBands: readonly ClearScoreBand[]): ColumnBar[] {
+  const columns = scoreBandColumnsOf(scoreBands)
+  const step = Math.max(1, Math.ceil(columns.length / SCORE_TICK_COUNT))
+  const rates = columns.map(({ band }) =>
+    band.population > 0 ? band.cleared / band.population : 0
+  )
   const maxRate = Math.max(0, ...rates)
 
-  return bands.map(({ score, cleared }, index) => {
+  return columns.map(({ band, label, range }, index) => {
     const rate = rates[index] ?? 0
-    const key = String(score)
-    const label = index % step === 0 ? formatScoreTick(score) : null
-    const range = `${integer.format(score)}~`
+    const key = String(band.score)
+    const tick = index % step === 0 ? label : null
     const share = percent.format(rate)
     const ratio = maxRate > 0 ? rate / maxRate : 0
 
-    return { key, label, range, count: cleared, share, ratio }
+    return { key, label: tick, range, count: band.cleared, share, ratio }
   })
 }
 
@@ -386,6 +430,7 @@ function compareJobs(sort: JobSort): (left: RankedJob, right: RankedJob) => numb
 
 export function jobRows(jobs: readonly ClearJob[], sort: JobSort, metric: JobMetric): JobRow[] {
   return jobs
+    .filter(isAwakenedJob)
     .map((job) => rankedJob(job, metric))
     .toSorted(compareJobs(sort))
     .map(({ row }) => row)

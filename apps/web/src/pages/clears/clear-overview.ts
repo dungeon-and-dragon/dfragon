@@ -12,6 +12,7 @@ import {
   type ClearFameDistribution,
   type ClearTimes,
   type ClearWeek,
+  isAwakenedJob,
   shareText
 } from '#entities/ranking'
 import { addDays } from './clear-weeks'
@@ -349,6 +350,7 @@ function jobRowOf(job: ClearOverviewJob, rate: number, metric: JobMetric): BoxPl
 // 명성과 장비 점수를 바꿔도 순위 목록이 같도록 명성 분포가 있는 전직으로 순위를 정한다.
 export function jobRanks(jobs: readonly ClearOverviewJob[], metric: JobMetric): JobRanks {
   const rows = jobs
+    .filter(isAwakenedJob)
     .flatMap((job) => {
       if (job.population === 0 || job.fame === null) {
         return []
@@ -417,6 +419,27 @@ export function hourColumns({ hours }: ClearTimes): ColumnBar[] {
 
 export function hasClearTimes({ weekdays }: ClearTimes): boolean {
   return weekdays.some(({ cleared }) => cleared > 0)
+}
+
+function scaledToMax(columns: readonly ColumnBar[]): ColumnBar[] {
+  const max = Math.max(0, ...columns.map(({ count }) => count))
+
+  return columns.map((column) => {
+    const ratio = max > 0 ? column.count / max : 0
+
+    return { ...column, ratio }
+  })
+}
+
+// 적은 인원 모험단이 대부분이라 한 높이에 두면 뒤 칸이 보이지 않아, 앞뒤 묶음을 나눠 각 묶음의 가장 큰 칸에 높이를 맞춘다.
+export function splitAdventureColumns(
+  columns: readonly ColumnBar[],
+  frontCount: number
+): ColumnBar[][] {
+  const front = scaledToMax(columns.slice(0, frontCount))
+  const back = scaledToMax(columns.slice(frontCount))
+
+  return [front, back]
 }
 
 // 마지막 칸은 그 인원 이상을 모두 센다.
