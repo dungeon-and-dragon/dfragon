@@ -17,6 +17,8 @@ const SAVES_LOWEST_LEVEL_LISTING =
   '이름이 정확히 같은 매물이 있으면 그 매물을 저장하고, 칭호, 크리쳐, 오라는 그 매물이 없을 때만 앞부분 검색에서 아이템 종류가 같은 `이름[숫자Lv]` 매물 가운데 가장 낮은 unitPrice와 그 매물의 itemId, itemRarity를 저장하고, 다른 꼬리표와 다른 종류는 받지 않는다'
 const SAVES_MIDDLE_LEVEL_TAG_LISTING =
   '이름 전체의 앞부분 검색에 꼬리표 매물이 없으면 마지막 단어를 뺀 앞부분으로 다시 찾아, `이름[숫자Lv] 알`처럼 꼬리표가 중간에 낀 매물 가운데 꼬리표 하나를 뺀 이름이 같은 것의 최저가를 저장하고, 둘 다 없으면 아이템 검색으로 넘어간다'
+const SAVES_CREATURE_EGG_LISTING =
+  '크리쳐는 정확한 이름 매물이 없으면 앞부분 검색에서 `이름 알`, `이름의 알`과 꼬리표 없는 이름의 `이름[숫자Lv] 알` 크리쳐 매물 가운데 최저가를 저장하고, 꼬리표가 있는 이름은 같은 꼬리표의 알만, 크리쳐가 아닌 알과 칭호의 알은 받지 않는다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -35,6 +37,12 @@ const exactTitle = '합성 칭호'
 const platinumEgg = '합성 재단사 플래티넘 알'
 const plainEgg = '합성 응원단 알'
 const unlistedEgg = '합성 빈 알'
+// 경매장에 알로만 오르는 크리쳐 본체와 알 매물만 있는 칭호를 흉내 낸 지어낸 이름이다.
+const eggCreature = '합성 펭귄'
+const leveledEggCreature = '합성 거북'
+const taggedCreature = '합성 여우[80Lv]'
+const possessiveEggCreature = '합성 고래'
+const eggTitle = '합성 표식'
 const checkedAt = new Date('2026-11-26T12:00:00+09:00')
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -368,6 +376,89 @@ test(SAVES_MIDDLE_LEVEL_TAG_LISTING, async () => {
   })
   assert.deepEqual(saved.get(unlistedEgg), {
     itemName: unlistedEgg,
+    itemId: null,
+    itemRarity: null,
+    unitPrice: null,
+    checkedAt
+  })
+})
+
+test(SAVES_CREATURE_EGG_LISTING, async () => {
+  const listing = (id: string, itemName: string, itemTypeDetail: string, unitPrice: number) => {
+    const itemId = id.repeat(32)
+    const itemRarity = id === 'a' ? '에픽' : '레어'
+
+    return { itemId, itemName, itemRarity, itemTypeDetail, unitPrice }
+  }
+
+  const frontRows: Record<string, unknown[]> = {
+    [eggCreature]: [
+      listing('a', `${eggCreature} 알`, '크리쳐', 20_000),
+      listing('b', `${eggCreature} 플래티넘[45Lv] 알`, '크리쳐', 100),
+      listing('c', `${eggCreature} 상자`, '크리쳐', 200),
+      listing('d', `${eggCreature} 알`, '칭호', 300)
+    ],
+    [leveledEggCreature]: [
+      listing('e', `${leveledEggCreature}[30Lv] 알`, '크리쳐', 15_000),
+      listing('f', `${leveledEggCreature}[75Lv] 알`, '크리쳐', 13_000)
+    ],
+    [taggedCreature]: [
+      listing('1', `${taggedCreature} 알`, '크리쳐', 40_000),
+      listing('2', '합성 여우[30Lv] 알', '크리쳐', 1_000)
+    ],
+    [possessiveEggCreature]: [listing('3', `${possessiveEggCreature}의 알`, '크리쳐', 7_000)],
+    [eggTitle]: [listing('4', `${eggTitle} 알`, '칭호', 500)]
+  }
+
+  const { neople, searched } = auctionNeople((itemName, wordType) => {
+    if (wordType === 'front') {
+      return jsonResponse({ rows: frontRows[itemName] ?? [] })
+    }
+
+    return jsonResponse({ rows: [] })
+  })
+
+  const { saved, repository } = memoryPrices()
+
+  await priceService(neople, repository).refresh([
+    listed(eggCreature, ['CREATURE']),
+    listed(leveledEggCreature, ['CREATURE']),
+    listed(taggedCreature, ['CREATURE']),
+    listed(possessiveEggCreature, ['CREATURE']),
+    listed(eggTitle, ['TITLE'])
+  ])
+
+  assert.deepEqual(searched, [eggTitle])
+  assert.deepEqual(saved.get(eggCreature), {
+    itemName: eggCreature,
+    itemId: 'a'.repeat(32),
+    itemRarity: '에픽',
+    unitPrice: 20_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(leveledEggCreature), {
+    itemName: leveledEggCreature,
+    itemId: 'f'.repeat(32),
+    itemRarity: '레어',
+    unitPrice: 13_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(taggedCreature), {
+    itemName: taggedCreature,
+    itemId: '1'.repeat(32),
+    itemRarity: '레어',
+    unitPrice: 40_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(possessiveEggCreature), {
+    itemName: possessiveEggCreature,
+    itemId: '3'.repeat(32),
+    itemRarity: '레어',
+    unitPrice: 7_000,
+    checkedAt
+  })
+  assert.deepEqual(saved.get(eggTitle), {
+    itemName: eggTitle,
     itemId: null,
     itemRarity: null,
     unitPrice: null,
