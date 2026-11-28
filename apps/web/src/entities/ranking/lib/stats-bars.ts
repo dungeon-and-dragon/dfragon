@@ -1,6 +1,8 @@
 import { CHARACTER_SERVER_NAMES, displayJobName } from '#entities/character/@x/ranking'
 import type { CharacterStats } from '#entities/ranking/model/ranking-stats'
+import type { BarSeries } from '#shared/ui/chart/BarLineChart'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
+import type { ChartX } from '#shared/ui/chart/plot-layout'
 import type { Bar } from '#shared/ui/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
@@ -32,33 +34,44 @@ export function isAwakenedJob({ jobGrowName }: Readonly<{ jobGrowName: string | 
   return jobGrowName !== null && jobGrowName.startsWith(AWAKENING_MARK)
 }
 
-function awakenedJobs({ jobs }: CharacterStats): CharacterStats['jobs'] {
-  return jobs.filter(isAwakenedJob)
+export type JobFameChart = Readonly<{ x: ChartX[]; bars: BarSeries[] }>
+
+const JOB_FAME_BANDS = [
+  { key: 'under-80k', name: '8만 미만', from: 0, color: 'var(--color-chart-1)' },
+  { key: '80k-100k', name: '8만~10만', from: 80_000, color: 'var(--color-chart-3)' },
+  { key: '100k-120k', name: '10만~12만', from: 100_000, color: 'var(--color-chart-4)' },
+  { key: '120k-130k', name: '12만~13만', from: 120_000, color: 'var(--color-chart-2)' },
+  { key: 'from-130k', name: '13만 이상', from: 130_000, color: 'var(--color-chart-8)' }
+] as const
+
+function bandIndexOf(fame: number): number {
+  return JOB_FAME_BANDS.findLastIndex(({ from }) => fame >= from)
 }
 
-export function jobBars(stats: CharacterStats): Bar[] {
-  return awakenedJobs(stats).map(({ jobId, jobGrowId, jobName, jobGrowName, count }) => {
+export function jobFameChart({ jobs }: CharacterStats): JobFameChart {
+  const awakened = jobs.filter(isAwakenedJob)
+  const x = awakened.map(({ jobId, jobGrowId, jobName, jobGrowName }) => {
     const key = `${jobId}/${jobGrowId}`
     const name = displayJobName({ jobName, jobGrowName })
-    const share = shareText(count, stats.total)
 
-    return { key, name, value: count, share }
+    return { key, title: name, tick: name }
   })
-}
+  const countsByJob = awakened.map(({ fameBuckets }) => {
+    const counts = JOB_FAME_BANDS.map(() => 0)
 
-export function averageFameBars(stats: CharacterStats): Bar[] {
-  return awakenedJobs(stats)
-    .flatMap(({ jobId, jobGrowId, jobName, jobGrowName, averageFame }) => {
-      if (averageFame == null) {
-        return []
-      }
+    for (const { from, count } of fameBuckets) {
+      counts[bandIndexOf(from)] += count
+    }
 
-      const key = `${jobId}/${jobGrowId}`
-      const name = displayJobName({ jobName, jobGrowName })
+    return counts
+  })
+  const bars = JOB_FAME_BANDS.map(({ key, name, color }, band) => {
+    const values = countsByJob.map((counts) => counts[band] ?? 0)
 
-      return [{ key, name, value: averageFame }]
-    })
-    .toSorted((a, b) => b.value - a.value)
+    return { key, name, color, values }
+  })
+
+  return { x, bars }
 }
 
 type FameGroup = 'coarse' | 'fine' | 'high'

@@ -37,6 +37,8 @@ export const fameRankingSchema = z.object({
   nextCursor: z.string().min(1).nullable()
 })
 
+const fameBucketSchema = z.object({ from: count, to: count, count })
+
 export const characterStatsSchema = z.object({
   computedAt: z.iso.datetime().nullable(),
   total: count,
@@ -48,10 +50,10 @@ export const characterStatsSchema = z.object({
       jobName: z.string(),
       jobGrowName: z.string(),
       count,
-      averageFame: z.number().int().nullable()
+      fameBuckets: z.array(fameBucketSchema)
     })
   ),
-  fameDistribution: z.array(z.object({ from: count, to: count, count }))
+  fameDistribution: z.array(fameBucketSchema)
 })
 
 export type StoredCharacter = z.infer<typeof storedCharacterSchema>
