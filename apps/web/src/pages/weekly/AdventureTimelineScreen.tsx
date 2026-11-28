@@ -167,13 +167,13 @@ function TimelineTable({ pages }: { pages: AdventureTimelinePages }): React.JSX.
   return (
     <>
       <div className="table-scroll">
-        <table className="table table-fixed max-md:min-w-[640px]">
+        <table className="table table-fixed max-md:min-w-[720px]">
           <colgroup>
             <col className="w-[112px]" />
             <col className="w-[160px]" />
             <col className="w-[64px]" />
+            <col className="w-[160px]" />
             <col />
-            <col className="w-[180px]" />
           </colgroup>
           <thead>
             <tr>
