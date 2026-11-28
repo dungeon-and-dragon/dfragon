@@ -238,22 +238,12 @@ function chunks<T>(values: readonly T[], size: number): T[][] {
 
 // 재화 비용을 붙인 아이템은 경매장 가격을 내지 않는다.
 function toPrice(
-  {
-    category,
-    itemName,
-    itemId,
-    itemRarity,
-    unitPrice,
-    checkedAt,
-    platinum,
-    cost,
-    detail
-  }: LabItemPriceRow,
+  { itemName, itemId, itemRarity, unitPrice, checkedAt, platinum, cost, detail }: LabItemPriceRow,
   fame: number | null,
   candidate: LabItemPriceCandidate | null
 ): LabItemPrice {
   const look = lookOf(itemName, itemRarity, detail, candidate)
-  const performanceKey = performanceKeyOf(category, detail, candidate, fame, cost)
+  const performanceKey = performanceKeyOf(detail, candidate, fame, cost)
 
   if (cost !== null) {
     const currencyCost = toCurrencyCost(cost)
@@ -384,28 +374,12 @@ function performanceOptionsOf(
   return { slots: [], options }
 }
 
-// [NNLv] 꼬리표가 붙은 크리쳐는 Neople 상세에 이 두 줄이 더 있어 꼬리표 없는 크리쳐와 갈린다.
-// 소유자는 이 값을 잘못된 데이터일 수 있다고 보고(ADR 0085) 같은 성능으로 묶기로 해 판정에서 뺀다.
-const CREATURE_LEVEL_FORM_LINES: ReadonlySet<string> = new Set([
-  '인벤토리 무게 한도:5000g',
-  '최종 데미지 증가:1.5%'
-])
-
-function comparedOptionsOf(category: string, options: readonly string[]): string[] {
-  if (category !== 'CREATURE') {
-    return [...options]
-  }
-
-  return options.filter((line) => !CREATURE_LEVEL_FORM_LINES.has(line))
-}
-
 function sorted(values: readonly string[]): string[] {
   return [...values].sort()
 }
 
 // 같은 묶음 안에서 옵션 줄, 버프 줄, 명성, 구매 방법이 모두 같은 아이템끼리 같은 키다.
 function performanceKeyOf(
-  category: string,
   detail: LabItemPriceDetail | null,
   candidate: LabItemPriceCandidate | null,
   fame: number | null,
@@ -420,7 +394,7 @@ function performanceKeyOf(
 
   const currencyId = cost?.currencyId ?? null
   const sortedSlots = sorted(slots)
-  const sortedOptions = sorted(comparedOptionsOf(category, options))
+  const sortedOptions = sorted(options)
   const sortedBuffLines = sorted(buffLines)
   const key = JSON.stringify({
     slots: sortedSlots,
