@@ -65,6 +65,8 @@ export type LearnedSkill = SkillStyle['active'][number]
 
 export type UpgradeType = 1 | 2
 
+export const EVOLUTION_NUMERALS: Readonly<Record<UpgradeType, string>> = { 1: 'Ⅰ', 2: 'Ⅱ' }
+
 export type SkillIconImage = Readonly<{ sprite: string; x: number; y: number }>
 
 export type SkillWindowIcon = Readonly<{

@@ -1,11 +1,11 @@
 import {
   type EvolutionBranch,
+  EvolutionBranchTooltip,
   type SkillIconImage,
   type SkillMarks,
   SkillSprite,
   skillMarkOf
 } from '#entities/catalog'
-import { BranchTooltip, EvolutionBranchExplain } from './BranchTooltip'
 import { SKILL_ICON } from './skill-classes'
 
 const HEADING = 'section-title'
@@ -47,12 +47,11 @@ function Rate({
   }
 
   return (
-    <BranchTooltip
-      tooltip={<EvolutionBranchExplain branch={branch} />}
-      className={`${RATE} cursor-default`}
-    >
-      {content}
-    </BranchTooltip>
+    <EvolutionBranchTooltip branch={branch}>
+      <button type="button" className={`${RATE} cursor-default`}>
+        {content}
+      </button>
+    </EvolutionBranchTooltip>
   )
 }
 
