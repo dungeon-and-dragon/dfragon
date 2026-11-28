@@ -191,6 +191,7 @@ function contentStatsOf(contentId: string): ClearContentStats {
     weekMoves: null,
     streaks: null,
     scoreBands: { equipment: [], buff: [] },
+    scoreBandMinPopulation: 0,
     weekdays: [],
     hours: []
   }
