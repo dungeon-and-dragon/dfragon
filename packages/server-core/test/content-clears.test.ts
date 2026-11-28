@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import type { ContentClearSetting } from '@dfragon/database'
 import type { TimelineRow } from '../src/domain/character-timeline/rows.js'
 import {
   CLEAR_CONTENTS,
   type ClearContent,
+  filterClearContents,
   findContentClear,
   hasScoreStats,
   toCollectionMinFame,
@@ -208,4 +210,24 @@ test('분모 기준 명성은 컨텐츠마다 그 입장 명성이고, 입장 �
 test('점수 통계는 각인된 악몽 1주차부터 내고 그 전 주는 내지 않는다', () => {
   assert.equal(hasScoreStats(at('2026-10-29T06:00:00')), false)
   assert.equal(hasScoreStats(at('2026-11-05T06:00:00')), true)
+})
+
+test('컨텐츠 설정은 그 스위치를 끈 컨텐츠만 빼고, 설정 행이 없는 컨텐츠는 켜진 것으로 본다', () => {
+  const setting = (contentId: string, collected: boolean, shown: boolean): ContentClearSetting => ({
+    contentId,
+    collected,
+    shown,
+    updatedAt: at('2026-11-12T10:00:00')
+  })
+  const settings = [setting('nabel-normal', false, true), setting('inae-twilight', true, false)]
+  const idsOf = (contents: readonly ClearContent[]) => contents.map(({ id }) => id)
+
+  assert.deepEqual(
+    idsOf(filterClearContents(CLEAR_CONTENTS, settings, 'collected')),
+    idsOf(CLEAR_CONTENTS).filter((id) => id !== 'nabel-normal')
+  )
+  assert.deepEqual(
+    idsOf(filterClearContents(CLEAR_CONTENTS, settings, 'shown')),
+    idsOf(CLEAR_CONTENTS).filter((id) => id !== 'inae-twilight')
+  )
 })

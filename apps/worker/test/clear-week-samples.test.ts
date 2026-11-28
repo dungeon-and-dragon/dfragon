@@ -8,7 +8,10 @@ import type {
   LegionClearWeek,
   StoredClearPopulation
 } from '@dfragon/database'
-import type { ClearSampleRepository } from '@dfragon/server-core/application/content-clears/repository.js'
+import type {
+  ClearSampleRepository,
+  ClearWeekSampleRepository
+} from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearWeekSampleService } from '../src/application/content-clears/week-samples.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import { CLEAR_LEGIONS } from '@dfragon/server-core/domain/content-clears/index.js'
@@ -16,7 +19,9 @@ import { addHours } from 'date-fns'
 
 // 합성 분모와 집계다. DB 읽기와 저장은 fake이며 저장한 재료를 다시 읽는 왕복은 container-content-clear-check.mjs가 확인한다.
 const week = (date: string) => new Date(`${date}T06:00:00+09:00`)
-const emptySampleRepository: ClearSampleRepository = {
+const emptySampleRepository: ClearSampleRepository &
+  Pick<ClearWeekSampleRepository, 'readSettings'> = {
+  readSettings: async () => [],
   readAdventureSizes: async () => [],
   readContentJobFames: async () => [],
   readContentTimes: async () => [],
@@ -253,6 +258,46 @@ test('레기온은 출시 주부터 레이드 분모가 마감한 가장 최근 
     ]
   )
   assert.equal(summary.legions, 4)
+})
+
+test('수집을 끈 레기온은 레이드 분모가 마감해도 클리어를 옮기지 않고 분모도 저장하지 않는다', async () => {
+  const moved: string[] = []
+  const recorded: string[] = []
+  const service = new ClearWeekSampleService(
+    {
+      ...emptySampleRepository,
+      readSettings: async () => [
+        {
+          contentId: 'legion-venus',
+          collected: false,
+          shown: true,
+          updatedAt: week('2026-11-12')
+        }
+      ],
+      readPopulations: async () => [
+        ...movedLegionWeeksBefore('2026-11-05'),
+        population('michaela-hard', '2026-11-05', true)
+      ],
+      readContentWeekSampleWeeks: async () => [],
+      readOverviewSampleWeeks: async () => [],
+      readPopulationJobs: async () => [],
+      recordLegionClears: async ({ contentId, weekStart }: LegionClearWeek) => {
+        moved.push(`${contentId}/${formatResetDate(weekStart)}`)
+      },
+      analyzeContentClears: async () => undefined,
+      recordPopulation: async ({ contentId, weekStart }) => {
+        recorded.push(`${contentId}/${formatResetDate(weekStart)}`)
+      },
+      recordContentWeekSamples: async () => undefined,
+      recordOverviewSamples: async () => undefined
+    },
+    () => week('2026-11-13')
+  )
+
+  await service.recordMissing(() => undefined)
+
+  assert.deepEqual(moved, ['legion-apocalypse/2026-11-05'])
+  assert.deepEqual(recorded, ['legion-apocalypse/2026-11-05'])
 })
 
 test('첫 레이드 출시 전에 나온 레기온은 레이드 분모가 없는 출시 주부터 옮기고, 레이드 분모가 없는 주는 전체 개요를 저장하지 않는다', async () => {
