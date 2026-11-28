@@ -291,6 +291,15 @@ model ContentClearPopulation {
   @@map("content_clear_populations")
 }
 
+model ContentClearSetting {
+  contentId String   @id @map("content_id")
+  collected Boolean  @default(true)
+  shown     Boolean  @default(true)
+  updatedAt DateTime @map("updated_at") @db.Timestamptz(3)
+
+  @@map("content_clear_settings")
+}
+
 model ContentClearWeekSample {
   contentId  String   @map("content_id")
   weekStart  DateTime @map("week_start") @db.Timestamptz(3)
