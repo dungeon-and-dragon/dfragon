@@ -783,13 +783,13 @@ function samePerformanceItem(
   }
 }
 
-function samePerformanceLines(): string[] {
-  return [...document.querySelectorAll('.tooltip-item > ul:last-child > li')].map(
-    (line) => line.textContent ?? ''
+function samePerformanceLines(): string[][] {
+  return [...document.querySelectorAll('.tooltip-item > div:last-child > ul > li')].map((line) =>
+    [...line.children].slice(1).map((cell) => cell.textContent ?? '')
   )
 }
 
-it('같은 묶음의 performanceKey가 같은 카드는 가장 싼 카드 한 줄로 보이고, 그 tooltip 아래에 나머지 카드를 응답 순서대로 이름 | 가격으로 보인다', async () => {
+it('같은 묶음의 performanceKey가 같은 카드는 가장 싼 카드 한 줄로 보이고, 그 tooltip 아래에 나머지 카드를 응답 순서대로 이름과 가격으로 보인다', async () => {
   server.use(
     itemDetailHandlers.detail,
     http.get(LAB_ITEMS_URL, () =>
@@ -830,7 +830,10 @@ it('같은 묶음의 performanceKey가 같은 카드는 가장 싼 카드 한 �
   await hover(nameOf(enchantTable(), '합성 카드 B').parentElement!)
 
   await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
-  expect(samePerformanceLines()).toEqual(['합성 카드 C | -', '합성 카드 A | 300'])
+  expect(samePerformanceLines()).toEqual([
+    ['합성 카드 C', '-'],
+    ['합성 카드 A', '300']
+  ])
 
   await leave(nameOf(enchantTable(), '합성 카드 B').parentElement!)
   await vi.waitFor(() => expect(openTooltips()).toEqual([]))
@@ -873,10 +876,11 @@ it('같은 성능 재화 아이템은 재화 개수가 가장 작은 아이템 �
   await hover(nameOf(enchantTable(), '합성 보주 B').parentElement!)
 
   expect(document.body.textContent).toContain('레벨제한 115')
-  expect(samePerformanceLines()).toEqual(['합성 보주 A | 5'])
+  expect(samePerformanceLines()).toEqual([['합성 보주 A', '5']])
 
-  const line = document.querySelector('.tooltip-item > ul:last-child > li')!
-  expect(line.querySelector('img')?.getAttribute('alt')).toBe('합성 주화')
+  const price = document.querySelector('.tooltip-item > div:last-child > ul > li')!
+    .lastElementChild!
+  expect(price.querySelector('img')?.getAttribute('alt')).toBe('합성 주화')
 })
 
 it('플래티넘 표는 같은 성능 칭호를 플래티넘 최저가가 가장 싼 칭호 한 줄로 보이고, tooltip 아래 나머지 가격도 플래티넘 최저가다', async () => {
@@ -911,11 +915,11 @@ it('플래티넘 표는 같은 성능 칭호를 플래티넘 최저가가 가장
 
   await hover(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
 
-  expect(samePerformanceLines()).toEqual(['합성 칭호 Y | 300'])
+  expect(samePerformanceLines()).toEqual([['합성 칭호 Y', '300']])
 
   await leave(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
   await vi.waitFor(() => expect(openTooltips()).toEqual([]))
   await hover(nameOf(platinumTable()!, '합성 칭호 Y').parentElement!)
 
-  expect(samePerformanceLines()).toEqual(['합성 칭호 X | 500'])
+  expect(samePerformanceLines()).toEqual([['합성 칭호 X', '500']])
 })
