@@ -94,7 +94,7 @@ export function LabItemTable({
             const categoryCellBorder = categoryIndex === rows.length - 1 ? LAST_ROW_CELL : ''
 
             return tiers.flatMap(({ tier, items }, tierIndex) =>
-              items.map((item, itemIndex) => (
+              items.map(({ item, others }, itemIndex) => (
                 <tr key={`${category}:${tier}:${item.itemName}`}>
                   {tierIndex === 0 && itemIndex === 0 && (
                     // 한 tbody 안의 scope="rowgroup"은 뒤 부위의 행까지 덮으므로 합친 행만 덮는 row로 둔다.
@@ -115,7 +115,7 @@ export function LabItemTable({
                     </td>
                   )}
                   <td className={MERGED_ROW_CELL}>
-                    <LabItemName item={item} role={role} />
+                    <LabItemName item={item} others={others} role={role} />
                   </td>
                   {withFame && <td className="table-num">{integerText(item.fame)}</td>}
                   <td className="table-num font-semibold">
@@ -152,11 +152,29 @@ function LabItemIcon({
   )
 }
 
+function SamePerformanceItems({ others }: { others: readonly LabItem[] }): React.ReactNode {
+  if (others.length === 0) {
+    return null
+  }
+
+  return (
+    <ul className="m-0 flex w-[280px] list-none flex-col gap-1 p-0 text-fg not-first:mt-2 not-first:border-t not-first:border-line not-first:pt-2">
+      {others.map((other) => (
+        <li key={other.itemName}>
+          {other.itemName} | <LabItemPrice item={other} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 function LabItemName({
   item,
+  others,
   role
 }: {
   item: LabItem
+  others: readonly LabItem[]
   role: EnchantRole | undefined
 }): React.JSX.Element {
   const rarity = itemRarityOfGrade(item.itemRarity)
@@ -168,16 +186,29 @@ function LabItemName({
     </div>
   )
 
+  const footer = <SamePerformanceItems others={others} />
+
   if (item.itemId !== null) {
     return (
-      <ItemTooltip itemId={item.itemId} role={role}>
+      <ItemTooltip itemId={item.itemId} role={role} footer={footer}>
         {name}
       </ItemTooltip>
     )
   }
 
   if (item.tooltip === null) {
-    return name
+    if (others.length === 0) {
+      return name
+    }
+
+    return (
+      <Tooltip.Root>
+        <Tooltip.Trigger delay={0} closeDelay={0} render={name} />
+        <Tooltip.Popup side="right" align="start" sideOffset={8}>
+          <div className="tooltip-item">{footer}</div>
+        </Tooltip.Popup>
+      </Tooltip.Root>
+    )
   }
 
   const detail = {
@@ -191,7 +222,7 @@ function LabItemName({
   }
 
   return (
-    <ItemDetailTooltip item={detail} iconUrl={item.iconUrl} role={role}>
+    <ItemDetailTooltip item={detail} iconUrl={item.iconUrl} role={role} footer={footer}>
       {name}
     </ItemDetailTooltip>
   )

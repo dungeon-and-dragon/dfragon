@@ -63,10 +63,12 @@ function ItemTooltipBody({
 export function ItemTooltip({
   itemId,
   role,
+  footer,
   children
 }: {
   itemId: string
   role?: EnchantRole
+  footer?: ReactNode
   children: ReactElement
 }): React.JSX.Element {
   return (
@@ -75,6 +77,7 @@ export function ItemTooltip({
       <Tooltip.Popup side="right" align="start" sideOffset={8}>
         <div className="tooltip-item">
           <ItemTooltipBody itemId={itemId} role={role} />
+          {footer}
         </div>
       </Tooltip.Popup>
     </Tooltip.Root>
@@ -85,11 +88,13 @@ export function ItemDetailTooltip({
   item,
   iconUrl,
   role,
+  footer,
   children
 }: {
   item: ItemTooltipDetail
   iconUrl: string | null
   role?: EnchantRole
+  footer?: ReactNode
   children: ReactElement
 }): React.JSX.Element {
   const icon =
@@ -105,6 +110,7 @@ export function ItemDetailTooltip({
       <Tooltip.Popup side="right" align="start" sideOffset={8}>
         <div className="tooltip-item">
           <TooltipCard item={item} icon={icon} role={role} />
+          {footer}
         </div>
       </Tooltip.Popup>
     </Tooltip.Root>

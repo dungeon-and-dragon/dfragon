@@ -65,7 +65,9 @@ const labItemsSchema = z.object({
             platinum: platinumPriceSchema.nullable().default(null),
             tooltip: tooltipSchema.nullable().default(null),
             // 이 필드를 내기 전의 API 응답은 명성이 없는 것으로 읽는다.
-            fame: z.number().int().positive().nullable().default(null)
+            fame: z.number().int().positive().nullable().default(null),
+            // 이 필드를 내기 전의 API 응답은 같은 성능 아이템이 없는 것으로 읽는다.
+            performanceKey: z.string().nullable().default(null)
           })
           .transform(({ iconPath, ...item }) => {
             const iconUrl = browserApiUrl(iconPath)
