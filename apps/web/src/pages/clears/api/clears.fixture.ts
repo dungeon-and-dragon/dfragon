@@ -5,7 +5,8 @@ import type {
   ClearJob,
   ClearOverview,
   ClearStats,
-  ClearWeek
+  ClearWeek,
+  ClearWeekMove
 } from '#entities/ranking'
 
 // 클리어 화면 story의 합성 집계다. 전직 이름과 수는 실제 값이 아니다.
@@ -226,11 +227,19 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
       }
     : null
 
-  const stageMoves = contentId.startsWith('michaela')
-    ? {
-        hard: { same: 1100, other: 240, none: 110 },
-        normal: { same: 3900, other: 300, none: 200 }
-      }
+  const weekMoves: ClearWeekMove[] | null = contentId.startsWith('michaela')
+    ? [
+        { from: 'hard', to: 'hard', characters: 1100 },
+        { from: 'hard', to: 'normal', characters: 300 },
+        { from: 'hard', to: 'left', characters: 180 },
+        { from: 'normal', to: 'hard', characters: 240 },
+        { from: 'normal', to: 'normal', characters: 3900 },
+        { from: 'normal', to: 'left', characters: 520 },
+        { from: 'returned', to: 'hard', characters: 70 },
+        { from: 'returned', to: 'normal', characters: 150 },
+        { from: 'first', to: 'hard', characters: 40 },
+        { from: 'first', to: 'normal', characters: 50 }
+      ]
     : null
 
   const streaks = weekly
@@ -292,7 +301,7 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
     weeklyClears,
     fameBands,
     weekOverWeek,
-    stageMoves,
+    weekMoves,
     streaks,
     stages,
     scoreBands: { equipment: equipmentBands, buff: buffBands },

@@ -15,8 +15,8 @@ import type {
   ClearRecordRaidStage,
   ClearRecordStageCount,
   ClearScoreBandCount,
-  ClearStageMoveCount,
-  ClearStageMoveSelection,
+  ClearWeekMoveCount,
+  ClearWeekMoveSelection,
   ClearStreakCount,
   ClearTimeCount,
   ClearWeekComparison,
@@ -35,7 +35,7 @@ export interface ClearSampleRepository {
   readContentTimes(selection: ClearWeekSelection): Promise<ClearTimeCount[]>
   readFameBands(selection: ClearWeekSelection, minFame: number): Promise<ClearFameBandCount[]>
   readWeekGroups(comparison: ClearWeekComparison): Promise<ClearWeekGroupSample[]>
-  readStageMoves(selection: ClearStageMoveSelection): Promise<ClearStageMoveCount[]>
+  readWeekMoves(selection: ClearWeekMoveSelection): Promise<ClearWeekMoveCount[]>
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]>
   readRaidModes(selection: ClearRecordRaidSelection): Promise<ClearRecordRaidMode[]>
   readRaidStageCounts(

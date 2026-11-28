@@ -4,8 +4,7 @@ import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
   CLEAR_LEGIONS,
-  type ClearContent,
-  findStagePair
+  type ClearContent
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearContentStats,
@@ -191,13 +190,8 @@ export class ClearStatsService {
       (await this.repository.readContentWeekSamples(week)) ??
       (await this.samples.loadContent(content, population))
     const firstWeeks = await this.firstWeeksOf(current, content.id)
-    const pair = findStagePair(content)
-    const stageMoves =
-      pair !== undefined && samples.stageMoves !== null
-        ? { pair, counts: samples.stageMoves }
-        : null
 
-    return toClearContentStats(summary, population, { ...samples, firstWeeks, stageMoves })
+    return toClearContentStats(summary, population, { ...samples, firstWeeks })
   }
 
   private async loadOverview(
@@ -400,7 +394,7 @@ export const emptyClearStatsRepository: ClearStatsRepository = {
   readFirstWeeks: async () => [],
   readFameBands: async () => [],
   readWeekGroups: async () => [],
-  readStageMoves: async () => [],
+  readWeekMoves: async () => [],
   readStreaks: async () => [],
   readRaidModes: async () => [],
   readRaidStageCounts: async () => [],

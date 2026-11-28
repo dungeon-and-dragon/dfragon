@@ -8,11 +8,11 @@ import type {
   ClearJobFameSample,
   ClearJobScoreSample,
   ClearScoreBandCount,
-  ClearStageMoveCount,
   ClearStreakCount,
   ClearTimeCount,
   ClearWeekGroupSample,
-  ClearWeekGroupScoreSample
+  ClearWeekGroupScoreSample,
+  ClearWeekMoveCount
 } from './content-clear.js'
 
 export type ClearContentWeekSamples = {
@@ -24,7 +24,7 @@ export type ClearContentWeekSamples = {
   times: ClearTimeCount[]
   weekGroups: ClearWeekGroupSample[] | null
   weekGroupScores: ClearWeekGroupScoreSample[] | null
-  stageMoves: ClearStageMoveCount[] | null
+  weekMoves: ClearWeekMoveCount[] | null
   streaks: ClearStreakCount[] | null
   stages: ClearRecordStageCount[] | null
 }

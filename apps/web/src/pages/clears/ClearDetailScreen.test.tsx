@@ -8,7 +8,8 @@ import type {
   ClearContentStats,
   ClearJob,
   ClearStats,
-  ClearWeek
+  ClearWeek,
+  ClearWeekMove
 } from '#entities/ranking'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { server } from '#testing/test-support/msw-server'
@@ -146,10 +147,18 @@ const RAID_WEEK_OVER_WEEK = {
   first: { cleared: 10, fame, scores: noScores }
 }
 
-const MICHAELA_STAGE_MOVES = {
-  hard: { same: 40, other: 9, none: 8 },
-  normal: { same: 90, other: 6, none: 10 }
-}
+const MICHAELA_WEEK_MOVES: ClearWeekMove[] = [
+  { from: 'hard', to: 'hard', characters: 40 },
+  { from: 'hard', to: 'normal', characters: 6 },
+  { from: 'hard', to: 'left', characters: 8 },
+  { from: 'normal', to: 'hard', characters: 9 },
+  { from: 'normal', to: 'normal', characters: 90 },
+  { from: 'normal', to: 'left', characters: 12 },
+  { from: 'returned', to: 'hard', characters: 5 },
+  { from: 'returned', to: 'normal', characters: 4 },
+  { from: 'first', to: 'hard', characters: 3 },
+  { from: 'first', to: 'normal', characters: 0 }
+]
 
 const RAID_STREAKS = [
   { weeks: 1, characters: 20 },
@@ -163,7 +172,7 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
   const raid = header.kind === 'raid'
   const selected = weeks.find((candidate) => candidate.weekStart === weekStart) ?? null
   const weekOverWeek = raid ? RAID_WEEK_OVER_WEEK : null
-  const stageMoves = contentId.startsWith('michaela') ? MICHAELA_STAGE_MOVES : null
+  const weekMoves = contentId.startsWith('michaela') ? MICHAELA_WEEK_MOVES : null
   const streaks = raid ? RAID_STREAKS : null
   const stages = raid ? [] : null
   const weekdays = [4, 5, 6, 7, 1, 2, 3].map((weekday) => {
@@ -204,7 +213,7 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
       { fame: 106000, population: 400, cleared: 40 }
     ],
     weekOverWeek,
-    stageMoves,
+    weekMoves,
     streaks,
     stages,
     scoreBands: { equipment: [], buff: [] },
@@ -411,8 +420,7 @@ it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 배�
     '컨텐츠',
     '주차별 클리어',
     '명성 구간',
-    '지난주 대비 이탈과 복귀',
-    '난이도 이동',
+    '지난주 대비 이동',
     '클리어 캐릭터의 명성',
     '연속 클리어 주 수',
     '클리어 요일과 시간대',
@@ -428,11 +436,27 @@ it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 배�
   expect(panelNames()).not.toContain('배율별 클리어')
 })
 
-it('이동 집계가 없는 레이드는 일반과 하드 이동 카드를 두지 않는다', async () => {
+it('이동 집계가 없는 레이드는 이동 생키 대신 지난주 대비 이탈과 복귀 카드를 둔다', async () => {
   await open({ contentKey: 'inae' })
 
   expect(panelNames()).toContain('지난주 대비 이탈과 복귀')
-  expect(panelNames()).not.toContain('난이도 이동')
+  expect(panelNames()).not.toContain('지난주 대비 이동')
+  expect(panel('지난주 대비 이탈과 복귀')?.querySelector('dl')?.textContent).toBe(
+    '이탈21복귀7신규10'
+  )
+})
+
+it('일반과 하드가 있는 레이드에 그 주 이동이 없으면 2행에 이동 생키도 이탈과 복귀 카드도 두지 않는다', async () => {
+  await open(
+    { contentKey: 'michaela', week: LAST_CLOSED_WEEK },
+    {
+      contentStats: (contentId, weekStart) =>
+        HttpResponse.json({ ...statsOf(contentId, weekStart), weekMoves: [] })
+    }
+  )
+
+  expect(panelNames()).not.toContain('지난주 대비 이동')
+  expect(panelNames()).not.toContain('지난주 대비 이탈과 복귀')
 })
 
 it('챌린지는 미션 선택을 두고, 응답에 없는 지난주 대비, 이동, 연속 클리어 주 수, 그룹별 명성 카드와 응답에 있는 클리어 요일과 시간대 카드를 두지 않는다', async () => {
@@ -460,18 +484,30 @@ it('주차별 클리어는 레이드면 다시 클리어와 신규 막대를, �
   expect(legendNames('주차별 클리어')).toEqual(['신규', '한 번이라도 깬 캐릭터 비율'])
 })
 
-it('지난주 대비는 이탈, 복귀, 신규 수와 두 주의 분할 막대를 두고, 이동은 일반 → 하드, 하드 → 일반 수를 둔다', async () => {
+it('지난주 대비 이동은 지난주 하드, 일반, 복귀, 신규에서 이번 주 하드, 일반, 이탈로 가는 수를 노드마다 적는다', async () => {
   await open({ contentKey: 'michaela', week: LAST_CLOSED_WEEK })
 
-  const weekOverWeek = panel('지난주 대비 이탈과 복귀')
-  expect(weekOverWeek?.querySelector('dl')?.textContent).toBe('이탈21복귀7신규10')
-  expect(weekOverWeek?.textContent).toContain('13주차61')
-  expect(weekOverWeek?.textContent).toContain('14주차57')
-  const moves = panel('난이도 이동')
-  expect(moves?.querySelector('dl')?.textContent).toBe('일반하드9하드일반6')
-  expect(moves?.querySelectorAll('dt svg')).toHaveLength(2)
-  expect(moves?.textContent).toContain('14주차 하드57')
-  expect(moves?.textContent).toContain('14주차 일반106')
+  const labels = [...(panel('지난주 대비 이동')?.querySelectorAll('svg text') ?? [])].map(
+    (text) => text.textContent
+  )
+  expect(labels).toEqual([
+    '13주차',
+    '14주차',
+    '하드',
+    '54',
+    '일반',
+    '111',
+    '복귀',
+    '9',
+    '신규',
+    '3',
+    '하드',
+    '57',
+    '일반',
+    '100',
+    '이탈',
+    '20'
+  ])
 })
 
 it('클리어 캐릭터의 명성은 분포가 있는 그룹만 둔다', async () => {
@@ -641,8 +677,7 @@ it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점�
     '컨텐츠',
     '주차별 클리어',
     '명성 구간',
-    '지난주 대비 이탈과 복귀',
-    '난이도 이동',
+    '지난주 대비 이동',
     '클리어 캐릭터의 명성',
     '클리어 캐릭터의 장비 점수',
     '연속 클리어 주 수',

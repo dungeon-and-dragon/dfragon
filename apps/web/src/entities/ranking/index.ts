@@ -33,10 +33,10 @@ export type {
   ClearScoreBand,
   ClearScoreDistributions,
   ClearScoreKind,
-  ClearStageMoves,
   ClearStats,
   ClearTimes,
   ClearWeek,
+  ClearWeekMove,
   ClearWeekOverWeek
 } from './model/clear-stats'
 export { itemSlotName, WEAPON_SLOT } from './model/item-stats'
