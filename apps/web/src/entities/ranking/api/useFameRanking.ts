@@ -1,5 +1,4 @@
-import { infiniteQueryOptions, useInfiniteQuery } from '@tanstack/react-query'
-import { useCallback } from 'react'
+import { type QueryKey, queryOptions } from '@tanstack/react-query'
 import { SearchHttpFailure } from '#shared/api/api-error'
 import { createJsonRequest } from '#shared/api/json-request'
 import {
@@ -12,16 +11,14 @@ import {
 } from '#entities/ranking/model/ranking-stats'
 import { EVOLUTION_FILTER_LIMIT, ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import { API_BASE_URL, dfragonHttp } from '#shared/api/dfragon-api'
-import type { LoadedResult } from '#shared/lib/useLoadedResult'
+import { type LoadedResult, useLoadedResult } from '#shared/lib/useLoadedResult'
 
 const FAME_RANKING_PATH = '/rankings/fame'
 
-export type FameRankingPages = Readonly<{
+export type FameRankingPage = Readonly<{
+  page: number
   characters: readonly RankedCharacter[]
-  hasMore: boolean
-  loadingMore: boolean
-  moreError: string | null
-  loadMore: () => void
+  pageCount: number
 }>
 
 const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)
@@ -80,10 +77,7 @@ function isReversed(from: number | undefined, to: number | undefined): boolean {
 }
 
 // API는 기준과 맞지 않는 범위와 거꾸로 된 범위를 400으로 거부하므로 보내기 전에 거른다.
-async function requestFameRanking(
-  filter: FameRankingFilter,
-  cursor: string | undefined
-): Promise<FameRanking> {
+async function requestFameRanking(filter: FameRankingFilter, page: number): Promise<FameRanking> {
   const scored = filter.sort !== undefined
   if (
     (filter.jobGrowId !== undefined && filter.jobId === undefined) ||
@@ -103,6 +97,7 @@ async function requestFameRanking(
   const fameTo = filter.fameTo !== undefined ? String(filter.fameTo) : undefined
   const scoreFrom = filter.scoreFrom !== undefined ? String(filter.scoreFrom) : undefined
   const scoreTo = filter.scoreTo !== undefined ? String(filter.scoreTo) : undefined
+  const pageParam = page > 1 ? String(page) : undefined
 
   return requestJson(FAME_RANKING_PATH, fameRankingSchema, {
     searchParams: {
@@ -119,80 +114,63 @@ async function requestFameRanking(
       ...(filter.sort !== undefined && { sort: filter.sort }),
       ...(scoreFrom !== undefined && { scoreFrom }),
       ...(scoreTo !== undefined && { scoreTo }),
-      ...(cursor !== undefined && { cursor })
+      ...(pageParam !== undefined && { page: pageParam })
     }
   })
 }
 
-function messageOf(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message
-  }
+async function requestFameRankingPage(
+  filter: FameRankingFilter,
+  page: number
+): Promise<FameRankingPage> {
+  const ranking = await requestFameRanking(filter, page)
 
-  return String(error)
+  return { ...ranking, page }
 }
 
-function nextCursorOf(page: FameRanking): string | undefined {
-  if (page.nextCursor === null) {
-    return undefined
-  }
+function filterKey(filter: FameRankingFilter): QueryKey {
+  return [
+    'fame-ranking',
+    filter.jobId ?? null,
+    filter.jobGrowId ?? null,
+    filter.role ?? null,
+    filter.equipmentSetId ?? null,
+    filter.oathSetId ?? null,
+    filter.oathSetOption ?? null,
+    filter.itemIds?.join(',') ?? null,
+    evolutionsKey(filter.evolutions),
+    filter.fameFrom ?? null,
+    filter.fameTo ?? null,
+    filter.sort ?? null,
+    filter.scoreFrom ?? null,
+    filter.scoreTo ?? null
+  ]
+}
 
-  return page.nextCursor
+function fameRankingKey(filter: FameRankingFilter, page: number): QueryKey {
+  return [...filterKey(filter), page]
 }
 
 // 서버가 화면을 그리기 전에 받아 둘 때와 화면의 hook이 같은 key와 요청을 쓴다.
-export function fameRankingQuery(filter: FameRankingFilter) {
-  return infiniteQueryOptions({
-    queryKey: [
-      'fame-ranking',
-      filter.jobId ?? null,
-      filter.jobGrowId ?? null,
-      filter.role ?? null,
-      filter.equipmentSetId ?? null,
-      filter.oathSetId ?? null,
-      filter.oathSetOption ?? null,
-      filter.itemIds?.join(',') ?? null,
-      evolutionsKey(filter.evolutions),
-      filter.fameFrom ?? null,
-      filter.fameTo ?? null,
-      filter.sort ?? null,
-      filter.scoreFrom ?? null,
-      filter.scoreTo ?? null
-    ],
-    queryFn: ({ pageParam }) => requestFameRanking(filter, pageParam),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: nextCursorOf
+export function fameRankingQuery(filter: FameRankingFilter, page = 1) {
+  const queryKey = fameRankingKey(filter, page)
+
+  return queryOptions({
+    queryKey,
+    queryFn: () => requestFameRankingPage(filter, page)
   })
 }
 
-export function useFameRanking(filter: FameRankingFilter): LoadedResult<FameRankingPages> {
-  const query = useInfiniteQuery(fameRankingQuery(filter))
-  const { data, error, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
-    query
-  const loadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
-  if (data === undefined) {
-    if (error != null) {
-      return { status: 'error', message: messageOf(error) }
-    }
+// 다른 페이지를 받는 동안 같은 필터의 앞 페이지를 그대로 두어 페이지 수가 사라지지 않게 한다.
+export function useFameRanking(
+  filter: FameRankingFilter,
+  page: number
+): LoadedResult<FameRankingPage> {
+  const filtered = JSON.stringify(filterKey(filter))
+  const sameFilter = (previousKey: QueryKey) =>
+    JSON.stringify(previousKey.slice(0, -1)) === filtered
 
-    return { status: 'loading' }
-  }
-
-  const characters = data.pages.flatMap((page) => page.characters)
-  const moreError = isFetchNextPageError ? messageOf(error) : null
-
-  return {
-    status: 'success',
-    value: {
-      characters,
-      hasMore: hasNextPage,
-      loadingMore: isFetchingNextPage,
-      moreError,
-      loadMore
-    }
-  }
+  return useLoadedResult(fameRankingKey(filter, page), () => requestFameRankingPage(filter, page), {
+    keepPreviousWhile: sameFilter
+  })
 }

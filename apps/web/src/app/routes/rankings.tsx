@@ -4,9 +4,6 @@ import { RankingsPage } from '#pages/rankings'
 import { parseRankingSearch, rankingFilterOf } from '#widgets/ranking-filter'
 import { pageHead, siteUrl } from '#shared/lib/page-head'
 
-// 구조화 데이터에는 화면이 첫 쪽에 보이는 만큼만 넣는다.
-const LISTED_CHARACTERS = 20
-
 export const Route = createFileRoute('/rankings')({
   ssr: true,
   validateSearch: parseRankingSearch,
@@ -17,11 +14,11 @@ export const Route = createFileRoute('/rankings')({
     const query = fameRankingQuery(rankingFilterOf(deps))
 
     if (typeof window === 'undefined') {
-      await queryClient.prefetchInfiniteQuery(query)
+      await queryClient.prefetchQuery(query)
     }
 
-    const firstPage = queryClient.getQueryData(query.queryKey)?.pages[0]
-    const listed = (firstPage?.characters ?? []).slice(0, LISTED_CHARACTERS)
+    const firstPage = queryClient.getQueryData(query.queryKey)
+    const listed = firstPage?.characters ?? []
     const characters = listed.map(({ serverId, characterId, characterName }) => ({
       serverId,
       characterId,
