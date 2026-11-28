@@ -962,7 +962,8 @@ const SCORE_BAND_WIDTHS: Readonly<Record<CharacterScoreKind, number>> = {
 }
 
 // 구간별 캐릭터 수는 분모 기준 명성 이상인 캐릭터의 지금 점수 가운데 클리어 점수와 같은 엔진 버전만 골라,
-// 클리어 점수와 같은 기준인 이력 최고치로 센다.
+// 클리어 점수와 같은 기준인 이력 최고치로 센다. 클리어 수도 이 분모 캐릭터 가운데 클리어한 캐릭터만 같은 구간으로 센다.
+// 클리어 때 복사한 점수로 따로 세면 그 뒤 엔진 버전이 바뀌거나 점수 구간이 달라진 캐릭터가 분자에만 남아 클리어율이 100%를 넘는다.
 export function readContentClearScoreBands(
   client: DatabaseClient,
   selection: ClearWeekSelection,
@@ -981,34 +982,28 @@ export function readContentClearScoreBands(
         ${Object.values(SCORE_BAND_WIDTHS)}::int[]
       ) AS width(kind, size)
     ),
-    population AS (
-      SELECT
-        stored.kind,
-        (GREATEST(stored.score, best_score.score) / width.size) * width.size AS score,
-        count(*)::int AS population
-      FROM character_scores stored
-      JOIN characters c ON c.server_id = stored.server_id AND c.character_id = stored.character_id
-      JOIN engine
-        ON engine.engine_package = stored.engine_package
-        AND engine.engine_rules_rev = stored.engine_rules_rev
-        AND engine.engine_bundle_id = stored.engine_bundle_id
-      JOIN width ON width.kind = stored.kind
-      ${bestScoreJoinSql('stored', 'stored')}
-      WHERE c.max_fame >= ${minFame} AND ${awakenedSql}
-      GROUP BY 1, 2
-    ),
-    cleared AS (
-      SELECT versioned.kind, (versioned.score / width.size) * width.size AS score, count(*)::int AS cleared
-      FROM versioned
-      JOIN width ON width.kind = versioned.kind
-      GROUP BY 1, 2
+    cleared_character AS (
+      SELECT DISTINCT clear.server_id, clear.character_id
+      FROM content_clears clear
+      WHERE ${selectedClearsSql(selection)}
     )
     SELECT
-      kind,
-      score,
-      coalesce(population.population, 0) AS population,
-      coalesce(cleared.cleared, 0) AS cleared
-    FROM population
-    FULL JOIN cleared USING (kind, score)
-    ORDER BY kind, score`
+      stored.kind,
+      (GREATEST(stored.score, best_score.score) / width.size) * width.size AS score,
+      count(*)::int AS population,
+      count(cleared_character.character_id)::int AS cleared
+    FROM character_scores stored
+    JOIN characters c ON c.server_id = stored.server_id AND c.character_id = stored.character_id
+    JOIN engine
+      ON engine.engine_package = stored.engine_package
+      AND engine.engine_rules_rev = stored.engine_rules_rev
+      AND engine.engine_bundle_id = stored.engine_bundle_id
+    JOIN width ON width.kind = stored.kind
+    ${bestScoreJoinSql('stored', 'stored')}
+    LEFT JOIN cleared_character
+      ON cleared_character.server_id = stored.server_id
+      AND cleared_character.character_id = stored.character_id
+    WHERE c.max_fame >= ${minFame} AND ${awakenedSql}
+    GROUP BY 1, 2
+    ORDER BY 1, 2`
 }
