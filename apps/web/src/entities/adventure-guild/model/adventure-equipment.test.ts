@@ -59,7 +59,7 @@ function slotCell(row: ReturnType<typeof toEquipmentBoard>[number], slot: string
   return row.slots.find((entry) => entry.slot === slot)?.cell
 }
 
-it('같은 부위에 에픽과 태초가 있으면 태초를 보이고, 남은 개수는 태초만 세며 등급별 개수를 따로 둔다', () => {
+it('같은 부위에 에픽과 태초가 있으면 태초를 보이고, 남은 개수는 태초만 세며 레전더리를 뺀 등급별 개수를 따로 둔다', () => {
   const source = character('가', 1, [
     equipment('상의', '에픽', 2),
     equipment('상의', '태초', 3),
@@ -72,7 +72,7 @@ it('같은 부위에 에픽과 태초가 있으면 태초를 보이고, 남은 �
     itemName: '태초 상의',
     rarity: '태초',
     extraCount: 2,
-    rarityCounts: [3, 2, 1]
+    rarityCounts: [3, 2]
   })
 })
 
@@ -83,8 +83,22 @@ it('에픽과 레전더리가 하나씩이면 에픽을 보이고 남은 개수�
   expect(slotCell(row!, '반지')).toMatchObject({
     rarity: '에픽',
     extraCount: 0,
-    rarityCounts: [0, 1, 1]
+    rarityCounts: [0, 1]
   })
+})
+
+it('레전더리만 가진 부위와 서약은 비운다', () => {
+  const source = character(
+    '가',
+    1,
+    [equipment('반지', '레전더리')],
+    [oath('oath', '레전더리'), oath('crystal', '레전더리', 5)]
+  )
+  const [row] = toEquipmentBoard([source], SET)
+
+  expect(slotCell(row!, '반지')).toBeNull()
+  expect(row!.oath).toBeNull()
+  expect(row!.crystals).toEqual([null, null])
 })
 
 it('고른 세트가 아닌 보유는 칸에 넣지 않고, 가진 것이 없는 부위는 비운다', () => {
@@ -131,10 +145,10 @@ it('행은 명성이 높은 순서이고 명성이 없는 캐릭터와 가진 �
   ])
   expect(rows[0]!.slots.every(({ cell }) => cell === null)).toBe(true)
   expect(rows[0]!.oath).toBeNull()
-  expect(rows[0]!.crystalCounts).toEqual([0, 0, 0])
+  expect(rows[0]!.crystals).toEqual([null, null])
 })
 
-it('서약은 가장 높은 등급의 본체를 보이고 결정은 태초, 에픽, 레전더리 순으로 등급별 개수를 더한다', () => {
+it('서약은 가장 높은 등급의 본체를 보이고 결정은 태초, 에픽 순으로 등급별 개수를 더한다', () => {
   const source = character(
     '가',
     1,
@@ -143,6 +157,7 @@ it('서약은 가장 높은 등급의 본체를 보이고 결정은 태초, 에�
       oath('oath', '에픽'),
       oath('oath', '태초'),
       oath('crystal', '에픽', 3),
+      oath('crystal', '에픽', 2),
       oath('crystal', '레전더리', 2),
       oath('crystal', '태초', 4, OTHER_SET)
     ]
@@ -150,7 +165,10 @@ it('서약은 가장 높은 등급의 본체를 보이고 결정은 태초, 에�
   const [row] = toEquipmentBoard([source], SET)
 
   expect(row!.oath).toMatchObject({ itemName: '태초 oath', rarity: '태초' })
-  expect(row!.crystalCounts).toEqual([0, 3, 2])
+  expect(row!.crystals).toEqual([
+    null,
+    { itemId: 'crystal-에픽', itemName: '에픽 crystal', rarity: '에픽', count: 5 }
+  ])
 })
 
 it('세트를 고르지 않으면 장비 칸을 비운다', () => {
