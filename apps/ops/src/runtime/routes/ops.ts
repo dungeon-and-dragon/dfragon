@@ -4,6 +4,8 @@ import type { BatchNeopleKeyRepository } from '#application/batch-neople-keys/re
 import { BatchNeopleKeyService } from '#application/batch-neople-keys/index.js'
 import type { CollectionRepository } from '#application/collection/repository.js'
 import { CollectionService } from '#application/collection/index.js'
+import type { ContentClearSettingRepository } from '#application/content-clear-settings/repository.js'
+import { ContentClearSettingService } from '#application/content-clear-settings/index.js'
 import type { JobRepository } from '#application/jobs/repository.js'
 import { JobService } from '#application/jobs/index.js'
 import type { LabCandidateRepository } from '#application/lab-candidates/repository.js'
@@ -18,6 +20,7 @@ import type { QueueRepository } from '#application/queues/repository.js'
 import { QueueService } from '#application/queues/index.js'
 import { BatchNeopleKeyController } from '#presentation/http/batch-neople-keys/index.js'
 import { CollectionController } from '#presentation/http/collection/index.js'
+import { ContentClearSettingController } from '#presentation/http/content-clear-settings/index.js'
 import { JobController } from '#presentation/http/jobs/index.js'
 import {
   limitIconJsonBody,
@@ -38,6 +41,7 @@ export interface OpsRouteOptions {
   readonly readQueueCounts: QueueRepository['readCounts']
   readonly collection: CollectionRepository
   readonly batchNeopleKeys: BatchNeopleKeyRepository
+  readonly contentClearSettings: ContentClearSettingRepository
   readonly labItems: LabItemRepository
   readonly labCurrencies: LabCurrencyRepository
   readonly labItemDetails: LabItemDetailRepository
@@ -49,6 +53,7 @@ export function createOpsRoutes({
   readQueueCounts,
   collection,
   batchNeopleKeys,
+  contentClearSettings,
   labItems,
   labCurrencies,
   labItemDetails,
@@ -60,6 +65,9 @@ export function createOpsRoutes({
   const collectionController = new CollectionController(new CollectionService(collection))
   const batchNeopleKeyController = new BatchNeopleKeyController(
     new BatchNeopleKeyService(batchNeopleKeys)
+  )
+  const contentClearSettingController = new ContentClearSettingController(
+    new ContentClearSettingService(contentClearSettings)
   )
   const labItemController = new LabItemController(new LabItemService(labItems, labCurrencies))
   const labCurrencyController = new LabCurrencyController(new LabCurrencyService(labCurrencies))
@@ -79,6 +87,7 @@ export function createOpsRoutes({
   routes.route('/api/queues', queueController.routes())
   routes.route('/api/collection', collectionController.routes())
   routes.route('/api/batch-neople-keys', batchNeopleKeyController.routes())
+  routes.route('/api/content-clear-settings', contentClearSettingController.routes())
   routes.route('/api/lab-items', labItemController.routes())
   routes.route('/api/lab-currencies', labCurrencyController.routes())
   routes.route('/api/lab-item-details', labItemDetailController.routes())

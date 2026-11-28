@@ -9,6 +9,7 @@ const failureResponses = {
   jobNotScheduled: { status: 400, body: { error: { code: 'JOB_NOT_SCHEDULED' } } },
   batchNeopleKeyNotFound: { status: 404, body: { error: { code: 'BATCH_NEOPLE_KEY_NOT_FOUND' } } },
   batchNeopleKeyDuplicate: { status: 409, body: { error: { code: 'BATCH_NEOPLE_KEY_DUPLICATE' } } },
+  contentClearNotFound: { status: 404, body: { error: { code: 'CONTENT_CLEAR_NOT_FOUND' } } },
   labCurrencyNotFound: { status: 404, body: { error: { code: 'LAB_CURRENCY_NOT_FOUND' } } },
   labCurrencyDuplicate: { status: 409, body: { error: { code: 'LAB_CURRENCY_DUPLICATE' } } },
   labItemIconNotFound: { status: 404, body: { error: { code: 'LAB_ITEM_ICON_NOT_FOUND' } } },

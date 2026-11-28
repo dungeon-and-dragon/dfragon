@@ -1,5 +1,6 @@
 export { DatabaseBatchNeopleKeyRepository } from './batch-neople-keys.js'
 export { DatabaseCollectionRepository } from './collection.js'
+export { DatabaseContentClearSettingRepository } from './content-clear-settings.js'
 export { DatabaseJobRepository } from './jobs.js'
 export { DatabaseLabCandidateRepository } from './lab-candidates.js'
 export { DatabaseLabCurrencyRepository } from './lab-currencies.js'
