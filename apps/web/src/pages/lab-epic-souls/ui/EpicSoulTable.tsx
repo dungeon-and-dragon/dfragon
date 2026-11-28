@@ -81,6 +81,16 @@ export function EpicSoulTable({
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <td className={EDGE_CELL} />
+            <th scope="row" className="text-left">
+              합계
+            </th>
+            <td className={WIDE_ONLY} />
+            <td className={WIDE_ONLY} />
+            <td className={WIDE_ONLY} />
+            <td className="table-num font-bold">{formatCount(total)}</td>
+          </tr>
           {rows.map(({ character, result }) => (
             <CharacterRows
               key={`${character.serverId}/${character.characterId}`}
@@ -90,16 +100,6 @@ export function EpicSoulTable({
             />
           ))}
         </tbody>
-        <tfoot>
-          <tr>
-            <td className={EDGE_CELL} />
-            <th scope="row">합계</th>
-            <td className={WIDE_ONLY} />
-            <td className={WIDE_ONLY} />
-            <td className={WIDE_ONLY} />
-            <td className="table-num font-bold">{formatCount(total)}</td>
-          </tr>
-        </tfoot>
       </table>
     </div>
   )
