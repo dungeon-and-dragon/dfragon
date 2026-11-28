@@ -78,6 +78,13 @@ export function isLabItemVariantGrouped(category: string): boolean {
   return VARIANT_GROUPED_CATEGORIES.includes(category)
 }
 
+const PLATINUM_TAG_PATTERN = / 플래티넘/
+
+// 기본 이름이 떼어 내는 플래티넘 꼬리표가 있는 칭호, 크리쳐다.
+export function isLabItemPlatinum(category: string, itemName: string): boolean {
+  return isLabItemVariantGrouped(category) && PLATINUM_TAG_PATTERN.test(itemName)
+}
+
 // 묶는 종류는 예전에 변형 이름으로 저장한 아이템도 기본 이름과 같은 아이템으로 본다.
 export function isSameLabItem(category: string, savedName: string, itemName: string): boolean {
   if (savedName === itemName) {

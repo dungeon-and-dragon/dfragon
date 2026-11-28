@@ -12,6 +12,7 @@ import type {
 } from '@dfragon/database'
 import {
   isEnchantCategory,
+  isLabItemPlatinum,
   LAB_ITEM_CATEGORIES,
   LAB_ITEM_TIERS,
   type LabItemCategory,
@@ -253,7 +254,7 @@ function toPrice(
   candidate: LabItemPriceCandidate | null
 ): LabItemPrice {
   const look = lookOf(itemName, itemRarity, detail, candidate)
-  const performanceKey = performanceKeyOf(category, detail, candidate, fame, cost)
+  const performanceKey = performanceKeyOf(category, itemName, detail, candidate, fame, cost)
 
   if (cost !== null) {
     const currencyCost = toCurrencyCost(cost)
@@ -403,9 +404,11 @@ function sorted(values: readonly string[]): string[] {
   return [...values].sort()
 }
 
-// 같은 묶음 안에서 옵션 줄, 버프 줄, 명성, 구매 방법이 모두 같은 아이템끼리 같은 키다.
+// 같은 묶음 안에서 옵션 줄, 버프 줄, 명성, 구매 방법, 칭호와 크리쳐의 플래티넘 여부가 모두 같은 아이템끼리 같은 키다.
+// 크리쳐의 플래티넘 판은 레벨 판 두 줄을 빼면 옵션이 일반 판과 같아 이름의 플래티넘 꼬리표로 가른다.
 function performanceKeyOf(
   category: string,
+  itemName: string,
   detail: LabItemPriceDetail | null,
   candidate: LabItemPriceCandidate | null,
   fame: number | null,
@@ -422,12 +425,14 @@ function performanceKeyOf(
   const sortedSlots = sorted(slots)
   const sortedOptions = sorted(comparedOptionsOf(category, options))
   const sortedBuffLines = sorted(buffLines)
+  const platinum = isLabItemPlatinum(category, itemName)
   const key = JSON.stringify({
     slots: sortedSlots,
     options: sortedOptions,
     buffLines: sortedBuffLines,
     fame,
-    currencyId
+    currencyId,
+    platinum
   })
 
   return digestOptionKey(key)
