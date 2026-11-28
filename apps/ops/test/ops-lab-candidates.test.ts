@@ -100,6 +100,10 @@ async function startOpsApp(t: test.TestContext, labCandidates: LabCandidateRepos
     readQueueCounts: unused,
     collection: { readSummary: unused, requeue: unused },
     batchNeopleKeys: { readKeys: unused, add: unused, setEnabled: unused, delete: unused },
+    contentClearSettings: {
+      readSettings: () => assert.fail('컨텐츠 설정을 읽으면 안 된다'),
+      change: () => assert.fail('컨텐츠 설정을 바꾸면 안 된다')
+    },
     labItems: { readGroups: unused, replaceGroup: unused },
     labCurrencies: { readCurrencies: unused, readIcon: unused, add: unused, update: unused },
     labItemDetails: { readDetails: unused, readIcon: unused, save: unused },

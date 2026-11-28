@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import type { ContentClearSetting } from '@dfragon/database'
+import { CLEAR_CONTENT_CATALOG } from '@dfragon/lib/content-clear-catalog'
 import type { TimelineRow } from '../src/domain/character-timeline/rows.js'
 import {
   CLEAR_CONTENTS,
@@ -210,6 +211,13 @@ test('분모 기준 명성은 컨텐츠마다 그 입장 명성이고, 입장 �
 test('점수 통계는 각인된 악몽 1주차부터 내고 그 전 주는 내지 않는다', () => {
   assert.equal(hasScoreStats(at('2026-10-29T06:00:00')), false)
   assert.equal(hasScoreStats(at('2026-11-05T06:00:00')), true)
+})
+
+test('운영 화면의 클리어 컨텐츠 목록은 레이드, 챌린지, 레기온 목록과 id, 종류, 이름이 같다', () => {
+  assert.deepEqual(
+    CLEAR_CONTENT_CATALOG,
+    [...CLEAR_CONTENTS, ...CLEAR_LEGIONS].map(({ id, kind, name }) => ({ id, kind, name }))
+  )
 })
 
 test('컨텐츠 설정은 그 스위치를 끈 컨텐츠만 빼고, 설정 행이 없는 컨텐츠는 켜진 것으로 본다', () => {
