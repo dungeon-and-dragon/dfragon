@@ -98,16 +98,17 @@ export function RankingsScreen({
 
   const rows: readonly FilterRow[] = [
     {
+      label: '장비',
+      content: (
+        <div className="flex flex-wrap gap-2">
+          <WeaponSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
+          <UniqueItemSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
+        </div>
+      )
+    },
+    {
       label: '세트',
       content: <RankingSetFilter choices={choices} filter={filter} onChange={changeSets} />
-    },
-    {
-      label: '무기',
-      content: <WeaponSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
-    },
-    {
-      label: '유일 장비',
-      content: <UniqueItemSelect choices={itemChoices} itemIds={itemIds} onChange={changeItems} />
     },
     ...(evolutionRow !== null ? [evolutionRow] : []),
     {
