@@ -17,6 +17,12 @@ export type SetChoices = Readonly<{
   options: readonly SetChoice[]
 }>
 
+// 랭킹 세트 검색에서 고를 일이 없는 장비 세트다. 오디세이 고급 세트, 차원 속의 이야기 세트.
+const HIDDEN_EQUIPMENT_SET_IDS: ReadonlySet<string> = new Set([
+  '13f6edd6dc195fdb8bc76b8349078ef6',
+  'b9403caf99c157682d1d468d899e9aaa'
+])
+
 function byCountDesc<Item extends { count: number }>(a: Item, b: Item): number {
   return b.count - a.count
 }
@@ -110,7 +116,7 @@ export function setChoicesOf(
   const equipment = (stats?.equipmentSets ?? [])
     .toSorted(byCountDesc)
     .flatMap(({ setId, name }) => {
-      if (setId === null) {
+      if (setId === null || HIDDEN_EQUIPMENT_SET_IDS.has(setId)) {
         return []
       }
 

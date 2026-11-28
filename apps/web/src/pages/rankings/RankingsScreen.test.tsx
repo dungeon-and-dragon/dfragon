@@ -569,8 +569,10 @@ const setStats: SetStats = {
   sampleSize: 6,
   equipmentSets: [
     { setId: FAIRY, name: '소울 페어리 세트', count: 1 },
-    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 3 },
-    { setId: null, name: null, count: 2 }
+    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 2 },
+    { setId: 'b9403caf99c157682d1d468d899e9aaa', name: '차원 속의 이야기 세트', count: 1 },
+    { setId: '13f6edd6dc195fdb8bc76b8349078ef6', name: '오디세이 고급 세트', count: 1 },
+    { setId: null, name: null, count: 1 }
   ],
   oathSets: [
     {
@@ -639,7 +641,7 @@ function optionTexts(label: string): string[] {
   )
 }
 
-it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
+it('세트 셀렉트는 전체 직업 세트 통계에서 오디세이 고급, 차원 속의 이야기 세트를 빼고 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
   await render(
     async () => rankingOf(1),
     { jobId: RANKING_JOBS[0].jobId, oathSetId: DRAGON },
@@ -1300,8 +1302,8 @@ it('점수 기준이 든 필터로 들어오면 셀렉트와 입력에 그 값�
   expect(queries()).toEqual([{ sort: 'equipmentScore', scoreFrom: '1300000', scoreTo: '1400000' }])
   expect(setSelect('검색 기준').textContent).toContain('장비 점수')
   expect(rangeInputs().map((input) => [input.getAttribute('aria-label'), input.value])).toEqual([
-    ['최저 장비 점수', '1300000'],
-    ['최대 장비 점수', '1400000']
+    ['최저 장비 점수', '1,300,000'],
+    ['최대 장비 점수', '1,400,000']
   ])
   expect(
     [...container.querySelectorAll('thead th[aria-sort="descending"]')].map(
@@ -1340,6 +1342,47 @@ it('최저가 최대보다 크면 두 입력을 invalid로 두고 적용을 막�
     true,
     true
   ])
+})
+
+it('범위 입력은 숫자만 남겨 세 자리마다 쉼표를 넣어 보이고, 적용하면 쉼표 없는 수로 넘긴다', async () => {
+  const onFilterChange = vi.fn()
+  await render(async () => rankingOf(1), {}, onFilterChange)
+
+  const [from] = rangeInputs()
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set?.call(
+      from,
+      '0a1,2b34'
+    )
+    from!.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+
+  expect(rangeInputs()[0]!.value).toBe('1,234')
+  await act(async () => chip('적용').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({
+    sort: undefined,
+    fameFrom: 1234,
+    fameTo: undefined,
+    scoreFrom: undefined,
+    scoreTo: undefined
+  })
+})
+
+it('필터 줄은 직업, 전직, 무기와 유일 장비를 한 줄에 둔 장비, 세트, 검색 기준 순이다', async () => {
+  await render(async () => rankingOf(1), {})
+
+  const headingTexts = [...container.querySelectorAll('h2')].map((heading) => heading.textContent)
+  expect(headingTexts.slice(0, 5)).toEqual(['직업', '전직', '장비', '세트', '검색 기준'])
+
+  const equipmentRow = [...container.querySelectorAll('[role="group"]')].find(
+    (group) => group.querySelector('h2')?.textContent === '장비'
+  )
+
+  expect(
+    [...(equipmentRow?.querySelectorAll('[role="combobox"]') ?? [])].map((select) =>
+      select.getAttribute('aria-label')
+    )
+  ).toEqual(['무기', '유일 장비'])
 })
 
 it('점수 기준에서 세트를 고르면 기준과 점수 범위를 그대로 두고 세트만 바꿔 넘긴다', async () => {
