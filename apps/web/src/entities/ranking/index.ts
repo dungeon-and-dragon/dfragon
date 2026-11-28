@@ -10,7 +10,7 @@ export {
   oathOptionShortName,
   oathSetShortName
 } from './lib/set-names'
-export { fameBars, isAwakenedJob, jobFameChart, serverBars, shareText } from './lib/stats-bars'
+export { fameBars, isAwakenedJob, jobFameChart, shareText } from './lib/stats-bars'
 export type { FameBar, JobFameChart } from './lib/stats-bars'
 export { clearContentStatsSchema, clearOverviewSchema, clearStatsSchema } from './model/clear-stats'
 export type {

@@ -1,9 +1,8 @@
-import { CHARACTER_SERVER_NAMES, displayJobName } from '#entities/character/@x/ranking'
+import { displayJobName } from '#entities/character/@x/ranking'
 import type { CharacterStats } from '#entities/ranking/model/ranking-stats'
 import type { BarSeries } from '#shared/ui/chart/BarLineChart'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { ChartX } from '#shared/ui/chart/plot-layout'
-import type { Bar } from '#shared/ui/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
 
@@ -19,15 +18,6 @@ export function shareText(count: number, total: number): string {
   }
 
   return percent.format(count / total)
-}
-
-export function serverBars({ servers, total }: CharacterStats): Bar[] {
-  return servers.map(({ serverId, count }) => ({
-    key: serverId,
-    name: CHARACTER_SERVER_NAMES[serverId],
-    value: count,
-    share: shareText(count, total)
-  }))
 }
 
 export function isAwakenedJob({ jobGrowName }: Readonly<{ jobGrowName: string | null }>): boolean {
