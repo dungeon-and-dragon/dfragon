@@ -28,6 +28,7 @@ import { Route as LabEpicSoulsRouteImport } from './routes/lab.epic-souls'
 import { Route as LabMultisearchRouteImport } from './routes/lab.multisearch'
 import { Route as StatsIndexRouteImport } from './routes/stats.index'
 import { Route as StatsCombosRouteImport } from './routes/stats.combos'
+import { Route as StatsJobsRouteImport } from './routes/stats.jobs'
 import { Route as StatsSetsRouteImport } from './routes/stats.sets'
 import { Route as StatsSkillsRouteImport } from './routes/stats.skills'
 import { Route as StatsWeaponsRouteImport } from './routes/stats.weapons'
@@ -132,6 +133,11 @@ const StatsCombosRoute = StatsCombosRouteImport.update({
   path: '/stats/combos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatsJobsRoute = StatsJobsRouteImport.update({
+  id: '/stats/jobs',
+  path: '/stats/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatsSetsRoute = StatsSetsRouteImport.update({
   id: '/stats/sets',
   path: '/stats/sets',
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
+  '/stats/jobs': typeof StatsJobsRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
+  '/stats/jobs': typeof StatsJobsRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/lab/epic-souls': typeof LabEpicSoulsRoute
   '/lab/multisearch': typeof LabMultisearchRoute
   '/stats/combos': typeof StatsCombosRoute
+  '/stats/jobs': typeof StatsJobsRoute
   '/stats/sets': typeof StatsSetsRoute
   '/stats/skills': typeof StatsSkillsRoute
   '/stats/weapons': typeof StatsWeaponsRoute
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
+    | '/stats/jobs'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
@@ -312,6 +322,7 @@ export interface FileRouteTypes {
     | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
+    | '/stats/jobs'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/lab/epic-souls'
     | '/lab/multisearch'
     | '/stats/combos'
+    | '/stats/jobs'
     | '/stats/sets'
     | '/stats/skills'
     | '/stats/weapons'
@@ -371,6 +383,7 @@ export interface RootRouteChildren {
   LabEpicSoulsRoute: typeof LabEpicSoulsRoute
   LabMultisearchRoute: typeof LabMultisearchRoute
   StatsCombosRoute: typeof StatsCombosRoute
+  StatsJobsRoute: typeof StatsJobsRoute
   StatsSetsRoute: typeof StatsSetsRoute
   StatsSkillsRoute: typeof StatsSkillsRoute
   StatsWeaponsRoute: typeof StatsWeaponsRoute
@@ -520,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StatsCombosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/stats/jobs': {
+      id: '/stats/jobs'
+      path: '/stats/jobs'
+      fullPath: '/stats/jobs'
+      preLoaderRoute: typeof StatsJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stats/sets': {
       id: '/stats/sets'
       path: '/stats/sets'
@@ -595,6 +615,7 @@ const rootRouteChildren: RootRouteChildren = {
   LabEpicSoulsRoute: LabEpicSoulsRoute,
   LabMultisearchRoute: LabMultisearchRoute,
   StatsCombosRoute: StatsCombosRoute,
+  StatsJobsRoute: StatsJobsRoute,
   StatsSetsRoute: StatsSetsRoute,
   StatsSkillsRoute: StatsSkillsRoute,
   StatsWeaponsRoute: StatsWeaponsRoute,
