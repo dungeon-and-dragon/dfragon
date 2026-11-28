@@ -1,6 +1,4 @@
 export { characterStatsQuery } from './api/useCharacterStats'
 export { JobStatsPage } from './JobStatsPage'
-export { SetStatsPage } from './SetStatsPage'
-export { SetStatsScreen } from './SetStatsScreen'
 export { StatsPage } from './StatsPage'
 export { jobStatsFilterOf, skillStatsGrowOf } from './skill-stats-board'
