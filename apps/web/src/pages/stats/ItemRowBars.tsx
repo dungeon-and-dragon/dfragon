@@ -3,9 +3,6 @@ import { ItemIcon } from '#entities/character'
 import { ItemTooltip } from '#widgets/item-tooltip'
 import type { ItemBar } from './item-stats-bars'
 
-// 무기 이름은 "제2형 - 수식, 방어의 운검"처럼 길어 반 폭 상자에서 세트 이름 칸보다 넓게 둔다.
-const ITEM_NAME_WIDTH = 220
-
 function ItemLabel({ itemId, name }: { itemId: string; name: string }): React.JSX.Element {
   return (
     <ItemTooltip itemId={itemId}>
@@ -44,7 +41,6 @@ export function ItemRowBars({
       tone={tone}
       max={max}
       formatValue={formatValue}
-      nameWidth={ITEM_NAME_WIDTH}
       barFromMd={barFromMd}
     />
   )
