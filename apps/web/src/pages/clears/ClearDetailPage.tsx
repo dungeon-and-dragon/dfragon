@@ -19,7 +19,7 @@ export function ClearDetailPage(): React.JSX.Element {
 
   async function openContent(nextContent: string): Promise<void> {
     if (nextContent === content) {
-      await navigate({ to: '/clears', search: { week }, resetScroll: false })
+      await navigate({ to: '/clears', search: {}, resetScroll: false })
 
       return
     }

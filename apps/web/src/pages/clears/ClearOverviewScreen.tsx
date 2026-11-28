@@ -15,7 +15,6 @@ import {
   contentCards,
   defaultBaseContentId,
   distributionRows,
-  findOverviewWeek,
   hasClearTimes,
   hasRateValues,
   jobRanks,
@@ -24,12 +23,12 @@ import {
   RATE_PERIODS,
   type RatePeriod,
   splitAdventureColumns,
+  weekRangeText,
   weekSummaryOf
 } from './clear-overview'
 import { BaseContentSelect } from './components/BaseContentSelect'
 import { ClearContentCards } from './components/ClearContentCards'
 import { ClearScreenSkeleton, ClearStatsSkeleton } from './components/ClearSkeleton'
-import { ClearWeekWheel } from './components/ClearWeekWheel'
 import { CLEAR_TITLE, ClearTimePanel, ClearTitle, Panel } from './components/ClearPanel'
 import { clearClasses } from './components/clear-classes'
 import { useChoice } from './hooks/useChoice'
@@ -63,12 +62,8 @@ function formatRateValue(value: number): string {
 }
 
 export function ClearOverviewScreen({
-  week,
-  onWeekSelect,
   onContentOpen
 }: {
-  week: string | undefined
-  onWeekSelect: (weekStart: string) => void
   onContentOpen: (contentKey: string, weekStart: string) => void
 }): React.JSX.Element {
   const result = useClearStats()
@@ -87,7 +82,7 @@ export function ClearOverviewScreen({
     case 'success': {
       const contents = clearContentsOf(result.value)
       const weeks = overviewWeeks(contents)
-      const selected = findOverviewWeek(weeks, week)
+      const selected = weeks.at(-1)
       if (selected === undefined) {
         return (
           <div className={clearClasses.screen}>
@@ -102,7 +97,6 @@ export function ClearOverviewScreen({
           contents={contents}
           weeks={weeks}
           selected={selected}
-          onWeekSelect={onWeekSelect}
           onContentOpen={onContentOpen}
         />
       )
@@ -114,13 +108,11 @@ function Overview({
   contents,
   weeks,
   selected,
-  onWeekSelect,
   onContentOpen
 }: {
   contents: readonly ClearContent[]
   weeks: readonly OverviewWeek[]
   selected: OverviewWeek
-  onWeekSelect: (weekStart: string) => void
   onContentOpen: (contentKey: string, weekStart: string) => void
 }): React.JSX.Element {
   const { weekStart } = selected
@@ -133,7 +125,7 @@ function Overview({
   return (
     <div className={clearClasses.screen}>
       <ClearTitle summary={weekSummaryOf(contents, weekStart)}>
-        <ClearWeekWheel weeks={weeks} selected={selected} onSelect={onWeekSelect} />
+        <p className="text-base font-semibold tabular-nums text-fg">{weekRangeText(weekStart)}</p>
       </ClearTitle>
       <ClearContentCards cards={contentCards(contents, weekStart)} onOpen={openContent} />
       {hasRateValues(contents) && (
