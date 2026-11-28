@@ -67,6 +67,10 @@
   --color-warning-weak: light-dark(#f3efe5, #2d2209);
   /* 대화상자 뒤 막. 지금 쓰는 곳은 없다. */
   --color-overlay: light-dark(#0a0a0b66, #08080ab8);
+  /* 그림 칩에서 그림 위 글자 뒤에 까는 어두운 막. 그림이 늘 어두워 두 모드가 같다. */
+  --color-image-scrim: light-dark(#0a0a0bd9, #0a0a0bd9);
+  /* 그림 칩에서 그림 위 글자 */
+  --color-on-image: light-dark(var(--gray-0), var(--gray-0));
   /* 주 버튼, 선택 표시, focus 테두리 */
   --color-signal: light-dark(var(--gray-950), var(--gray-50));
   /* 주 버튼 hover */

@@ -1,8 +1,9 @@
-import { Button, type ChipGroupItem } from '@dfragon/ui'
+import { Button, ImageChipGroup, type ImageChipGroupItem } from '@dfragon/ui'
 import { type ReactNode, useId } from 'react'
-import { ChoiceField } from '#shared/ui/ChoiceField'
+import { ChoiceSelect } from '#shared/ui/ChoiceField'
 import { RANKING_JOBS, type RankingGrow, type RankingJob } from '#entities/character'
 import type { FameRankingFilter } from '#entities/ranking'
+import { growSprite, jobSprite, roleBadgeSprite } from '#widgets/ranking-filter/lib/job-sprites'
 import { growFilter, growLabel } from '#widgets/ranking-filter/lib/ranking-jobs'
 
 // 600px 미만에서는 칩, 선택 상자, 버튼, 입력칸을 24px 높이와 12px 글자로 줄인다.
@@ -14,11 +15,12 @@ const FILTER_LABEL = 'label m-0 flex h-8 w-16 shrink-0 items-center max-sm:h-aut
 // 칩 묶음의 값은 문자열이라 직업은 jobId, 전직은 jobGrowId와 역할을 이은 키로 고른다.
 const ALL = 'all'
 
-const JOB_CHOICES: readonly ChipGroupItem<string>[] = RANKING_JOBS.map(({ jobId, name }) => ({
-  value: jobId,
-  label: name
-}))
-const JOB_ITEMS: readonly ChipGroupItem<string>[] = [
+const JOB_CHOICES: readonly ImageChipGroupItem<string>[] = RANKING_JOBS.map((job) => {
+  const image = jobSprite(job)
+
+  return { value: job.jobId, label: job.name, image }
+})
+const JOB_ITEMS: readonly ImageChipGroupItem<string>[] = [
   { value: ALL, label: '직업 전체' },
   ...JOB_CHOICES
 ]
@@ -36,8 +38,19 @@ function onlyGrowOf(job: RankingJob | undefined): RankingGrow | undefined {
   return job.grows[0]
 }
 
-function growItems(job: RankingJob | undefined, growRequired: boolean): ChipGroupItem<string>[] {
-  const grows = job?.grows.map((grow) => ({ value: growKey(grow), label: growLabel(grow) })) ?? []
+function growItems(
+  job: RankingJob | undefined,
+  growRequired: boolean
+): ImageChipGroupItem<string>[] {
+  const grows =
+    job?.grows.map((grow) => {
+      const value = growKey(grow)
+      const label = growLabel(grow)
+      const image = growSprite(job, grow)
+      const badge = grow.role !== undefined ? roleBadgeSprite(grow.role) : undefined
+
+      return { value, label, image, badge }
+    }) ?? []
 
   if (growRequired || onlyGrowOf(job) !== undefined) {
     return grows
@@ -151,7 +164,7 @@ export function RankingFilterBox({
         <h2 id={jobLabelId} className={FILTER_LABEL}>
           직업
         </h2>
-        <ChoiceField
+        <ImageChoiceField
           label="직업"
           labelId={jobLabelId}
           items={growRequired ? JOB_CHOICES : JOB_ITEMS}
@@ -159,18 +172,20 @@ export function RankingFilterBox({
           onValueChange={selectJob}
         />
       </div>
-      <div className={FILTER_ROW}>
-        <h2 id={growLabelId} className={FILTER_LABEL}>
-          전직
-        </h2>
-        <ChoiceField
-          label="전직"
-          labelId={growLabelId}
-          items={growItems(job, growRequired)}
-          value={growValue}
-          onValueChange={selectGrow}
-        />
-      </div>
+      {job !== undefined && (
+        <div className={FILTER_ROW}>
+          <h2 id={growLabelId} className={FILTER_LABEL}>
+            전직
+          </h2>
+          <ImageChoiceField
+            label="전직"
+            labelId={growLabelId}
+            items={growItems(job, growRequired)}
+            value={growValue}
+            onValueChange={selectGrow}
+          />
+        </div>
+      )}
       {rows.map((row) => (
         <LabeledRow key={row.label} row={row} />
       ))}
@@ -182,6 +197,42 @@ export function RankingFilterBox({
         </div>
       )}
     </div>
+  )
+}
+
+// 그림 칩에는 전체 칩을 두지 않고, 고른 칩을 다시 눌러 풀면 전체를 고른 것으로 본다. 선택 상자는 전체 항목을 그대로 둔다.
+function ImageChoiceField({
+  label,
+  labelId,
+  items,
+  value,
+  onValueChange
+}: {
+  label: string
+  labelId: string
+  items: readonly ImageChipGroupItem<string>[]
+  value: string
+  onValueChange: (value: string) => void
+}): React.JSX.Element {
+  const hasAll = items.some((item) => item.value === ALL)
+
+  function changeChip(next: string | null): void {
+    onValueChange(next ?? ALL)
+  }
+
+  return (
+    <>
+      <div className="max-md:hidden">
+        <ImageChipGroup
+          aria-labelledby={labelId}
+          items={items.filter((item) => item.value !== ALL)}
+          value={value === ALL ? null : value}
+          onValueChange={changeChip}
+          deselectable={hasAll}
+        />
+      </div>
+      <ChoiceSelect label={label} items={items} value={value} onValueChange={onValueChange} />
+    </>
   )
 }
 

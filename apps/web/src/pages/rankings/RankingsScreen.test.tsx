@@ -318,20 +318,20 @@ it('빈 결과는 목록 상자에 빈 문구만 둔다', async () => {
   expect(container.querySelector('table')).toBeNull()
 })
 
-it('고른 직업으로 목록 이름을 바꾸고, 앞의 眞을 뺀 전직 이름 칩으로 필터 변경을 알린다', async () => {
+it('고른 직업으로 목록 이름을 바꾸고, 앞의 眞을 뺀 전직 이름 칩으로 필터 변경을 알리며, 고른 직업 칩을 다시 누르면 직업 전체로 돌린다', async () => {
   const [job] = RANKING_JOBS
   const onFilterChange = vi.fn()
   await render(async () => rankingOf(1), { jobId: job.jobId }, onFilterChange)
 
   expect(container.querySelector(`section[aria-label="${job.name} 검색 결과"]`)).not.toBeNull()
   expect(chip(job.name).hasAttribute('data-pressed')).toBe(true)
-  expect(chip('직업 전체').hasAttribute('data-pressed')).toBe(false)
+  expect(chip('직업 전체')).toBeUndefined()
   await act(async () => chip('웨펀마스터').click())
   expect(onFilterChange).toHaveBeenLastCalledWith({
     jobId: job.jobId,
     jobGrowId: job.grows[0].jobGrowId
   })
-  await act(async () => chip('직업 전체').click())
+  await act(async () => chip(job.name).click())
   expect(onFilterChange).toHaveBeenLastCalledWith({})
 })
 
@@ -388,7 +388,6 @@ it('프리스트(남)는 크루세이더 칩 대신 딜러, 버퍼 칩을 두고
   await render(async () => rankingOf(1), { jobId: MALE_PRIEST }, onFilterChange)
 
   expect(chipLabels()).toEqual([
-    '전직 전체',
     '크루세이더(딜러)',
     '크루세이더(버퍼)',
     '인파이터',
@@ -408,12 +407,13 @@ it('프리스트(남)는 크루세이더 칩 대신 딜러, 버퍼 칩을 두고
   })
 })
 
-it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌린 채 목록 이름에 전직과 역할을 쓴다', async () => {
-  await render(async () => rankingOf(1), {
-    jobId: MALE_PRIEST,
-    jobGrowId: CRUSADER,
-    role: 'dealer'
-  })
+it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌린 채 목록 이름에 전직과 역할을 쓰며, 다시 누르면 전직 전체로 돌린다', async () => {
+  const onFilterChange = vi.fn()
+  await render(
+    async () => rankingOf(1),
+    { jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' },
+    onFilterChange
+  )
 
   expect(queries()).toEqual([{ jobId: MALE_PRIEST, jobGrowId: CRUSADER, role: 'dealer' }])
   expect(
@@ -421,7 +421,8 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
   ).not.toBeNull()
   expect(chip('크루세이더(딜러)').hasAttribute('data-pressed')).toBe(true)
   expect(chip('크루세이더(버퍼)').hasAttribute('data-pressed')).toBe(false)
-  expect(chip('전직 전체').hasAttribute('data-pressed')).toBe(false)
+  await act(async () => chip('크루세이더(딜러)').click())
+  expect(onFilterChange).toHaveBeenLastCalledWith({ jobId: MALE_PRIEST })
 })
 
 function rankingPage(from: number, count: number, nextCursor: string | null): FameRanking {
@@ -684,7 +685,7 @@ it('세트를 고르면 직업 필터와 함께 넘기고, 서약 세트를 바�
   })
   await pickOption('서약 세트', '서약 세트 전체')
   expect(onFilterChange).toHaveBeenLastCalledWith({ jobId })
-  await act(async () => chip('직업 전체').click())
+  await act(async () => chip(RANKING_JOBS[0].name).click())
   expect(onFilterChange).toHaveBeenLastCalledWith({
     oathSetId: DRAGON,
     oathSetOption: '용투 : 용제 강림'
@@ -1368,11 +1369,15 @@ it('범위 입력은 숫자만 남겨 세 자리마다 쉼표를 넣어 보이�
   })
 })
 
-it('필터 줄은 직업, 전직, 무기와 유일 장비를 한 줄에 둔 장비, 세트, 검색 기준 순이다', async () => {
+it('필터 줄은 직업, 고른 직업의 전직, 무기와 유일 장비를 한 줄에 둔 장비, 세트, 검색 기준 순이고, 직업을 고르지 않으면 전직 줄을 두지 않는다', async () => {
   await render(async () => rankingOf(1), {})
 
-  const headingTexts = [...container.querySelectorAll('h2')].map((heading) => heading.textContent)
-  expect(headingTexts.slice(0, 5)).toEqual(['직업', '전직', '장비', '세트', '검색 기준'])
+  const headingTexts = () =>
+    [...container.querySelectorAll('h2')].map((heading) => heading.textContent)
+  expect(headingTexts().slice(0, 4)).toEqual(['직업', '장비', '세트', '검색 기준'])
+
+  await render(async () => rankingOf(1), { jobId: RANKING_JOBS[0].jobId })
+  expect(headingTexts().slice(0, 5)).toEqual(['직업', '전직', '장비', '세트', '검색 기준'])
 
   const equipmentRow = [...container.querySelectorAll('[role="group"]')].find(
     (group) => group.querySelector('h2')?.textContent === '장비'
