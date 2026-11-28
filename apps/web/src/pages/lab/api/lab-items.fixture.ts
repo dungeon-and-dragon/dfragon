@@ -260,13 +260,7 @@ export const labItemsFixture = {
             description: null,
             unitPrice: 95_000_000,
             checkedAt: CHECKED_AT,
-            cost: null,
-            platinum: {
-              itemId: null,
-              itemRarity: '레어',
-              unitPrice: 310_000_000,
-              checkedAt: CHECKED_AT
-            }
+            cost: null
           },
           {
             itemName: '진정한 각성을 이룬 자',

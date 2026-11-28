@@ -37,13 +37,6 @@ const tooltipSchema = z.object({
   card: itemCardSchema.nullable()
 })
 
-const platinumPriceSchema = z.object({
-  itemId: z.string().nullable(),
-  itemRarity: z.string().nullable(),
-  unitPrice: z.number().int().positive().nullable(),
-  checkedAt: z.iso.datetime().nullable()
-})
-
 const labItemsSchema = z.object({
   groups: z.array(
     z.object({
@@ -61,8 +54,6 @@ const labItemsSchema = z.object({
             unitPrice: z.number().int().positive().nullable(),
             checkedAt: z.iso.datetime().nullable(),
             cost: currencyCostSchema.nullable(),
-            // 이 필드를 내기 전의 API 응답은 플래티넘 변형이 없는 것으로 읽는다.
-            platinum: platinumPriceSchema.nullable().default(null),
             tooltip: tooltipSchema.nullable().default(null),
             // 이 필드를 내기 전의 API 응답은 명성이 없는 것으로 읽는다.
             fame: z.number().int().positive().nullable().default(null),
