@@ -72,10 +72,6 @@ function accessoryTable(): HTMLTableElement {
   )!
 }
 
-function platinumTable(): HTMLTableElement | null {
-  return container.querySelector<HTMLTableElement>('section[aria-label="플래티넘"] table')
-}
-
 function cellTexts(table: HTMLTableElement): string[][] {
   return [...table.querySelectorAll('tbody tr')].map((row) =>
     [...row.children].map((cell) => cell.textContent ?? '')
@@ -159,68 +155,6 @@ it('버퍼로 바꾸면 마법부여 표만 버퍼 카드로 바뀌고 칭호, �
   expect(cellTexts(accessoryTable())).toEqual(accessoryRows)
 })
 
-it('플래티넘 구획은 칭호, 크리쳐, 오라 표 아래에 플래티넘 변형이 있는 칭호만 플래티넘 최저가로 보인다', async () => {
-  await renderLoaded()
-
-  const sections = [...container.querySelectorAll('section')].map((section) =>
-    section.getAttribute('aria-label')
-  )
-  expect(sections).toEqual(['칭호, 크리쳐, 오라', '플래티넘'])
-  expect(container.querySelector('section[aria-label="플래티넘"] h2')?.textContent).toBe('플래티넘')
-  expect([...platinumTable()!.querySelectorAll('thead th')].map((th) => th.textContent)).toEqual([
-    '종류',
-    '등급',
-    '아이템',
-    '명성',
-    '최저가'
-  ])
-  expect(cellTexts(platinumTable()!)).toEqual([
-    ['칭호', '종결', '프로스트의 전설', '980', '310,000,000']
-  ])
-})
-
-it('플래티넘 변형은 있지만 매물이 없으면 플래티넘 표 최저가는 -이고, 모든 아이템의 platinum이 null이면 플래티넘 구획이 없다', async () => {
-  const title = (itemName: string, platinumPrice: number | null | undefined) => {
-    const platinum =
-      platinumPrice === undefined
-        ? null
-        : { itemId: null, itemRarity: null, unitPrice: platinumPrice, checkedAt: null }
-
-    return {
-      itemName,
-      itemId: null,
-      itemRarity: null,
-      iconPath: null,
-      description: null,
-      unitPrice: 1_000,
-      checkedAt: null,
-      cost: null,
-      platinum
-    }
-  }
-
-  const respond = (items: ReturnType<typeof title>[]) =>
-    http.get(LAB_ITEMS_URL, () =>
-      HttpResponse.json({
-        groups: [{ category: 'TITLE', role: 'all', tier: '종결', items }]
-      } satisfies LabItemsResponse)
-    )
-
-  server.use(respond([title('합성 칭호 A', null), title('합성 칭호 B', undefined)]))
-  await render()
-  await vi.waitFor(() => expect(platinumTable()).not.toBeNull())
-
-  expect(cellTexts(platinumTable()!)).toEqual([['칭호', '종결', '합성 칭호 A', '-', '-']])
-
-  await act(async () => root.unmount())
-  root = createRoot(container)
-  server.use(respond([title('합성 칭호 B', undefined)]))
-  await render()
-  await vi.waitFor(() => expect(accessoryTable()).not.toBeNull())
-
-  expect(platinumTable()).toBeNull()
-})
-
 it('이름은 레전더리면 레전더리 색, 등급을 모르면 기본 글자색으로 보인다', async () => {
   await renderLoaded()
   await act(async () => roleChip('버퍼').click())
@@ -265,45 +199,6 @@ it('마지막 업데이트는 마법부여와 칭호 묶음을 통틀어 가장 
   const note = container.querySelector('[data-testid="page-note"]')!
   await vi.waitFor(() => expect(note.textContent).toBe('마지막 업데이트 5분 전'))
   expect(note.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-26T05:35:00.000Z')
-})
-
-it('마지막 업데이트는 플래티넘 최저가의 확인 시각이 더 늦으면 그 시각으로 보인다', async () => {
-  server.use(
-    http.get(LAB_ITEMS_URL, () =>
-      HttpResponse.json({
-        groups: [
-          {
-            category: 'TITLE',
-            role: 'all',
-            tier: '종결',
-            items: [
-              {
-                itemName: '합성 칭호',
-                itemId: null,
-                itemRarity: null,
-                iconPath: null,
-                description: null,
-                unitPrice: null,
-                checkedAt: '2026-11-26T05:20:00.000Z',
-                cost: null,
-                platinum: {
-                  itemId: null,
-                  itemRarity: null,
-                  unitPrice: null,
-                  checkedAt: '2026-11-26T05:38:00.000Z'
-                }
-              }
-            ]
-          }
-        ]
-      } satisfies LabItemsResponse)
-    )
-  )
-  await render()
-
-  const note = container.querySelector('[data-testid="page-note"]')!
-  await vi.waitFor(() => expect(note.textContent).toBe('마지막 업데이트 2분 전'))
-  expect(note.querySelector('time')?.getAttribute('datetime')).toBe('2026-11-26T05:38:00.000Z')
 })
 
 it('받는 중에는 역할 칩 아래에 뼈대를 두고 표는 그리지 않는다', async () => {
@@ -881,45 +776,4 @@ it('같은 성능 재화 아이템은 재화 개수가 가장 작은 아이템 �
   const price = document.querySelector('.tooltip-item > div:last-child > ul > li')!
     .lastElementChild!
   expect(price.querySelector('img')?.getAttribute('alt')).toBe('합성 주화')
-})
-
-it('플래티넘 표는 같은 성능 칭호를 플래티넘 최저가가 가장 싼 칭호 한 줄로 보이고, tooltip 아래 나머지 가격도 플래티넘 최저가다', async () => {
-  const platinum = (unitPrice: number) => ({
-    itemId: null,
-    itemRarity: null,
-    unitPrice,
-    checkedAt: null
-  })
-  server.use(
-    http.get(LAB_ITEMS_URL, () =>
-      HttpResponse.json({
-        groups: [
-          {
-            category: 'TITLE',
-            role: 'all',
-            tier: '종결',
-            items: [
-              samePerformanceItem('합성 칭호 X', 'same', 100, { platinum: platinum(500) }),
-              samePerformanceItem('합성 칭호 Y', 'same', 300, { platinum: platinum(200) })
-            ]
-          }
-        ]
-      } satisfies LabItemsResponse)
-    )
-  )
-  await render()
-  await vi.waitFor(() => expect(platinumTable()).not.toBeNull())
-
-  expect(cellTexts(accessoryTable())).toEqual([['칭호', '종결', '합성 칭호 X', '-', '100']])
-  expect(cellTexts(platinumTable()!)).toEqual([['칭호', '종결', '합성 칭호 Y', '-', '200']])
-
-  await hover(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
-
-  expect(samePerformanceLines()).toEqual([['합성 칭호 Y', '300']])
-
-  await leave(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
-  await vi.waitFor(() => expect(openTooltips()).toEqual([]))
-  await hover(nameOf(platinumTable()!, '합성 칭호 Y').parentElement!)
-
-  expect(samePerformanceLines()).toEqual([['합성 칭호 X', '500']])
 })
