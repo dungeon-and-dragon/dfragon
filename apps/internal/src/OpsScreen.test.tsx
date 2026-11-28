@@ -501,6 +501,29 @@ async function submitBatchKey(label: string, key: string): Promise<void> {
   await flush()
 }
 
+describe('클리어 집계 패널', () => {
+  it('컨텐츠마다 수집과 노출 스위치를 따로 끄면 그 스위치만 꺼진다', async () => {
+    const api = new FakeOpsApi()
+    api.contentClearSettings = [
+      { id: 'legion-venus', kind: 'legion', name: '베누스', collected: true, shown: true }
+    ]
+    await renderScreen(api)
+    await openTab('클리어 집계')
+    const switchOf = (label: string) =>
+      section('클리어 집계').querySelector<HTMLElement>(`[aria-label="베누스 ${label}"]`)
+
+    await click(switchOf('수집') as HTMLElement)
+    await waitFor(() => expect(switchOf('수집')?.getAttribute('aria-checked')).toBe('false'))
+    await click(switchOf('노출') as HTMLElement)
+    await waitFor(() => expect(switchOf('노출')?.getAttribute('aria-checked')).toBe('false'))
+
+    expect(api.writes().map(({ method, path, body }) => [method, path, body])).toEqual([
+      ['PATCH', '/api/content-clear-settings/legion-venus', { collected: false }],
+      ['PATCH', '/api/content-clear-settings/legion-venus', { shown: false }]
+    ])
+  })
+})
+
 describe('batch key 패널', () => {
   it('key를 추가하면 끝 4자로 목록에 나타나고 입력란을 비우며 원문은 화면 어디에도 없다', async () => {
     const api = new FakeOpsApi()
