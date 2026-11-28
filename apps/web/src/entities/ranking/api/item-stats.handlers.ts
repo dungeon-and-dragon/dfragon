@@ -16,5 +16,11 @@ export const itemStatsHandlers = {
   ),
   loading: http.get(ITEM_STATS_URL, async () => {
     await delay('infinite')
-  })
+  }),
+  failure: http.get(ITEM_STATS_URL, () =>
+    HttpResponse.json(
+      { error: { code: 'INTERNAL_SERVER_ERROR', message: '아이템 통계를 받지 못했습니다.' } },
+      { status: 500 }
+    )
+  )
 }

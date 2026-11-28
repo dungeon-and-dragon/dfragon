@@ -22,10 +22,12 @@ const SAMPLE_ITEMS: readonly ChipGroupItem<SetSample>[] = SET_SAMPLES.map((sampl
 
 export function SetStatsFilterBox({
   filter,
-  onFilterChange
+  onFilterChange,
+  growRequired = false
 }: {
   filter: SetStatsFilter
   onFilterChange: (filter: SetStatsFilter) => void
+  growRequired?: boolean
 }): React.JSX.Element {
   // 직업, 전직을 바꿔도 고른 표본은 그대로 둔다.
   function changeJob({ jobId, jobGrowId, role }: FameRankingFilter): void {
@@ -52,5 +54,12 @@ export function SetStatsFilterBox({
     }
   ]
 
-  return <RankingFilterBox filter={filter} onChange={changeJob} rows={rows} />
+  return (
+    <RankingFilterBox
+      filter={filter}
+      onChange={changeJob}
+      rows={rows}
+      growRequired={growRequired}
+    />
+  )
 }

@@ -1,10 +1,10 @@
 import { getRouteApi } from '@tanstack/react-router'
 import type { SetStatsFilter } from '#entities/ranking'
-import { ComboStatsScreen } from './ComboStatsScreen'
+import { JobStatsScreen } from './JobStatsScreen'
 
-const route = getRouteApi('/stats/combos')
+const route = getRouteApi('/stats/jobs')
 
-export function ComboStatsPage(): React.JSX.Element {
+export function JobStatsPage(): React.JSX.Element {
   const filter = route.useSearch()
   const navigate = route.useNavigate()
 
@@ -12,5 +12,5 @@ export function ComboStatsPage(): React.JSX.Element {
     await navigate({ search: next, resetScroll: false })
   }
 
-  return <ComboStatsScreen filter={filter} onFilterChange={changeFilter} />
+  return <JobStatsScreen filter={filter} onFilterChange={changeFilter} />
 }

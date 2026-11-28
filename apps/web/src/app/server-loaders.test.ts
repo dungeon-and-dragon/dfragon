@@ -222,59 +222,50 @@ it('세트 통계 loader는 주소의 직업으로 세트 통계와 아이템 �
   expect(queryClient.getQueryData(itemStatsKey)).toBeDefined()
 })
 
-it('조합 통계 loader는 세트 통계를, 무기 통계 loader는 아이템 통계를 주소의 직업으로 받는다', async () => {
+it('직업 통계 loader는 주소의 전직으로, 주소에 직업이 없으면 귀검사(남) 웨펀마스터로 스킬, 세트, 아이템 통계를 받아 캐시에 두고 표본은 세트, 아이템 통계에만 보낸다', async () => {
+  const { skillStatsHandlers } = await import('#entities/ranking/api/skill-stats.handlers')
   const { setStatsHandlers } = await import('#entities/ranking/api/set-stats.handlers')
   const { itemStatsHandlers } = await import('#entities/ranking/api/item-stats.handlers')
-  const combos = await import('./routes/stats.combos')
-  const weapons = await import('./routes/stats.weapons')
-
-  server.use(setStatsHandlers.empty, itemStatsHandlers.empty)
-
-  await (combos.Route.options.loader as Loader)({
-    context: { queryClient },
-    params: {},
-    deps: { jobId: 'job-1' }
-  })
-  await (weapons.Route.options.loader as Loader)({
-    context: { queryClient },
-    params: {},
-    deps: { jobId: 'job-2', sample: 'top' }
-  })
-
-  expect(requestedSearches()).toEqual([
-    '/stats/sets?jobId=job-1&sample=all',
-    '/stats/items?jobId=job-2&sample=top'
-  ])
-})
-
-it('스킬 통계 loader는 주소의 전직으로, 주소에 직업이 없으면 귀검사(남) 웨펀마스터로 스킬 통계를 받아 캐시에 둔다', async () => {
-  const { skillStatsHandlers } = await import('#entities/ranking/api/skill-stats.handlers')
   const { skillStatsFixture } = await import('#pages/stats/api/skill-stats.fixture')
   const { RANKING_JOBS } = await import('#entities/character')
-  const { skillStatsQuery } = await import('#entities/ranking')
-  const { Route } = await import('./routes/stats.skills')
+  const { itemStatsQuery, setStatsQuery, skillStatsQuery } = await import('#entities/ranking')
+  const { Route } = await import('./routes/stats.jobs')
   const loader = Route.options.loader as Loader
   const job = RANKING_JOBS.find(({ name }) => name === '귀검사(남)')!
   const [weaponMaster, soulBringer] = job.grows
-  const { queryKey } = skillStatsQuery({
-    jobId: job.jobId,
-    jobGrowId: weaponMaster!.jobGrowId,
-    role: null
-  })
+  const firstFilter = { jobId: job.jobId, jobGrowId: weaponMaster!.jobGrowId }
 
-  server.use(skillStatsHandlers.of(skillStatsFixture))
+  server.use(
+    skillStatsHandlers.of(skillStatsFixture),
+    setStatsHandlers.empty,
+    itemStatsHandlers.empty
+  )
   await loader({ context: { queryClient }, params: {}, deps: {} })
   await loader({
     context: { queryClient },
     params: {},
-    deps: { jobId: job.jobId, jobGrowId: soulBringer!.jobGrowId }
+    deps: { jobId: job.jobId, jobGrowId: soulBringer!.jobGrowId, sample: 'top' }
   })
 
-  expect(requestedSearches()).toEqual([
-    `/stats/skills?jobId=${job.jobId}&jobGrowId=${weaponMaster!.jobGrowId}`,
-    `/stats/skills?jobId=${job.jobId}&jobGrowId=${soulBringer!.jobGrowId}`
-  ])
-  expect(queryClient.getQueryData(queryKey)).toBeDefined()
+  const first = `jobId=${job.jobId}&jobGrowId=${weaponMaster!.jobGrowId}`
+  const second = `jobId=${job.jobId}&jobGrowId=${soulBringer!.jobGrowId}`
+  expect(requestedSearches().toSorted()).toEqual(
+    [
+      `/stats/skills?${first}`,
+      `/stats/sets?${first}&sample=all`,
+      `/stats/items?${first}&sample=all`,
+      `/stats/skills?${second}`,
+      `/stats/sets?${second}&sample=top`,
+      `/stats/items?${second}&sample=top`
+    ].toSorted()
+  )
+
+  const skillStatsKey = skillStatsQuery({ ...firstFilter, role: null }).queryKey
+  const setStatsKey = setStatsQuery(firstFilter).queryKey
+  const itemStatsKey = itemStatsQuery(firstFilter).queryKey
+  expect(queryClient.getQueryData(skillStatsKey)).toBeDefined()
+  expect(queryClient.getQueryData(setStatsKey)).toBeDefined()
+  expect(queryClient.getQueryData(itemStatsKey)).toBeDefined()
 })
 
 async function loadClearDetail(content: string, deps: Record<string, unknown>): Promise<unknown> {

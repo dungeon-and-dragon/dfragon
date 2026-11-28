@@ -2,20 +2,13 @@ import { Link, useLocation } from '@tanstack/react-router'
 
 const STATS_TABS = [
   { to: '/stats/sets', label: '세트' },
-  { to: '/stats/weapons', label: '무기' },
-  { to: '/stats/combos', label: '조합' },
+  { to: '/stats/jobs', label: '직업' },
   { to: '/stats', label: '명성' },
-  { to: '/stats/skills', label: '스킬' },
   { to: '/clears', label: '클리어' }
 ] as const
 
-// 세트, 조합, 무기, 스킬 탭은 같은 직업, 전직 필터를 주소에 두므로 이 탭 사이를 오갈 때 필터를 그대로 넘긴다.
-const SHARED_FILTER_TABS: ReadonlySet<string> = new Set([
-  '/stats/sets',
-  '/stats/combos',
-  '/stats/weapons',
-  '/stats/skills'
-])
+// 세트, 직업 탭은 같은 직업, 전직, 표본 필터를 주소에 두므로 두 탭 사이를 오갈 때 필터를 그대로 넘긴다.
+const SHARED_FILTER_TABS: ReadonlySet<string> = new Set(['/stats/sets', '/stats/jobs'])
 
 export function StatsTabs(): React.JSX.Element {
   const pathname = useLocation({ select: (location) => location.pathname })

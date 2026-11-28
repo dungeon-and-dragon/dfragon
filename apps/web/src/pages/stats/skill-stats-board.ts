@@ -11,6 +11,7 @@ import {
 import {
   type FameRankingFilter,
   SKILL_STATS_MIN_SAMPLE,
+  type SetStatsFilter,
   type SkillStats,
   type SkillStatsJob
 } from '#entities/ranking'
@@ -45,6 +46,16 @@ export function skillStatsGrowOf({ jobId, jobGrowId, role }: FameRankingFilter):
   const filter = { jobId: job.jobId, jobGrowId: grow.jobGrowId, ...roleFilter }
 
   return { job, grow, statsJob, filter }
+}
+
+export function jobStatsFilterOf(search: SetStatsFilter): SetStatsFilter {
+  const { filter } = skillStatsGrowOf(search)
+
+  if (search.sample === undefined) {
+    return filter
+  }
+
+  return { ...filter, sample: search.sample }
 }
 
 type SkillLevels = SkillStats['skills'][number]['levels']
