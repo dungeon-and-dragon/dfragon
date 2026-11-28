@@ -9,6 +9,7 @@ import type {
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { FetchCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
 import { LabItemService } from '../src/application/lab-items/index.js'
+import type { FindGameItem } from '../src/application/lab-items/ports.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { DatabaseLabItemRepository } from '../src/infrastructure/database/lab-items.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -28,7 +29,12 @@ const EMPTY_DETAIL: LabItemPriceDetail = {
   card: null
 }
 
-const EMPTY_CANDIDATE: LabItemPriceCandidate = { ...EMPTY_DETAIL, options: [], buffLines: [] }
+const EMPTY_CANDIDATE: LabItemPriceCandidate = {
+  ...EMPTY_DETAIL,
+  itemName: '합성 후보',
+  options: [],
+  buffLines: []
+}
 
 // 아이템 이름은 모두 지어낸 이름이다.
 function row(
@@ -79,7 +85,8 @@ async function startApi(
   rows: LabItemPriceRow[],
   readCurrencyIcon: LabItemRepository['readCurrencyIcon'] = async () => null,
   readItemIcon: LabItemRepository['readItemIcon'] = async () => null,
-  fetchCatalog: FetchCatalog = noCatalog
+  fetchCatalog: FetchCatalog = noCatalog,
+  findGameItem: FindGameItem = async () => null
 ) {
   const labItems: LabItemRepository = {
     readLabItemPrices: async () => rows,
@@ -91,6 +98,7 @@ async function startApi(
     details: { fetchDetails: unusedProvider, catalog: new CatalogService(fetchCatalog) },
     todayGrade: { fetchShopGrade: unusedProvider },
     labItems,
+    findGameItem,
     writeAccessLog: () => undefined
   })
 
@@ -733,7 +741,8 @@ test('같은 아이템 아이콘을 동시에 요청하면 DB를 한 번만 읽�
         return icon
       }
     },
-    async () => new Map()
+    async () => new Map(),
+    async () => null
   )
 
   const icons = await Promise.all([
@@ -1245,5 +1254,203 @@ test('아이템 상세를 받지 못한 카드와 옵션이 없는 항목은 선
 test('실험실에 마법부여 항목이 없으면 200과 빈 slots로 답한다', async (t) => {
   const body = await requestEnchantOptions(t, [row('TITLE', 'all', '종결', '합성 칭호', 100)])
 
-  assert.deepEqual(body, { slots: [] })
+  assert.deepEqual(body, { slots: [], slotItems: [] })
+})
+
+type SlotItemOptionsBody = {
+  slotItems: {
+    category: string
+    tiers: {
+      tier: string
+      options: {
+        id: string
+        cards: { itemName: string; gameItemName: string; itemId: string | null }[]
+      }[]
+    }[]
+  }[]
+}
+
+function slotItemRow(
+  category: string,
+  tier: string,
+  itemName: string,
+  unitPrice: number | null,
+  candidate: Partial<LabItemPriceCandidate> = {}
+): LabItemPriceRow {
+  return {
+    ...row(category, 'all', tier, itemName, unitPrice),
+    candidate: { ...EMPTY_CANDIDATE, itemName, ...candidate }
+  }
+}
+
+// 지어낸 게임 아이템 이름마다 지어낸 Neople id를 돌려주고, 찾은 이름을 남긴다.
+function gameItems(names: readonly string[]) {
+  const searched: string[] = []
+  const findGameItem: FindGameItem = async (itemName) => {
+    searched.push(itemName)
+
+    if (!names.includes(itemName)) {
+      return null
+    }
+
+    return { itemId: `neople-${itemName}`, itemRarity: '레어' }
+  }
+
+  return { searched, findGameItem }
+}
+
+async function requestSlotItemOptions(
+  t: test.TestContext,
+  rows: LabItemPriceRow[],
+  findGameItem: FindGameItem
+) {
+  const request = await startApi(t, rows, undefined, undefined, noCatalog, findGameItem)
+
+  return async () => {
+    const response = await request('/lab/enchant-options')
+    assert.equal(response.status, 200)
+
+    return ((await response.json()) as SlotItemOptionsBody).slotItems
+  }
+}
+
+function slotItemNamesOf(slotItems: SlotItemOptionsBody['slotItems']) {
+  return slotItems.map(({ category, tiers }) => ({
+    category,
+    tiers: tiers.map(({ tier, options }) => ({
+      tier,
+      options: options.map(({ cards }) =>
+        cards.map(({ itemName, gameItemName, itemId }) => [itemName, gameItemName, itemId])
+      )
+    }))
+  }))
+}
+
+test('칭호, 크리쳐, 오라 선택지는 옵션이 같은 아이템을 가격 낮은 순으로 묶어 높은 등급에 두고, 등급 안은 명성이 높은 순이다', async (t) => {
+  const strength = [{ name: '힘', value: '100' }]
+  const intelligence = [{ name: '지능', value: '100' }]
+  const { findGameItem } = gameItems([
+    '합성 칭호 비싼',
+    '합성 칭호 싼',
+    '합성 칭호 높은 명성',
+    '합성 크리쳐',
+    '합성 오라'
+  ])
+  const options = await requestSlotItemOptions(
+    t,
+    [
+      slotItemRow('AURA', '종결', '합성 오라', 500, { fame: 800, options: strength }),
+      slotItemRow('TITLE', '준종결', '합성 칭호 비싼', 9_000, { fame: 700, options: strength }),
+      slotItemRow('TITLE', '종결', '합성 칭호 싼', 1_000, { fame: 700, options: strength }),
+      slotItemRow('TITLE', '종결', '합성 칭호 높은 명성', 5_000, {
+        fame: 900,
+        options: intelligence
+      }),
+      slotItemRow('CREATURE', '배럭', '합성 크리쳐', 300, { fame: 600, options: strength })
+    ],
+    findGameItem
+  )
+
+  assert.deepEqual(slotItemNamesOf(await options()), [
+    {
+      category: 'title',
+      tiers: [
+        {
+          tier: '종결',
+          options: [
+            [['합성 칭호 높은 명성', '합성 칭호 높은 명성', 'neople-합성 칭호 높은 명성']],
+            [
+              ['합성 칭호 싼', '합성 칭호 싼', 'neople-합성 칭호 싼'],
+              ['합성 칭호 비싼', '합성 칭호 비싼', 'neople-합성 칭호 비싼']
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      category: 'creature',
+      tiers: [{ tier: '배럭', options: [[['합성 크리쳐', '합성 크리쳐', 'neople-합성 크리쳐']]] }]
+    },
+    {
+      category: 'aura',
+      tiers: [{ tier: '종결', options: [[['합성 오라', '합성 오라', 'neople-합성 오라']]] }]
+    }
+  ])
+})
+
+test('오라 상자, 크리쳐 알은 이은 후보의 게임 아이템 이름으로 Neople 아이템을 찾고, 찾지 못한 아이템은 혼자 선택지가 되지 않으며 찾은 이름은 다시 찾지 않는다', async (t) => {
+  const strength = [{ name: '힘', value: '100' }]
+  const { searched, findGameItem } = gameItems(['합성 오라', '합성 크리쳐'])
+  const options = await requestSlotItemOptions(
+    t,
+    [
+      slotItemRow('AURA', '종결', '합성 오라 상자', 500, {
+        itemName: '합성 오라',
+        options: strength
+      }),
+      slotItemRow('CREATURE', '종결', '합성 크리쳐 알', 300, {
+        itemName: '합성 크리쳐',
+        options: strength
+      }),
+      slotItemRow('CREATURE', '종결', '합성 같은 옵션 못 찾은 크리쳐', 100, { options: strength }),
+      slotItemRow('CREATURE', '준종결', '합성 혼자 못 찾은 크리쳐', 100, {
+        options: [{ name: '지능', value: '1' }]
+      })
+    ],
+    findGameItem
+  )
+
+  const first = await options()
+  const second = await options()
+
+  assert.deepEqual(slotItemNamesOf(first), [
+    {
+      category: 'creature',
+      tiers: [
+        {
+          tier: '종결',
+          options: [
+            [
+              ['합성 같은 옵션 못 찾은 크리쳐', '합성 같은 옵션 못 찾은 크리쳐', null],
+              ['합성 크리쳐 알', '합성 크리쳐', 'neople-합성 크리쳐']
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      category: 'aura',
+      tiers: [{ tier: '종결', options: [[['합성 오라 상자', '합성 오라', 'neople-합성 오라']]] }]
+    }
+  ])
+  assert.deepEqual(second, first)
+  assert.deepEqual(
+    searched.filter((name) => name === '합성 오라' || name === '합성 크리쳐').toSorted(),
+    ['합성 오라', '합성 크리쳐']
+  )
+})
+
+test('Neople 아이템 검색이 실패한 이름은 그 요청에서 빼고 다음 요청에서 다시 찾는다', async (t) => {
+  let fails = true
+  const findGameItem: FindGameItem = async (itemName) => {
+    if (fails) {
+      throw new Error('합성 Neople 실패')
+    }
+
+    return { itemId: `neople-${itemName}`, itemRarity: '레어' }
+  }
+  const options = await requestSlotItemOptions(
+    t,
+    [slotItemRow('TITLE', '종결', '합성 칭호', 1_000, { options: [{ name: '힘', value: '1' }] })],
+    findGameItem
+  )
+
+  assert.deepEqual(await options(), [])
+  fails = false
+  assert.deepEqual(slotItemNamesOf(await options()), [
+    {
+      category: 'title',
+      tiers: [{ tier: '종결', options: [[['합성 칭호', '합성 칭호', 'neople-합성 칭호']]] }]
+    }
+  ])
 })

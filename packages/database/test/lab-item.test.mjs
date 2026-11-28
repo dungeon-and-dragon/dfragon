@@ -608,12 +608,14 @@ test('후보 가격 대상은 고른 이름을 빼고, 고른 아이템의 가�
   const rows = await readLabItemPrices(client)
   const candidateLines = { options: [{ name: '힘', value: '100' }], buffLines: ['합성 버프 옵션'] }
   const selectedDetail = {
+    itemName: selected.itemName,
     description: selected.description,
     itemRarity: '레어',
     ...tooltip,
     ...candidateLines
   }
   const noIconDetail = {
+    itemName: noIcon.itemName,
     description: noIcon.description,
     itemRarity: '레어',
     ...noTooltip,
@@ -904,12 +906,13 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래�
       itemName,
       unitPrice,
       itemId,
+      detail?.itemName ?? null,
       detail?.description ?? null
     ]),
     [
-      [titleBase, 30_000, `synthetic-${titleBase}`, '합성 후보 설명'],
-      ['합성 변형만', 9_000, 'synthetic-합성 변형만[40Lv]', '합성 변형 설명'],
-      ['합성 후보 없는 아이템', null, null, null]
+      [titleBase, 30_000, `synthetic-${titleBase}`, titleBase, '합성 후보 설명'],
+      ['합성 변형만', 9_000, 'synthetic-합성 변형만[40Lv]', '합성 변형만[30Lv]', '합성 변형 설명'],
+      ['합성 후보 없는 아이템', null, null, null, null]
     ]
   )
   assert.deepEqual(
@@ -926,7 +929,7 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래�
   )
 })
 
-test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를 아이콘 없이 붙이고, 이름이 같은 후보가 있으면 그 후보를 쓴다', {
+test('후보에 없는 이름은 경매장 item_id가 같은 후보의 이름과 상세를 아이콘 없이 붙이고, 이름이 같은 후보가 있으면 그 후보를 쓴다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
@@ -970,6 +973,7 @@ test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를
   )
   const egg = rows.find(({ itemName }) => itemName === '합성 크리쳐 알')
   assert.equal(egg?.candidate?.iconUpdatedAt, null)
+  assert.equal(egg?.candidate?.itemName, '합성 크리쳐')
 })
 
 test('칭호, 크리쳐의 최저가는 플래티넘 변형을 빼고 고르고, 다른 종류는 플래티넘 이름 변형도 넣는다', {

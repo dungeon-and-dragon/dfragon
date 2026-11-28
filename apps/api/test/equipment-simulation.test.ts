@@ -28,6 +28,7 @@ import {
   type SimulationFeatures,
   supportsSimulation
 } from '../src/domain/equipment-simulation/index.js'
+import type { FindGameItem } from '../src/application/lab-items/ports.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
 type FixtureName = 'dealer-blade' | 'buffer-muse'
@@ -148,9 +149,10 @@ function fixture(
 }
 
 async function listen(t: TestContext, options: Partial<ApiHttpAppOptions>) {
-  const labItems = labItemsOf(DEFAULT_LAB_ROWS)
+  const labItems = labItemsOf([...DEFAULT_LAB_ROWS, ...SLOT_LAB_ROWS])
   const { app } = await createApiHttpApp({
     labItems,
+    findGameItem: findSlotGameItem,
     search: { searchCharacters: async () => assert.fail('검색을 부르면 안 된다') },
     details: {
       fetchDetails: async () => assert.fail('상세 조회를 부르면 안 된다'),
@@ -975,31 +977,74 @@ test('실제 엔진은 시뮬레이션 입력을 받아 원본 점수와 바꾼 
   assert.ok(skillEnchanted.simulated.value < skillEnchanted.baseline.value)
 })
 
-// 칭호, 크리쳐, 오라 묶음의 대표 아이템 Neople 상세 가운데 엔진이 읽는 명성, 스탯, 버프 칸만 옮긴 값이다.
+// 칭호, 크리쳐, 오라 교체 아이템의 Neople 상세 가운데 엔진이 읽는 명성, 스탯, 버프 칸만 옮긴 값이다.
 const slotItemDetails = JSON.parse(
   readFileSync(new URL('../../test/fixtures/slot-item-details.json', import.meta.url), 'utf8')
 ) as Record<string, Item>
 
-const TITLE_ID = 'title:1123:character/common/title/100333206'
 const TITLE_ITEM = {
   itemId: '42fd3d4144f788b37ed19c70281dcda6',
   itemName: '프로스트의 전설',
   itemRarity: '레어'
 }
-const CREATURE_ID = 'creature:991:creature/100990927'
 const CREATURE_ITEM = {
   itemId: 'd1a086d0205f4928ec5f04b53b308521',
   itemName: '톱니꼬마 던니니',
   itemRarity: '레어'
 }
-const TOP_CREATURE_ID = 'creature:1261:creature/100991296'
-const AURA_ID = 'aura:645:character/swordman/avatar/aura/101590961'
 const AURA_ITEM = {
   itemId: '6997321d175648e99eb75adf5c8e2625',
   itemName: '초월한 폭풍의 기세',
   itemRarity: '레어'
 }
-const TOP_AURA_ID = 'aura:845:character/swordman/avatar/aura/101590700'
+// 실험실 항목 이름이고, simulateSlotItems가 실험실 선택지 id로 바꿔 보낸다.
+const TITLE_ID = TITLE_ITEM.itemName
+const CREATURE_ID = CREATURE_ITEM.itemName
+const TOP_CREATURE_ID = '운명을 담는 재단사'
+const AURA_ID = AURA_ITEM.itemName
+const TOP_AURA_ID = '열대야의 추억'
+const SLOT_LAB_ROWS: readonly LabItemPriceRow[] = [
+  labRow('TITLE', 'all', TITLE_ID, null),
+  labRow('CREATURE', 'all', CREATURE_ID, null),
+  labRow('CREATURE', 'all', TOP_CREATURE_ID, null),
+  labRow('AURA', 'all', AURA_ID, null),
+  labRow('AURA', 'all', TOP_AURA_ID, null)
+]
+
+// 교체 아이템 상세가 있는 이름만 Neople 검색에 잡힌 것으로 본다.
+const findSlotGameItem: FindGameItem = async (itemName) => {
+  const found = Object.entries(slotItemDetails).find(([, detail]) => detail.itemName === itemName)
+
+  if (found === undefined) {
+    return null
+  }
+
+  return { itemId: found[0], itemRarity: '레어' }
+}
+
+type SlotItemBody = Readonly<Record<string, unknown>>
+
+/** title, creature, aura에 넣은 실험실 항목 이름을 어느 종류든 그 이름의 카드가 든 선택지 id로 바꾼다. 목록에 없는 값은 그대로 둔다. */
+async function withSlotItemIds(origin: string, body: SlotItemBody): Promise<SlotItemBody> {
+  const response = await fetch(new URL('/lab/enchant-options', origin))
+  const { slotItems } = (await response.json()) as {
+    slotItems: { tiers: { options: { id: string; cards: { itemName: string }[] }[] }[] }[]
+  }
+  const options = slotItems.flatMap(({ tiers }) => tiers.flatMap(({ options }) => options))
+  const idOf = (value: unknown) =>
+    options.find(({ cards }) => cards.some(({ itemName }) => itemName === value))?.id ?? value
+  const ids = Object.fromEntries(
+    (['title', 'creature', 'aura'] as const)
+      .filter((category) => category in body)
+      .map((category) => [category, idOf(body[category])])
+  )
+
+  return { ...body, ...ids }
+}
+
+async function simulateSlotItems(origin: string, path: string, body: SlotItemBody) {
+  return await simulate(origin, path, await withSlotItemIds(origin, body))
+}
 
 /** 그 버전 엔진이 낸 결과처럼 버전만 바꾼다. */
 function versionedEngine(package_ = 'dnfscore-native 0.6.0'): Reply {
@@ -1016,7 +1061,7 @@ test('칭호, 크리쳐, 오라를 바꾸면 원본 항목의 아이템 칸만 �
   const engine = scoring(versionedEngine())
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, {
+  const response = await simulateSlotItems(origin, path, {
     equipment: [],
     title: TITLE_ID,
     creature: CREATURE_ID,
@@ -1073,7 +1118,7 @@ test('칭호 교체는 12부위 변경과 함께 보낼 수 있고 칭호는 장
   const engine = scoring(versionedEngine())
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, {
+  const response = await simulateSlotItems(origin, path, {
     equipment: [{ slotId: 'WEAPON', reinforce: 12, amplified: false, enchantId: null }],
     title: TITLE_ID,
     creature: null
@@ -1094,7 +1139,7 @@ test('새 아이템 상세를 받지 못하면 엔진을 부르지 않고 두 �
   const engine = scoring(versionedEngine())
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, { equipment: [], creature: CREATURE_ID })
+  const response = await simulateSlotItems(origin, path, { equipment: [], creature: CREATURE_ID })
 
   assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
   assert.equal(engine.requests.length, 0)
@@ -1125,7 +1170,7 @@ for (const [name, package_, body, expected] of [
     const engine = scoring(versionedEngine(package_))
     const origin = await listen(t, { details, ...engine.options })
 
-    const response = await simulate(origin, path, body)
+    const response = await simulateSlotItems(origin, path, body)
 
     assert.equal(response.status, 200)
     assert.deepEqual(
@@ -1141,7 +1186,7 @@ for (const [name, package_, body, expected] of [
 for (const [name, body, edit] of [
   [
     '모르는 칭호 id',
-    { equipment: [], title: 'title:1:missing' },
+    { equipment: [], title: 'lab:title:missing' },
     (payloads: CharacterPayloads) => payloads
   ],
   [
@@ -1161,7 +1206,7 @@ for (const [name, body, edit] of [
     const engine = scoring(versionedEngine())
     const origin = await listen(t, { details, ...engine.options })
 
-    const response = await simulate(origin, path, body)
+    const response = await simulateSlotItems(origin, path, body)
 
     assert.deepEqual(response, { status: 400, body: { error: { code: INVALID_REQUEST } } })
     assert.equal(engine.requests.length, 0)
@@ -1182,7 +1227,7 @@ test('칭호, 크리쳐, 오라가 비어 있으면 고른 아이템을 아이�
   const engine = scoring(versionedEngine(ADDED_SLOT_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, {
+  const response = await simulateSlotItems(origin, path, {
     equipment: [],
     title: TITLE_ID,
     creature: CREATURE_ID,
@@ -1206,7 +1251,7 @@ test('0.16.0 전 엔진에 비어 있는 칭호를 더한 요청을 보내면 �
   const engine = scoring(versionedEngine('dnfscore-native 0.15.0'))
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, { equipment: [], title: TITLE_ID })
+  const response = await simulateSlotItems(origin, path, { equipment: [], title: TITLE_ID })
 
   assert.deepEqual(response, { status: 200, body: { baseline: null, simulated: null } })
 })
@@ -1268,7 +1313,7 @@ test('실제 엔진은 딜러의 칭호, 크리쳐, 오라를 더 높은 명성 
     { equipment: [], creature: TOP_CREATURE_ID },
     { equipment: [], aura: TOP_AURA_ID }
   ]) {
-    const response = await simulate(origin, path, body)
+    const response = await simulateSlotItems(origin, path, body)
 
     assert.equal(response.status, 200)
     assert.equal(response.body.simulated.skipped, null, JSON.stringify(body))
@@ -4244,7 +4289,7 @@ test('끝 스펙과 오라 교체를 함께 보내면 오라 아이템은 교체
   const engine = scoring(versionedEngine(AVATAR_ENGINE))
   const origin = await listen(t, { details, ...engine.options })
 
-  const response = await simulate(origin, path, {
+  const response = await simulateSlotItems(origin, path, {
     equipment: [],
     aura: AURA_ID,
     avatarPreset: 'best'
