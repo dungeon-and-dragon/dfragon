@@ -57,24 +57,7 @@ export class AuctionPriceService {
       return levelListing
     }
 
-    return this.auraBoxListing(itemName)
-  }
-
-  // 상자 매물의 itemId는 상자 아이템이라, 아이템 정보 tooltip이 오라 본체를 보이도록 itemId와 등급은 오라 이름으로 찾은 아이템에서 받는다.
-  private async auraBoxListing(itemName: string): Promise<AuctionListing | null> {
-    const boxListing = await this.fetchLowestListing(`${itemName}${AURA_BOX_SUFFIX}`)
-
-    if (boxListing === null) {
-      return null
-    }
-
-    const aura = await this.findItem(itemName)
-
-    if (aura === null) {
-      return boxListing
-    }
-
-    return { ...boxListing, itemId: aura.itemId, itemRarity: aura.itemRarity }
+    return this.fetchLowestListing(`${itemName}${AURA_BOX_SUFFIX}`)
   }
 
   // 재화로 교환하는 아이템은 경매장을 부르지 않고, 경매장 매물이 없는 아이템과 함께 아이템 검색으로 아이콘만 찾는다.
