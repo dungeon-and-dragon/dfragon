@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fameRankingSchema } from './ranking-stats'
 
-// 합성 응답이다. API가 세트 필드와 nextCursor를 더한 뒤의 명성 랭킹 응답 모양이다.
+// 합성 응답이다. API가 세트 필드와 쪽 수를 더한 뒤의 명성 랭킹 응답 모양이다.
 const row = {
   serverId: 'cain',
   characterId: 'synthetic-character',
@@ -20,7 +20,7 @@ const row = {
 }
 
 describe('fameRankingSchema', () => {
-  it('세트 필드와 nextCursor가 더해진 응답을 rank가 있든 없든 읽는다', () => {
+  it('세트 필드와 쪽 수가 더해진 응답을 rank가 있든 없든 읽는다', () => {
     const response = {
       characters: [
         {
@@ -31,7 +31,7 @@ describe('fameRankingSchema', () => {
         },
         { ...row, characterId: 'synthetic-no-sets', equipmentSet: null, oathSet: null }
       ],
-      nextCursor: 'WzgwMDAwLCJjYWluIiwic3ludGhldGljLW5vLXNldHMiLDJd'
+      pageCount: 3
     }
 
     const parsed = fameRankingSchema.safeParse(response)
@@ -66,7 +66,7 @@ describe('fameRankingSchema', () => {
         { ...row, characterId: 'synthetic-null', equipmentSet: null, oathSet: null, score: null },
         { ...row, characterId: 'synthetic-missing', equipmentSet: null, oathSet: null }
       ],
-      nextCursor: null
+      pageCount: 1
     }
 
     expect(fameRankingSchema.parse(response).characters.map(({ score }) => score)).toEqual([
