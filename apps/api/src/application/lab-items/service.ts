@@ -3,7 +3,6 @@ import type { CatalogDetail } from '@dfragon/server-core/domain/character-catalo
 import type {
   LabCurrencyIcon,
   LabItemCard,
-  LabItemPlatinumPrice,
   LabItemPriceCandidate,
   LabItemPriceCost,
   LabItemPriceDetail,
@@ -57,7 +56,6 @@ export interface LabItemPrice {
   fame: number | null
   unitPrice: number | null
   checkedAt: Date | null
-  platinum: LabItemPlatinumPrice | null
   cost: LabItemCurrencyCost | null
   performanceKey: string | null
 }
@@ -238,7 +236,7 @@ function chunks<T>(values: readonly T[], size: number): T[][] {
 
 // 재화 비용을 붙인 아이템은 경매장 가격을 내지 않는다.
 function toPrice(
-  { itemName, itemId, itemRarity, unitPrice, checkedAt, platinum, cost, detail }: LabItemPriceRow,
+  { itemName, itemId, itemRarity, unitPrice, checkedAt, cost, detail }: LabItemPriceRow,
   fame: number | null,
   candidate: LabItemPriceCandidate | null
 ): LabItemPrice {
@@ -255,7 +253,6 @@ function toPrice(
       fame,
       unitPrice: null,
       checkedAt,
-      platinum,
       cost: currencyCost,
       performanceKey
     }
@@ -268,7 +265,6 @@ function toPrice(
     fame,
     unitPrice,
     checkedAt,
-    platinum,
     cost: null,
     performanceKey
   }
