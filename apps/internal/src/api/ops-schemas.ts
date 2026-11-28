@@ -89,6 +89,18 @@ export const batchKeyListSchema = z.object({ keys: z.array(batchKeySchema) })
 
 export const batchKeyAdditionSchema = z.object({ id: z.int().positive() })
 
+const contentClearSettingSchema = z.object({
+  id: z.string(),
+  kind: z.enum(['raid', 'challenge', 'legion']),
+  name: z.string(),
+  collected: z.boolean(),
+  shown: z.boolean()
+})
+
+export const contentClearSettingListSchema = z.object({
+  contents: z.array(contentClearSettingSchema)
+})
+
 const labItemCostSchema = z.object({ currencyId: z.int().positive(), count: z.int().positive() })
 
 const labItemSchema = z.object({ itemName: z.string(), cost: labItemCostSchema.nullable() })
@@ -193,6 +205,8 @@ export type QueueList = z.infer<typeof queueListSchema>
 export type Collection = z.infer<typeof collectionSchema>
 export type BatchKey = z.infer<typeof batchKeySchema>
 export type BatchKeyList = z.infer<typeof batchKeyListSchema>
+export type ContentClearSetting = z.infer<typeof contentClearSettingSchema>
+export type ContentClearSettingList = z.infer<typeof contentClearSettingListSchema>
 export type LabItemCost = z.infer<typeof labItemCostSchema>
 export type LabItem = z.infer<typeof labItemSchema>
 export type LabItemGroup = z.infer<typeof labItemGroupSchema>
