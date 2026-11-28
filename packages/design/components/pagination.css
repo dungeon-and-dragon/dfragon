@@ -1,13 +1,16 @@
 /*
- * 목록 아래의 이전, 현재 페이지 번호, 다음 줄이다. 전체 페이지 수는 보이지 않는다.
- * <nav class="pagination" aria-label="페이지"><button class="btn btn-ghost btn-sm" disabled>이전</button>
- *   <span class="pagination-page num" aria-current="page">1</span><button class="btn btn-ghost btn-sm">다음</button></nav>
+ * 목록 아래의 이전, 페이지 번호, 다음 줄이다. 번호는 지금 페이지를 가운데 두고 5개까지 보인다.
+ * 폭이 360px보다 좁으면 이전, 다음 글자를 화면에서 숨기고 화살표만 남긴다.
+ * <nav class="pagination" aria-label="페이지"><button class="btn btn-ghost btn-sm" disabled><span class="pagination-label">이전</span></button>
+ *   <span class="pagination-page num" aria-current="page">1</span><button class="pagination-page num">2</button>
+ *   <button class="btn btn-ghost btn-sm"><span class="pagination-label">다음</span></button></nav>
  */
 .pagination {
+  container-type: inline-size;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 4px;
   min-height: 48px;
   border-top: 1px solid var(--color-line);
 }
@@ -18,8 +21,53 @@
   justify-content: center;
   min-width: var(--height-control-sm);
   height: var(--height-control-sm);
-  color: var(--color-fg);
+  margin: 0;
+  padding-inline: 4px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background-color: transparent;
+  color: var(--color-fg-muted);
+  font-family: inherit;
   font-size: var(--text-sm);
   line-height: var(--text-sm--line-height);
+  font-weight: var(--font-weight-medium);
+  transition-property: color, background-color;
+  transition-duration: var(--duration-hover);
+  transition-timing-function: var(--ease-standard);
+}
+
+button.pagination-page {
+  cursor: pointer;
+}
+
+button.pagination-page:hover:not(:disabled) {
+  background-color: var(--color-inset);
+  color: var(--color-fg);
+}
+
+button.pagination-page:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 2px;
+}
+
+button.pagination-page:disabled {
+  color: var(--color-fg-disabled);
+  cursor: not-allowed;
+}
+
+.pagination-page[aria-current='page'] {
+  background-color: var(--color-inset);
+  color: var(--color-fg);
   font-weight: var(--font-weight-semibold);
+}
+
+@container (width < 360px) {
+  .pagination-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
