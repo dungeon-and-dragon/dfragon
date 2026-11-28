@@ -153,11 +153,16 @@ const MICHAELA_WEEK_MOVES: ClearWeekMove[] = [
   { from: 'hard', to: 'left', characters: 8 },
   { from: 'normal', to: 'hard', characters: 9 },
   { from: 'normal', to: 'normal', characters: 90 },
+  { from: 'normal', to: 'matching', characters: 7 },
   { from: 'normal', to: 'left', characters: 12 },
+  { from: 'matching', to: 'normal', characters: 2 },
+  { from: 'matching', to: 'matching', characters: 30 },
+  { from: 'matching', to: 'left', characters: 5 },
   { from: 'returned', to: 'hard', characters: 5 },
   { from: 'returned', to: 'normal', characters: 4 },
   { from: 'first', to: 'hard', characters: 3 },
-  { from: 'first', to: 'normal', characters: 0 }
+  { from: 'first', to: 'normal', characters: 0 },
+  { from: 'first', to: 'matching', characters: 1 }
 ]
 
 const RAID_STREAKS = [
@@ -484,7 +489,7 @@ it('주차별 클리어는 레이드면 다시 클리어와 신규 막대를, �
   expect(legendNames('주차별 클리어')).toEqual(['신규', '한 번이라도 깬 캐릭터 비율'])
 })
 
-it('지난주 대비 이동은 지난주 하드, 일반, 복귀, 신규에서 이번 주 하드, 일반, 이탈로 가는 수를 노드마다 적는다', async () => {
+it('지난주 대비 이동은 지난주 하드, 일반, 싱글/매칭, 복귀, 신규에서 이번 주 하드, 일반, 싱글/매칭, 이탈로 가는 수를 노드마다 적는다', async () => {
   await open({ contentKey: 'michaela', week: LAST_CLOSED_WEEK })
 
   const labels = [...(panel('지난주 대비 이동')?.querySelectorAll('svg text') ?? [])].map(
@@ -496,17 +501,21 @@ it('지난주 대비 이동은 지난주 하드, 일반, 복귀, 신규에서 �
     '하드',
     '54',
     '일반',
-    '111',
+    '118',
+    '싱글/매칭',
+    '37',
     '복귀',
     '9',
     '신규',
-    '3',
+    '4',
     '하드',
     '57',
     '일반',
-    '100',
+    '102',
+    '싱글/매칭',
+    '38',
     '이탈',
-    '20'
+    '25'
   ])
 })
 
