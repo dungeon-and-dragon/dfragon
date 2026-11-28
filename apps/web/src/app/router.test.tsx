@@ -298,7 +298,7 @@ it('통계 화면의 표본 정보를 화면 밖 빌드 commit 위에 둔다', a
   )
 })
 
-it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 지금 항목 없는 전역 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 화면 상자에 멀티서치를 고른 실험실 탭과 게임 바, 표를 둔다', async () => {
+it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, 실험실을 지금 항목으로 둔 전역 메뉴, 검색창, 오늘 등급, 모드 전환 버튼을 두고 화면 상자에 멀티서치를 고른 실험실 탭과 게임 바, 표를 둔다', async () => {
   await act(async () => root.render(<WebApp host={host} />))
 
   const header = container.querySelector('header')!
@@ -311,7 +311,8 @@ it('실험실 멀티서치는 전역 바에 아이콘 없는 브랜드 글자, �
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', 'page']
   ])
   expect(brand.compareDocumentPosition(grade) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   const buttons = [...header.querySelectorAll('button')]
@@ -350,7 +351,8 @@ it('메인 화면은 전역 바에 검색창과 현재 메뉴 항목 없이, 화
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
 
   const main = container.querySelector('main')!
@@ -378,7 +380,8 @@ it('없는 주소는 전역 바 아래에 열려던 주소, 안내, 첫 화면 �
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
   expect(container.querySelector('[role="tablist"]')).toBeNull()
   expect(container.querySelector('button[aria-label^="화면 공유"]')).toBeNull()
@@ -408,7 +411,8 @@ it.each([
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
 })
 
@@ -513,7 +517,8 @@ it('직업 필터가 붙은 검색 주소에서도 전역 메뉴의 검색을 �
     ['검색', 'page'],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
 })
 
@@ -563,7 +568,8 @@ it('캐릭터 주소를 직접 열면 주소의 tab으로 요약과 탭을 그�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
 
   const statusTab = [...container.querySelectorAll<HTMLElement>('[role="tab"]')].find(
@@ -599,11 +605,12 @@ it('장비 시뮬레이터 주소를 열면 캐릭터 상세 안이 아닌 시�
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', 'page']
+    ['장비 시뮬레이터', 'page'],
+    ['실험실', null]
   ])
 })
 
-it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸고, 전역 메뉴에는 지금 항목을 두지 않는다', async () => {
+it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸고, 전역 메뉴의 실험실을 지금 항목으로 둔다', async () => {
   server.use(labItemsHandlers.items)
   window.history.replaceState(null, '', '/lab')
   const historyLength = window.history.length
@@ -617,7 +624,8 @@ it('실험실 주소는 기록을 늘리지 않고 마법부여 주소로 바꾸
     ['검색', null],
     ['통계', null],
     ['모험단', null],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', 'page']
   ])
 })
 
@@ -692,7 +700,8 @@ it('한글 모험단 이름의 주소를 직접 열면 저장한 모험단과 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
   expect(adventureRequests()).toEqual([
     `${SITE_API_URL}/adventures/${encodedName}/activity`,
@@ -1707,7 +1716,8 @@ it('저장한 모험단이 없으면 예전 내 모험단 주소는 모험단 �
     ['검색', null],
     ['통계', null],
     ['모험단', 'page'],
-    ['장비 시뮬레이터', null]
+    ['장비 시뮬레이터', null],
+    ['실험실', null]
   ])
   const form = container.querySelector<HTMLFormElement>('main form')!
   const input = form.querySelector<HTMLInputElement>('input[aria-label="모험단"]')!

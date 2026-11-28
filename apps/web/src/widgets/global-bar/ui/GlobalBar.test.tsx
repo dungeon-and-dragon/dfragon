@@ -129,6 +129,7 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
     null,
     null,
     null,
+    null,
     null
   ])
   expect(underline().visibility).toBe('hidden')
@@ -138,14 +139,15 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
   expect(container.querySelector('form[role="search"]')).not.toBeNull()
 })
 
-it('장비 시뮬레이터 항목은 메뉴 맨 끝에서 시뮬레이터 검색 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
+it('메뉴 끝의 장비 시뮬레이터는 시뮬레이터 검색 주소로, 실험실은 마법부여 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
   await render('/rankings')
 
   expect(menuLinks().map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
     ['검색', '/rankings'],
     ['통계', '/stats'],
     ['모험단', '/adventures'],
-    ['장비 시뮬레이터', '/simulator']
+    ['장비 시뮬레이터', '/simulator'],
+    ['실험실', '/lab/enchants']
   ])
 })
 
@@ -170,13 +172,11 @@ it('캐릭터 상세 주소에서는 장비 시뮬레이터를 지금 항목으�
 })
 
 it.each(['/lab/enchants', '/lab/multisearch'])(
-  '실험실 아래 주소(%s)에서는 메뉴에 실험실과 멀티서치 항목이 없고 지금 항목도 두지 않는다',
+  '실험실 아래 주소(%s)에서는 실험실을 지금 항목으로 두고 멀티서치 항목은 메뉴에 없다',
   async (path) => {
     await render(path)
 
-    const labels = menuLinks().map((link) => link.textContent)
-    expect(labels).not.toContain('실험실')
-    expect(labels).not.toContain('멀티서치')
-    expect(currentLabels()).toEqual([])
+    expect(menuLinks().map((link) => link.textContent)).not.toContain('멀티서치')
+    expect(currentLabels()).toEqual(['실험실'])
   }
 )
