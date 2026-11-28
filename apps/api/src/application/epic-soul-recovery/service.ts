@@ -5,6 +5,8 @@ import type {
   EquipmentSimulationService,
   SimulatedPlan
 } from '#application/equipment-simulation/index.js'
+import type { LoadCharacterScoreSource } from '#application/equipment-simulation/ports.js'
+import type { LoadStoredScoreSource } from './ports.js'
 import {
   type RecoveryAfterItem,
   type RecoveryCandidate,
@@ -80,16 +82,26 @@ function baselineOf(simulated: readonly Simulated[]): CharacterCardScore | null 
 }
 
 export class EpicSoulRecoveryService {
-  constructor(private readonly simulation: EquipmentSimulationService) {}
+  constructor(
+    private readonly simulation: EquipmentSimulationService,
+    private readonly loadStoredScoreSource: LoadStoredScoreSource,
+    private readonly loadScoreSource: LoadCharacterScoreSource
+  ) {}
 
-  /** 가상 점수는 시뮬레이션처럼 상세 응답 캐시, 조회 알림, DB에 남기지 않는다. */
+  /**
+   * 저장한 원문이 있으면 Neople을 부르지 않고 그 원문으로 계산하고, 없을 때만 상세 조회처럼 받는다.
+   * 가상 점수는 시뮬레이션처럼 상세 응답 캐시, 조회 알림, DB에 남기지 않는다.
+   */
   async recover(
     identity: CharacterIdentity,
     includePrimordial: boolean,
     signal: AbortSignal
   ): Promise<EpicSoulRecoveryResult> {
+    const source =
+      (await this.loadStoredScoreSource(identity, signal)) ??
+      (await this.loadScoreSource(identity, signal))
     const { payloads, simulated } = await this.simulation.simulateEach(
-      identity,
+      source,
       (payloads) =>
         recoveryCandidates(
           payloads.equipment,

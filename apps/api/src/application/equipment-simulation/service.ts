@@ -112,15 +112,15 @@ export class EquipmentSimulationService {
   }
 
   /**
-   * 원문을 한 번 읽어 `planOf`가 만든 요청마다 차례로 점수를 계산한다. 엔진 worker가 하나라 한꺼번에 보내도 빨라지지 않으므로,
+   * 같은 원문으로 `planOf`가 만든 요청마다 차례로 점수를 계산한다. 엔진 worker가 하나라 한꺼번에 보내도 빨라지지 않으므로,
    * 차례로 보내 다른 요청이 사이에 계산되게 한다.
    */
   simulateEach<T extends { readonly request: EquipmentSimulationRequest }>(
-    identity: CharacterIdentity,
+    source: CharacterScoreSource,
     planOf: (payloads: CharacterPayloads) => readonly T[],
     signal: AbortSignal
   ): Promise<SimulatedPlans<T>> {
-    return this.track(this.runEach(identity, planOf, signal))
+    return this.track(this.runEach(source, planOf, signal))
   }
 
   /** 진행 중인 계산을 끊지 않고 끝나기를 기다린다. */
@@ -139,11 +139,10 @@ export class EquipmentSimulationService {
   }
 
   private async runEach<T extends { readonly request: EquipmentSimulationRequest }>(
-    identity: CharacterIdentity,
+    source: CharacterScoreSource,
     planOf: (payloads: CharacterPayloads) => readonly T[],
     signal: AbortSignal
   ): Promise<SimulatedPlans<T>> {
-    const source = await this.loadScoreSource(identity, signal)
     const simulated: SimulatedPlan<T>[] = []
 
     for (const plan of planOf(source.payloads)) {
