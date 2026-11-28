@@ -43,7 +43,12 @@ const stats: CharacterStats = {
       jobName: '직업1',
       jobGrowName: '眞 전직1',
       count: 400,
-      averageFame: 80000
+      fameBuckets: [
+        { from: 70000, to: 80000, count: 150 },
+        { from: 80000, to: 90000, count: 100 },
+        { from: 120000, to: 130000, count: 30 },
+        { from: 130000, to: 140000, count: 20 }
+      ]
     },
     {
       jobId: 'job-1',
@@ -51,7 +56,7 @@ const stats: CharacterStats = {
       jobName: '직업1',
       jobGrowName: '眞 전직2',
       count: 200,
-      averageFame: 90000
+      fameBuckets: [{ from: 90000, to: 100000, count: 200 }]
     },
     {
       jobId: 'job-2',
@@ -59,7 +64,7 @@ const stats: CharacterStats = {
       jobName: '직업2',
       jobGrowName: '眞 전직3',
       count: 100,
-      averageFame: null
+      fameBuckets: []
     }
   ],
   fameDistribution: [
@@ -103,23 +108,17 @@ it('제목 상자 없이 통계 상자만 그린다', async () => {
   expect(container.querySelector('header')).toBeNull()
 })
 
-it('큰 수는 줄여 쓰고 상자 넷을 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성 순으로 그린다', async () => {
+it('큰 수는 줄여 쓰고 상자 셋을 서버 인구, 명성 분포, 직업별 명성 순으로 그린다', async () => {
   await render(stats)
 
   expect([...container.querySelectorAll('h2')].map((name) => name.textContent)).toEqual([
     '서버 인구',
     '명성 분포',
-    '직업 분포',
-    '직업별 평균 명성'
+    '직업별 명성'
   ])
   expect(rowsOf('서버 인구')).toEqual([
     ['카인', '', '600'],
     ['바칼', '', '300']
-  ])
-  expect(rowsOf('직업 분포').map(([name, , value]) => [name, value])).toEqual([
-    ['전직1', '400'],
-    ['전직2', '200'],
-    ['전직3', '100']
   ])
   expect(rowsOf('명성 분포')).toEqual([
     ['', '0'],
@@ -210,19 +209,17 @@ it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫�
   expect(tooltipText('명성 분포')).toBeNull()
 })
 
-it('서버 인구와 직업 분포 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 목록을 벗어나면 지운다', async () => {
+it('서버 인구 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 목록을 벗어나면 지운다', async () => {
   await render({ ...stats, total: 1000 })
 
   const serverRow = boxOf('서버 인구').querySelector('li')!
-  const jobRow = boxOf('직업 분포').querySelector('li')!
   expect(tooltipText('서버 인구')).toBeNull()
 
   await moveMouse(document.body, serverRow)
   expect(tooltipText('서버 인구')).toBe('60.0%')
 
-  await moveMouse(serverRow, jobRow)
+  await moveMouse(serverRow, document.body)
   expect(tooltipText('서버 인구')).toBeNull()
-  expect(tooltipText('직업 분포')).toBe('40.0%')
 })
 
 it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 비율로 바꾼다', async () => {
@@ -241,65 +238,56 @@ it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 
   expect(tooltipText('서버 인구')).toBeNull()
 })
 
-it('직업별 평균 명성 행에는 마우스를 올려도 비율 툴팁이 없다', async () => {
-  await render({ ...stats, total: 1000 })
+function jobNamesOf(): string[] {
+  return [...boxOf('직업별 명성').querySelectorAll('svg text[text-anchor="middle"]')].map(
+    (tick) => tick.textContent ?? ''
+  )
+}
 
-  const row = boxOf('직업별 평균 명성').querySelector('li')!
-  await moveMouse(document.body, row)
+function legendOf(name: string): HTMLButtonElement {
+  return [...boxOf('직업별 명성').querySelectorAll('button')].find(
+    (button) => button.textContent === name
+  )!
+}
 
-  expect(tooltipOf('직업별 평균 명성')).toBeNull()
-  expect(boxOf('직업별 평균 명성').textContent).not.toContain('%')
-})
-
-it('평균 명성은 높은 순이고 명성이 있는 캐릭터가 없는 직업은 뺀다', async () => {
-  await render(stats)
-
-  expect(rowsOf('직업별 평균 명성').map(([name, , value]) => [name, value])).toEqual([
-    ['전직2', '90,000'],
-    ['전직1', '80,000']
-  ])
-})
-
-it('직업 분포와 직업별 평균 명성에서 眞이 붙지 않은 전직은 뺀다', async () => {
+it('직업별 명성은 각성 전직마다 막대를 두고 眞이 붙지 않은 전직은 뺀다', async () => {
   await render({
     ...stats,
     jobs: [
       ...stats.jobs,
-      {
-        jobId: 'job-2',
-        jobGrowId: 'grow-4',
-        jobName: '직업2',
-        jobGrowName: '전직4',
-        count: 500,
-        averageFame: 100000
-      }
+      { ...stats.jobs[2]!, jobGrowId: 'grow-4', jobGrowName: '전직4', count: 500, fameBuckets: [] }
     ]
   })
 
-  expect(rowsOf('직업 분포').map(([name]) => name)).toEqual(['전직1', '전직2', '전직3'])
-  expect(rowsOf('직업별 평균 명성').map(([name]) => name)).toEqual(['전직2', '전직1'])
+  expect(jobNamesOf()).toEqual(['전직1', '전직2', '전직3'])
 })
 
-it('두 통계 막대에 전직명을 표시하고 동명 전직에만 성별을 붙인다', async () => {
+it('직업별 명성 막대에 전직명을 쓰고 동명 전직에만 성별을 붙인다', async () => {
   await render({
     ...stats,
     jobs: [
-      { ...stats.jobs[0], jobName: '격투가(남)', jobGrowName: '眞 넨마스터' },
-      { ...stats.jobs[1], jobName: '격투가(여)', jobGrowName: '眞 넨마스터' },
-      { ...stats.jobs[2], jobName: '귀검사(남)', jobGrowName: '眞 웨펀마스터', averageFame: 70000 }
+      { ...stats.jobs[0]!, jobName: '격투가(남)', jobGrowName: '眞 넨마스터' },
+      { ...stats.jobs[1]!, jobName: '격투가(여)', jobGrowName: '眞 넨마스터' },
+      { ...stats.jobs[2]!, jobName: '귀검사(남)', jobGrowName: '眞 웨펀마스터' }
     ]
   })
 
-  expect(rowsOf('직업 분포').map(([name]) => name)).toEqual([
-    '넨마스터(남)',
-    '넨마스터(여)',
-    '웨펀마스터'
-  ])
-  expect(rowsOf('직업별 평균 명성').map(([name]) => name)).toEqual([
-    '넨마스터(여)',
-    '넨마스터(남)',
-    '웨펀마스터'
-  ])
+  expect(jobNamesOf()).toEqual(['넨마스터(남)', '넨마스터(여)', '웨펀마스터'])
+})
+
+it('직업별 명성 범례를 누르면 그 구간에 취소선을 긋고 다시 누르면 되돌린다', async () => {
+  await render(stats)
+
+  const legend = legendOf('8만 미만')
+  expect(legend.getAttribute('aria-pressed')).toBe('true')
+
+  await act(async () => legend.click())
+  expect(legend.getAttribute('aria-pressed')).toBe('false')
+  expect(legend.className).toContain('line-through')
+
+  await act(async () => legend.click())
+  expect(legend.getAttribute('aria-pressed')).toBe('true')
+  expect(legend.className).not.toContain('line-through')
 })
 
 it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
