@@ -82,7 +82,6 @@ export function RowBars({
   tone = 'count',
   max = Math.max(0, ...bars.map(({ value }) => value)),
   formatValue,
-  fill = false,
   nameWidth,
   barFromMd = false
 }: {
@@ -90,7 +89,6 @@ export function RowBars({
   tone?: BarTone
   max?: number
   formatValue?: (value: number) => string
-  fill?: boolean
   nameWidth?: number
   // true면 900px 미만에서 가운데 막대를 숨기고 이름과 값만 둔다.
   barFromMd?: boolean
@@ -154,12 +152,8 @@ export function RowBars({
   }
 
   return (
-    <div className={`relative ${fill ? 'flex grow flex-col' : ''}`}>
-      <ul
-        ref={listRef}
-        {...areaProps}
-        className={`m-0 list-none p-4 ${fill ? 'flex grow flex-col justify-around' : ''}`}
-      >
+    <div className="relative">
+      <ul ref={listRef} {...areaProps} className="m-0 list-none p-4">
         {bars.map((bar) => {
           const open = !collapsed.has(bar.key)
           const rowColumns = columnsOf(0)
@@ -168,7 +162,6 @@ export function RowBars({
             tone,
             formatValue: formatValue ?? formatInteger,
             countUp: formatValue === undefined,
-            thick: fill,
             linked,
             toggleSlot
           }
@@ -231,18 +224,13 @@ type RowLayout = Readonly<{
   tone: BarTone
   formatValue: (value: number) => string
   countUp: boolean
-  thick: boolean
   linked: boolean
   toggleSlot: boolean
   small?: boolean
   barFromMd?: boolean
 }>
 
-function railHeightOf(thick: boolean, small: boolean): string {
-  if (thick) {
-    return 'h-[10px]'
-  }
-
+function railHeightOf(small: boolean): string {
   if (small) {
     return 'h-[4px]'
   }
@@ -260,7 +248,6 @@ function BarRow({
     tone,
     formatValue,
     countUp,
-    thick,
     linked,
     toggleSlot,
     small = false,
@@ -304,18 +291,14 @@ function BarRow({
       <span data-chart-name="" className={`truncate ${small || base ? 'text-fg-muted' : ''}`}>
         {label ?? name}
       </span>
-      <span
-        className={`${RAIL_CLASS} ${railHeightOf(thick, small)}${barFromMd ? ' max-md:hidden' : ''}`}
-      >
+      <span className={`${RAIL_CLASS} ${railHeightOf(small)}${barFromMd ? ' max-md:hidden' : ''}`}>
         <span
           ref={markRef}
           data-chart-mark=""
           className="absolute top-0 left-0 block h-full w-(--bar-width) min-w-[2px]"
           style={{ '--bar-width': `${percent}%` }}
         >
-          <span
-            className={`${BODY_CLASS} ${thick ? 'rounded-[5px]' : 'rounded-[3px]'} ${fill} ${dimmed ? 'opacity-30' : ''}`}
-          />
+          <span className={`${BODY_CLASS} rounded-[3px] ${fill} ${dimmed ? 'opacity-30' : ''}`} />
         </span>
       </span>
       <span

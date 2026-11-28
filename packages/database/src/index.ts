@@ -173,8 +173,6 @@ export {
   finishClearRecordBackfill,
   readClearRecordBackfill,
   readClearRecordCursors,
-  readClearRecordRaidModes,
-  readClearRecordRaidStageCounts,
   recordClearRecordBackfillProgress,
   recordClearRecordCursors,
   recordClearRecords,
@@ -184,10 +182,6 @@ export type {
   ClearRecordBackfillProgress,
   ClearRecordCursor,
   ClearRecordInput,
-  ClearRecordRaidMode,
-  ClearRecordRaidSelection,
-  ClearRecordRaidStage,
-  ClearRecordStageCount,
   LegionClearRecordInput,
   RaidClearRecordInput
 } from './clear-record.js'

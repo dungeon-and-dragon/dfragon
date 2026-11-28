@@ -21,7 +21,6 @@ import {
   findStage,
   ratioBars,
   scoreBandColumns,
-  stageBars,
   type SplitCard,
   stageChoices,
   streakColumns,
@@ -291,7 +290,6 @@ function DetailStats({
     stats.weekOverWeek !== null ? weekGroupRows(stats.weekOverWeek, ({ fame }) => fame) : []
   const streaks = streakColumns(stats.streaks)
   const ratios = ratioBars(content, week)
-  const stages = stageBars(stats.stages)
   const adventures = splitAdventureColumns(
     adventureColumns(
       stats.adventures,
@@ -381,11 +379,6 @@ function DetailStats({
       </div>
       <div className={clearClasses.row}>
         <ScoreBandPanel scoreBands={stats.scoreBands} />
-        {stages.length > 0 && (
-          <Panel name="단계별 클리어 캐릭터">
-            <RowBars bars={stages} fill />
-          </Panel>
-        )}
       </div>
       <div className={clearClasses.row}>
         {hasAdventures && (
