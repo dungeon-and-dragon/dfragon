@@ -14,6 +14,7 @@ type JsonRequestOptions = {
   signal?: AbortSignal
   details?: boolean
   timeout?: number
+  cache?: RequestCache
 }
 
 export function createJsonRequest(
@@ -27,7 +28,7 @@ export function createJsonRequest(
   return async (
     path,
     schema,
-    { method = 'get', searchParams, json, signal, details = true, timeout } = {}
+    { method = 'get', searchParams, json, signal, details = true, timeout, cache } = {}
   ) => {
     try {
       signal?.throwIfAborted()
@@ -37,7 +38,9 @@ export function createJsonRequest(
         json,
         headers: { Accept: 'application/json' },
         signal,
-        timeout
+        timeout,
+        // ky는 undefined 값도 instance 옵션 위에 덮으므로, 주지 않으면 instance의 cache를 그대로 둔다.
+        ...(cache !== undefined && { cache })
       })
       const response = await request
       // ky의 body 메서드만 본문 읽기에도 timeout을 건다. await한 Response의 본문을 직접 읽으면 대기 상한이 없다.

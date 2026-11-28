@@ -36,9 +36,11 @@ function TooltipCard({
 
 function ItemTooltipBody({
   itemId,
+  iconUrl,
   role
 }: {
   itemId: string
+  iconUrl: string | null | undefined
   role: EnchantRole | undefined
 }): React.JSX.Element {
   const result = useItemDetail(itemId)
@@ -52,7 +54,7 @@ function ItemTooltipBody({
       return (
         <TooltipCard
           item={result.value}
-          icon={<ItemIcon itemId={itemId} rarity={null} size="sm" />}
+          icon={<ItemIcon itemId={itemId} src={iconUrl} rarity={null} size="sm" />}
           role={role}
         />
       )
@@ -62,11 +64,13 @@ function ItemTooltipBody({
 // role을 주지 않으면 카드 옵션을 딜러와 버퍼 기준 모두로 강조한다.
 export function ItemTooltip({
   itemId,
+  iconUrl,
   role,
   footer,
   children
 }: {
   itemId: string
+  iconUrl?: string | null
   role?: EnchantRole
   footer?: ReactNode
   children: ReactElement
@@ -76,7 +80,7 @@ export function ItemTooltip({
       <Tooltip.Trigger delay={0} closeDelay={0} render={children} />
       <Tooltip.Popup side="right" align="start" sideOffset={8}>
         <div className="tooltip-item">
-          <ItemTooltipBody itemId={itemId} role={role} />
+          <ItemTooltipBody itemId={itemId} iconUrl={iconUrl} role={role} />
           {footer}
         </div>
       </Tooltip.Popup>
