@@ -207,7 +207,7 @@ function LabItemName({
 
   if (item.itemId !== null) {
     return (
-      <ItemTooltip itemId={item.itemId} role={role} footer={footer}>
+      <ItemTooltip itemId={item.itemId} iconUrl={item.iconUrl} role={role} footer={footer}>
         {name}
       </ItemTooltip>
     )
