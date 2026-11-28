@@ -1,7 +1,8 @@
 import type { FameRankingFilter, ScoreSort } from '#entities/ranking'
 
 // API가 INTEGER 열과 비교하므로 0으로 시작하지 않는 9자리까지의 정수만 받는다.
-const RANGE_PATTERN = /^(0|[1-9]\d{0,8})$/
+export const MAX_RANGE_DIGITS = 9
+const RANGE_PATTERN = new RegExp(`^(0|[1-9]\\d{0,${MAX_RANGE_DIGITS - 1}})$`)
 
 export type SearchRange = Readonly<{ from?: number; to?: number }>
 

@@ -1,7 +1,7 @@
 import { Button, Select, TextField, TextFieldInput } from '@dfragon/ui'
 import { type ChangeEvent, type FormEvent, useState } from 'react'
 import type { ScoreSort } from '#entities/ranking'
-import { type SearchRange, searchRangeOf } from './search-range'
+import { MAX_RANGE_DIGITS, type SearchRange, searchRangeOf } from './search-range'
 
 const RANGE_INPUT = 'w-[112px] max-sm:w-[88px]'
 const FAME = 'fame'
@@ -14,12 +14,31 @@ const CRITERIA = [
 
 type CriterionValue = (typeof CRITERIA)[number]['value']
 
+const GROUPED = new Intl.NumberFormat('en-US')
+const NON_DIGIT_PATTERN = /\D/g
+const LEADING_ZEROS_PATTERN = /^0+(?=\d)/
+
 function textOf(bound: number | undefined): string {
   if (bound === undefined) {
     return ''
   }
 
   return String(bound)
+}
+
+function digitsOf(text: string): string {
+  return text
+    .replace(NON_DIGIT_PATTERN, '')
+    .replace(LEADING_ZEROS_PATTERN, '')
+    .slice(0, MAX_RANGE_DIGITS)
+}
+
+function groupedOf(digits: string): string {
+  if (digits === '') {
+    return ''
+  }
+
+  return GROUPED.format(Number(digits))
 }
 
 function sortOf(value: CriterionValue): ScoreSort | undefined {
@@ -55,11 +74,11 @@ export function SearchCriterionFilter({
   }
 
   function handleFromChange(event: ChangeEvent<HTMLInputElement>): void {
-    setFrom(event.target.value)
+    setFrom(digitsOf(event.target.value))
   }
 
   function handleToChange(event: ChangeEvent<HTMLInputElement>): void {
-    setTo(event.target.value)
+    setTo(digitsOf(event.target.value))
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
@@ -91,7 +110,7 @@ export function SearchCriterionFilter({
               aria-label={`최저 ${criterion.label}`}
               inputMode="numeric"
               autoComplete="off"
-              value={from}
+              value={groupedOf(from)}
               onChange={handleFromChange}
             />
           </TextField>
@@ -103,7 +122,7 @@ export function SearchCriterionFilter({
               aria-label={`최대 ${criterion.label}`}
               inputMode="numeric"
               autoComplete="off"
-              value={to}
+              value={groupedOf(to)}
               onChange={handleToChange}
             />
           </TextField>
