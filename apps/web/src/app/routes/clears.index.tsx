@@ -25,13 +25,17 @@ export const Route = createFileRoute('/clears/')({
         replace: true
       })
     }
+
+    // 개요는 최신 주만 보이므로 예전 주를 고른 주소는 주를 뺀 주소로 넘긴다.
+    if (week !== undefined) {
+      throw redirect({ to: '/clears', search: {}, replace: true })
+    }
   },
-  loaderDeps: ({ search: { week } }) => ({ week }),
-  // 고른 주의 개요는 클리어 통계를 받아야 어느 주인지 알 수 있어 이어서 받는다.
-  loader: async ({ context: { queryClient }, deps: { week } }) => {
+  // 최신 주의 개요는 클리어 통계를 받아야 어느 주인지 알 수 있어 이어서 받는다.
+  loader: async ({ context: { queryClient } }) => {
     await prefetchOnServer(queryClient, clearStatsQuery)
     const stats = queryClient.getQueryData(clearStatsQuery.queryKey)
-    const overviewQuery = stats !== undefined ? clearOverviewQueryOf(stats, week) : null
+    const overviewQuery = stats !== undefined ? clearOverviewQueryOf(stats) : null
 
     if (overviewQuery !== null) {
       await prefetchOnServer(queryClient, overviewQuery)

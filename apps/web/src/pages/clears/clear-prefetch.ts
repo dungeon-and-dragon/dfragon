@@ -11,9 +11,8 @@ type ClearDetailAddress = Readonly<{
 }>
 
 // 화면이 고르는 주와 컨텐츠를 같은 함수로 골라, 서버가 미리 받는 조회가 화면이 쓰는 조회와 같게 한다.
-export function clearOverviewQueryOf(stats: ClearStats, week: string | undefined) {
-  const weeks = overviewWeeks(clearContentsOf(stats))
-  const selected = findOverviewWeek(weeks, week)
+export function clearOverviewQueryOf(stats: ClearStats) {
+  const selected = overviewWeeks(clearContentsOf(stats)).at(-1)
   if (selected === undefined) {
     return null
   }

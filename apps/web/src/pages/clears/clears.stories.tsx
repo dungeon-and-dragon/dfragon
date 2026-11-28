@@ -16,11 +16,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 function Overview(): React.JSX.Element {
-  const [week, setWeek] = useState<string>()
-
   function openContent(): void {}
 
-  return <ClearOverviewScreen week={week} onWeekSelect={setWeek} onContentOpen={openContent} />
+  return <ClearOverviewScreen onContentOpen={openContent} />
 }
 
 function Detail({ initialContentKey }: Readonly<{ initialContentKey: string }>): React.JSX.Element {
