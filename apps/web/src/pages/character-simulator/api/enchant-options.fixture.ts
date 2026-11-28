@@ -3,6 +3,8 @@ import { type EnchantOptionsResponse, enchantOptionsSchema } from './useEnchantO
 
 type Slot = EnchantOptionsResponse['slots'][number]
 type Card = Slot['tiers'][number]['options'][number]['cards'][number]
+type SlotItemGroup = EnchantOptionsResponse['slotItems'][number]
+type SlotItemCard = SlotItemGroup['tiers'][number]['options'][number]['cards'][number]
 
 export const ENCHANT_CARD_ICON_PATH = `/lab/item-icon?${new URLSearchParams({ itemName: '합성 하의 보주', v: '1764135000000' })}`
 export const ENCHANT_CURRENCY_ICON_PATH = '/lab/currencies/1/icon?v=1764135000000'
@@ -173,7 +175,150 @@ const slots: Slot[] = [
   }
 ]
 
-export const enchantOptionsFixture: EnchantOptionsResponse = { slots }
+// 이름과 Neople id는 운영 실험실 목록에서, 가격은 지어낸 값이다. 장비 시뮬레이터 화면 fixture 딜러가 착용한 칭호, 크리쳐, 오라는 종결 플래티넘 칭호, 종결 크리쳐, 준종결 오라 선택지에 든다.
+function slotItemCard(
+  itemName: string,
+  itemId: string | null,
+  unitPrice: number | null,
+  gameItemName = itemName
+): SlotItemCard {
+  return {
+    itemName,
+    gameItemName,
+    itemId,
+    itemRarity: '레어',
+    iconPath: null,
+    unitPrice,
+    cost: null
+  }
+}
+
+export const TITLE_FINAL_PLATINUM = 'lab:title:final-platinum'
+export const TITLE_FINAL = 'lab:title:final'
+export const TITLE_SEMI = 'lab:title:semi'
+export const TITLE_BARRACKS = 'lab:title:barracks'
+export const CREATURE_FINAL = 'lab:creature:final'
+export const CREATURE_SEMI = 'lab:creature:semi'
+export const AURA_FINAL = 'lab:aura:final'
+export const AURA_SEMI = 'lab:aura:semi'
+
+const slotItems: SlotItemGroup[] = [
+  {
+    category: 'title',
+    tiers: [
+      {
+        tier: '종결',
+        options: [
+          {
+            id: TITLE_FINAL_PLATINUM,
+            cards: [
+              slotItemCard(
+                '프로스트의 전설 플래티넘',
+                '53ebb215d0249e099ed0cd456e7ff2e4',
+                27_999_999,
+                '프로스트의 전설 플래티넘[45Lv]'
+              ),
+              slotItemCard(
+                '군자의 사계 플래티넘',
+                '381f087017173f2184925ecc09b8eaf6',
+                33_333_333,
+                '군자의 사계 플래티넘[70Lv]'
+              )
+            ]
+          },
+          {
+            id: TITLE_FINAL,
+            cards: [
+              slotItemCard('군자의 사계', 'efef96c0ebc3ace0a7aed5bb82b4ff67', 26_970_000),
+              slotItemCard('프로스트의 전설', '42fd3d4144f788b37ed19c70281dcda6', 27_111_111)
+            ]
+          }
+        ]
+      },
+      {
+        tier: '준종결',
+        options: [
+          {
+            id: TITLE_SEMI,
+            cards: [slotItemCard('진정한 각성을 이룬 자', 'c89a01593a155a3cbaaf272084d8fb57', null)]
+          }
+        ]
+      },
+      {
+        tier: '배럭',
+        options: [
+          {
+            id: TITLE_BARRACKS,
+            cards: [
+              slotItemCard(
+                '세리아의 풍성한 선물 Ver.2',
+                '29f088750881775babb636fdfda1d705',
+                7_498_000
+              )
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    category: 'creature',
+    tiers: [
+      {
+        tier: '종결',
+        options: [
+          {
+            id: CREATURE_FINAL,
+            cards: [
+              slotItemCard(
+                '운명을 담는 재단사 알',
+                'bf04e5b415fea3989e8607efb4987d14',
+                26_699_999,
+                '운명을 담는 재단사'
+              )
+            ]
+          }
+        ]
+      },
+      {
+        tier: '준종결',
+        options: [
+          {
+            id: CREATURE_SEMI,
+            cards: [slotItemCard('멍멍이 잠수함', 'd2cd18e4d1d8a13d7e3a952fcf057b6d', 17_988_888)]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    category: 'aura',
+    tiers: [
+      {
+        tier: '종결',
+        options: [
+          {
+            id: AURA_FINAL,
+            cards: [slotItemCard('열대야의 추억', 'c6ca900e513cccb177890939de234227', 41_299_990)]
+          }
+        ]
+      },
+      {
+        tier: '준종결',
+        options: [
+          {
+            id: AURA_SEMI,
+            cards: [
+              slotItemCard('고결한 영혼의 잔상', '25e7652de779ccea0d8559a3e5bf7e01', 17_999_999)
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
+
+export const enchantOptionsFixture: EnchantOptionsResponse = { slots, slotItems }
 
 const parsedEnchantOptions = enchantOptionsSchema.parse(enchantOptionsFixture)
 

@@ -1,4 +1,5 @@
 import { WEAPON_RELEASE_MAX } from '@dfragon/lib/equipment-variants'
+import { LAB_ITEM_TIERS } from '@dfragon/lib/lab-items'
 import { Chip, NumberField, Select, Switch } from '@dfragon/ui'
 import { Fragment } from 'react'
 import {
@@ -15,17 +16,16 @@ import { ItemTooltip } from '#widgets/item-tooltip'
 import { MISSING_VALUE } from '#shared/lib/missing-value'
 import type { LabEnchantCard } from '#pages/character-simulator/api/useEnchantOptions'
 import {
-  type EnchantChoice,
   FULL_POTENCY,
   type SimulatorSlot,
   type SimulatorSlotItem,
-  type SlotDraft
+  type SlotDraft,
+  type SlotItemChoice
 } from '#pages/character-simulator/model/simulator-draft'
 import { TuneSelect } from './TuneSelect'
 
-// 마법부여 선택지 id는 `lab:부위:역할:hash`, 칭호, 크리쳐, 오라 묶음 id는 `분류:명성:아이템`, 장비 선택지 id는 32자리 itemId 모양이라 이 값과 겹치지 않는다.
+// 마법부여 선택지 id는 `lab:부위:역할:hash`, 칭호, 크리쳐, 오라 선택지 id는 `lab:종류:hash`, 장비 선택지 id는 32자리 itemId 모양이라 이 값과 겹치지 않는다.
 const CURRENT = 'current'
-const ENCHANT_TIERS: EnchantChoice['tier'][] = ['종결', '준종결', '배럭']
 const integer = new Intl.NumberFormat('ko-KR')
 const SIGNED: Intl.NumberFormatOptions = { signDisplay: 'always' }
 const CONTROL_LINE = 'flex h-control-sm items-center'
@@ -244,18 +244,72 @@ export function SlotItemControl({
   return (
     <div className="chip-list" role="group" aria-label={label}>
       {slotItem.wornChoiceId === null && (
-        <ItemChoiceChip value={CURRENT} item={worn} chosen={value} onChoose={changeItem} />
+        <>
+          <span className="chip-list-label">현재</span>
+          <ItemChoiceChip value={CURRENT} item={worn} chosen={value} onChoose={changeItem} />
+        </>
       )}
-      {slotItem.choices.map((choice) => (
-        <ItemChoiceChip
-          key={choice.id}
-          value={choice.id}
-          item={choice}
-          chosen={value}
-          onChoose={changeItem}
-        />
-      ))}
+      {slotItem.choicesStatus === 'error' && (
+        <p className="m-0 pt-2 text-xs text-fg-subtle">
+          {`${slotItem.slotName} 목록을 불러오지 못했습니다.`}
+        </p>
+      )}
+      {LAB_ITEM_TIERS.map((tier) => {
+        const choices = slotItem.choices.filter((choice) => choice.tier === tier)
+
+        if (choices.length === 0) {
+          return null
+        }
+
+        return (
+          <Fragment key={tier}>
+            <span className="chip-list-label">{tier}</span>
+            {choices.map((choice) => (
+              <SlotItemChoiceChip
+                key={choice.id}
+                choice={choice}
+                chosen={value}
+                onChoose={changeItem}
+              />
+            ))}
+          </Fragment>
+        )
+      })}
     </div>
+  )
+}
+
+function SlotItemChoiceChip({
+  choice,
+  chosen,
+  onChoose
+}: {
+  choice: SlotItemChoice
+  chosen: string
+  onChoose: (value: string) => void
+}): React.JSX.Element {
+  const { itemId, name, rarity, cards } = choice
+
+  return (
+    <ChoiceChip value={choice.id} chosen={chosen} onChoose={onChoose} ariaLabel={name}>
+      <ItemTooltip itemId={itemId}>
+        <span className="flex shrink-0">
+          <ItemIcon itemId={itemId} rarity={rarity} />
+        </span>
+      </ItemTooltip>
+      <span className="flex min-w-0 grow flex-col gap-1 text-xs">
+        <ItemName name={name} rarity={rarity} weight="normal" />
+        {cards.map((card) => (
+          <span
+            key={card.itemName}
+            className="flex items-center justify-between gap-3 text-2xs text-fg-muted"
+          >
+            <span className="truncate">{card.itemName}</span>
+            <EnchantCardPrice card={card} />
+          </span>
+        ))}
+      </span>
+    </ChoiceChip>
   )
 }
 
@@ -404,7 +458,7 @@ export function EnchantControl({
       {slot.enchantChoicesStatus === 'error' && (
         <p className="m-0 pt-2 text-xs text-fg-subtle">마법부여 목록을 불러오지 못했습니다.</p>
       )}
-      {ENCHANT_TIERS.map((tier) => {
+      {LAB_ITEM_TIERS.map((tier) => {
         const choices = slot.enchantChoices.filter((choice) => choice.tier === tier)
 
         if (choices.length === 0) {

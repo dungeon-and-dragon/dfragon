@@ -1,5 +1,5 @@
 import type { EnchantGradeSlot } from '@dfragon/lib/enchant-grades'
-import type { LabItemTier } from '@dfragon/lib/lab-items'
+import type { LabItemTier, SlotItemCategory } from '@dfragon/lib/lab-items'
 import {
   EQUIPMENT_VARIANT_SLOTS,
   type EquipmentSet,
@@ -21,7 +21,6 @@ import {
   weaponVariantsOf
 } from '@dfragon/lib/equipment-variants'
 import type { BuffSwitching } from '@dfragon/lib/buff-switching'
-import { findWornSlotItem, type SlotItemCategory, slotItemsOf } from '@dfragon/lib/slot-items'
 import {
   type CharacterDetailView,
   type EnchantOption,
@@ -33,7 +32,9 @@ import {
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import type {
   EnchantOptions,
-  LabEnchantCard
+  LabEnchantCard,
+  LabSlotItemCard,
+  LabSlotItemOption
 } from '#pages/character-simulator/api/useEnchantOptions'
 import { EMPTY_SLOT_NAME } from './empty-slot'
 import { equippedEnchantLabels, optionEnchantLabels } from './enchant-label'
@@ -174,11 +175,14 @@ export type SimulatorSlot = ItemView &
     weaponTypes: readonly WeaponTypeChoice[]
   }>
 
+/** name, itemId, rarity는 엔진에 넘길 게임 아이템이고, cards는 화면에 보일 실험실 아이템과 가격이다. */
 export type SlotItemChoice = Readonly<{
   id: string
+  tier: LabItemTier
   name: string
-  itemId: string | null
+  itemId: string
   rarity: ItemView['rarity']
+  cards: LabSlotItemCard[]
 }>
 
 export type SimulatorSlotItem = ItemView &
@@ -186,6 +190,7 @@ export type SimulatorSlotItem = ItemView &
     category: SlotItemCategory
     slotName: string
     choices: readonly SlotItemChoice[]
+    choicesStatus: EnchantChoicesStatus
     wornChoiceId: string | null
   }>
 
@@ -351,7 +356,7 @@ function enchantChoicesOf(
 }
 
 // API가 골드 가격이 있는 카드를 재화로 사는 카드보다 앞에 둔다.
-function shownCardsOf(cards: readonly LabEnchantCard[]): LabEnchantCard[] {
+function shownCardsOf<C extends LabEnchantCard>(cards: readonly C[]): C[] {
   const cheapest = cards[0]!
   const costCard = cards.find(({ cost }) => cost !== null)
 
@@ -675,31 +680,93 @@ function withoutLevel(name: string): string {
   return name.replace(LEVEL_SUFFIX, '')
 }
 
+function slotItemChoiceOfOption(tier: LabItemTier, option: LabSlotItemOption): SlotItemChoice {
+  // API는 엔진에 넘길 아이템을 찾은 카드가 하나 이상인 선택지만 준다.
+  const represented = option.cards.find((card) => card.itemId !== null)!
+  const name = withoutLevel(represented.gameItemName)
+  const rarity = itemRarityOfGrade(represented.itemRarity)
+  const cards = shownCardsOf(option.cards)
+
+  return { id: option.id, tier, name, itemId: represented.itemId!, rarity, cards }
+}
+
+type SlotItemOptions = Readonly<{
+  choices: SlotItemChoice[]
+  options: readonly Readonly<{ tier: LabItemTier; option: LabSlotItemOption }>[]
+}>
+
+function slotItemOptionsOf(
+  category: SlotItemCategory,
+  { options }: SimulatorEnchantOptions
+): SlotItemOptions {
+  const group = options?.slotItems.find((candidate) => candidate.category === category)
+  const tiered = (group?.tiers ?? []).flatMap(({ tier, options: tierOptions }) =>
+    tierOptions.map((option) => ({ tier, option }))
+  )
+  const choices = tiered.map(({ tier, option }) => slotItemChoiceOfOption(tier, option))
+
+  return { choices, options: tiered }
+}
+
+// 착용 아이템은 실험실 이름 대신 게임 아이템 이름이나 Neople id로 선택지의 카드와 맞춘다.
+function wornSlotItemChoiceOf(
+  options: SlotItemOptions['options'],
+  item: { readonly itemId: string; readonly itemName: string | null }
+): string | null {
+  const wornName = item.itemName !== null ? withoutLevel(item.itemName) : null
+  const found = options.find(({ option }) =>
+    option.cards.some(
+      (card) => card.itemId === item.itemId || withoutLevel(card.gameItemName) === wornName
+    )
+  )
+
+  if (found === undefined) {
+    return null
+  }
+
+  return found.option.id
+}
+
 function slotItemRow(
   category: SlotItemCategory,
   item: WornItem | null | undefined,
+  enchantOptions: SimulatorEnchantOptions,
   slotName: string | null = null
 ): SimulatorRow {
-  const choices = slotItemsOf(category).map(({ id, name, item: represented }) => {
-    const { itemId, rarity } = toItemView(represented)
-    const choiceName = withoutLevel(name)
-
-    return { id, name: choiceName, itemId, rarity }
-  })
+  const slotItemOptions = slotItemOptionsOf(category, enchantOptions)
+  const { choices } = slotItemOptions
+  const choicesStatus = enchantOptions.status
   const name = slotName ?? SLOT_ITEM_NAMES[category]
 
   if (item?.itemId == null) {
     const empty = { itemId: null, itemName: EMPTY_SLOT_NAME, rarity: null }
-    const slotItem = { ...empty, category, slotName: name, choices, wornChoiceId: null }
+    const slotItem = {
+      ...empty,
+      category,
+      slotName: name,
+      choices,
+      choicesStatus,
+      wornChoiceId: null
+    }
 
     return { kind: 'slotItem', slotItem }
   }
 
   const view = toItemView(item)
   const itemName = view.itemName !== null ? withoutLevel(view.itemName) : null
-  const wornChoiceId =
-    findWornSlotItem(category, { itemId: item.itemId, itemName: item.itemName })?.id ?? null
-  const slotItem = { ...view, itemName, category, slotName: name, choices, wornChoiceId }
+  const wornChoiceId = wornSlotItemChoiceOf(slotItemOptions.options, {
+    itemId: item.itemId,
+    itemName: item.itemName
+  })
+  const slotItem = {
+    ...view,
+    itemName,
+    category,
+    slotName: name,
+    choices,
+    choicesStatus,
+    wornChoiceId
+  }
 
   return { kind: 'slotItem', slotItem }
 }
@@ -812,7 +879,12 @@ export function toSimulatorRows(
     const item = detail.equipment.equipment.find((worn) => worn.slotId === slotId)
 
     if (slotId === TITLE_SLOT_ID) {
-      return slotItemRow('title', item, item?.slotName ?? EQUIPMENT_SLOT_NAMES[slotId])
+      return slotItemRow(
+        'title',
+        item,
+        enchantOptions,
+        item?.slotName ?? EQUIPMENT_SLOT_NAMES[slotId]
+      )
     }
 
     if (item === undefined) {
@@ -828,7 +900,11 @@ export function toSimulatorRows(
 
   const aura = detail.avatar.find(({ slotId }) => slotId === AURA_SLOT_ID)
 
-  return [...equipment, slotItemRow('creature', detail.creature), slotItemRow('aura', aura)]
+  return [
+    ...equipment,
+    slotItemRow('creature', detail.creature, enchantOptions),
+    slotItemRow('aura', aura, enchantOptions)
+  ]
 }
 
 function originalDraft(slot: SimulatorSlot): SlotDraft {
@@ -1018,13 +1094,14 @@ function changeSlot(
   return { ...changes, equipment: { ...others, [slot.slotId]: next } }
 }
 
+/** 고른 id가 받은 선택지에 없으면(공유 주소를 연 뒤 목록이 바뀌었거나 아직 받는 중) 착용한 아이템을 그대로 둔 것으로 본다. */
 export function slotItemChoiceOf(
   slotItem: SimulatorSlotItem,
   changes: SimulatorChanges
 ): string | null {
   const chosen = changes.slotItems[slotItem.category]
 
-  if (chosen === undefined) {
+  if (chosen === undefined || !slotItem.choices.some(({ id }) => id === chosen)) {
     return null
   }
 
@@ -1297,6 +1374,21 @@ export function simulationBody(
 
     return [toSimulationChange(row.slot, draftOf(row.slot, changes))]
   })
+  const slotItems = Object.fromEntries(
+    rows.flatMap((row) => {
+      if (row.kind !== 'slotItem') {
+        return []
+      }
+
+      const chosen = slotItemChoiceOf(row.slotItem, changes)
+
+      if (chosen === null || chosen === row.slotItem.wornChoiceId) {
+        return []
+      }
+
+      return [[row.slotItem.category, chosen]]
+    })
+  )
   // 서약이 없는 캐릭터는 본체를 고르기 전까지 서약 세트만 골라도 더할 서약이 없어 보내지 않는다.
   const oathChanges =
     oath?.body?.empty === true && changes.oath.body === null ? NO_OATH_CHANGES : changes.oath
@@ -1314,7 +1406,7 @@ export function simulationBody(
   return {
     ...equipmentSet,
     equipment,
-    ...changes.slotItems,
+    ...slotItems,
     ...avatarPreset,
     ...buffLevel,
     ...switchingEquipment,
