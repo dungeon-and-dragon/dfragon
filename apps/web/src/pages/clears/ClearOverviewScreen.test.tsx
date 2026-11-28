@@ -206,7 +206,6 @@ type Replies = Readonly<{
 }>
 
 type Handlers = Readonly<{
-  onWeekSelect?: (weekStart: string) => void
   onContentOpen?: (contentKey: string, weekStart: string) => void
 }>
 
@@ -249,21 +248,13 @@ function respond({
   )
 }
 
-function render(
-  weekStart: string | undefined,
-  replies: Replies = {},
-  { onWeekSelect = () => {}, onContentOpen = () => {} }: Handlers = {}
-): Promise<void> {
+function render(replies: Replies = {}, { onContentOpen = () => {} }: Handlers = {}): Promise<void> {
   respond(replies)
 
   return act(async () =>
     root.render(
       <TestQueryClient>
-        <ClearOverviewScreen
-          week={weekStart}
-          onWeekSelect={onWeekSelect}
-          onContentOpen={onContentOpen}
-        />
+        <ClearOverviewScreen onContentOpen={onContentOpen} />
       </TestQueryClient>
     )
   )
@@ -279,12 +270,8 @@ function loading(): boolean {
   return adventures != null && adventures.lastElementChild?.childElementCount === 0
 }
 
-async function open(
-  weekStart: string | undefined,
-  replies: Replies = {},
-  handlers: Handlers = {}
-): Promise<void> {
-  await render(weekStart, replies, handlers)
+async function open(replies: Replies = {}, handlers: Handlers = {}): Promise<void> {
+  await render(replies, handlers)
   await vi.waitFor(() => expect(loading()).toBe(false))
 }
 
@@ -299,12 +286,6 @@ function panel(name: string): HTMLElement | null {
 function panelNames(): string[] {
   return [...container.querySelectorAll('section[aria-label]')].map(
     (section) => section.getAttribute('aria-label') ?? ''
-  )
-}
-
-function wheelRows(): string[] {
-  return [...container.querySelectorAll('[aria-label="주 선택"] > *')].map(
-    (row) => row.textContent ?? ''
   )
 }
 
@@ -357,24 +338,23 @@ function click(element: Element): Promise<void> {
   })
 }
 
-it('받는 중에는 제목만 두고 주 선택과 패널은 두지 않는다', async () => {
-  await render(undefined, { stats: pending })
+it('받는 중에는 제목만 두고 패널은 두지 않는다', async () => {
+  await render({ stats: pending })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
-  expect(container.querySelector('[aria-label="주 선택"]')).toBeNull()
   expect(panelNames()).toEqual([])
 })
 
 it('조회가 실패하면 제목 줄과 오류 한 줄을 둔다', async () => {
-  await open(undefined, { stats: () => serverError('통계를 불러오지 못했습니다.') })
+  await open({ stats: () => serverError('통계를 불러오지 못했습니다.') })
 
   expect(container.querySelector('h1')?.textContent).toBe('클리어 집계')
   expect(container.querySelector('[role="alert"]')?.textContent).toBe('통계를 불러오지 못했습니다.')
 })
 
 it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개요를 부르지 않는다', async () => {
-  await open(undefined, {
+  await open({
     stats: () =>
       HttpResponse.json({
         contents: stats.contents.map((item) => ({ ...item, weeks: [] })),
@@ -386,12 +366,12 @@ it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개
   expect(requested).toEqual(['/stats/clears'])
 })
 
-it('주를 고르지 않으면 가장 최근 주를 가운데에 두고 가장 넓은 분모의 기준 명성과 캐릭터 수를 보인다', async () => {
-  await open(undefined)
+it('가장 최근 주만 주를 옮기는 휠 없이 보이고 가장 넓은 분모의 기준 명성과 캐릭터 수를 보인다', async () => {
+  await open()
 
-  expect(wheelRows()).toEqual(['11-05 ~ 11-11', '11-12 ~ 11-18집계 중', ''])
+  expect(container.querySelector('[aria-label="주 선택"]')).toBeNull()
   expect(container.querySelector('header')?.textContent).toBe(
-    '클리어 집계11-05 ~ 11-1111-12 ~ 11-18집계 중기준 명성104,292 이상캐릭터 수2,000'
+    '클리어 집계11-12 ~ 11-18기준 명성104,292 이상캐릭터 수2,000'
   )
   expect(requestsTo('/stats/clears/overview')).toEqual([
     `/stats/clears/overview?week=${LATEST_WEEK}`
@@ -400,7 +380,7 @@ it('주를 고르지 않으면 가장 최근 주를 가운데에 두고 가장 �
 })
 
 it('컨텐츠 카드는 출시가 최근인 것부터 일반과 하드를 한 장에 두고 클리어율, 지난주 대비 증감, 클리어 수를 적으며 각인된 악몽은 이름 아래 몬스터 이름을 적는다', async () => {
-  await open(undefined)
+  await open()
 
   expect(cards()).toEqual([
     '챌린지각인된 악몽더러운 피를 흘리는 자0.3%0.0%p6',
@@ -413,41 +393,18 @@ it('컨텐츠 카드는 출시가 최근인 것부터 일반과 하드를 한 �
   expect(changes).toEqual(['0.0%p', '▲ 0.3%p', '▼ 0.6%p', '0.0%p'])
 })
 
-it('휠의 이전 주와 다음 주를 누르면 그 주를 고르고, 고른 주가 바뀌면 카드와 개요를 그 주 값으로 다시 그린다', async () => {
-  const onWeekSelect = vi.fn()
-  await open(undefined, {}, { onWeekSelect })
-
-  await click(buttonNamed('11-05 ~ 11-11'))
-  expect(onWeekSelect).toHaveBeenCalledWith(LAST_CLOSED_WEEK)
-
-  await open(LAST_CLOSED_WEEK, {}, { onWeekSelect })
-
-  expect(wheelRows()).toEqual(['10-29 ~ 11-04', '11-05 ~ 11-11', '11-12 ~ 11-18집계 중'])
-  expect(requestsTo('/stats/clears/overview')).toEqual([
-    `/stats/clears/overview?week=${LATEST_WEEK}`,
-    `/stats/clears/overview?week=${LAST_CLOSED_WEEK}`
-  ])
-  await click(buttonNamed('11-12 ~ 11-18집계 중'))
-  expect(onWeekSelect).toHaveBeenLastCalledWith(LATEST_WEEK)
-  expect(cards()).toEqual([
-    '챌린지각인된 악몽더러운 피를 흘리는 자0.3%3',
-    '레이드무너진 성자 미카엘라하드5.7%▼ 0.4%p57일반10.6%0.0%p106',
-    '레이드만들어진 신 나벨하드4.0%0.0%p40'
-  ])
-})
-
-it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 고른 주로 상세를 연다', async () => {
+it('컨텐츠 카드를 누르면 그 컨텐츠 묶음과 최근 주로 상세를 연다', async () => {
   const onContentOpen = vi.fn()
-  await open(LAST_CLOSED_WEEK, {}, { onContentOpen })
+  await open({}, { onContentOpen })
 
   const card = [...container.querySelectorAll('nav[aria-label="컨텐츠"] > div > button')][1]!
   await click(card)
 
-  expect(onContentOpen).toHaveBeenCalledWith('michaela', LAST_CLOSED_WEEK)
+  expect(onContentOpen).toHaveBeenCalledWith('michaela', LATEST_WEEK)
 })
 
 it('주간 클리어율은 레이드의 하드와 일반 선을 함께 그리고 기간을 줄여 선이 빠져도 남은 컨텐츠의 색을 바꾸지 않는다', async () => {
-  await open(undefined)
+  await open()
 
   expect(panel('주간 클리어율')?.querySelector('[aria-label="단계"]')).toBeNull()
   const halfYear = legendMarks()
@@ -470,7 +427,7 @@ it('주간 클리어율은 레이드의 하드와 일반 선을 함께 그리고
 })
 
 it('명성 box plot은 분포가 있는 컨텐츠만 중앙값이 높은 순으로 둔다', async () => {
-  await open(undefined)
+  await open()
 
   const names = [
     ...(panel('클리어 캐릭터의 명성')?.querySelectorAll('li > span:first-child') ?? [])
@@ -483,7 +440,7 @@ it('명성 box plot은 분포가 있는 컨텐츠만 중앙값이 높은 순으�
 })
 
 it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 전직 8개와 낮은 전직 8개를 클리어율과 함께 둔다', async () => {
-  await open(undefined)
+  await open()
 
   const lists = [...(panel('전직별 클리어')?.querySelectorAll('[role="group"]') ?? [])].map(
     (list) => [
@@ -501,7 +458,7 @@ it('전직별 클리어는 첫 레이드를 기준으로 클리어율이 높은 
 })
 
 it('전직별 클리어 순위는 眞 각성 전 전직을 클리어율이 가장 높아도 두지 않는다', async () => {
-  await open(undefined, {
+  await open({
     overview: (selected) => {
       const overview = overviewOf(selected)
       const unawakened = { ...job(20, 2, 2), jobName: '아처', jobGrowName: '하이드라' }
@@ -524,13 +481,13 @@ it('전직별 클리어 순위는 眞 각성 전 전직을 클리어율이 가�
 })
 
 it('함께 깬 컨텐츠 패널은 두지 않는다', async () => {
-  await open(undefined)
+  await open()
 
   expect(panel('함께 깬 컨텐츠')).toBeNull()
 })
 
 it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주로 받아 1명부터 12명과 13명 이상으로 센다', async () => {
-  await open(undefined)
+  await open()
 
   expect(requestsTo('/stats/clears/michaela-hard')).toEqual([
     `/stats/clears/michaela-hard?week=${LATEST_WEEK}`
@@ -543,7 +500,7 @@ it('모험단 기준 클리어 횟수는 기준 컨텐츠의 상세를 그 주�
 })
 
 it('모험단 기준 클리어 횟수는 1~5명과 6명 이상을 나눠 각 묶음의 가장 큰 칸에 막대 높이를 맞춘다', async () => {
-  await open(undefined)
+  await open()
 
   const box = panel('모험단 기준 클리어 횟수')!
   const heights = [...box.querySelectorAll('li:not([aria-hidden])')].map((column) =>
@@ -555,7 +512,7 @@ it('모험단 기준 클리어 횟수는 1~5명과 6명 이상을 나눠 각 묶
 })
 
 it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async () => {
-  await open(undefined, {
+  await open({
     overview: (selected) =>
       HttpResponse.json({
         ...overviewOf(selected),
@@ -574,7 +531,7 @@ it('값이 없는 통계는 패널과 점수 전환을 두지 않는다', async 
 })
 
 it('개요 조회가 실패하면 카드와 주간 클리어율은 두고 오류 한 줄을 둔다', async () => {
-  await open(undefined, { overview: () => serverError('개요를 불러오지 못했습니다.') })
+  await open({ overview: () => serverError('개요를 불러오지 못했습니다.') })
 
   expect(cards()).toHaveLength(3)
   expect(panelNames()).toEqual(['주간 클리어율'])
@@ -595,7 +552,7 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
     '2026-04-22T21:00:00.000Z',
     recentWeeks([420, 400], 1000)
   )
-  await open(undefined, {
+  await open({
     stats: () => HttpResponse.json({ ...stats, legions: [{ ...apocalypse, entryFame: null }] })
   })
 
@@ -614,23 +571,8 @@ it('레기온 기록이 있으면 출시 순서에 맞춰 레기온 카드를 �
   ])
 })
 
-it('레이드 기록 없이 레기온 기록만 있는 주는 고를 주에 두지 않아, 그 주로 열면 가장 최근 주를 고른다', async () => {
-  const venus = content('legion-venus', 'legion', '베누스', '2025-02-05T21:00:00.000Z', [
-    week('2025-02-06', 300),
-    ...recentWeeks([500, 480])
-  ])
-  await open('2025-02-06', {
-    stats: () => HttpResponse.json({ ...stats, legions: [{ ...venus, entryFame: null }] })
-  })
-
-  expect(wheelRows()).toEqual(['11-05 ~ 11-11', '11-12 ~ 11-18집계 중', ''])
-  expect(requestsTo('/stats/clears/overview')).toEqual([
-    `/stats/clears/overview?week=${LATEST_WEEK}`
-  ])
-})
-
 it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프를 바꾸면 축이 그 점수 기준으로 바뀐다', async () => {
-  await open(undefined, {
+  await open({
     overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => ({ ...item, scores: { equipment, buff } }))
@@ -651,7 +593,7 @@ it('점수가 있는 주에는 장비 점수 카드를 두고, 장비와 버프�
 })
 
 it('한 가지 점수만 있으면 장비 점수 카드에 전환을 두지 않는다', async () => {
-  await open(undefined, {
+  await open({
     overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => ({
@@ -667,7 +609,7 @@ it('한 가지 점수만 있으면 장비 점수 카드에 전환을 두지 않�
 })
 
 it('전직 점수가 있으면 전직별 클리어에 명성, 장비 점수 전환을 두고, 장비 점수로 바꿔도 같은 전직 목록에 점수 분포를 그린다', async () => {
-  await open(undefined, {
+  await open({
     overview: (selected) => {
       const overview = overviewOf(selected)
       const contents = overview.contents.map((item) => {

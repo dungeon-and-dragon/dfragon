@@ -935,7 +935,7 @@ function serveClears(): void {
   )
 }
 
-it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 같은 주의 전체 개요로 돌아간다', async () => {
+it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 주를 뺀 전체 개요로 돌아간다', async () => {
   serveClears()
   window.history.replaceState(null, '', '/clears/michaela?week=2026-11-05')
   await act(async () => root.render(<WebApp host={host} />))
@@ -951,7 +951,18 @@ it('클리어 상세에서 고른 컨텐츠 카드를 다시 누르면 같은 �
   })
 
   await waitForPath('/clears')
-  expect(window.location.search).toBe('?week=2026-11-05')
+  expect(window.location.search).toBe('')
+})
+
+it('주를 고른 예전 클리어 개요 주소는 기록을 늘리지 않고 주를 뺀 주소로 바꾼다', async () => {
+  serveClears()
+  window.history.replaceState(null, '', '/clears?week=2026-11-05')
+  const historyLength = window.history.length
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() => expect(window.location.search).toBe(''))
+  expect(window.location.pathname).toBe('/clears')
+  expect(window.history.length).toBe(historyLength)
 })
 
 it('캐릭터 주소의 tab이 모르는 값이면 장비 탭을 연다', async () => {
