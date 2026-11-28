@@ -458,6 +458,13 @@ export type SkillChainLink = Readonly<{ name: string | null; icon: SkillIconImag
 
 export type SkillChain = Readonly<{ skills: readonly SkillChainLink[] }>
 
+// 저장소 소유자가 스킬 체인을 보이지 않기로 정한 직업이다.
+const NO_SKILL_CHAIN_JOB_NAMES: ReadonlySet<string> = new Set(['크리에이터', '다크나이트'])
+
+export function showsSkillChain(jobName: string | null): boolean {
+  return jobName === null || !NO_SKILL_CHAIN_JOB_NAMES.has(jobName)
+}
+
 export function skillChainOf(
   catalog: SkillWindowCatalog | null,
   character: SkillCharacter,

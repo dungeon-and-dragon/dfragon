@@ -4,6 +4,7 @@ import { ListBox } from '#shared/ui/ListBox'
 import {
   type SkillWindow,
   type SkillWindowCatalog,
+  showsSkillChain,
   skillWindowByPicks,
   useSkillWindowCatalog
 } from '#entities/catalog'
@@ -170,23 +171,26 @@ function skillColumnsOf(
   now: number
 ): SkillColumns {
   switch (result.status) {
-    case 'loading':
+    case 'loading': {
+      const chainSkeleton = showsSkillChain(grow.job.name) && (
+        <div aria-busy="true">
+          <div aria-hidden="true">
+            <SkillChainPanel>
+              <span className="skeleton h-[280px]" />
+            </SkillChainPanel>
+          </div>
+        </div>
+      )
+
       return {
         main: (
           <div aria-busy="true">
             <span aria-hidden="true" className="skeleton h-[480px]" />
           </div>
         ),
-        side: (
-          <div aria-busy="true">
-            <div aria-hidden="true">
-              <SkillChainPanel>
-                <span className="skeleton h-[280px]" />
-              </SkillChainPanel>
-            </div>
-          </div>
-        )
+        side: chainSkeleton
       }
+    }
     case 'error':
       return {
         main: (
@@ -215,9 +219,11 @@ function skillColumnsOf(
         main: <SkillWindowGrid skillWindow={board.skillWindow} source={source} />,
         side: (
           <>
-            <SkillChainPanel>
-              <SkillChainContent board={board} grow={grow} />
-            </SkillChainPanel>
+            {showsSkillChain(grow.job.name) && (
+              <SkillChainPanel>
+                <SkillChainContent board={board} grow={grow} />
+              </SkillChainPanel>
+            )}
             <SkillUpgradeContent board={board} />
           </>
         )

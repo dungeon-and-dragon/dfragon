@@ -11,6 +11,7 @@ export {
   buffSkillIconOf,
   EVOLUTION_NUMERALS,
   learnedSkillRowsOf,
+  showsSkillChain,
   skillChainOf,
   skillEvolutionBranchesOf,
   skillMarkOf,
