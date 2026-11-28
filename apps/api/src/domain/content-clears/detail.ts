@@ -121,8 +121,14 @@ function toWeekOverWeek(
   return { both, returned, left, first }
 }
 
-const WEEK_MOVE_FROM_ORDER: readonly ClearWeekMoveFrom[] = ['hard', 'normal', 'returned', 'first']
-const WEEK_MOVE_TO_ORDER: readonly ClearWeekMoveTo[] = ['hard', 'normal', 'left']
+const WEEK_MOVE_FROM_ORDER: readonly ClearWeekMoveFrom[] = [
+  'hard',
+  'normal',
+  'matching',
+  'returned',
+  'first'
+]
+const WEEK_MOVE_TO_ORDER: readonly ClearWeekMoveTo[] = ['hard', 'normal', 'matching', 'left']
 
 function toWeekMoves(counts: readonly ClearWeekMoveCount[]): ClearWeekMoveCount[] {
   return counts.toSorted((left, right) => {
