@@ -1344,6 +1344,23 @@ it('최저가 최대보다 크면 두 입력을 invalid로 두고 적용을 막�
   ])
 })
 
+it('필터 줄은 직업, 전직, 무기와 유일 장비를 한 줄에 둔 장비, 세트, 검색 기준 순이다', async () => {
+  await render(async () => rankingOf(1), {})
+
+  const headingTexts = [...container.querySelectorAll('h2')].map((heading) => heading.textContent)
+  expect(headingTexts.slice(0, 5)).toEqual(['직업', '전직', '장비', '세트', '검색 기준'])
+
+  const equipmentRow = [...container.querySelectorAll('[role="group"]')].find(
+    (group) => group.querySelector('h2')?.textContent === '장비'
+  )
+
+  expect(
+    [...(equipmentRow?.querySelectorAll('[role="combobox"]') ?? [])].map((select) =>
+      select.getAttribute('aria-label')
+    )
+  ).toEqual(['무기', '유일 장비'])
+})
+
 it('점수 기준에서 세트를 고르면 기준과 점수 범위를 그대로 두고 세트만 바꿔 넘긴다', async () => {
   const onFilterChange = vi.fn()
   await render(
