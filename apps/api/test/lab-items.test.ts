@@ -8,6 +8,7 @@ import type {
 } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { FetchCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
+import { LabItemService } from '../src/application/lab-items/index.js'
 import type { LabItemRepository } from '../src/application/lab-items/repository.js'
 import { DatabaseLabItemRepository } from '../src/infrastructure/database/lab-items.js'
 import { createApiHttpApp } from '../src/runtime/api-app.js'
@@ -696,6 +697,69 @@ test('아이템 아이콘은 이름으로 찾아 오래 캐시하게 내고, 없
   assert.equal((await request('/lab/item-icon?itemName=%ED%95%A9%EC%84%B1')).status, 404)
   assert.equal((await request('/lab/item-icon')).status, 404)
   assert.deepEqual(requested, [itemName, '합성'])
+})
+
+test('같은 이름과 v의 아이템 아이콘은 DB를 다시 읽지 않고, v가 바뀌면 새로 읽는다', async (t) => {
+  // 합성 바이트다.
+  const icons = [new Uint8Array([1]), new Uint8Array([2])]
+  const requested: string[] = []
+  const request = await startApi(t, [], undefined, async (name) => {
+    requested.push(name)
+
+    return { bytes: icons[requested.length - 1]!, contentType: 'image/png' }
+  })
+
+  const first = await request('/lab/item-icon?itemName=icon&v=1')
+  const repeated = await request('/lab/item-icon?itemName=icon&v=1')
+  const changed = await request('/lab/item-icon?itemName=icon&v=2')
+
+  assert.deepEqual(new Uint8Array(await first.arrayBuffer()), icons[0])
+  assert.deepEqual(new Uint8Array(await repeated.arrayBuffer()), icons[0])
+  assert.deepEqual(new Uint8Array(await changed.arrayBuffer()), icons[1])
+  assert.deepEqual(requested, ['icon', 'icon'])
+})
+
+test('같은 아이템 아이콘을 동시에 요청하면 DB를 한 번만 읽는다', async () => {
+  // 합성 바이트다.
+  const icon = { bytes: new Uint8Array([5]), contentType: 'image/png' }
+  const requested: string[] = []
+  const service = new LabItemService(
+    {
+      readLabItemPrices: async () => [],
+      readCurrencyIcon: async () => null,
+      readItemIcon: async (name) => {
+        requested.push(name)
+
+        return icon
+      }
+    },
+    async () => new Map()
+  )
+
+  const icons = await Promise.all([
+    service.readItemIcon('icon', '1'),
+    service.readItemIcon('icon', '1')
+  ])
+
+  assert.deepEqual(icons, [icon, icon])
+  assert.deepEqual(requested, ['icon'])
+})
+
+test('없는 아이템 아이콘은 기억하지 않아 나중에 넣은 아이콘을 낸다', async (t) => {
+  // 합성 바이트다.
+  const bytes = new Uint8Array([7])
+  let stored = false
+  const request = await startApi(t, [], undefined, async () =>
+    stored ? { bytes, contentType: 'image/png' } : null
+  )
+
+  const missing = await request('/lab/item-icon?itemName=icon&v=1')
+  stored = true
+  const added = await request('/lab/item-icon?itemName=icon&v=1')
+
+  assert.equal(missing.status, 404)
+  assert.equal(added.status, 200)
+  assert.deepEqual(new Uint8Array(await added.arrayBuffer()), bytes)
 })
 
 test('아이템 아이콘은 소유자 아이콘이 비어 있을 때 후보 아이콘을 낸다', async (t) => {
