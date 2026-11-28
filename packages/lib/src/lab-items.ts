@@ -86,3 +86,13 @@ export function isSameLabItem(category: string, savedName: string, itemName: str
 
   return isLabItemVariantGrouped(category) && labItemBaseName(savedName) === itemName
 }
+
+export const SLOT_ITEM_CATEGORIES = ['title', 'creature', 'aura'] as const
+
+export type SlotItemCategory = (typeof SLOT_ITEM_CATEGORIES)[number]
+
+export const SLOT_ITEM_LAB_CATEGORIES = {
+  title: 'TITLE',
+  creature: 'CREATURE',
+  aura: 'AURA'
+} as const satisfies Readonly<Record<SlotItemCategory, LabItemCategory>>

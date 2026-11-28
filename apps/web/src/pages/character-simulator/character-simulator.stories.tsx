@@ -156,7 +156,7 @@ async function changeSlotItems({ canvasElement }: { canvasElement: HTMLElement }
   await choose(canvasElement, '칭호')
   await toggle(canvasElement, '칭호 교체', '진정한 각성을 이룬 자')
   await choose(canvasElement, '크리쳐')
-  await toggle(canvasElement, '크리쳐 교체', 'SD 흰 구름 전령 에를리히')
+  await toggle(canvasElement, '크리쳐 교체', '멍멍이 잠수함')
   await choose(canvasElement, '오라')
   await toggle(canvasElement, '오라 교체', '열대야의 추억')
 }

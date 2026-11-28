@@ -97,8 +97,9 @@ export type LabItemPriceDetail = LabItemTooltipFields & {
 
 export type LabItemStatusLine = { name: string; value: string }
 
-// 같은 성능 판정에 쓰는 옵션 줄과 버프 줄은 후보에만 있다.
+// 같은 성능 판정에 쓰는 옵션 줄과 버프 줄은 후보에만 있다. itemName은 오라 상자, 크리쳐 알과 이은 후보면 실험실 이름과 다른 게임 아이템 이름이다.
 export type LabItemPriceCandidate = LabItemPriceDetail & {
+  itemName: string
   options: LabItemStatusLine[]
   buffLines: string[]
 }
@@ -121,7 +122,7 @@ type StoredLabItemPriceRow = Omit<
   LabItemPriceRow,
   'unitPrice' | 'cost' | 'detail' | 'candidate'
 > & {
-  hasCandidate: boolean
+  candidateName: string | null
   candidateDescription: string | null
   candidateRarity: string | null
   candidateIconUpdatedAt: Date | null
@@ -200,11 +201,12 @@ function toPriceDetail({
 }
 
 function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceCandidate | null {
-  if (!row.hasCandidate) {
+  if (row.candidateName === null) {
     return null
   }
 
   return {
+    itemName: row.candidateName,
     description: row.candidateDescription,
     itemRarity: row.candidateRarity,
     iconUpdatedAt: row.candidateIconUpdatedAt,
@@ -233,7 +235,7 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       CASE WHEN d."icon" IS NULL THEN NULL ELSE d."updated_at" END AS "detailIconUpdatedAt",
       d."item_type_detail" AS "detailItemTypeDetail", d."available_level" AS "detailAvailableLevel",
       d."fame" AS "detailFame", d."card" AS "detailCard",
-      candidate."item_name" IS NOT NULL AS "hasCandidate",
+      candidate."item_name" AS "candidateName",
       candidate."description" AS "candidateDescription", candidate."item_rarity" AS "candidateRarity",
       CASE
         WHEN candidate."icon" IS NULL OR candidate."item_name" <> i."item_name" THEN NULL
@@ -348,6 +350,7 @@ async function readCandidateVariantGroups(
       unitPrice,
       checkedAt: row.checkedAt,
       candidate: {
+        itemName: row.itemName,
         description: row.description,
         itemRarity: row.candidateRarity,
         iconUpdatedAt: row.iconUpdatedAt,

@@ -9,7 +9,6 @@ import {
   oathVariantOf,
   oathVariantsOf
 } from '@dfragon/lib/equipment-variants'
-import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
@@ -34,7 +33,14 @@ import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { storyItemDetail } from '#widgets/item-tooltip/api/item-detail.fixture'
 import { ITEM_DETAIL_URL, itemDetailHandlers } from '#widgets/item-tooltip/api/item-detail.handlers'
-import { DEALER_PANTS_FINAL } from './api/enchant-options.fixture'
+import {
+  AURA_FINAL,
+  CREATURE_SEMI,
+  DEALER_PANTS_FINAL,
+  TITLE_BARRACKS,
+  TITLE_FINAL,
+  TITLE_SEMI
+} from './api/enchant-options.fixture'
 import { enchantOptionsHandlers } from './api/enchant-options.handlers'
 import { simulationScore, withSwitchingEquipment } from './api/simulation.fixture'
 import { simulationUrl } from './api/simulation.handlers'
@@ -219,6 +225,42 @@ function buttonOf(label: string, name: string): HTMLButtonElement {
 
 function pressedButton(label: string): HTMLButtonElement | null {
   return control(label).querySelector<HTMLButtonElement>('button[aria-pressed="true"]')
+}
+
+// 칭호, 크리쳐, 오라 선택지는 버튼 글자에 카드 이름과 가격이 붙어, 게임 아이템 이름인 aria-label로 부른다.
+function slotItemNameOf(button: HTMLButtonElement): string | null {
+  const label = button.getAttribute('aria-label')
+
+  if (label !== null) {
+    return label
+  }
+
+  return button.textContent
+}
+
+function slotItemNames(label: string): (string | null)[] {
+  return buttonsIn(label).map(slotItemNameOf)
+}
+
+function pressedSlotItem(label: string): string | null {
+  const pressed = pressedButton(label)
+
+  if (pressed === null) {
+    return null
+  }
+
+  return slotItemNameOf(pressed)
+}
+
+function slotItemButton(label: string, name: string): HTMLButtonElement {
+  const found = buttonsIn(label).find((button) => slotItemNameOf(button) === name)
+  expect(found, name).toBeDefined()
+
+  return found!
+}
+
+async function pressSlotItem(label: string, name: string): Promise<void> {
+  await act(async () => slotItemButton(label, name).click())
 }
 
 function pressedIn(label: string): string | null {
@@ -533,25 +575,51 @@ it('칭호는 무기 다음 자리에, 크리쳐와 오라는 장비 뒤에 두�
 
   await choose('칭호')
 
-  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
+  expect(pressedSlotItem('칭호 교체')).toBe('프로스트의 전설 플래티넘')
 
   await choose('크리쳐')
 
-  expect(pressedIn('크리쳐 교체')).toBe('운명을 담는 재단사')
+  expect(pressedSlotItem('크리쳐 교체')).toBe('운명을 담는 재단사')
 
   await choose('오라')
 
-  expect(pressedIn('오라 교체')).toBe('스노우메이지 캐슬')
+  expect(pressedSlotItem('오라 교체')).toBe('고결한 영혼의 잔상')
 
   await choose('칭호')
-  expect(buttonNames('칭호 교체')).toEqual(slotItemsOf('title').map(({ name }) => name))
-  expect(buttonsIn('칭호 교체').map((button) => iconsIn(button))).toEqual(
-    slotItemsOf('title').map(({ item }) => [iconUrl(item.itemId)])
+  expect(slotItemNames('칭호 교체')).toEqual([
+    '프로스트의 전설 플래티넘',
+    '군자의 사계',
+    '진정한 각성을 이룬 자',
+    '세리아의 풍성한 선물 Ver.2'
+  ])
+  expect(buttonsIn('칭호 교체').map((button) => iconsIn(button))).toEqual([
+    [iconUrl('53ebb215d0249e099ed0cd456e7ff2e4')],
+    [iconUrl('efef96c0ebc3ace0a7aed5bb82b4ff67')],
+    [iconUrl('c89a01593a155a3cbaaf272084d8fb57')],
+    [iconUrl('29f088750881775babb636fdfda1d705')]
+  ])
+})
+
+it('칭호 선택지는 등급별로 묶고 버튼마다 실험실 아이템 이름과 경매장 가격을 보인다', async () => {
+  await render(characterDetailFixture('dealer'))
+  await waitForScores(UNCHANGED_SCORES)
+
+  await choose('칭호')
+
+  expect(
+    [...control('칭호 교체').querySelectorAll('.chip-list-label')].map(
+      ({ textContent }) => textContent
+    )
+  ).toEqual(['종결', '준종결', '배럭'])
+  expect(slotItemButton('칭호 교체', '군자의 사계').textContent).toBe(
+    '군자의 사계군자의 사계26,970,000'
+  )
+  expect(slotItemButton('칭호 교체', '진정한 각성을 이룬 자').textContent).toBe(
+    `진정한 각성을 이룬 자진정한 각성을 이룬 자${MISSING_VALUE}`
   )
 })
 
 it('착용 아이템이 속한 선택지를 다시 누르면 칭호를 바꾸지 않은 상태로 돌아간다', async () => {
-  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -560,22 +628,22 @@ it('착용 아이템이 속한 선택지를 다시 누르면 칭호를 바꾸지
   ])
 
   await choose('칭호')
-  await press('칭호 교체', titleItem!.name)
-  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: titleItem!.id }))
-  await act(async () => buttonOf('칭호 교체', '프로스트의 전설 플래티넘').click())
+  await pressSlotItem('칭호 교체', '진정한 각성을 이룬 자')
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: TITLE_SEMI }))
+  await pressSlotItem('칭호 교체', '프로스트의 전설 플래티넘')
 
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,000,000'],
     ['차이', '0']
   ])
-  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
+  expect(pressedSlotItem('칭호 교체')).toBe('프로스트의 전설 플래티넘')
   expect(resetButton().disabled).toBe(true)
 })
 
 it('선택지에 없는 착용 칭호는 레벨 꼬리를 뗀 이름의 착용 버튼을 첫 버튼으로 켜 둔다', async () => {
   const detail = characterDetailFixture('dealer')
-  // 849 명성의 플래티넘 칭호는 선택 목록에 없다. itemId는 합성 값이다.
+  // 849 명성의 플래티넘 칭호는 실험실 선택지에 없다. itemId는 합성 값이다.
   const worn = { itemId: 'f'.repeat(32), itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]' }
   await render({
     ...detail,
@@ -598,16 +666,18 @@ it('선택지에 없는 착용 칭호는 레벨 꼬리를 뗀 이름의 착용 �
 
   await choose('칭호')
 
-  expect(buttonNames('칭호 교체')).toEqual([
+  expect(slotItemNames('칭호 교체')).toEqual([
     '진정한 각성을 이룬 자 플래티넘',
-    ...slotItemsOf('title').map(({ name }) => name)
+    '프로스트의 전설 플래티넘',
+    '군자의 사계',
+    '진정한 각성을 이룬 자',
+    '세리아의 풍성한 선물 Ver.2'
   ])
-  expect(pressedIn('칭호 교체')).toBe('진정한 각성을 이룬 자 플래티넘')
+  expect(pressedSlotItem('칭호 교체')).toBe('진정한 각성을 이룬 자 플래티넘')
   expect(iconsIn(pressedButton('칭호 교체')!)).toEqual([iconUrl(worn.itemId)])
 })
 
 it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보를 tooltip으로 보이고 고르지는 않는다', async () => {
-  const [titleItem] = slotItemsOf('title')
   const requestedItemIds: string[] = []
   await render(characterDetailFixture('dealer'))
   server.use(
@@ -624,7 +694,7 @@ it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보
     ['차이', '0']
   ])
   await choose('칭호')
-  const icon = buttonOf('칭호 교체', titleItem!.name).querySelector('img')!.parentElement!
+  const icon = slotItemButton('칭호 교체', '군자의 사계').querySelector('img')!.parentElement!
 
   // Base UI Tooltip은 trigger의 mouseenter를 직접 듣는다.
   await act(async () => {
@@ -634,12 +704,11 @@ it('선택 버튼의 아이콘에 마우스를 올리면 그 아이템의 정보
   await vi.waitFor(() => {
     expect(document.body.textContent).toContain('레벨제한 115')
   })
-  expect(requestedItemIds).toEqual([titleItem!.item.itemId])
-  expect(pressedIn('칭호 교체')).toBe('프로스트의 전설 플래티넘')
+  expect(requestedItemIds).toEqual(['efef96c0ebc3ace0a7aed5bb82b4ff67'])
+  expect(pressedSlotItem('칭호 교체')).toBe('프로스트의 전설 플래티넘')
 })
 
 it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 고른다', async () => {
-  const [, secondTitle, thirdTitle] = slotItemsOf('title')
   await render(characterDetailFixture('dealer'))
   server.use(itemDetailHandlers.detail)
   await waitForScores([
@@ -649,12 +718,12 @@ it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 �
   ])
 
   await choose('칭호')
-  await act(async () => buttonOf('칭호 교체', secondTitle!.name).querySelector('img')!.click())
+  await act(async () => slotItemButton('칭호 교체', '군자의 사계').querySelector('img')!.click())
 
-  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: secondTitle!.id }))
-  expect(pressedIn('칭호 교체')).toBe(secondTitle!.name)
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: TITLE_FINAL }))
+  expect(pressedSlotItem('칭호 교체')).toBe('군자의 사계')
 
-  const icon = buttonOf('칭호 교체', thirdTitle!.name).querySelector('img')!
+  const icon = slotItemButton('칭호 교체', '진정한 각성을 이룬 자').querySelector('img')!
   const touch = new PointerEvent('pointerdown', {
     bubbles: true,
     cancelable: true,
@@ -665,13 +734,11 @@ it('선택 버튼의 아이콘을 눌러도 터치로 탭해도 그 버튼을 �
     icon.click()
   })
 
-  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: thirdTitle!.id }))
-  expect(pressedIn('칭호 교체')).toBe(thirdTitle!.name)
+  await vi.waitFor(() => expect(bodies.at(-1)).toEqual({ equipment: [], title: TITLE_SEMI }))
+  expect(pressedSlotItem('칭호 교체')).toBe('진정한 각성을 이룬 자')
 })
 
 it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수를 새 결과로 바꾼다', async () => {
-  // 최상위 칭호 둘은 착용 칭호가 속한 선택지이거나 그 이름과 앞부분이 같아 이름으로 고를 수 없다.
-  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -680,26 +747,21 @@ it('칭호를 고르면 빈 equipment와 고른 칭호 id를 요청하고 점수
   ])
 
   await choose('칭호')
-  await press('칭호 교체', titleItem!.name)
+  await pressSlotItem('칭호 교체', '세리아의 풍성한 선물 Ver.2')
 
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,001,000'],
     ['차이', '+1,000']
   ])
-  expect(bodies.at(-1)).toEqual({ equipment: [], title: titleItem!.id })
-  expect(pressedIn('칭호 교체')).toBe(titleItem!.name)
+  expect(bodies.at(-1)).toEqual({ equipment: [], title: TITLE_BARRACKS })
+  expect(pressedSlotItem('칭호 교체')).toBe('세리아의 풍성한 선물 Ver.2')
   const titleIcons = iconsIn(pressedButton('칭호 교체')!)
-  expect(titleIcons).toEqual([iconUrl(titleItem!.item.itemId)])
+  expect(titleIcons).toEqual([iconUrl('29f088750881775babb636fdfda1d705')])
   expect(resetButton().disabled).toBe(false)
 })
 
 it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 넣고, 초기화하면 모두 되돌린다', async () => {
-  // 최상위 크리쳐 둘은 착용 크리쳐가 속한 선택지이거나 그 이름과 앞부분이 같아 이름으로 고를 수 없다.
-  const creatureItem = slotItemsOf('creature').find(
-    ({ name }) => name === 'SD 흰 구름 전령 에를리히'
-  )
-  const [auraItem] = slotItemsOf('aura')
   await render(characterDetailFixture('dealer'))
   await waitForScores([
     ['현재', '1,000,000'],
@@ -709,9 +771,9 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
 
   await step('무기 수치 올리기', 1)
   await choose('크리쳐')
-  await press('크리쳐 교체', creatureItem!.name)
+  await pressSlotItem('크리쳐 교체', '멍멍이 잠수함')
   await choose('오라')
-  await press('오라 교체', auraItem!.name)
+  await pressSlotItem('오라 교체', '열대야의 추억')
 
   await waitForScores([
     ['현재', '1,000,000'],
@@ -722,14 +784,14 @@ it('장비 수치와 크리쳐, 오라를 함께 바꾸면 한 요청에 모두 
     equipment: [
       { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }
     ],
-    creature: creatureItem!.id,
-    aura: auraItem!.id
+    creature: CREATURE_SEMI,
+    aura: AURA_FINAL
   })
 
   await act(async () => resetButton().click())
 
   expect(rowOf('크리쳐').querySelectorAll('td')[1]!.textContent).toBe('운명을 담는 재단사')
-  expect(pressedIn('오라 교체')).toBe('스노우메이지 캐슬')
+  expect(pressedSlotItem('오라 교체')).toBe('고결한 영혼의 잔상')
   await waitForScores([
     ['현재', '1,000,000'],
     ['변경 후', '1,000,000'],
@@ -1909,6 +1971,19 @@ it('마법부여 목록을 받지 못해도 현재 줄을 빈 아이콘 칸으�
   ])
 })
 
+it('실험실 목록을 받지 못하면 칭호는 착용 칭호 버튼과 실패 문구만 보인다', async () => {
+  server.use(enchantOptionsHandlers.failure)
+  await render(characterDetailFixture('dealer'))
+  await expect.poll(() => rowsIn('장비').length).toBeGreaterThan(0)
+
+  await choose('칭호')
+
+  await expect
+    .poll(() => control('칭호 교체').textContent)
+    .toContain('칭호 목록을 불러오지 못했습니다.')
+  expect(slotItemNames('칭호 교체')).toEqual(['프로스트의 전설 플래티넘'])
+})
+
 it('마법부여 목록을 받는 동안에는 현재 줄만 빈 아이콘 칸으로 둔다', async () => {
   server.use(enchantOptionsHandlers.loading)
   await openDealerPants()
@@ -1927,7 +2002,6 @@ async function reopen(detail: CharacterDetailView, saved: SavedChangesProps): Pr
 
 it('바꾼 값을 주소에 남기고, 그 주소로 다시 열면 같은 값으로 같은 변경을 요청한다', async () => {
   const detail = characterDetailFixture('dealer')
-  const titleItem = slotItemsOf('title').find(({ name }) => name === '진정한 각성을 이룬 자')
   const saves: (string | undefined)[] = []
   await render(detail, scoresFor, () => HttpResponse.json(detail), {
     onChangesSave: (saved) => saves.push(saved)
@@ -1941,7 +2015,7 @@ it('바꾼 값을 주소에 남기고, 그 주소로 다시 열면 같은 값으
   await choose('하의')
   await press('하의 마법부여', '최종 데미지 증가 +3%')
   await choose('칭호')
-  await press('칭호 교체', titleItem!.name)
+  await pressSlotItem('칭호 교체', '진정한 각성을 이룬 자')
   await chooseOath('세트')
   await press('서약 세트', '어둠에 잠긴 그림자 서약')
   await chooseCrystal(7)

@@ -147,7 +147,10 @@ function restoreRows(
       return restored
     }
 
-    return simulatorReducer(restored, { type: 'slotItem', slotItem: row.slotItem, id })
+    // 칭호, 크리쳐, 오라 선택지도 실험실 목록에서 따로 받아 아직 없을 수 있어, 고른 id를 그대로 두고 slotItemChoiceOf가 거른다.
+    const slotItems = { ...restored.slotItems, [row.slotItem.category]: id }
+
+    return { ...restored, slotItems }
   }, changes)
 }
 

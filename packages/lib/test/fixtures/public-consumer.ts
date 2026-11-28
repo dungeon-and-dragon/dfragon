@@ -75,12 +75,6 @@ import {
   type OathCrystal
 } from '@dfragon/lib/equipment-variants'
 import {
-  findSlotItem,
-  slotItemsOf,
-  type SlotItem,
-  type SlotItemCategory
-} from '@dfragon/lib/slot-items'
-import {
   avatarPresetNeedsMainStat,
   findAvatarPreset,
   type AvatarEmblem,
@@ -214,18 +208,6 @@ export function enchantCards(entries: readonly EnchantEntry[], mainStat: Enchant
   const display: readonly EnchantDisplayStatus[] = displayStatusOf(chosen)
 
   return { labels, needsMainStat, display }
-}
-
-export function slotItemNames(category: SlotItemCategory, id: string) {
-  const items: readonly SlotItem[] = slotItemsOf(category)
-  const names = items.map((slotItem) => slotItem.name)
-  const found: SlotItem | null = findSlotItem(category, id)
-
-  if (found === null) {
-    return { names, itemId: null }
-  }
-
-  return { names, itemId: found.item.itemId }
 }
 
 export function equipmentVariantItems(

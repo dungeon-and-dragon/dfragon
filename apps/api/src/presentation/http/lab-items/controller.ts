@@ -31,9 +31,9 @@ export class LabItemController {
 
     routes.get('/enchant-options', (c) =>
       respondUnlessDisconnected(c, async (signal) => {
-        const options = await this.service.enchantOptions(signal)
+        const [options, slotItems] = await this.service.simulatorOptions(signal)
 
-        return c.json(toEnchantOptionsResponse(options))
+        return c.json(toEnchantOptionsResponse(options, slotItems))
       })
     )
 
