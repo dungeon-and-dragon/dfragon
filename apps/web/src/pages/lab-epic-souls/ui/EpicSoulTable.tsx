@@ -22,7 +22,6 @@ const EDGE_CELL = 'px-0'
 // 검색 화면의 세트 열과 같은 폭이다.
 const SET_COLUMN = 'w-[160px] max-sm:hidden'
 const SET_CELL = 'py-0 max-sm:hidden'
-// 600px 미만에서는 세트, 명성, 점수 열을 숨기고 명성과 점수를 캐릭터 칸 둘째 줄에 둔다.
 const WIDE_ONLY = 'max-sm:hidden'
 const SPANNED_COLUMNS = 5
 
