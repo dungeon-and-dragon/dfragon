@@ -9,5 +9,5 @@ export {
   toLatestContentsMinFame,
   toPopulationMinFame
 } from './contents.js'
-export type { ClearContent, ClearStagePair } from './contents.js'
+export type { ClearContent } from './contents.js'
 export { CLEAR_LEGIONS } from './legions.js'

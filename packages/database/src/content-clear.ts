@@ -599,18 +599,20 @@ export type ClearWeekGroupSample = ClearFameQuantiles & {
   cleared: number
 }
 
-export type ClearStageMoveSelection = {
+export type ClearWeekMoveSelection = {
   hardContentId: string
   normalContentId: string
   weekStart: Date
   previousWeekStart: Date
 }
 
-export type ClearStagePrevious = 'same' | 'other' | 'none'
+export type ClearWeekMoveFrom = 'hard' | 'normal' | 'returned' | 'first'
 
-export type ClearStageMoveCount = {
-  contentId: string
-  previous: ClearStagePrevious
+export type ClearWeekMoveTo = 'hard' | 'normal' | 'left'
+
+export type ClearWeekMoveCount = {
+  from: ClearWeekMoveFrom
+  to: ClearWeekMoveTo
   characters: number
 }
 
@@ -734,41 +736,46 @@ export function readContentClearWeekGroups(
     GROUP BY clear."group"`
 }
 
-// 지난주에 두 단계를 모두 깼으면 같은 단계로 센다.
-export function readContentClearStageMoves(
+// 한 주에 두 단계를 모두 깬 캐릭터는 하드로 센다. 두 주 모두 깨지 않은 캐릭터는 세지 않는다.
+export function readContentClearWeekMoves(
   client: DatabaseClient,
-  { hardContentId, normalContentId, weekStart, previousWeekStart }: ClearStageMoveSelection
-): Promise<ClearStageMoveCount[]> {
-  return client.$queryRaw<ClearStageMoveCount[]>`
-    SELECT
-      clear.content_id AS "contentId",
-      CASE
-        WHEN EXISTS (
-          SELECT 1
-          FROM content_clears previous
-          WHERE previous.content_id = clear.content_id
-            AND previous.server_id = clear.server_id
-            AND previous.character_id = clear.character_id
-            AND previous.week_start = ${previousWeekStart}
-        ) THEN 'same'
-        WHEN EXISTS (
-          SELECT 1
-          FROM content_clears previous
-          WHERE previous.content_id = CASE clear.content_id
-              WHEN ${hardContentId} THEN ${normalContentId}
-              ELSE ${hardContentId}
-            END
-            AND previous.server_id = clear.server_id
-            AND previous.character_id = clear.character_id
-            AND previous.week_start = ${previousWeekStart}
-        ) THEN 'other'
-        ELSE 'none'
-      END AS previous,
-      count(*)::int AS characters
-    FROM content_clears clear
-    WHERE clear.content_id IN (${hardContentId}, ${normalContentId})
-      AND clear.week_start = ${weekStart}
-    GROUP BY 1, 2`
+  { hardContentId, normalContentId, weekStart, previousWeekStart }: ClearWeekMoveSelection
+): Promise<ClearWeekMoveCount[]> {
+  const stageWeekSql = (week: Date) => Prisma.sql`
+    SELECT server_id, character_id, bool_or(content_id = ${hardContentId}) AS hard
+    FROM content_clears
+    WHERE content_id IN (${hardContentId}, ${normalContentId}) AND week_start = ${week}
+    GROUP BY server_id, character_id`
+
+  return client.$queryRaw<ClearWeekMoveCount[]>`
+    WITH current_week AS (${stageWeekSql(weekStart)}),
+    previous_week AS (${stageWeekSql(previousWeekStart)}),
+    moves AS (
+      SELECT
+        CASE
+          WHEN previous_week.server_id IS NOT NULL
+            THEN CASE WHEN previous_week.hard THEN 'hard' ELSE 'normal' END
+          WHEN EXISTS (
+            SELECT 1
+            FROM content_clears earlier
+            WHERE earlier.content_id IN (${hardContentId}, ${normalContentId})
+              AND earlier.server_id = current_week.server_id
+              AND earlier.character_id = current_week.character_id
+              AND earlier.week_start < ${previousWeekStart}
+          ) THEN 'returned'
+          ELSE 'first'
+        END AS "from",
+        CASE
+          WHEN current_week.server_id IS NULL THEN 'left'
+          WHEN current_week.hard THEN 'hard'
+          ELSE 'normal'
+        END AS "to"
+      FROM current_week
+      FULL JOIN previous_week USING (server_id, character_id)
+    )
+    SELECT "from", "to", count(*)::int AS characters
+    FROM moves
+    GROUP BY "from", "to"`
 }
 
 // 이번 주부터 거슬러 n번째 기록이 정확히 n-1주 전이면 그 n주는 끊기지 않고 이어진다.

@@ -7,18 +7,18 @@ import type {
   ClearJobScoreSample,
   ClearRecordStageCount,
   ClearScoreBandCount,
-  ClearStageMoveCount,
-  ClearStagePrevious,
   ClearStreakCount,
   ClearTimeCount,
   ClearWeekGroup,
   ClearWeekGroupSample,
   ClearWeekGroupScoreSample,
+  ClearWeekMoveCount,
+  ClearWeekMoveFrom,
+  ClearWeekMoveTo,
   StoredClearPopulation
 } from '@dfragon/database'
 import { RAID_STAGE_ORDER } from '@dfragon/server-core/domain/raid-stage.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
-import type { ClearStagePair } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearFameDistribution,
   type ClearJobStats,
@@ -47,11 +47,6 @@ export type ClearWeekGroupStats = {
 
 export type ClearScoreBand = Omit<ClearScoreBandCount, 'kind'>
 
-export type ClearStageMoves = {
-  hard: Record<ClearStagePrevious, number>
-  normal: Record<ClearStagePrevious, number>
-}
-
 export type ClearContentStats = ClearContentHeader &
   ClearTimes & {
     week: ClearWeek | null
@@ -60,13 +55,13 @@ export type ClearContentStats = ClearContentHeader &
     weeklyClears: ClearWeeklyClear[]
     fameBands: ClearFameBandCount[]
     weekOverWeek: Record<ClearWeekGroup, ClearWeekGroupStats> | null
-    stageMoves: ClearStageMoves | null
+    weekMoves: ClearWeekMoveCount[] | null
     streaks: ClearStreakCount[] | null
     stages: ClearRecordStageCount[] | null
     scoreBands: Record<CharacterScoreKind, ClearScoreBand[]>
   }
 
-// 레이드가 아니면 weekGroups, weekGroupScores, streaks, stages가 null이고, 일반과 하드 짝이 없으면 stageMoves가 null이다.
+// 레이드가 아니면 weekGroups, weekGroupScores, streaks, stages가 null이고, 일반과 하드 짝이 없으면 weekMoves가 null이다.
 export type ClearContentSamples = {
   jobFames: readonly ClearJobFameSample[]
   jobScores: readonly ClearJobScoreSample[]
@@ -78,7 +73,7 @@ export type ClearContentSamples = {
   fameBands: ClearFameBandCount[]
   times: readonly ClearTimeCount[]
   weekGroups: readonly ClearWeekGroupSample[] | null
-  stageMoves: { pair: ClearStagePair; counts: readonly ClearStageMoveCount[] } | null
+  weekMoves: readonly ClearWeekMoveCount[] | null
   streaks: ClearStreakCount[] | null
 }
 
@@ -126,30 +121,20 @@ function toWeekOverWeek(
   return { both, returned, left, first }
 }
 
-function toStageCounts(
-  counts: readonly ClearStageMoveCount[],
-  contentId: string
-): Record<ClearStagePrevious, number> {
-  const countOf = (previous: ClearStagePrevious) =>
-    counts
-      .filter((count) => count.contentId === contentId && count.previous === previous)
-      .reduce((total, count) => total + count.characters, 0)
+const WEEK_MOVE_FROM_ORDER: readonly ClearWeekMoveFrom[] = ['hard', 'normal', 'returned', 'first']
+const WEEK_MOVE_TO_ORDER: readonly ClearWeekMoveTo[] = ['hard', 'normal', 'left']
 
-  const same = countOf('same')
-  const other = countOf('other')
-  const none = countOf('none')
+function toWeekMoves(counts: readonly ClearWeekMoveCount[]): ClearWeekMoveCount[] {
+  return counts.toSorted((left, right) => {
+    const fromOrder =
+      WEEK_MOVE_FROM_ORDER.indexOf(left.from) - WEEK_MOVE_FROM_ORDER.indexOf(right.from)
 
-  return { same, other, none }
-}
+    if (fromOrder !== 0) {
+      return fromOrder
+    }
 
-function toStageMoves({
-  pair,
-  counts
-}: NonNullable<ClearContentSamples['stageMoves']>): ClearStageMoves {
-  const hard = toStageCounts(counts, pair.hard.id)
-  const normal = toStageCounts(counts, pair.normal.id)
-
-  return { hard, normal }
+    return WEEK_MOVE_TO_ORDER.indexOf(left.to) - WEEK_MOVE_TO_ORDER.indexOf(right.to)
+  })
 }
 
 function toScoreBands(
@@ -195,7 +180,7 @@ export function toEmptyContentStats({
     weeklyClears: [],
     fameBands: [],
     weekOverWeek: null,
-    stageMoves: null,
+    weekMoves: null,
     streaks: null,
     stages: null,
     scoreBands: { equipment: [], buff: [] },
@@ -217,7 +202,7 @@ export function toClearContentStats(
     samples.weekGroups !== null
       ? toWeekOverWeek(samples.weekGroups, samples.weekGroupScores ?? [])
       : null
-  const stageMoves = samples.stageMoves !== null ? toStageMoves(samples.stageMoves) : null
+  const weekMoves = samples.weekMoves !== null ? toWeekMoves(samples.weekMoves) : null
   const times = toClearTimes(samples.times)
   const stages = samples.stages !== null ? toStages(samples.stages) : null
   const scoreBands = toScoreBands(samples.scoreBands)
@@ -230,7 +215,7 @@ export function toClearContentStats(
     weeklyClears,
     fameBands: samples.fameBands,
     weekOverWeek,
-    stageMoves,
+    weekMoves,
     streaks: samples.streaks,
     stages,
     scoreBands,

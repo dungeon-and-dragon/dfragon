@@ -15,8 +15,8 @@ import {
   type ClearRecordRaidStage,
   type ClearRecordStageCount,
   type ClearScoreBandCount,
-  type ClearStageMoveCount,
-  type ClearStageMoveSelection,
+  type ClearWeekMoveCount,
+  type ClearWeekMoveSelection,
   type ClearStreakCount,
   type ClearTimeCount,
   type ClearWeekComparison,
@@ -45,7 +45,7 @@ import {
   readContentClearRaidTimes,
   readContentClearScoreBands,
   readContentClearScores,
-  readContentClearStageMoves,
+  readContentClearWeekMoves,
   readContentClearStreaks,
   readContentClearWeekGroupScores,
   readContentClearWeekGroups,
@@ -106,8 +106,8 @@ export class DatabaseClearStatsRepository
     return readContentClearWeekGroups(this.client, comparison)
   }
 
-  readStageMoves(selection: ClearStageMoveSelection): Promise<ClearStageMoveCount[]> {
-    return readContentClearStageMoves(this.client, selection)
+  readWeekMoves(selection: ClearWeekMoveSelection): Promise<ClearWeekMoveCount[]> {
+    return readContentClearWeekMoves(this.client, selection)
   }
 
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]> {

@@ -40,9 +40,9 @@ export class ClearSampleLoader {
     const times = await this.repository.readContentTimes(selection)
     const weekGroups = weekly ? await this.repository.readWeekGroups(comparison) : null
     const weekGroupScores = weekly ? await this.loadWeekGroupScores(comparison) : null
-    const stageMoves =
+    const weekMoves =
       pair !== undefined
-        ? await this.repository.readStageMoves({
+        ? await this.repository.readWeekMoves({
             hardContentId: pair.hard.id,
             normalContentId: pair.normal.id,
             weekStart,
@@ -62,7 +62,7 @@ export class ClearSampleLoader {
       times,
       weekGroups,
       weekGroupScores,
-      stageMoves,
+      weekMoves,
       streaks,
       stages
     }
