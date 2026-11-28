@@ -292,10 +292,11 @@ model ContentClearPopulation {
 }
 
 model ContentClearSetting {
-  contentId String   @id @map("content_id")
-  collected Boolean  @default(true)
-  shown     Boolean  @default(true)
-  updatedAt DateTime @map("updated_at") @db.Timestamptz(3)
+  contentId              String   @id @map("content_id")
+  collected              Boolean  @default(true)
+  shown                  Boolean  @default(true)
+  scoreBandMinPopulation Int      @default(0) @map("score_band_min_population")
+  updatedAt              DateTime @map("updated_at") @db.Timestamptz(3)
 
   @@map("content_clear_settings")
 }
