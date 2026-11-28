@@ -139,12 +139,12 @@ it('메인 화면에서는 검색창과 메뉴 밑줄을 숨기고, 다른 화�
   expect(container.querySelector('form[role="search"]')).not.toBeNull()
 })
 
-it('메뉴 끝의 장비 시뮬레이터는 시뮬레이터 검색 주소로, 실험실은 마법부여 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
+it('통계는 직업 통계 주소로, 메뉴 끝의 장비 시뮬레이터는 시뮬레이터 검색 주소로, 실험실은 마법부여 주소로 가고, 메뉴에 즐겨찾기 항목은 없다', async () => {
   await render('/rankings')
 
   expect(menuLinks().map((link) => [link.textContent, link.getAttribute('href')])).toEqual([
     ['검색', '/rankings'],
-    ['통계', '/stats'],
+    ['통계', '/stats/jobs'],
     ['모험단', '/adventures'],
     ['장비 시뮬레이터', '/simulator'],
     ['실험실', '/lab/enchants']
