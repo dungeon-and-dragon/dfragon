@@ -501,13 +501,14 @@ it('세트 통계를 받는 중이면 조합 상자만 받는 중으로 두고 �
   expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1)
 })
 
-it('무기 아래 유일 장비는 고정한 네 아이템을 낀 캐릭터 수로 보이고, 고른 전직과 그 아이템으로 거른 검색 화면에 잇는다', async () => {
+it('맨 윗줄은 조합, 무기, 유일 장비 순의 세 칸이고, 유일 장비는 고정한 네 아이템을 낀 캐릭터 수로 보이며 고른 전직과 그 아이템으로 거른 검색 화면에 잇는다', async () => {
   await renderStats(skillStatsFixture)
 
-  const sideBoxes = [...container.querySelectorAll('section[aria-label]')].map((section) =>
+  const topBoxes = [...container.querySelectorAll('section[aria-label]')].map((section) =>
     section.getAttribute('aria-label')
   )
-  expect(sideBoxes.slice(0, 3)).toEqual(['가장 많이 사용하는 조합', '무기', '유일 장비'])
+  expect(topBoxes.slice(0, 3)).toEqual(['가장 많이 사용하는 조합', '무기', '유일 장비'])
+  expect(box('유일 장비').closest('[aria-label="스킬 창"], .\\@container')).toBeNull()
   const uniques = barRows('유일 장비')
   expect(uniques.map(({ text }) => text)).toEqual([
     '광휘를 머금은 눈동자29.9만명',
@@ -526,5 +527,29 @@ it('무기 아래 유일 장비는 고정한 네 아이템을 낀 캐릭터 수�
     '6e1fcf6e59ed8d5a95dc152b84fe93ce',
     'df77236c51ea1274a3deb79c3e470695',
     '14449881bc371352c250502e7b201506'
+  ])
+})
+
+it('유일 장비 인원은 1,000명부터 천, 만 단위로 소수 한 자리까지 줄이고 그 아래는 그대로 쓴다', async () => {
+  const counts = [999, 1400, 14000, 100000]
+  const uniques = ITEM_STATS.slots
+    .filter(({ slotId }) => slotId !== 'WEAPON')
+    .map((slot, index) => ({
+      ...slot,
+      items: slot.items.map((item) => ({ ...item, count: counts[index]! }))
+    }))
+  const weapons = ITEM_STATS.slots.filter(({ slotId }) => slotId === 'WEAPON')
+  server.use(
+    http.get(ITEM_STATS_URL, () =>
+      HttpResponse.json({ ...ITEM_STATS, slots: [...weapons, ...uniques] })
+    )
+  )
+  await renderStats(skillStatsFixture)
+
+  expect(barRows('유일 장비').map(({ value }) => value)).toEqual([
+    '999명',
+    '1.4천명',
+    '1.4만명',
+    '10만명'
   ])
 })
