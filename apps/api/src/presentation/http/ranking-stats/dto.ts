@@ -12,12 +12,7 @@ import type {
 import { SET_SAMPLES, SKILL_STYLE_SAMPLE_TOP_COUNT } from '@dfragon/lib'
 import { z } from 'zod'
 import { type CharacterRow, toCharacterRow } from '#domain/character-row.js'
-import {
-  RANKING_SORTS,
-  type FameRankingCursor,
-  decodeFameRankingCursor,
-  encodeFameRankingCursor
-} from '#domain/ranking-stats/index.js'
+import { RANKING_SORTS } from '#domain/ranking-stats/index.js'
 import type { FameRankingPage } from '#application/ranking-stats/index.js'
 import { isMaleCrusaderJob } from '@dfragon/server-core/domain/male-crusader.js'
 
@@ -26,6 +21,7 @@ const role = z.enum(['dealer', 'buffer']).optional()
 // INTEGER 열과 비교하므로 int 범위를 넘지 않는 9자리까지의 양의 정수만 받는다.
 const OATH_SET_ID_PATTERN = /^[1-9]\d{0,8}$/
 const RANGE_VALUE_PATTERN = /^(0|[1-9]\d{0,8})$/
+const PAGE_PATTERN = /^[1-9]\d{0,8}$/
 
 const rangeValue = z.string().regex(RANGE_VALUE_PATTERN).transform(Number).optional()
 
@@ -99,18 +95,6 @@ const evolutions = z.string().transform((value, context): EvolutionSelection[] =
   return parsed
 })
 
-const cursor = z.string().transform((value, context): FameRankingCursor => {
-  const decoded = decodeFameRankingCursor(value)
-
-  if (decoded === undefined) {
-    context.addIssue({ code: 'custom', message: 'cursor를 해석할 수 없음' })
-
-    return z.NEVER
-  }
-
-  return decoded
-})
-
 type RankingRange = {
   sort?: RankingSort
   fameFrom?: number
@@ -143,7 +127,7 @@ export const fameRankingQuery = z
     fameTo: rangeValue,
     scoreFrom: rangeValue,
     scoreTo: rangeValue,
-    cursor: cursor.optional()
+    page: z.string().regex(PAGE_PATTERN).transform(Number).default(1)
   })
   .refine(hasJobForGrow)
   .refine(hasMaleCrusaderForRole)
@@ -152,7 +136,6 @@ export const fameRankingQuery = z
   .refine(({ fameFrom, fameTo }) => isWithin(fameFrom, fameTo))
   .refine(({ scoreFrom, scoreTo }) => isWithin(scoreFrom, scoreTo))
   .refine(rangeMatchesSort)
-  .refine(({ sort = 'fame', cursor }) => cursor === undefined || cursor.sort === sort)
 
 export type FameRankingQuery = z.infer<typeof fameRankingQuery>
 
@@ -187,7 +170,7 @@ export type FameRankingResponse = {
     equipmentSet: CharacterEquipmentSet | null
     oathSet: CharacterOathSet | null
   })[]
-  nextCursor: string | null
+  pageCount: number
 }
 
 export type StatsResponse = {
@@ -237,16 +220,15 @@ const emptyJobSkillAdoption: JobSkillAdoption = {
 
 export function toFameRankingResponse({
   characters,
-  nextCursor
+  pageCount
 }: FameRankingPage): FameRankingResponse {
   const rows = characters.map(({ equipmentSet, oathSet, ...stored }) => {
     const row = toCharacterRow(stored)
 
     return { ...row, equipmentSet, oathSet }
   })
-  const encodedCursor = nextCursor !== null ? encodeFameRankingCursor(nextCursor) : null
 
-  return { characters: rows, nextCursor: encodedCursor }
+  return { characters: rows, pageCount }
 }
 
 export function toStatsResponse(snapshot: CharacterStatsSnapshot | null): StatsResponse {

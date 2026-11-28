@@ -1,7 +1,1 @@
-export {
-  RANKING_SORTS,
-  type FameRankingCursor,
-  decodeFameRankingCursor,
-  encodeFameRankingCursor
-} from './cursor.js'
-export { FAME_RANKING_LIMIT } from './stats.js'
+export { FAME_RANKING_PAGE_SIZE, RANKING_SORTS } from './stats.js'

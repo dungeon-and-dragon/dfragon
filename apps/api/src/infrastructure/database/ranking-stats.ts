@@ -2,13 +2,13 @@ import {
   type CharacterStatsSnapshot,
   type DatabaseClient,
   type FameRankingFilter,
-  type FameRankingPosition,
   type ItemAdoption,
   type JobSkillAdoptionQuery,
   type JobSkillAdoptionSnapshot,
   type SetAdoption,
   type SetAdoptionQuery,
   type RankedStoredCharacter,
+  countFameRanking,
   readCharacterStatsSnapshot,
   readFameRanking,
   readItemAdoption,
@@ -23,9 +23,13 @@ export class DatabaseRankingStatsRepository implements RankingStatsRepository {
   readFameRanking(
     filter: FameRankingFilter,
     limit: number,
-    after?: FameRankingPosition
+    offset: number
   ): Promise<RankedStoredCharacter[]> {
-    return readFameRanking(this.client, filter, limit, after)
+    return readFameRanking(this.client, filter, limit, offset)
+  }
+
+  countFameRanking(filter: FameRankingFilter): Promise<number> {
+    return countFameRanking(this.client, filter)
   }
 
   readCharacterStatsSnapshot(): Promise<CharacterStatsSnapshot | null> {
