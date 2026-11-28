@@ -189,33 +189,46 @@ describe('Button의 클릭과 disabled, loading 상태', () => {
   })
 })
 
-describe('Pagination의 이전, 다음과 현재 페이지', () => {
-  it('현재 페이지 번호만 보이고 이전, 다음 클릭을 각각 전달한다', async () => {
-    const onPrevious = vi.fn()
-    const onNext = vi.fn()
-    await render(<Pagination page={3} onPrevious={onPrevious} onNext={onNext} />)
+describe('Pagination의 페이지 번호와 이전, 다음', () => {
+  it('지금 페이지를 가운데 둔 번호 5개를 보이고, 누른 번호와 앞뒤 페이지를 전달한다', async () => {
+    const onPageChange = vi.fn()
+    await render(<Pagination page={6} pageCount={12} onPageChange={onPageChange} />)
     const nav = container.querySelector('nav[aria-label="페이지"]')!
 
-    expect(nav.textContent).toBe('이전3다음')
-    expect(nav.querySelector('[aria-current="page"]')?.textContent).toBe('3')
+    expect(nav.textContent).toBe('이전45678다음')
+    expect(nav.querySelector('[aria-current="page"]')?.textContent).toBe('6')
+    await click(getByRole('button', '8'))
     await click(getByRole('button', '다음'))
-    expect(onNext).toHaveBeenCalledOnce()
-    expect(onPrevious).not.toHaveBeenCalled()
     await click(getByRole('button', '이전'))
-    expect(onPrevious).toHaveBeenCalledOnce()
+    expect(onPageChange.mock.calls).toEqual([[8], [7], [5]])
   })
 
-  it('막은 쪽 버튼은 클릭을 전달하지 않는다', async () => {
-    const onPrevious = vi.fn()
-    const onNext = vi.fn()
-    await render(
-      <Pagination page={1} onPrevious={onPrevious} onNext={onNext} previousDisabled nextDisabled />
-    )
+  it.each([
+    { name: '첫 페이지', page: 1, pageCount: 12, text: '이전12345다음' },
+    { name: '마지막 페이지', page: 12, pageCount: 12, text: '이전89101112다음' },
+    { name: '페이지가 5개보다 적을 때', page: 2, pageCount: 3, text: '이전123다음' }
+  ])('$name에서는 번호를 끝에 맞춰 보인다', async ({ page, pageCount, text }) => {
+    await render(<Pagination page={page} pageCount={pageCount} onPageChange={vi.fn()} />)
 
-    await click(getByRole('button', '이전'))
-    await click(getByRole('button', '다음'))
-    expect(onPrevious).not.toHaveBeenCalled()
-    expect(onNext).not.toHaveBeenCalled()
+    expect(container.querySelector('nav')?.textContent).toBe(text)
+  })
+
+  it('첫 페이지는 이전을, 마지막 페이지는 다음을 막고 disabled면 모든 버튼을 막는다', async () => {
+    const onPageChange = vi.fn()
+    await render(<Pagination page={1} pageCount={3} onPageChange={onPageChange} />)
+
+    expect(getByRole('button', '이전').hasAttribute('disabled')).toBe(true)
+    expect(getByRole('button', '다음').hasAttribute('disabled')).toBe(false)
+
+    await render(<Pagination page={3} pageCount={3} onPageChange={onPageChange} />)
+
+    expect(getByRole('button', '이전').hasAttribute('disabled')).toBe(false)
+    expect(getByRole('button', '다음').hasAttribute('disabled')).toBe(true)
+
+    await render(<Pagination page={2} pageCount={3} onPageChange={onPageChange} disabled />)
+    const buttons = [...container.querySelectorAll('button')]
+
+    expect(buttons.map((button) => button.disabled)).toEqual([true, true, true, true])
   })
 })
 

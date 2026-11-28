@@ -161,6 +161,10 @@ function pageButton(label: '이전' | '다음'): HTMLButtonElement {
   )!
 }
 
+function currentPage(): string | null | undefined {
+  return pagination().querySelector('[aria-current="page"]')?.textContent
+}
+
 function showNext(): Promise<void> {
   return act(async () => pageButton('다음').click())
 }
@@ -178,11 +182,13 @@ it('받은 100명을 한 페이지에 20명씩 보이고, 이전은 다시 받�
 
   expect(bodyRows()).toHaveLength(20)
   expect(firstCharacterName()).toBe('합성1')
-  expect(pagination().textContent).toBe('이전1다음')
+  expect(pagination().textContent).toBe('이전12345다음')
   expect(pageButton('이전').disabled).toBe(true)
+  expect(currentPage()).toBe('1')
   await showNext()
   expect(firstCharacterName()).toBe('합성21')
-  expect(pagination().textContent).toBe('이전2다음')
+  expect(pagination().textContent).toBe('이전12345다음')
+  expect(currentPage()).toBe('2')
   await showNext()
   await showNext()
   await showNext()
@@ -192,6 +198,16 @@ it('받은 100명을 한 페이지에 20명씩 보이고, 이전은 다시 받�
 
   expect(firstCharacterName()).toBe('합성61')
   expect(bodyRows()).toHaveLength(20)
+  expect(requests).toHaveLength(1)
+})
+
+it('번호를 누르면 받아 둔 행에서 그 페이지를 보인다', async () => {
+  await render(async () => rankingOf(100))
+
+  await act(async () => findButton('4')!.click())
+
+  expect(firstCharacterName()).toBe('합성61')
+  expect(currentPage()).toBe('4')
   expect(requests).toHaveLength(1)
 })
 
@@ -209,11 +225,13 @@ it('3페이지에서 이미 받아 둔 필터로 바꿔도 1페이지를 보인�
   await vi.waitFor(() => expect(firstCharacterName()).toBe('합성1'))
   await showNext()
   await showNext()
-  expect(pagination().textContent).toBe('이전3다음')
+  expect(pagination().textContent).toBe('이전12345다음')
+  expect(currentPage()).toBe('3')
 
   await render(async () => rankingOf(100))
 
-  expect(pagination().textContent).toBe('이전1다음')
+  expect(pagination().textContent).toBe('이전12345다음')
+  expect(currentPage()).toBe('1')
   expect(firstCharacterName()).toBe('합성1')
   expect(queries()).toEqual([{}, { itemIds: 'synthetic-weapon' }])
 })
@@ -459,7 +477,8 @@ it('받아 둔 행을 넘는 페이지로 가면 nextCursor로 한 번 더 받�
   await showNext()
 
   expect(characterLinks()).toHaveLength(10)
-  expect(pagination().textContent).toBe('이전7다음')
+  expect(pagination().textContent).toBe('이전34567다음')
+  expect(currentPage()).toBe('7')
   expect(pageButton('다음').disabled).toBe(true)
   expect(requests).toHaveLength(2)
 })
@@ -479,7 +498,8 @@ it('다음 페이지를 받는 동안 표 자리에 빈 줄을 두고 이전, �
 
   await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(5))
   expect(bodyRows()).toHaveLength(0)
-  expect(pagination().textContent).toBe('이전2다음')
+  expect(pagination().textContent).toBe('이전12다음')
+  expect(currentPage()).toBe('2')
   expect(pageButton('이전').disabled).toBe(true)
   expect(pageButton('다음').disabled).toBe(true)
   await vi.waitFor(() => expect(requests).toHaveLength(2))
