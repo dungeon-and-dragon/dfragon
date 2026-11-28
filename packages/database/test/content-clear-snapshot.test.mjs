@@ -258,8 +258,8 @@ test('점수 구간의 분모와 클리어 수를 같은 엔진 버전의 이력
   )
 
   assert.deepEqual(bands, [
-    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 0 },
-    { kind: 'equipment', score: 1_250_000, population: 1, cleared: 1 }
+    { kind: 'equipment', score: 1_160_000, population: 1, cleared: 0 },
+    { kind: 'equipment', score: 1_260_000, population: 1, cleared: 1 }
   ])
 })
 
@@ -283,7 +283,7 @@ test('클리어 뒤 지금 점수의 엔진 버전이 바뀐 캐릭터는 점수
   )
 
   assert.deepEqual(await readContentClearScoreBands(client, selection, 60_000), [
-    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 1 }
+    { kind: 'equipment', score: 1_160_000, population: 1, cleared: 1 }
   ])
 })
 
@@ -303,6 +303,6 @@ test('명성 구간과 점수 구간의 분모는 眞 각성 전 캐릭터를 �
     { fame: 66_000, population: 1, cleared: 1 }
   ])
   assert.deepEqual(await readContentClearScoreBands(client, selection, 60_000), [
-    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 1 }
+    { kind: 'equipment', score: 1_160_000, population: 1, cleared: 1 }
   ])
 })
