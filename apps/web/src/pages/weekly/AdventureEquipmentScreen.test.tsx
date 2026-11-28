@@ -326,18 +326,42 @@ it('서약 그림을 먼저 받지 못해도 카탈로그가 늦게 오면 카�
   )
 })
 
-it('장비 칸과 서약에 마우스를 올리면 태초, 에픽 개수를 따로 보인다', async () => {
-  serve(json(equipment))
+it('목걸이, 팔찌, 반지 칸과 서약에 마우스를 올리면 태초, 에픽 개수를 따로 보이고, 다른 부위는 에픽만 보인다', async () => {
+  const holdings = [
+    holding(ONYX, '상의', '에픽', 2),
+    holding(ONYX, '목걸이', '태초', 2),
+    holding(ONYX, '목걸이', '에픽', 2)
+  ]
+  const top = character(2, 'cain', 300, holdings, highFameOaths)
+  serve(json({ ...equipment, servers: [{ serverId: 'cain', characters: [top] }] }))
   await render({})
   await waitForTable()
 
-  const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
-  await act(async () => hover(topRow.querySelector('[role="img"]')!))
+  const icons = container
+    .querySelector('section[aria-label="장비"] table tbody tr')!
+    .querySelectorAll('[role="img"]')
+  await act(async () => hover(icons[0]!))
+  expect(tooltipRows()).toEqual(['에픽2개'])
+
+  await act(async () => hover(icons[1]!))
   expect(tooltipRows()).toEqual(['태초2개', '에픽2개'])
 
   const oathRow = container.querySelector('section[aria-label="서약"] table tbody tr')!
   await act(async () => hover(oathRow.querySelector('[role="img"]')!))
   expect(tooltipRows()).toEqual(['태초1개', '에픽0개'])
+})
+
+it('차원 속의 이야기 세트와 테라 스카이 디스크 세트는 세트 칩에 보이지 않는다', async () => {
+  const sets = [
+    ...equipment.sets,
+    { setItemId: 'b9403caf99c157682d1d468d899e9aaa', setItemName: '차원 속의 이야기 세트' },
+    { setItemId: '031605873421be39c0e08035d9db4ae9', setItemName: '테라 스카이 디스크 세트' }
+  ]
+  serve(json({ ...equipment, sets }))
+  await render({})
+  await waitForTable()
+
+  expect(chips('세트').map(([label]) => label)).toEqual(['칠흑', '페어리', '가나다 세트'])
 })
 
 it('세트 칩을 누르면 지금 서버와 고른 세트를 주소 값으로 넘긴다', async () => {

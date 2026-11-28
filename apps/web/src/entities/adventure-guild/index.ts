@@ -17,7 +17,8 @@ export {
   adventureEquipmentSchema,
   EQUIPMENT_SLOTS,
   HOLDING_RARITIES,
-  toEquipmentBoard
+  toEquipmentBoard,
+  visibleEquipmentSets
 } from './model/adventure-equipment'
 export type {
   AdventureEquipment,

@@ -18,6 +18,15 @@ export const EQUIPMENT_SLOTS = [
 // 높은 등급부터 둔다. 서약 결정 열도 이 순서다. 레전더리 이하는 보이지 않는다.
 export const HOLDING_RARITIES = ['태초', '에픽'] as const
 
+// 차원 속의 이야기 세트, 테라 스카이 디스크 세트는 세트 칩에 보이지 않는다.
+const HIDDEN_SET_IDS: readonly string[] = [
+  'b9403caf99c157682d1d468d899e9aaa',
+  '031605873421be39c0e08035d9db4ae9'
+]
+
+const PRIMEVAL_SLOTS: readonly EquipmentSlot[] = ['목걸이', '팔찌', '반지']
+const NON_PRIMEVAL_RARITIES = ['에픽'] as const
+
 const holdingSchema = z.object({
   setItemId: z.string(),
   rarity: z.string(),
@@ -52,7 +61,7 @@ export type HoldingCell = Readonly<{
   itemName: string
   rarity: string
   extraCount: number
-  rarityCounts: readonly number[]
+  rarityCounts: readonly Readonly<{ rarity: string; count: number }>[]
 }>
 
 export type CrystalCell = Readonly<{
@@ -68,6 +77,10 @@ export type EquipmentBoardRow = Readonly<{
   oath: HoldingCell | null
   crystals: readonly (CrystalCell | null)[]
 }>
+
+export function visibleEquipmentSets(sets: AdventureEquipment['sets']): AdventureEquipment['sets'] {
+  return sets.filter(({ setItemId }) => !HIDDEN_SET_IDS.includes(setItemId))
+}
 
 function rarityRank(rarity: string): number {
   return HOLDING_RARITIES.findIndex((name) => name === rarity)
@@ -92,22 +105,38 @@ function toCrystalCells(crystals: readonly Holding[]): (CrystalCell | null)[] {
   })
 }
 
-function countByRarity(holdings: readonly Holding[]): number[] {
-  return HOLDING_RARITIES.map((rarity) =>
-    holdings
+function countByRarity(
+  holdings: readonly Holding[],
+  rarities: readonly string[]
+): HoldingCell['rarityCounts'] {
+  return rarities.map((rarity) => {
+    const count = holdings
       .filter((holding) => holding.rarity === rarity)
-      .reduce((sum, { count }) => sum + count, 0)
-  )
+      .reduce((sum, holding) => sum + holding.count, 0)
+
+    return { rarity, count }
+  })
 }
 
-function toCell(holdings: readonly Holding[]): HoldingCell | null {
+function slotRarities(slot: EquipmentSlot): readonly string[] {
+  if (PRIMEVAL_SLOTS.includes(slot)) {
+    return HOLDING_RARITIES
+  }
+
+  return NON_PRIMEVAL_RARITIES
+}
+
+function toCell(
+  holdings: readonly Holding[],
+  rarities: readonly string[] = HOLDING_RARITIES
+): HoldingCell | null {
   const top = holdings.toSorted((a, b) => rarityRank(a.rarity) - rarityRank(b.rarity))[0]
 
   if (top === undefined) {
     return null
   }
 
-  const rarityCounts = countByRarity(holdings)
+  const rarityCounts = countByRarity(holdings, rarities)
   const topCount = holdings
     .filter(({ rarity }) => rarity === top.rarity)
     .reduce((sum, { count }) => sum + count, 0)
@@ -125,7 +154,7 @@ function toCell(holdings: readonly Holding[]): HoldingCell | null {
 function toSlots(equipment: EquipmentCharacter['equipment']): EquipmentBoardRow['slots'] {
   return EQUIPMENT_SLOTS.map((slot) => {
     const holdings = equipment.filter((holding) => holding.slot === slot)
-    const cell = toCell(holdings)
+    const cell = toCell(holdings, slotRarities(slot))
 
     return { slot, cell }
   })

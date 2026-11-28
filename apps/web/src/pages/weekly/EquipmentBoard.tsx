@@ -62,10 +62,10 @@ function RarityCountTooltip({
       <Tooltip.Trigger delay={0} closeDelay={0} render={children} />
       <Tooltip.Popup side="bottom" sideOffset={8}>
         <dl className="m-0 flex min-w-[120px] flex-col text-fg">
-          {HOLDING_RARITIES.map((rarity, index) => (
+          {cell.rarityCounts.map(({ rarity, count }) => (
             <div key={rarity} className="flex justify-between gap-4 py-1 text-xs">
               <dt className={raritySolidOfName(rarity)}>{rarity}</dt>
-              <dd className="m-0 num text-fg-muted">{`${cell.rarityCounts[index] ?? 0}개`}</dd>
+              <dd className="m-0 num text-fg-muted">{`${count}개`}</dd>
             </div>
           ))}
         </dl>
