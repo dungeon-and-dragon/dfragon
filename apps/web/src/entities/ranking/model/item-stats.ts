@@ -1,6 +1,12 @@
 import { z } from 'zod'
 
 export const WEAPON_SLOT = 'WEAPON'
+export const TITLE_SLOT = 'TITLE'
+export const CREATURE_SLOT = 'CREATURE'
+// 무기 아바타는 장비 무기와 부위 id가 겹쳐 API가 이 부위 id로 준다.
+export const WEAPON_AVATAR_SLOT = 'WEAPON_AVATAR'
+// 이 부위의 아이템은 이름 끝 [30Lv]처럼 Lv+1을 받는 스킬 레벨이 붙어 와서, 직업 통계가 Lv별로 센다.
+export const SKILL_LEVEL_SLOTS: readonly string[] = [TITLE_SLOT, CREATURE_SLOT, WEAPON_AVATAR_SLOT]
 
 const count = z.number().int().nonnegative()
 

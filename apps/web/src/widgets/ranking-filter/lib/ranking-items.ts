@@ -1,4 +1,4 @@
-import { type ItemStats, itemSlotName, WEAPON_SLOT } from '#entities/ranking'
+import { type ItemStats, itemSlotName, SKILL_LEVEL_SLOTS, WEAPON_SLOT } from '#entities/ranking'
 import { ITEM_FILTER_LIMIT } from '#shared/config/ranking'
 import type { SetChoice } from './ranking-sets'
 
@@ -53,7 +53,7 @@ function byCountDesc(a: { count: number }, b: { count: number }): number {
 
 /**
  * 무기는 많이 낀 순 전체이고, 직업을 고르지 않아 무기가 많을 때는 종류별로 묶는다.
- * 유일 장비는 부위별로 묶은 많이 낀 순 전체다.
+ * 유일 장비는 부위별로 묶은 많이 낀 순 전체다. 칭호, 크리쳐, 무기 아바타는 유일 장비가 아니라 넣지 않는다.
  */
 export function itemChoicesOf(stats: ItemStats | null, groupByType: boolean): ItemChoices {
   if (stats === null) {
@@ -66,7 +66,7 @@ export function itemChoicesOf(stats: ItemStats | null, groupByType: boolean): It
   const weapons = sorted.map(choiceOf)
   const weaponGroups = groupByType ? groupedByType(sorted) : [{ label: null, choices: weapons }]
   const uniqueGroups = stats.slots.flatMap(({ slotId, items }) => {
-    if (slotId === WEAPON_SLOT || items.length === 0) {
+    if (slotId === WEAPON_SLOT || SKILL_LEVEL_SLOTS.includes(slotId) || items.length === 0) {
       return []
     }
 
