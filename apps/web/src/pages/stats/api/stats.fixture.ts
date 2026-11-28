@@ -62,9 +62,16 @@ export function storyCharacterStats(computedAt: string): CharacterStats {
     const jobId = `job-${index}`
     const jobGrowId = `grow-${index}`
 
-    const fameBuckets = JOB_FAME_SHARES.map(([from, share]) => {
+    // 직업마다 높은 구간 비중을 달리 둬, 범례로 구간을 끄면 막대 순서가 바뀌게 한다.
+    const tilt = ((index % 4) - 1.5) / 2
+    const weighted = JOB_FAME_SHARES.map(
+      ([, share], bucket) => share * (1 + tilt * ((bucket - 3) / 3))
+    )
+
+    const weightSum = weighted.reduce((sum, weight) => sum + weight, 0)
+    const fameBuckets = JOB_FAME_SHARES.map(([from], bucket) => {
       const to = from + 10_000
-      const bucketCount = Math.round(count * share)
+      const bucketCount = Math.round((count * (weighted[bucket] ?? 0)) / weightSum)
 
       return { from, to, count: bucketCount }
     })

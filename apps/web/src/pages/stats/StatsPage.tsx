@@ -169,6 +169,7 @@ function JobFameBox({ chart }: { chart: JobFameChart }): React.JSX.Element {
         height={JOB_FAME_CHART_HEIGHT}
         narrowStep={JOB_FAME_NARROW_STEP}
         toggleable
+        sortByTotal
       />
     </ListBox>
   )
