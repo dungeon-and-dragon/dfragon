@@ -62,6 +62,7 @@ test('GET /items/:itemId는 Neople 아이템 상세를 툴팁 필드로 좁히�
   const response = await fetch(`${origin}/items/${bladeId}`)
 
   assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=86400')
   assert.deepEqual(await response.json(), {
     itemId: bladeId,
     name: '제2형 - 수식, 방어의 운검',
@@ -243,6 +244,7 @@ test('GET /items/:itemId는 Neople에서 아이템을 받지 못하면 502를 �
     const response = await fetch(`${origin}/items/${bladeId}`)
 
     assert.equal(response.status, 502, name)
+    assert.equal(response.headers.get('cache-control'), 'no-store', name)
     assert.deepEqual(
       await response.json(),
       { error: { code: 'NEOPLE_API_ERROR', message: '아이템 정보 조회 중 오류가 발생했습니다.' } },
