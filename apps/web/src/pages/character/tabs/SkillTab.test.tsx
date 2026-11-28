@@ -401,6 +401,18 @@ it('스킬 체인을 쓰지 않는 캐릭터는 체인 없음 한 줄을 보인�
   expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
 })
 
+it.each(['크리에이터', '다크나이트'])(
+  '%s는 체인을 설정했어도 스킬 체인을 그리지 않는다',
+  async (jobName) => {
+    const detail = characterDetailFixture('dealer')
+    await render({ ...detail, character: { ...detail.character, jobName } })
+
+    expect(container.querySelector('section[aria-label="스킬 트리 코드"]')).not.toBeNull()
+    expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
+    expect(container.textContent).not.toContain('스킬 체인 없음')
+  }
+)
+
 it('스킬 창이 있으면 그 전직의 스킬 채택률을 받고, 배운 스킬 목록이면 받지 않는다', async () => {
   respondSkillWindow(CATALOG)
   await render(characterDetailFixture('dealer'))

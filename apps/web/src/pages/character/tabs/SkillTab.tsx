@@ -13,6 +13,7 @@ import {
   type SkillUpgrade,
   type SkillWindow,
   type SkillWindowCatalog,
+  showsSkillChain,
   skillChainOf,
   skillUpgradeBoardOf,
   skillUpgradesOf,
@@ -126,7 +127,9 @@ function SkillSideColumn({
   return (
     <>
       {hash !== null && <SkillTreeCode hash={hash} />}
-      <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
+      {showsSkillChain(detail.character.jobName) && (
+        <SkillChainSection chain={skillChainOf(catalog, detail.character, style)} />
+      )}
       {board !== null && source !== null ? (
         <SkillUpgradeSections board={board} source={source} />
       ) : (
