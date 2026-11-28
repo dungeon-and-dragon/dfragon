@@ -569,8 +569,10 @@ const setStats: SetStats = {
   sampleSize: 6,
   equipmentSets: [
     { setId: FAIRY, name: '소울 페어리 세트', count: 1 },
-    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 3 },
-    { setId: null, name: null, count: 2 }
+    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 2 },
+    { setId: 'b9403caf99c157682d1d468d899e9aaa', name: '차원 속의 이야기 세트', count: 1 },
+    { setId: '13f6edd6dc195fdb8bc76b8349078ef6', name: '오디세이 고급 세트', count: 1 },
+    { setId: null, name: null, count: 1 }
   ],
   oathSets: [
     {
@@ -639,7 +641,7 @@ function optionTexts(label: string): string[] {
   )
 }
 
-it('세트 셀렉트는 전체 직업 세트 통계에서 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
+it('세트 셀렉트는 전체 직업 세트 통계에서 오디세이 고급, 차원 속의 이야기 세트를 빼고 많이 낀 순으로 세트를 두고, 선택지는 카탈로그 순서로 줄여 쓴다', async () => {
   await render(
     async () => rankingOf(1),
     { jobId: RANKING_JOBS[0].jobId, oathSetId: DRAGON },
