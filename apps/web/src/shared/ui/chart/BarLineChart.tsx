@@ -72,6 +72,7 @@ type BarLineChartProps = Readonly<{
   narrowStep?: number
   toggleable?: boolean
   sortByTotal?: boolean
+  barShares?: boolean
 }>
 
 export function BarLineChart(props: BarLineChartProps): React.JSX.Element | null {
@@ -93,7 +94,8 @@ function BarLinePlot({
   height = DEFAULT_HEIGHT,
   narrowStep,
   toggleable = false,
-  sortByTotal = false
+  sortByTotal = false,
+  barShares = false
 }: BarLineChartProps): React.JSX.Element {
   const [hiddenKeys, setHiddenKeys] = useState<ReadonlySet<string>>(new Set())
   const givenBars = bars.filter(({ key }) => !hiddenKeys.has(key))
@@ -187,10 +189,13 @@ function BarLinePlot({
   }
 
   function rowsAt(index: number): TooltipRow[] {
+    const total = shownBars.reduce((sum, { values }) => sum + Math.max(values[index] ?? 0, 0), 0)
     const barRows = shownBars.map(({ key, name, color, values }) => {
-      const value = formats.barValue(values[index] ?? 0)
+      const count = values[index] ?? 0
+      const value = formats.barValue(count)
+      const share = barShares ? shareOf(count, total) : undefined
 
-      return { key, name, color, value }
+      return { key, name, color, value, share }
     })
     const lineValue = line?.values[index]
 
@@ -430,4 +435,18 @@ function orderByTotal(bars: readonly BarSeries[], length: number): number[] {
 
 function reorder<T>(values: readonly T[], order: readonly number[], missing: T): T[] {
   return order.map((index) => values[index] ?? missing)
+}
+
+const percent = new Intl.NumberFormat('ko-KR', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+})
+
+function shareOf(count: number, total: number): string {
+  if (total <= 0) {
+    return percent.format(0)
+  }
+
+  return percent.format(count / total)
 }
