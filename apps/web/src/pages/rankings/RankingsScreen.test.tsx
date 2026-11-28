@@ -1155,6 +1155,30 @@ it('전직을 고르면 스킬 개화 줄에 스킬마다 개화 이름 두 개�
   })
 })
 
+it('스킬 개화의 갈래 버튼에 마우스를 올리면 그 갈래의 개화 이름과 설명을 Tooltip으로 보인다', async () => {
+  await render(
+    async () => rankingOf(1),
+    GROW_FILTER,
+    () => {},
+    evolutionResponses()
+  )
+  await vi.waitFor(() => expect(evolutionButton('발도 속전속결')).not.toBeNull())
+
+  await act(async () => {
+    evolutionButton('발도 속전속결').dispatchEvent(new MouseEvent('mouseenter'))
+  })
+
+  const popup = await vi.waitFor(() => {
+    const open = document.querySelector('[data-base-ui-portal] > [data-open]')
+    if (open === null) {
+      throw new Error('Tooltip이 열리지 않았다')
+    }
+
+    return open
+  })
+  expect(popup.textContent).toBe('Ⅱ 속전속결합성 설명합성 설명')
+})
+
 it('고른 개화가 든 필터로 들어오면 그 개화를 눌린 채 두고 목록 요청에 개화를 붙이며, 다른 개화를 누르면 그 스킬의 선택만 바꾼다', async () => {
   const onFilterChange = vi.fn()
   const filter: FameRankingFilter = {
