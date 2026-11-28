@@ -5,7 +5,6 @@ import {
   adoptionConditions,
   sampledCharactersSql
 } from './set-adoption.js'
-import { LAB_CANDIDATE_WEAR_SLOT_IDS } from './lab-candidate-wear-count.js'
 
 export type ItemCount = {
   itemId: string
@@ -42,6 +41,9 @@ const SLOT_ORDER = [
   'EARRING'
 ]
 
+// 오라는 직업 통계가 보이지 않아 세지 않는다. 칭호, 크리쳐, 무기 아바타는 이름의 스킬 Lv을 직업 통계가 센다.
+const AURA_SLOT_ID = 'AURORA'
+
 // 세트를 받은 합성 캐릭터 70만 명(명성 117014 이상 40만 명)과 아이템 149만 행(PostgreSQL 18.7)에서 표본별 교체
 // transaction이 약 15초 걸렸다. 운영 장비와 설정 차이를 감안해 열 배 넘게 둔다.
 const REPLACE_TIMEOUT_MS = 180_000
@@ -76,7 +78,7 @@ export async function replaceItemAdoption(
         FROM ${sampled} c
         JOIN character_items item
           ON item.server_id = c.server_id AND item.character_id = c.character_id
-            AND item.slot_id <> ALL(${LAB_CANDIDATE_WEAR_SLOT_IDS}::text[])
+            AND item.slot_id <> ${AURA_SLOT_ID}
         GROUP BY 1, 2, 3, 4, 5, 6, 7, 8`
     },
     { timeout: REPLACE_TIMEOUT_MS }
