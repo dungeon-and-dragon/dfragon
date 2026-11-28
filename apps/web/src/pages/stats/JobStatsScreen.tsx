@@ -1,4 +1,5 @@
 import { type ReactNode, useState } from 'react'
+import { BarLineChart } from '#shared/ui/chart/BarLineChart'
 import { RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
 import {
@@ -8,11 +9,14 @@ import {
   useSkillWindowCatalog
 } from '#entities/catalog'
 import {
+  CREATURE_SLOT,
   type SetStatsFilter,
   type SkillStats,
+  TITLE_SLOT,
   useItemStats,
   useSetStats,
-  useSkillStats
+  useSkillStats,
+  WEAPON_AVATAR_SLOT
 } from '#entities/ranking'
 import {
   SkillChainPanel,
@@ -24,7 +28,13 @@ import {
 import { StatsTabs } from '#widgets/stats-tabs'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { ItemRowBars } from './ItemRowBars'
-import { formatHeadcount, uniqueItemBars, weaponBars } from './item-stats-bars'
+import {
+  formatHeadcount,
+  type SkillLevelSeries,
+  skillLevelChart,
+  uniqueItemBars,
+  weaponBars
+} from './item-stats-bars'
 import { comboBars, formatShare } from './set-stats-bars'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
 import {
@@ -51,6 +61,18 @@ const ITEM_MESSAGES = {
 } as const
 const WEAPON_BOX = { name: '무기', ...ITEM_MESSAGES } as const
 const UNIQUE_BOX = { name: '유일 장비', ...ITEM_MESSAGES } as const
+const SKILL_LEVEL_BOX = { name: '칭호, 크리쳐, 무기 아바타 Lv', ...ITEM_MESSAGES } as const
+const SKILL_LEVEL_SERIES: readonly SkillLevelSeries[] = [
+  { slotId: TITLE_SLOT, name: '칭호', color: 'var(--color-chart-7)' },
+  { slotId: CREATURE_SLOT, name: '크리쳐', color: 'var(--color-chart-1)' },
+  { slotId: WEAPON_AVATAR_SLOT, name: '무기 아바타', color: 'var(--color-chart-4)' }
+]
+const SKILL_LEVEL_FORMATS = {
+  barTick: formatShare,
+  barValue: formatShare,
+  lineTick: formatShare,
+  lineValue: formatShare
+}
 const SKILL_EMPTY = '스킬 통계가 없습니다.'
 const SKILL_FAILED = '스킬 통계를 받지 못했습니다.'
 const FEW_SAMPLES = '표본이 20명 미만입니다.'
@@ -275,7 +297,30 @@ export function JobStatsScreen({
           )}
         </StatsBox>
       </div>
-      <SkillWindowColumns sideWidth="wide" main={skill.main} side={skill.side} />
+      <SkillWindowColumns
+        sideWidth="wide"
+        main={skill.main}
+        side={
+          <>
+            <StatsBox box={SKILL_LEVEL_BOX} result={itemStats}>
+              {(stats) => {
+                const chart = skillLevelChart(stats, SKILL_LEVEL_SERIES)
+
+                return (
+                  <BarLineChart
+                    label={SKILL_LEVEL_BOX.name}
+                    x={chart.x}
+                    bars={chart.bars}
+                    layout="stack"
+                    formats={SKILL_LEVEL_FORMATS}
+                  />
+                )
+              }}
+            </StatsBox>
+            {skill.side}
+          </>
+        }
+      />
       {setStats.status === 'success' && setStats.value.computedAt !== null && (
         <StatsNote count={setStats.value.sampleSize} computedAt={setStats.value.computedAt} />
       )}

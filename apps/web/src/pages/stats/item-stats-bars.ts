@@ -1,3 +1,5 @@
+import type { BarSeries } from '#shared/ui/chart/BarLineChart'
+import type { ChartX } from '#shared/ui/chart/plot-layout'
 import type { Bar } from '#shared/ui/chart/RowBars'
 import { type ItemCount, type ItemStats, WEAPON_SLOT } from '#entities/ranking'
 import type { SetStatsFilter } from '#entities/ranking'
@@ -100,4 +102,50 @@ export function uniqueItemBars(stats: ItemStats, filter: SetStatsFilter): ItemBa
 
     return { key: itemId, itemId, name, value, link }
   })
+}
+
+const SKILL_LEVEL_PATTERN = /\[(\d+)Lv\]$/
+
+export type SkillLevelSeries = Readonly<{ slotId: string; name: string; color: string }>
+
+export type SkillLevelChart = Readonly<{
+  x: readonly ChartX[]
+  bars: readonly BarSeries[]
+}>
+
+function countByLevelOf(stats: ItemStats, slotId: string): Map<number, number> {
+  const items = stats.slots.find((slot) => slot.slotId === slotId)?.items ?? []
+  const counts = new Map<number, number>()
+
+  for (const { name, count } of items) {
+    const level = name.match(SKILL_LEVEL_PATTERN)?.[1]
+
+    if (level === undefined) {
+      continue
+    }
+
+    const key = Number(level)
+    counts.set(key, (counts.get(key) ?? 0) + count)
+  }
+
+  return counts
+}
+
+export function skillLevelChart(
+  stats: ItemStats,
+  series: readonly SkillLevelSeries[]
+): SkillLevelChart {
+  const counts = series.map(({ slotId }) => countByLevelOf(stats, slotId))
+  const levels = [...new Set(counts.flatMap((byLevel) => [...byLevel.keys()]))].toSorted(
+    (a, b) => a - b
+  )
+  const x = levels.map((level) => ({ key: String(level), title: `${level}Lv`, tick: `${level}` }))
+  const bars = series.map(({ slotId, name, color }, index) => {
+    const byLevel = counts[index]!
+    const values = levels.map((level) => shareOf(byLevel.get(level) ?? 0, stats.sampleSize))
+
+    return { key: slotId, name, color, values }
+  })
+
+  return { x, bars }
 }
