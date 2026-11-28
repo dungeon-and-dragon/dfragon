@@ -39,8 +39,10 @@ afterEach(async () => {
 
 const GOLDEN = '7f788a703a87d783079b41d0fe6448c9'
 const FAIRY = '4ee7bd5912cda6e2a24c1f36d5202b46'
+const DRAGON_ARENA = 'b92ca7784123b5fea9cea40144925194'
 const UNLISTED = 'unlisted-equipment-set'
 const DRAGON = 16204
+const LUCK = 16206
 
 // 합성 통계다. 세트 id와 이름, 선택지 이름은 게임 데이터 그대로다.
 const stats: SetStats = {
@@ -49,7 +51,8 @@ const stats: SetStats = {
   equipmentSets: [
     { setId: FAIRY, name: '로열 페어리 세트', count: 2 },
     { setId: null, name: null, count: 2 },
-    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 3 },
+    { setId: GOLDEN, name: '영원히 이어지는 황금향 세트', count: 2 },
+    { setId: DRAGON_ARENA, name: '용투장의 난 세트', count: 1 },
     { setId: UNLISTED, name: '나아가려는 자의 마음 세트', count: 1 }
   ],
   oathSets: [
@@ -72,19 +75,33 @@ const stats: SetStats = {
   ]
 }
 
+function catalogSet(
+  setId: number,
+  name: string,
+  prefix: string,
+  options: readonly string[]
+): OathCatalog['sets'][number] {
+  return {
+    setId,
+    name,
+    icon: null,
+    options: options.map((option) => ({
+      name: `${prefix} : ${option}`,
+      icon: '',
+      effects: { rare: null, unique: null, legendary: null, epic: null, primitive: null }
+    }))
+  }
+}
+
 const catalog: OathCatalog = {
   version: 'synthetic',
   sets: [
-    {
-      setId: DRAGON,
-      name: '야망의 용투 서약',
-      icon: null,
-      options: ['용제 강림', '세계를 태우는 불꽃', '싸워야만 하는 운명'].map((name) => ({
-        name: `용투 : ${name}`,
-        icon: '',
-        effects: { rare: null, unique: null, legendary: null, epic: null, primitive: null }
-      }))
-    }
+    catalogSet(DRAGON, '야망의 용투 서약', '용투', [
+      '용제 강림',
+      '세계를 태우는 불꽃',
+      '싸워야만 하는 운명'
+    ]),
+    catalogSet(LUCK, '운명의 행운 서약', '행운', ['찬란한 운명', '일궈낸 운명', '혼돈의 운명'])
   ],
   items: []
 }
@@ -156,6 +173,41 @@ function rowsOf(name: string): [string, string][] {
   ])
 }
 
+function columnsOf(): HTMLElement[] {
+  return [...boxOf('장비 세트').querySelectorAll<HTMLElement>('[data-chart-item]')]
+}
+
+function accessibleNameOf(column: HTMLElement): string {
+  const name = column.firstElementChild?.getAttribute('aria-label')
+  if (name == null) {
+    return ''
+  }
+
+  return name
+}
+
+function columnLabels(): string[] {
+  return columnsOf().map((column) => accessibleNameOf(column).split(', ')[0] ?? '')
+}
+
+function columnOf(setName: string): HTMLElement {
+  return columnsOf().find((column) => accessibleNameOf(column).startsWith(`${setName} `))!
+}
+
+async function hoverColumn(setName: string): Promise<string[]> {
+  const column = columnOf(setName)
+  await act(async () => {
+    column.dispatchEvent(
+      new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
+    )
+  })
+  const tooltip = boxOf('장비 세트').querySelector('[aria-hidden="true"]')!
+
+  return [...tooltip.querySelectorAll('span')]
+    .filter((span) => span.children.length === 0)
+    .map((span) => span.textContent ?? '')
+}
+
 function rankingSearchOf(link: Element | null | undefined): Record<string, string> | null {
   const href = link?.getAttribute('href')
   if (href == null) {
@@ -222,90 +274,87 @@ it('표본 칩은 직업, 전직을 두고 표본만 바꾸며, 직업을 바꿔
   ])
 })
 
-it('장비 세트는 줄임말로 많은 순에 세트 없음을 맨 아래 두고, 표본 전체 대비 비율의 합이 100%다', async () => {
+it('장비 세트는 서약 계열 12세트를 아무도 끼지 않았어도 모두 많은 순으로 보이고, 세트 없음과 서약이 없는 세트는 뺀다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
   expect(setStatsQueries).toEqual([{ ...JOB_FILTER, sample: 'all' }])
-  expect(rowsOf('장비 세트')).toEqual([
-    ['황금향', '37.5%'],
-    ['페어리', '25.0%'],
-    ['나아가려는 자의 마음 세트', '12.5%'],
-    ['세트 없음', '25.0%']
-  ])
-  const total = rowsOf('장비 세트').reduce((sum, [, share]) => sum + Number.parseFloat(share), 0)
-  expect(total).toBe(100)
+  const labels = columnLabels()
+  expect(labels.slice(0, 3)).toEqual(['황금향 25.0%', '페어리 25.0%', '용투장 12.5%'])
+  expect(labels.slice(3).toSorted()).toEqual(
+    ['칠흑', '여우', '무리', '세렌디', '그림자', '발키리', '한계', '자연', '마력']
+      .map((name) => `${name} 0.0%`)
+      .toSorted()
+  )
 })
 
-it('서약 세트 아래 카탈로그 순서로 선택지를 펼쳐 왼쪽, 가운데, 오른쪽으로 부르고, 아무도 고르지 않은 선택지는 0%이며 세트 안 비율의 합이 100%다', async () => {
+it('장비 세트 막대에 마우스를 올리면 같은 계열 서약의 왼쪽, 가운데, 오른쪽 선택지 비율을 보이고, 아무도 고르지 않은 선택지는 0%다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
-  expect(rowsOf('서약 세트')).toEqual([
-    ['용투장', '50.0%'],
-    ['용투장 : 왼쪽', '0.0%'],
-    ['용투장 : 가운데', '75.0%'],
-    ['용투장 : 오른쪽', '25.0%'],
-    ['세트 없음', '50.0%']
+  expect(await hoverColumn('용투장')).toEqual([
+    '용투장',
+    '12.5%',
+    '왼쪽',
+    '용제 강림',
+    '0.0%',
+    '가운데',
+    '세계를 태우는 불꽃',
+    '75.0%',
+    '오른쪽',
+    '싸워야만 하는 운명',
+    '25.0%'
   ])
 })
 
-it('서약 세트의 선택지는 세트마다 접고 다시 펼친다', async () => {
+it('장비 세트 막대는 스크린 리더에 같은 계열 서약 선택지 비율까지 읽힌다', async () => {
   await render({ setStats: setStatsOf(stats) })
-  const toggle = boxOf('서약 세트').querySelector<HTMLButtonElement>('button[aria-expanded]')!
 
-  expect(toggle.getAttribute('aria-expanded')).toBe('true')
-  await act(async () => toggle.click())
-  expect(toggle.getAttribute('aria-expanded')).toBe('false')
-  expect(rowsOf('서약 세트').map(([name]) => name)).toEqual(['용투장', '세트 없음'])
-  await act(async () => toggle.click())
-  expect(rowsOf('서약 세트')).toHaveLength(5)
+  expect(accessibleNameOf(columnOf('용투장'))).toBe(
+    '용투장 12.5%, 왼쪽 용제 강림 0.0%, 가운데 세계를 태우는 불꽃 75.0%, 오른쪽 싸워야만 하는 운명 25.0%'
+  )
 })
 
-it('카탈로그를 받지 못하면 받은 선택지를 원래 이름으로 보인다', async () => {
+it('세렌디 세트는 행운 서약의 선택지를 보인다', async () => {
+  await render({ setStats: setStatsOf(stats) })
+
+  expect(await hoverColumn('세렌디')).toEqual([
+    '세렌디',
+    '0.0%',
+    '왼쪽',
+    '찬란한 운명',
+    '0.0%',
+    '가운데',
+    '일궈낸 운명',
+    '0.0%',
+    '오른쪽',
+    '혼돈의 운명',
+    '0.0%'
+  ])
+})
+
+it('서약 카탈로그를 받지 못하면 장비 세트 툴팁에 세트 이름과 비율만 보인다', async () => {
   await render({ setStats: setStatsOf(stats), oathCatalog: oathCatalogHandlers.notUploaded })
 
-  expect(rowsOf('서약 세트').map(([name]) => name)).toEqual([
-    '용투장',
-    '용투 : 싸워야만 하는 운명',
-    '용투 : 세계를 태우는 불꽃',
-    '세트 없음'
-  ])
+  expect(await hoverColumn('용투장')).toEqual(['용투장', '12.5%'])
 })
 
-it('세트와 선택지 막대는 고른 직업, 전직과 그 세트로 거른 랭킹으로 잇고 세트 없음은 잇지 않는다', async () => {
+it('장비 세트 막대는 고른 직업, 전직과 그 세트로 거른 랭킹으로 잇는다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
-  expect(rankingSearchOf(rowLink('장비 세트', '페어리'))).toEqual({
+  expect(rankingSearchOf(columnOf('페어리').querySelector('a'))).toEqual({
     ...JOB_FILTER,
     equipmentSetId: FAIRY
   })
-  expect(rowLink('장비 세트', '세트 없음')).toBeNull()
-  expect(rankingSearchOf(rowLink('서약 세트', '용투장'))).toEqual({
-    ...JOB_FILTER,
-    oathSetId: String(DRAGON)
-  })
-  expect(rankingSearchOf(rowLink('서약 세트', '용투장 : 왼쪽'))).toEqual({
-    ...JOB_FILTER,
-    oathSetId: String(DRAGON),
-    oathSetOption: '용투 : 용제 강림'
-  })
-  expect(rowLink('서약 세트', '세트 없음')).toBeNull()
 })
 
-it('조합은 두 세트를 함께 랭킹에 붙이고, 한쪽이라도 세트가 없으면 잇지 않는다', async () => {
+it('조합은 두 세트가 모두 있고 장비가 서약 계열 세트인 조합만 보이며, 두 세트를 함께 랭킹에 붙인다', async () => {
   await render({ setStats: setStatsOf(stats) })
 
-  expect(rowsOf('장비와 서약 조합')).toEqual([
-    ['황금향 + 용투장', '25.0%'],
-    ['페어리 + 세트 없음', '25.0%'],
-    ['나아가려는 자의 마음 세트 + 용투장', '12.5%'],
-    ['세트 없음', '37.5%']
-  ])
+  expect(rowsOf('장비와 서약 조합')).toEqual([['황금향 + 용투장', '25.0%']])
   expect(rankingSearchOf(rowLink('장비와 서약 조합', '황금향 + 용투장'))).toEqual({
     ...JOB_FILTER,
     equipmentSetId: GOLDEN,
     oathSetId: String(DRAGON)
   })
-  expect(rowLink('장비와 서약 조합', '페어리 + 세트 없음')).toBeNull()
 })
 
 it('저장분이 없으면 집계 시각 없이 상자마다 세트 통계가 없다고 알린다', async () => {
@@ -313,7 +362,6 @@ it('저장분이 없으면 집계 시각 없이 상자마다 세트 통계가 �
 
   expect(container.querySelector('header')).toBeNull()
   expect([...container.querySelectorAll('section p')].map((p) => p.textContent)).toEqual([
-    '세트 통계가 없습니다.',
     '세트 통계가 없습니다.',
     '세트 통계가 없습니다.'
   ])
@@ -325,7 +373,6 @@ it('받는 중에는 상자 제목과 skeleton을 보인다', async () => {
   expect(container.querySelector('[aria-busy="true"]')).not.toBeNull()
   expect([...container.querySelectorAll('section h2')].map((h2) => h2.textContent)).toEqual([
     '장비 세트',
-    '서약 세트',
     '장비와 서약 조합',
     '무기',
     '유일 장비'
