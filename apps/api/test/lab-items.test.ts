@@ -424,6 +424,40 @@ test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanc
   assert.equal(keys.get('합성 칭호 소유자 B'), keys.get('합성 칭호 소유자 A'))
 })
 
+test('크리쳐는 레벨 꼬리표 판에만 붙는 무게 한도와 최종 데미지 1.5% 줄을 빼고 비교하고, 칭호는 그 줄도 비교한다', async (t) => {
+  const strength = { name: '힘', value: '100' }
+  const levelFormLines = [
+    { name: '인벤토리 무게 한도', value: '5000g' },
+    { name: '최종 데미지 증가', value: '1.5%' }
+  ]
+  const candidateOf = (options: { name: string; value: string }[]) => ({
+    ...EMPTY_CANDIDATE,
+    fame: 1261,
+    options
+  })
+  const keys = await performanceKeys(t, [
+    { ...row('CREATURE', 'all', '종결', '합성 크리쳐', 1_000), candidate: candidateOf([strength]) },
+    {
+      ...row('CREATURE', 'all', '종결', '합성 크리쳐 알', 2_000),
+      candidate: candidateOf([strength, ...levelFormLines])
+    },
+    {
+      ...row('CREATURE', 'all', '종결', '합성 크리쳐 최종 데미지 다름', 3_000),
+      candidate: candidateOf([strength, { name: '최종 데미지 증가', value: '3%' }])
+    },
+    { ...row('TITLE', 'all', '종결', '합성 칭호', 1_000), candidate: candidateOf([strength]) },
+    {
+      ...row('TITLE', 'all', '종결', '합성 칭호 레벨', 2_000),
+      candidate: candidateOf([strength, ...levelFormLines])
+    }
+  ])
+
+  assert.equal(typeof keys.get('합성 크리쳐'), 'string')
+  assert.equal(keys.get('합성 크리쳐 알'), keys.get('합성 크리쳐'))
+  assert.notEqual(keys.get('합성 크리쳐 최종 데미지 다름'), keys.get('합성 크리쳐'))
+  assert.notEqual(keys.get('합성 칭호 레벨'), keys.get('합성 칭호'))
+})
+
 test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 설명, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
   const currencyUpdatedAt = new Date('2026-11-27T01:02:03.004Z')
   const exchanged: LabItemPriceRow = {
