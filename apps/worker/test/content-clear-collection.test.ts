@@ -421,6 +421,7 @@ test('수집을 끈 컨텐츠는 클리어와 분모를 저장하지 않고, 수
     contentId,
     collected: false,
     shown: true,
+    scoreBandMinPopulation: 0,
     updatedAt: at('2026-11-10T10:00')
   })
   const { state, store } = memoryClearStore(

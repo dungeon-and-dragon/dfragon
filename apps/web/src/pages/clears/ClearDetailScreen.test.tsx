@@ -223,6 +223,7 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
     weekMoves,
     streaks,
     scoreBands: { equipment: [], buff: [] },
+    scoreBandMinPopulation: 0,
     weekdays,
     hours: Array.from({ length: 24 }, (_, hour) => ({ hour, cleared: hour }))
   }
@@ -643,6 +644,17 @@ it('컨텐츠 집계가 실패하면 컨텐츠 줄 아래 오류 한 줄을 둔�
 const equipment = { p5: 280000, p25: 310000, median: 330000, p75: 350000, p95: 380000, max: 420000 }
 const buff = { p5: 120000, p25: 140000, median: 150000, p75: 160000, p95: 180000, max: 200000 }
 
+const SPARSE_EQUIPMENT_BANDS = [
+  { score: 0, population: 20, cleared: 3 },
+  { score: 50000, population: 20, cleared: 1 },
+  { score: 100000, population: 800, cleared: 80 },
+  { score: 150000, population: 10, cleared: 5 },
+  { score: 200000, population: 10, cleared: 5 },
+  { score: 250000, population: 20, cleared: 10 },
+  { score: 300000, population: 100, cleared: 90 },
+  { score: 350000, population: 10, cleared: 10 }
+]
+
 function scoredStatsOf(contentId: string, weekStart: string): ClearContentStats {
   const base = statsOf(contentId, weekStart)
   const scores = { equipment, buff }
@@ -734,33 +746,53 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
   expect(heights[1]).toContain('50%')
 })
 
-it('장비 점수 구간별 클리어율은 분모가 전체의 3%에 못 미치는 구간을 3% 이상이 될 때까지 다음 구간과 묶고 끝에 남은 구간은 앞 막대에 묶는다', async () => {
+it('장비 점수 구간별 클리어율은 분모가 최소 인원에 못 미치는 구간을 최소 인원이 될 때까지 다음 구간과 묶고 끝에 남은 구간은 앞 막대에 묶는다', async () => {
   await open(
     { contentKey: 'michaela' },
     {
       contentStats: (contentId, weekStart) => {
         const stats = scoredStatsOf(contentId, weekStart)
-        const equipment = [
-          { score: 0, population: 20, cleared: 3 },
-          { score: 50000, population: 20, cleared: 1 },
-          { score: 100000, population: 800, cleared: 80 },
-          { score: 150000, population: 10, cleared: 5 },
-          { score: 200000, population: 10, cleared: 5 },
-          { score: 250000, population: 20, cleared: 10 },
-          { score: 300000, population: 100, cleared: 90 },
-          { score: 350000, population: 10, cleared: 10 }
-        ]
 
-        return HttpResponse.json({ ...stats, scoreBands: { ...stats.scoreBands, equipment } })
+        return HttpResponse.json({
+          ...stats,
+          scoreBands: { ...stats.scoreBands, equipment: SPARSE_EQUIPMENT_BANDS },
+          scoreBandMinPopulation: 50
+        })
       }
     }
   )
 
   expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
-    '0~100,0004  10.0%',
+    '0~150,00084  10.0%',
+    '150,000~120  80.0%'
+  ])
+})
+
+it('장비 점수 구간별 클리어율은 최소 인원이 0이면 구간을 묶지 않는다', async () => {
+  await open(
+    { contentKey: 'michaela' },
+    {
+      contentStats: (contentId, weekStart) => {
+        const stats = scoredStatsOf(contentId, weekStart)
+
+        return HttpResponse.json({
+          ...stats,
+          scoreBands: { ...stats.scoreBands, equipment: SPARSE_EQUIPMENT_BANDS },
+          scoreBandMinPopulation: 0
+        })
+      }
+    }
+  )
+
+  expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
+    '0~50,0003  15.0%',
+    '50,000~100,0001  5.0%',
     '100,000~150,00080  10.0%',
-    '150,000~300,00020  50.0%',
-    '300,000~100  90.9%'
+    '150,000~200,0005  50.0%',
+    '200,000~250,0005  50.0%',
+    '250,000~300,00010  50.0%',
+    '300,000~350,00090  90.0%',
+    '350,000~10  100.0%'
   ])
 })
 

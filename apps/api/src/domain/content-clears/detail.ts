@@ -56,6 +56,7 @@ export type ClearContentStats = ClearContentHeader &
     weekMoves: ClearWeekMoveCount[] | null
     streaks: ClearStreakCount[] | null
     scoreBands: Record<CharacterScoreKind, ClearScoreBand[]>
+    scoreBandMinPopulation: number
   }
 
 // 레이드가 아니면 weekGroups, weekGroupScores, streaks가 null이고, 일반과 하드 짝이 없으면 weekMoves가 null이다.
@@ -153,10 +154,10 @@ function toScoreBands(
   return { equipment, buff }
 }
 
-export function toEmptyContentStats({
-  weeks: _weeks,
-  ...header
-}: ClearContentSummary): ClearContentStats {
+export function toEmptyContentStats(
+  { weeks: _weeks, ...header }: ClearContentSummary,
+  scoreBandMinPopulation: number
+): ClearContentStats {
   return {
     ...header,
     week: null,
@@ -168,6 +169,7 @@ export function toEmptyContentStats({
     weekMoves: null,
     streaks: null,
     scoreBands: { equipment: [], buff: [] },
+    scoreBandMinPopulation,
     weekdays: [],
     hours: []
   }
@@ -176,7 +178,8 @@ export function toEmptyContentStats({
 export function toClearContentStats(
   { weeks, ...header }: ClearContentSummary,
   population: StoredClearPopulation,
-  samples: ClearContentSamples
+  samples: ClearContentSamples,
+  scoreBandMinPopulation: number
 ): ClearContentStats {
   const weekStart = formatResetDate(population.weekStart)
   const week = weeks.find((summaryWeek) => summaryWeek.weekStart === weekStart) ?? null
@@ -201,6 +204,7 @@ export function toClearContentStats(
     weekMoves,
     streaks: samples.streaks,
     scoreBands,
+    scoreBandMinPopulation,
     ...times
   }
 }

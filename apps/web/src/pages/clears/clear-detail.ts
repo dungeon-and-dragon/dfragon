@@ -300,9 +300,6 @@ export function weekGroupRows(
 }
 
 const SCORE_TICK_COUNT = 5
-// 분모가 이 비율보다 적은 구간은 클리어율이 그 점수의 클리어 가능성을 말해 주지 못해, 다음 구간과 이 비율을 넘을 때까지 묶는다.
-// 끝에 남은 구간도 이 비율에 못 미치면 바로 앞 막대에 묶는다.
-const MIN_BAND_POPULATION_SHARE = 0.03
 
 interface ScoreBandColumn {
   band: ClearScoreBand
@@ -317,9 +314,9 @@ function joinBands(lower: ClearScoreBand, upper: ClearScoreBand): ClearScoreBand
   return { score: lower.score, population, cleared }
 }
 
-function groupBands(bands: readonly ClearScoreBand[]): ClearScoreBand[] {
-  const total = bands.reduce((sum, { population }) => sum + population, 0)
-  const minPopulation = total * MIN_BAND_POPULATION_SHARE
+// 분모가 최소 인원보다 적은 구간은 클리어율이 그 점수의 클리어 가능성을 말해 주지 못해, 최소 인원이 될 때까지 다음 구간과
+// 묶는다. 끝에 남은 구간도 최소 인원에 못 미치면 바로 앞 막대에 묶는다.
+function groupBands(bands: readonly ClearScoreBand[], minPopulation: number): ClearScoreBand[] {
   const groups: ClearScoreBand[] = []
   let pending: ClearScoreBand | undefined
 
@@ -345,8 +342,11 @@ function groupBands(bands: readonly ClearScoreBand[]): ClearScoreBand[] {
   return [...groups.slice(0, -1), joinBands(last, pending)]
 }
 
-function scoreBandColumnsOf(bands: readonly ClearScoreBand[]): ScoreBandColumn[] {
-  const groups = groupBands(bands)
+function scoreBandColumnsOf(
+  bands: readonly ClearScoreBand[],
+  minPopulation: number
+): ScoreBandColumn[] {
+  const groups = groupBands(bands, minPopulation)
 
   return groups.map((band, index) => {
     const label = formatScoreTick(band.score)
@@ -359,8 +359,11 @@ function scoreBandColumnsOf(bands: readonly ClearScoreBand[]): ScoreBandColumn[]
 }
 
 // 막대 높이는 그 구간 캐릭터 가운데 클리어한 비율이고, 가장 높은 구간을 기준으로 맞춘다.
-export function scoreBandColumns(scoreBands: readonly ClearScoreBand[]): ColumnBar[] {
-  const columns = scoreBandColumnsOf(scoreBands)
+export function scoreBandColumns(
+  scoreBands: readonly ClearScoreBand[],
+  minPopulation: number
+): ColumnBar[] {
+  const columns = scoreBandColumnsOf(scoreBands, minPopulation)
   const step = Math.max(1, Math.ceil(columns.length / SCORE_TICK_COUNT))
   const rates = columns.map(({ band }) =>
     band.population > 0 ? band.cleared / band.population : 0

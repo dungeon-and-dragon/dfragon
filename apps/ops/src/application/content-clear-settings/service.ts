@@ -9,12 +9,13 @@ import type { ContentClearSettingRepository } from './repository.js'
 export type ContentClearSettingSummary = ClearContentCatalogEntry & {
   collected: boolean
   shown: boolean
+  scoreBandMinPopulation: number
 }
 
 export class ContentClearSettingService {
   constructor(private readonly repository: ContentClearSettingRepository) {}
 
-  // 설정 행이 없는 컨텐츠는 수집과 노출이 모두 켜진 것으로 본다.
+  // 설정 행이 없는 컨텐츠는 수집과 노출이 모두 켜져 있고 점수 구간을 묶지 않는 것으로 본다.
   async readSettings(): Promise<ContentClearSettingSummary[]> {
     const settings = await this.repository.readSettings()
 
@@ -22,8 +23,9 @@ export class ContentClearSettingService {
       const setting = settings.find(({ contentId }) => contentId === content.id)
       const collected = setting?.collected ?? true
       const shown = setting?.shown ?? true
+      const scoreBandMinPopulation = setting?.scoreBandMinPopulation ?? 0
 
-      return { ...content, collected, shown }
+      return { ...content, collected, shown, scoreBandMinPopulation }
     })
   }
 

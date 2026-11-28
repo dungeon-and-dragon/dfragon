@@ -37,6 +37,7 @@ export type ContentClearSettingBody = {
   name: string
   collected: boolean
   shown: boolean
+  scoreBandMinPopulation: number
 }
 
 export type BatchKeyBody = {

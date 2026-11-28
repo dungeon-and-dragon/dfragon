@@ -225,6 +225,7 @@ test('컨텐츠 설정은 그 스위치를 끈 컨텐츠만 빼고, 설정 행�
     contentId,
     collected,
     shown,
+    scoreBandMinPopulation: 0,
     updatedAt: at('2026-11-12T10:00:00')
   })
   const settings = [setting('nabel-normal', false, true), setting('inae-twilight', true, false)]

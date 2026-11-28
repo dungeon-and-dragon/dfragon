@@ -505,7 +505,14 @@ describe('클리어 집계 패널', () => {
   it('컨텐츠마다 수집과 노출 스위치를 따로 끄면 그 스위치만 꺼진다', async () => {
     const api = new FakeOpsApi()
     api.contentClearSettings = [
-      { id: 'legion-venus', kind: 'legion', name: '베누스', collected: true, shown: true }
+      {
+        id: 'legion-venus',
+        kind: 'legion',
+        name: '베누스',
+        collected: true,
+        shown: true,
+        scoreBandMinPopulation: 0
+      }
     ]
     await renderScreen(api)
     await openTab('클리어 집계')
@@ -520,6 +527,39 @@ describe('클리어 집계 패널', () => {
     expect(api.writes().map(({ method, path, body }) => [method, path, body])).toEqual([
       ['PATCH', '/api/content-clear-settings/legion-venus', { collected: false }],
       ['PATCH', '/api/content-clear-settings/legion-venus', { shown: false }]
+    ])
+  })
+
+  it('점수 구간 최소 인원을 넣고 저장하면 그 컨텐츠의 최소 인원만 바꾼다', async () => {
+    const api = new FakeOpsApi()
+    api.contentClearSettings = [
+      {
+        id: 'legion-venus',
+        kind: 'legion',
+        name: '베누스',
+        collected: true,
+        shown: true,
+        scoreBandMinPopulation: 0
+      }
+    ]
+    await renderScreen(api)
+    await openTab('클리어 집계')
+    const input = section('클리어 집계').querySelector<HTMLInputElement>(
+      '[aria-label="베누스 최소 인원"]'
+    ) as HTMLInputElement
+
+    expect(input.value).toBe('0')
+
+    typeInto(input, '30')
+    await click(
+      section('클리어 집계').querySelector<HTMLElement>(
+        '[aria-label="베누스 최소 인원 저장"]'
+      ) as HTMLElement
+    )
+
+    await waitFor(() => expect(api.contentClearSettings[0]?.scoreBandMinPopulation).toBe(30))
+    expect(api.writes().map(({ method, path, body }) => [method, path, body])).toEqual([
+      ['PATCH', '/api/content-clear-settings/legion-venus', { scoreBandMinPopulation: 30 }]
     ])
   })
 })

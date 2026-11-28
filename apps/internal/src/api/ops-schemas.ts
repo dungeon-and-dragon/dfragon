@@ -94,7 +94,8 @@ const contentClearSettingSchema = z.object({
   kind: z.enum(['raid', 'challenge', 'legion']),
   name: z.string(),
   collected: z.boolean(),
-  shown: z.boolean()
+  shown: z.boolean(),
+  scoreBandMinPopulation: z.int().nonnegative()
 })
 
 export const contentClearSettingListSchema = z.object({
