@@ -20,8 +20,6 @@ import {
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
   readContentClearWeekSamples,
-  readClearRecordRaidModes,
-  readClearRecordRaidStageCounts,
   readContentClearJobScores,
   readContentClearScoreBands,
   readContentClearScores,
@@ -320,9 +318,6 @@ try {
     readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
     readWeekMoves: (selection) => readContentClearWeekMoves(client, selection),
     readStreaks: (selection) => readContentClearStreaks(client, selection),
-    readRaidModes: (selection) => readClearRecordRaidModes(client, selection),
-    readRaidStageCounts: (selection, stages) =>
-      readClearRecordRaidStageCounts(client, selection, stages),
     readContentJobScores: (selection) => readSelectedContentClearJobScores(client, selection),
     readWeekGroupScores: (comparison) => readContentClearWeekGroupScores(client, comparison),
     readScoreBands: (selection, minFame) => readContentClearScoreBands(client, selection, minFame),
@@ -795,11 +790,6 @@ try {
   assert.equal(scoredGrow.scores.buff, null)
 
   const scoredDetail = await scoredService.contentStats('michaela-hard', '2026-11-05')
-  assert.deepEqual(scoredDetail.stages, [
-    { stage: '싱글/매칭', characters: 5 },
-    { stage: '일반', characters: 2 },
-    { stage: '하드', characters: 1 }
-  ])
   assert.equal(scoredDetail.weekOverWeek.first.fame.max, 130000)
   // 명성 구간은 분모와 같은 지금 최고 명성으로 세므로 복사한 명성 130,000은 구간에 쓰지 않는다.
   assert.equal(
@@ -821,8 +811,8 @@ try {
   })
   const legionDetail = await scoredService.contentStats('legion-venus', '2026-11-05')
   assert.deepEqual(
-    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages, legionDetail.weekMoves],
-    ['legion', 2, null, null]
+    [legionDetail.kind, legionDetail.week.cleared, legionDetail.weekMoves],
+    ['legion', 2, null]
   )
   assert.equal(
     legionDetail.jobs.reduce((total, { cleared }) => total + cleared, 0),
@@ -841,7 +831,6 @@ try {
   )
   const challengeScored = await scoredService.contentStats('engraved-nightmare-1', '2026-11-05')
   assert.deepEqual(challengeScored.scoreBands, { equipment: [], buff: [] })
-  assert.equal(challengeScored.stages, null)
 
   // 지난주와 이번 주가 모두 1주차 뒤면 지난주 대비 그룹 점수를 계산한다. 11-12 주에 미카엘라 하드를 깬 캐릭터가 없어
   // 11-05 주 클리어 캐릭터는 모두 이탈 그룹이고 지난주 행의 점수를 쓴다.
