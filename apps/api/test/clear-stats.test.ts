@@ -482,6 +482,7 @@ test('노출을 끈 컨텐츠는 목록, 전체 개요, 상세에서 빠지고, 
     contentId,
     collected: true,
     shown: false,
+    scoreBandMinPopulation: 0,
     updatedAt: at('2026-11-12T10:00:00')
   })
   let settings = [hidden('michaela-hard'), hidden('legion-venus')]
@@ -516,6 +517,38 @@ test('노출을 끈 컨텐츠는 목록, 전체 개요, 상세에서 빠지고, 
     assert.deepEqual(after.legions, ['legion-apocalypse', 'legion-venus'])
     assert.deepEqual(after.overview, ['michaela-hard', 'engraved-nightmare-1'])
     assert.equal((await getJson(origin, '/stats/clears/michaela-hard')).status, 200)
+  } finally {
+    await app.close()
+  }
+})
+
+test('컨텐츠 상세는 그 컨텐츠의 점수 구간 최소 인원을 지금 설정값으로 주고, 설정이 바뀌면 다음 갱신부터 바뀐 값을 준다', async () => {
+  const minPopulation = (contentId: string, scoreBandMinPopulation: number) => ({
+    contentId,
+    collected: true,
+    shown: true,
+    scoreBandMinPopulation,
+    updatedAt: at('2026-11-12T10:00:00')
+  })
+  let settings: ContentClearSetting[] = [minPopulation('michaela-hard', 30)]
+  const { app, origin, refreshClearStats } = await listen(
+    fakeReader({ readSettings: async () => settings })
+  )
+  const minPopulationOf = async (contentId: string, week?: string) => {
+    const query = week !== undefined ? `?week=${week}` : ''
+    const { body } = await getJson(origin, `/stats/clears/${contentId}${query}`)
+
+    return body.scoreBandMinPopulation
+  }
+
+  try {
+    assert.equal(await minPopulationOf('michaela-hard'), 30)
+    assert.equal(await minPopulationOf('michaela-hard', '2026-10-29'), 30)
+    assert.equal(await minPopulationOf('michaela-normal'), 0)
+
+    settings = [minPopulation('michaela-hard', 50)]
+    await refreshClearStats()
+    assert.equal(await minPopulationOf('michaela-hard'), 50)
   } finally {
     await app.close()
   }
@@ -565,6 +598,7 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
       weekMoves: null,
       streaks: null,
       scoreBands: { equipment: [], buff: [] },
+      scoreBandMinPopulation: 0,
       weekdays: [],
       hours: []
     })
