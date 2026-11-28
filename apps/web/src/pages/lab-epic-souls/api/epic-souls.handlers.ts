@@ -1,5 +1,4 @@
 import { delay, HttpResponse, http } from 'msw'
-import { z } from 'zod'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
 import { storyAdventureCharacters, storyRecoveries } from './epic-souls.fixture'
 
@@ -10,14 +9,6 @@ const STORY_CHARACTER_PREFIX = 'story-character-'
 
 function failure(message: string) {
   return HttpResponse.json({ error: { code: 'INTERNAL_SERVER_ERROR', message } }, { status: 500 })
-}
-
-const recoveryBodySchema = z.object({ includePrimordial: z.boolean() })
-
-async function includePrimordialOf(request: Request): Promise<boolean> {
-  const { includePrimordial } = recoveryBodySchema.parse(await request.json())
-
-  return includePrimordial
 }
 
 export const epicSoulsHandlers = {
@@ -36,9 +27,9 @@ export const epicSoulsHandlers = {
     failure('모험단 캐릭터를 받지 못했습니다.')
   ),
   /** 캐릭터 순서대로 합성 응답을 주고, 응답이 없는 캐릭터는 실패로 답한다. */
-  recoveries: http.post(EPIC_SOUL_RECOVERY_URL, async ({ params, request }) => {
+  recoveries: http.get(EPIC_SOUL_RECOVERY_URL, ({ params }) => {
     const number = Number(String(params.characterId).replace(STORY_CHARACTER_PREFIX, ''))
-    const recovery = storyRecoveries(await includePrimordialOf(request))[number - 1]
+    const recovery = storyRecoveries()[number - 1]
 
     if (recovery == null) {
       return failure('계산하지 못했습니다.')
@@ -46,7 +37,7 @@ export const epicSoulsHandlers = {
 
     return HttpResponse.json(recovery)
   }),
-  recoveriesLoading: http.post(EPIC_SOUL_RECOVERY_URL, async () => {
+  recoveriesLoading: http.get(EPIC_SOUL_RECOVERY_URL, async () => {
     await delay('infinite')
   })
 }

@@ -1,5 +1,4 @@
 import { ChevronDownIcon, ChevronRightIcon, IconButton } from '@dfragon/ui'
-import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { StoredCharacter } from '#entities/ranking'
 import { displayJobName, formatCount } from '#entities/character'
@@ -8,25 +7,22 @@ import {
   type EpicSoulRecoveryResult,
   useEpicSoulRecoveries
 } from '#pages/lab-epic-souls/api/useEpicSoulRecoveries'
-import { simulatorChangesOf } from '#pages/lab-epic-souls/lib/simulator-changes'
 import { EpicSoulSlotTable } from './EpicSoulSlotTable'
 
 const EDGE_CELL = 'px-0'
 
 export function EpicSoulTable({
-  characters,
-  includePrimordial
+  characters
 }: {
   characters: readonly StoredCharacter[]
-  includePrimordial: boolean
 }): React.JSX.Element {
-  const results = useEpicSoulRecoveries(characters, includePrimordial)
+  const results = useEpicSoulRecoveries(characters)
   const total = results.reduce((sum, result) => {
     if (result.status !== 'success') {
       return sum
     }
 
-    return sum + result.recovery.souls.total
+    return sum + result.souls.total
   }, 0)
 
   return (
@@ -36,7 +32,6 @@ export function EpicSoulTable({
           <col className="w-[36px]" />
           <col />
           <col className="w-[96px]" />
-          <col className="w-[104px]" />
         </colgroup>
         <thead>
           <tr>
@@ -46,9 +41,6 @@ export function EpicSoulTable({
             <th scope="col">캐릭터</th>
             <th scope="col" className="table-num">
               에픽 소울
-            </th>
-            <th scope="col">
-              <span className="sr-only">시뮬레이터</span>
             </th>
           </tr>
         </thead>
@@ -66,7 +58,6 @@ export function EpicSoulTable({
             <td className={EDGE_CELL} />
             <th scope="row">합계</th>
             <td className="table-num font-bold">{formatCount(total)}</td>
-            <td />
           </tr>
         </tfoot>
       </table>
@@ -83,7 +74,7 @@ function CharacterRows({
 }): React.JSX.Element {
   const [expanded, setExpanded] = useState(false)
   const { characterName } = character
-  const slots = result.status === 'success' ? result.recovery.souls.slots : []
+  const slots = result.status === 'success' ? result.souls.slots : []
   const expandable = slots.length > 0
 
   function toggle(): void {
@@ -118,12 +109,12 @@ function CharacterRows({
             </span>
           </div>
         </td>
-        <RecoveryCells character={character} result={result} />
+        <RecoveryCell result={result} />
       </tr>
       {expandable && expanded && (
         <tr>
           <td className={EDGE_CELL} />
-          <td colSpan={3} className="h-auto bg-inset p-0">
+          <td colSpan={2} className="h-auto bg-inset p-0">
             <EpicSoulSlotTable slots={slots} />
           </td>
         </tr>
@@ -132,51 +123,17 @@ function CharacterRows({
   )
 }
 
-function RecoveryCells({
-  character,
-  result
-}: {
-  character: StoredCharacter
-  result: EpicSoulRecoveryResult
-}): React.JSX.Element {
+function RecoveryCell({ result }: { result: EpicSoulRecoveryResult }): React.JSX.Element {
   switch (result.status) {
     case 'loading':
       return (
-        <>
-          <td>
-            <span aria-label="받는 중" className="skeleton h-[14px]" />
-          </td>
-          <td />
-        </>
+        <td>
+          <span aria-label="받는 중" className="skeleton h-[14px]" />
+        </td>
       )
     case 'error':
-      return (
-        <>
-          <td className="table-num">{MISSING_VALUE}</td>
-          <td className="whitespace-normal text-fg-muted">계산하지 못했습니다.</td>
-        </>
-      )
-    case 'success': {
-      const { recovery } = result
-      const changes = simulatorChangesOf(recovery)
-
-      return (
-        <>
-          <td className="table-num font-semibold">{formatCount(recovery.souls.total)}</td>
-          <td>
-            {changes !== undefined && (
-              <Link
-                to="/c/$serverId/$characterId/simulator"
-                params={{ serverId: character.serverId, characterId: character.characterId }}
-                search={{ changes }}
-                className="text-sm text-fg-muted underline focus-ring"
-              >
-                시뮬레이터
-              </Link>
-            )}
-          </td>
-        </>
-      )
-    }
+      return <td className="table-num whitespace-normal text-fg-muted">계산하지 못했습니다.</td>
+    case 'success':
+      return <td className="table-num font-semibold">{formatCount(result.souls.total)}</td>
   }
 }

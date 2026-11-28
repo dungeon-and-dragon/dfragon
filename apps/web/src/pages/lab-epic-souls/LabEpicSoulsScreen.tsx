@@ -1,4 +1,3 @@
-import { Checkbox } from '@dfragon/ui'
 import { useState } from 'react'
 import { AdventureNameForm } from '#features/adventure-search'
 import { LabTabs } from '#widgets/lab-tabs'
@@ -15,7 +14,6 @@ export function LabEpicSoulsScreen({
   onAdventureOpen?: (adventureName: string) => void
 }): React.JSX.Element {
   const [adventureName, setAdventureName] = useState(initialAdventureName)
-  const [includePrimordial, setIncludePrimordial] = useState(false)
 
   function openAdventure(next: string): void {
     setAdventureName(next)
@@ -31,27 +29,13 @@ export function LabEpicSoulsScreen({
           onAdventureOpen={openAdventure}
           className="max-sm:w-full"
         />
-        {adventureName !== null && (
-          <label className="flex h-control-sm cursor-pointer items-center gap-2">
-            <Checkbox checked={includePrimordial} onCheckedChange={setIncludePrimordial} />
-            태초 장비 포함해서 계산
-          </label>
-        )}
       </div>
-      {adventureName !== null && (
-        <AdventureEpicSouls adventureName={adventureName} includePrimordial={includePrimordial} />
-      )}
+      {adventureName !== null && <AdventureEpicSouls adventureName={adventureName} />}
     </div>
   )
 }
 
-function AdventureEpicSouls({
-  adventureName,
-  includePrimordial
-}: {
-  adventureName: string
-  includePrimordial: boolean
-}): React.JSX.Element {
+function AdventureEpicSouls({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureCharacters(adventureName)
 
   switch (result.status) {
@@ -72,7 +56,7 @@ function AdventureEpicSouls({
         return <p className="p-4 text-fg-muted">모험단을 찾지 못했습니다.</p>
       }
 
-      return <EpicSoulTable characters={characters} includePrimordial={includePrimordial} />
+      return <EpicSoulTable characters={characters} />
     }
   }
 }
