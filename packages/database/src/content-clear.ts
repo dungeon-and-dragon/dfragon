@@ -955,10 +955,10 @@ export function readContentClearWeekGroupScores(
     GROUP BY versioned."group", versioned.kind`
 }
 
-// 구간 폭은 장비 점수 약 40만~140만, 버프 점수 약 10만~24만에서 구간이 20개 안팎이 되게 정했다.
+// 구간 폭은 캐릭터가 몰린 점수대를 웹이 잘게 나눠 그릴 수 있게 좁게 둔다. 사람이 적은 구간은 웹이 묶는다.
 const SCORE_BAND_WIDTHS: Readonly<Record<CharacterScoreKind, number>> = {
-  equipment: 50_000,
-  buff: 10_000
+  equipment: 10_000,
+  buff: 5_000
 }
 
 // 구간별 캐릭터 수는 분모 기준 명성 이상인 캐릭터의 지금 점수 가운데 클리어 점수와 같은 엔진 버전만 골라,
