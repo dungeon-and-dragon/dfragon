@@ -5,15 +5,22 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { skillWindowHandlers } from '#entities/catalog/api/skill-window.handlers'
 import { RANKING_JOBS } from '#entities/character'
-import type { FameRankingFilter, SkillStats } from '#entities/ranking'
+import type { SetStatsFilter, SkillStats } from '#entities/ranking'
+import { storyItemStats } from '#entities/ranking/api/item-stats.fixture'
+import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
+import { storySetStats } from '#entities/ranking/api/set-stats.fixture'
+import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
 import { SKILL_STATS_URL, skillStatsHandlers } from '#entities/ranking/api/skill-stats.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
 import { skillStatsCatalogFixture, skillStatsFixture } from './api/skill-stats.fixture'
-import { SkillStatsScreen } from './SkillStatsScreen'
+import { JobStatsScreen } from './JobStatsScreen'
 
 const MARK_FILE = /(evolution|enhancement)-\d/
+const COMPUTED_AT = '2026-11-28T15:00:00.000Z'
+const SET_STATS = storySetStats(COMPUTED_AT)
+const ITEM_STATS = storyItemStats(COMPUTED_AT)
 
 let container: HTMLDivElement
 let root: Root
@@ -30,7 +37,11 @@ beforeEach(() => {
   root = createRoot(container)
   requests = []
   server.events.on('request:start', recordRequest)
-  server.use(...skillWindowHandlers([skillStatsCatalogFixture]))
+  server.use(
+    ...skillWindowHandlers([skillStatsCatalogFixture]),
+    http.get(SET_STATS_URL, () => HttpResponse.json(SET_STATS)),
+    http.get(ITEM_STATS_URL, () => HttpResponse.json(ITEM_STATS))
+  )
 })
 
 afterEach(async () => {
@@ -42,20 +53,20 @@ afterEach(async () => {
 
 const SWORDMAN = RANKING_JOBS.find((job) => job.name === '귀검사(남)')!
 const WEAPON_MASTER = SWORDMAN.grows.find((grow) => grow.name === '웨펀마스터')!
-const WEAPON_MASTER_FILTER: FameRankingFilter = {
+const WEAPON_MASTER_FILTER: SetStatsFilter = {
   jobId: SWORDMAN.jobId,
   jobGrowId: WEAPON_MASTER.jobGrowId
 }
 
 async function render(
-  filter: FameRankingFilter,
-  onFilterChange: (filter: FameRankingFilter) => void = vi.fn()
+  filter: SetStatsFilter,
+  onFilterChange: (filter: SetStatsFilter) => void = vi.fn()
 ): Promise<void> {
   await act(async () =>
     root.render(
       <TestQueryClient>
         <TestRouter>
-          <SkillStatsScreen filter={filter} onFilterChange={onFilterChange} />
+          <JobStatsScreen filter={filter} onFilterChange={onFilterChange} />
         </TestRouter>
       </TestQueryClient>
     )
@@ -82,8 +93,30 @@ function pressedChips(): string[] {
     .map((button) => button.textContent ?? '')
 }
 
+function requestsTo(apiUrl: string): string[] {
+  return requests.filter((url) => url.href.startsWith(apiUrl)).map(({ search }) => search)
+}
+
 function skillRequests(): string[] {
-  return requests.filter((url) => url.href.startsWith(SKILL_STATS_URL)).map(({ search }) => search)
+  return requestsTo(SKILL_STATS_URL)
+}
+
+function box(name: string): HTMLElement {
+  return container.querySelector(`section[aria-label="${name}"]`)!
+}
+
+type BarRow = Readonly<{ text: string; value: string; link: Record<string, string> }>
+
+function barRows(name: string): BarRow[] {
+  return [...box(name).querySelectorAll('li[data-chart-item]')].map((row) => {
+    const value = row.querySelector('[data-chart-value]')?.textContent ?? ''
+    const href = row.querySelector('a')?.getAttribute('href') ?? ''
+    const url = new URL(href, 'https://dfragon.test')
+    const params = Object.fromEntries(url.searchParams)
+    const link = { path: url.pathname, ...params }
+
+    return { text: row.textContent, value, link }
+  })
 }
 
 type SkillCell = Readonly<{
@@ -188,13 +221,16 @@ function upgradeMarkTrigger(
   return row?.querySelectorAll('img')[type - 1]?.parentElement
 }
 
-it('주소에 고른 직업이 없으면 귀검사(남) 웨펀마스터를 고른 채로 그 통계를 받고 직업 전체, 전직 전체 칩을 두지 않는다', async () => {
+it('주소에 고른 직업이 없으면 귀검사(남) 웨펀마스터를 고른 채로 스킬, 세트, 아이템 통계를 받고 직업 전체, 전직 전체 칩을 두지 않는다', async () => {
   server.use(skillStatsHandlers.of(skillStatsFixture))
   await render({})
 
   await vi.waitFor(() => expect(container.querySelector('[aria-label="스킬 창"]')).not.toBeNull())
-  expect(skillRequests()).toEqual([`?jobId=${SWORDMAN.jobId}&jobGrowId=${WEAPON_MASTER.jobGrowId}`])
-  expect(pressedChips()).toEqual(['귀검사(남)', '웨펀마스터'])
+  const weaponMaster = `?jobId=${SWORDMAN.jobId}&jobGrowId=${WEAPON_MASTER.jobGrowId}`
+  expect(skillRequests()).toEqual([weaponMaster])
+  expect(requestsTo(SET_STATS_URL)).toEqual([`${weaponMaster}&sample=all`])
+  expect(requestsTo(ITEM_STATS_URL)).toEqual([`${weaponMaster}&sample=all`])
+  expect(pressedChips()).toEqual(['귀검사(남)', '웨펀마스터', '전체'])
   expect(chip('직업 전체')).toBeUndefined()
   expect(chip('전직 전체')).toBeUndefined()
 })
@@ -210,7 +246,7 @@ it('주소에 직업만 있으면 그 직업의 첫 전직 통계를 받고, 다
   await vi.waitFor(() =>
     expect(skillRequests()).toEqual([`?jobId=${job!.jobId}&jobGrowId=${job!.grows[0]!.jobGrowId}`])
   )
-  expect(pressedChips()).toEqual([job!.name, job!.grows[0]!.name])
+  expect(pressedChips()).toEqual([job!.name, job!.grows[0]!.name, '전체'])
 
   await act(async () => chip(nextJob!.name)?.click())
 
@@ -360,7 +396,7 @@ it('스킬 강화를 모두 숨기면 스킬 강화 제목도 그리지 않는�
   expect(upgradeSection('스킬 강화')).toBeNull()
 })
 
-it('통계를 계산한 적이 없으면 통계가 없다고 보이고, 받지 못하면 다른 통계 탭과 같은 실패 표시를 보인다', async () => {
+it('스킬 통계를 계산한 적이 없으면 통계가 없다고 보이고, 받지 못하면 다른 통계 탭과 같은 실패 표시를 보인다', async () => {
   await renderStats({ ...skillStatsFixture, computedAt: null })
 
   expect(container.querySelector('p.state')?.textContent).toBe('스킬 통계가 없습니다.')
@@ -389,4 +425,77 @@ it('남성 크루세이더는 고른 역할을 함께 보내 그 역할의 통�
       `?jobId=${crusader.jobId}&jobGrowId=${buffer.jobGrowId}&role=buffer`
     ])
   )
+})
+
+it('가장 많이 사용하는 조합과 무기는 많은 순 5개만 그리고, 막대마다 고른 전직과 그 조합, 무기로 거른 검색 화면에 잇는다', async () => {
+  await renderStats(skillStatsFixture)
+
+  const job = { path: '/rankings', jobId: SWORDMAN.jobId, jobGrowId: WEAPON_MASTER.jobGrowId }
+  const combos = barRows('가장 많이 사용하는 조합')
+  expect(combos.map(({ value }) => value)).toEqual(['9.7%', '8.9%', '7.6%', '6.2%', '5.8%'])
+  expect(combos[0]!.link).toEqual({
+    ...job,
+    equipmentSetId: '7f788a703a87d783079b41d0fe6448c9',
+    oathSetId: '16203'
+  })
+
+  const weapons = barRows('무기')
+  expect(weapons.map(({ value }) => value)).toEqual(['14.8%', '6.1%', '5.7%', '5.2%', '4.9%'])
+  expect(weapons[0]!.text).toContain('요도 : 날뛰는 흑혈')
+  expect(weapons[0]!.link).toEqual({ ...job, itemIds: 'story-weapon-1' })
+  expect(weapons.some(({ text }) => text.includes('그 밖'))).toBe(false)
+})
+
+it('표본 칩은 조합과 무기 요청의 표본만 바꾸고 스킬 통계 요청에는 표본을 보내지 않는다', async () => {
+  const onFilterChange = vi.fn()
+  server.use(skillStatsHandlers.of(skillStatsFixture))
+  await render({ ...WEAPON_MASTER_FILTER, sample: 'top' }, onFilterChange)
+
+  const weaponMaster = `?jobId=${SWORDMAN.jobId}&jobGrowId=${WEAPON_MASTER.jobGrowId}`
+  await vi.waitFor(() => expect(requestsTo(ITEM_STATS_URL)).toEqual([`${weaponMaster}&sample=top`]))
+  expect(requestsTo(SET_STATS_URL)).toEqual([`${weaponMaster}&sample=top`])
+  expect(skillRequests()).toEqual([weaponMaster])
+  expect(pressedChips()).toEqual(['귀검사(남)', '웨펀마스터', '상위 500명'])
+
+  await act(async () => chip('전체')?.click())
+
+  expect(onFilterChange).toHaveBeenLastCalledWith({ ...WEAPON_MASTER_FILTER, sample: undefined })
+})
+
+it('스킬 통계를 받지 못해도 조합과 무기 상자는 값을 보인다', async () => {
+  server.use(skillStatsHandlers.failure)
+  await render(WEAPON_MASTER_FILTER)
+
+  await vi.waitFor(() =>
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(
+      '스킬 통계를 받지 못했습니다.'
+    )
+  )
+  await vi.waitFor(() => expect(barRows('무기')).toHaveLength(5))
+  expect(barRows('가장 많이 사용하는 조합')).toHaveLength(5)
+})
+
+it('조합과 무기 상자는 각자 통계를 받지 못하거나 통계가 없으면 그 상자 안에 알리고 스킬 창은 그대로 그린다', async () => {
+  server.use(
+    skillStatsHandlers.of(skillStatsFixture),
+    setStatsHandlers.failure,
+    itemStatsHandlers.empty
+  )
+  await render(WEAPON_MASTER_FILTER)
+
+  await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+  expect(box('가장 많이 사용하는 조합').textContent).toBe(
+    '가장 많이 사용하는 조합세트 통계를 받지 못했습니다.'
+  )
+  expect(box('무기').textContent).toBe('무기아이템 통계가 없습니다.')
+  expect(cellOf('발도').level).toBe('20')
+})
+
+it('세트 통계를 받는 중이면 조합 상자만 받는 중으로 두고 무기와 스킬 창은 그린다', async () => {
+  server.use(skillStatsHandlers.of(skillStatsFixture), setStatsHandlers.loading)
+  await render(WEAPON_MASTER_FILTER)
+
+  await vi.waitFor(() => expect(barRows('무기')).toHaveLength(5))
+  expect(cellOf('발도').level).toBe('20')
+  expect(container.querySelectorAll('[aria-busy="true"]')).toHaveLength(1)
 })
