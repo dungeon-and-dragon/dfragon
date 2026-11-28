@@ -131,15 +131,19 @@ export function LabItemTable({
   )
 }
 
+const ICON_SIZE_CLASSES = { md: 'size-game-icon', sm: 'size-[24px]' } as const
+
 function LabItemIcon({
   item,
-  rarity
+  rarity,
+  size = 'md'
 }: {
   item: LabItem
   rarity: ItemRarity | null
+  size?: keyof typeof ICON_SIZE_CLASSES
 }): React.JSX.Element {
   if (item.iconUrl === null) {
-    return <ItemIcon itemId={item.itemId} rarity={rarity} />
+    return <ItemIcon itemId={item.itemId} rarity={rarity} size={size} />
   }
 
   return (
@@ -147,7 +151,7 @@ function LabItemIcon({
       src={item.iconUrl}
       alt=""
       loading="lazy"
-      className={`${itemPartClasses.icon} size-game-icon ${raritySolidOf(rarity)}`}
+      className={`${itemPartClasses.icon} ${ICON_SIZE_CLASSES[size]} ${raritySolidOf(rarity)}`}
     />
   )
 }
@@ -158,13 +162,26 @@ function SamePerformanceItems({ others }: { others: readonly LabItem[] }): React
   }
 
   return (
-    <ul className="m-0 flex w-[280px] list-none flex-col gap-1 p-0 text-fg not-first:mt-2 not-first:border-t not-first:border-line not-first:pt-2">
-      {others.map((other) => (
-        <li key={other.itemName}>
-          {other.itemName} | <LabItemPrice item={other} />
-        </li>
-      ))}
-    </ul>
+    <div className="w-[280px] not-first:mt-2 not-first:border-t not-first:border-line not-first:pt-2">
+      <p className="m-0 mb-1 text-fg-muted">동일한 성능의 아이템</p>
+      <ul className="m-0 grid list-none grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 p-0">
+        {others.map((other) => {
+          const rarity = itemRarityOfGrade(other.itemRarity)
+
+          return (
+            <li key={other.itemName} className="col-span-3 grid grid-cols-subgrid items-center">
+              <LabItemIcon item={other} rarity={rarity} size="sm" />
+              <span className={`truncate ${rarityTextClasses[rarity ?? 'unknown']}`}>
+                {other.itemName}
+              </span>
+              <span className="text-right text-fg tabular-nums">
+                <LabItemPrice item={other} />
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }
 
