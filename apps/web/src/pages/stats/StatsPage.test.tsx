@@ -172,6 +172,25 @@ it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 �
   expect(tooltipText('명성 분포')).toBeNull()
 })
 
+it('명성 분포는 12만~13만 막대와 13만 이상 막대 사이에도 구분선을 둔다', async () => {
+  await render({
+    ...stats,
+    fameDistribution: [
+      { from: 128000, to: 129000, count: 10 },
+      { from: 129000, to: 130000, count: 20 },
+      { from: 130000, to: 131000, count: 1 }
+    ]
+  })
+
+  const items = [...boxOf('명성 분포').querySelectorAll('li')]
+  const dividerIndexes = items.flatMap((item, index) =>
+    item.getAttribute('aria-hidden') === 'true' ? [index] : []
+  )
+
+  expect(items).toHaveLength(3 + 1 + 10 + 1 + 1)
+  expect(dividerIndexes).toEqual([3, 14])
+})
+
 it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
   await render(stats)
 

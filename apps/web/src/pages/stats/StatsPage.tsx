@@ -109,10 +109,7 @@ function StatBox({
 }
 
 function fameGroupsOf(bars: readonly FameBar[]): FameBar[][] {
-  const coarse = bars.filter(({ fine }) => !fine)
-  const fine = bars.filter(({ fine }) => fine)
-
-  return [coarse, fine].filter((group) => group.length > 0)
+  return Object.values(Object.groupBy(bars, ({ group }) => group)).filter((group) => group != null)
 }
 
 function FameBox({ bars }: { bars: readonly FameBar[] }): React.JSX.Element {

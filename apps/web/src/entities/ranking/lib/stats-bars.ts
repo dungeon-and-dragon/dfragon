@@ -61,11 +61,14 @@ export function averageFameBars(stats: CharacterStats): Bar[] {
     .toSorted((a, b) => b.value - a.value)
 }
 
-export type FameBar = ColumnBar & Readonly<{ fine: boolean }>
+type FameGroup = 'coarse' | 'fine' | 'high'
+
+export type FameBar = ColumnBar & Readonly<{ group: FameGroup }>
 
 type FameBucket = CharacterStats['fameDistribution'][number]
 
 const FINE_FROM = 120_000
+const HIGH_FROM = 130_000
 const COARSE_WIDTH = 40_000
 const LABEL_STEP = 5_000
 const DENSITY_WIDTH = 1_000
@@ -116,6 +119,10 @@ function densityOf({ from, to, count }: FameBucket): number {
   return count / ((to - from) / DENSITY_WIDTH)
 }
 
+function maxDensityOf(buckets: readonly FameBucket[]): number {
+  return Math.max(0, ...buckets.map(densityOf))
+}
+
 export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
   if (fameDistribution.length === 0) {
     return []
@@ -123,21 +130,25 @@ export function fameBars({ fameDistribution }: CharacterStats): FameBar[] {
 
   const distribution = fameDistribution.toSorted((a, b) => a.from - b.from)
   const coarse = coarseBuckets(distribution)
-  const fine = fineBuckets(distribution)
-  const maxDensity = Math.max(...[...coarse, ...fine].map(densityOf))
+  const allFine = fineBuckets(distribution)
+  const fine = allFine.filter(({ from }) => from < HIGH_FROM)
+  const high = allFine.filter(({ from }) => from >= HIGH_FROM)
+  const sharedMaxDensity = maxDensityOf([...coarse, ...fine])
+  const highMaxDensity = maxDensityOf(high)
 
-  function barOf(bucket: FameBucket, isFine: boolean): FameBar {
+  function barOf(bucket: FameBucket, group: FameGroup, maxDensity: number): FameBar {
     const { from, to, count } = bucket
-    const labeled = !isFine || from % LABEL_STEP === 0
+    const labeled = group === 'coarse' || from % LABEL_STEP === 0
     const label = labeled ? fameText(from) : null
     const range = `${fameText(from)}~${fameText(to)}`
     const ratio = maxDensity > 0 ? densityOf(bucket) / maxDensity : 0
 
-    return { key: String(from), label, range, count, ratio, fine: isFine }
+    return { key: String(from), label, range, count, ratio, group }
   }
 
   return [
-    ...coarse.map((bucket) => barOf(bucket, false)),
-    ...fine.map((bucket) => barOf(bucket, true))
+    ...coarse.map((bucket) => barOf(bucket, 'coarse', sharedMaxDensity)),
+    ...fine.map((bucket) => barOf(bucket, 'fine', sharedMaxDensity)),
+    ...high.map((bucket) => barOf(bucket, 'high', highMaxDensity))
   ]
 }
