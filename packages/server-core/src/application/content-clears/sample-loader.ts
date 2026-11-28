@@ -5,7 +5,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import { subWeeks } from 'date-fns'
-import { toRaidStageLabel, toRaidStageModeNames } from '#domain/raid-stage.js'
+import { toRaidStageModeNames } from '#domain/raid-stage.js'
 import {
   type ClearContent,
   findStagePair,
@@ -54,7 +54,6 @@ export class ClearSampleLoader {
         : null
 
     const streaks = weekly ? await this.repository.readStreaks(selection) : null
-    const stages = raidName !== undefined ? await this.loadStages(raidName, weekStart) : null
 
     return {
       jobFames,
@@ -66,8 +65,7 @@ export class ClearSampleLoader {
       weekGroups,
       weekGroupScores,
       weekMoves,
-      streaks,
-      stages
+      streaks
     }
   }
 
@@ -91,26 +89,5 @@ export class ClearSampleLoader {
     }
 
     return this.repository.readWeekGroupScores(comparison)
-  }
-
-  // 단계 라벨은 수집 판정과 같은 함수로 정하고, 단계 라벨이 없는 기록(이내 황혼전)은 세지 않는다.
-  private async loadStages(raidName: string, weekStart: Date) {
-    const selection = { raidName, weekStart }
-    const modes = await this.repository.readRaidModes(selection)
-    const stages = modes.flatMap(({ modeName, hard }) => {
-      const stage = toRaidStageLabel({ modeName, hard: hard ?? false })
-
-      if (stage === null) {
-        return []
-      }
-
-      return [{ modeName, hard, stage }]
-    })
-
-    if (stages.length === 0) {
-      return []
-    }
-
-    return this.repository.readRaidStageCounts(selection, stages)
   }
 }
