@@ -1,6 +1,7 @@
 import type { CharacterActivityInput, ClearRecordInput, ContentClearInput } from '@dfragon/database'
 import {
   CLEAR_CONTENTS,
+  filterClearContents,
   toCollectionMinFame,
   toContentClearInput,
   toPopulationMinFame
@@ -40,14 +41,16 @@ export class ContentClearCollectionService {
   ): Promise<ClearCollectionSummary> {
     const { createFetchTimeline, readConcurrency, now, pause, report } = this.ports
     const { startedAt, done: resumedAt } = await readOrStartProgress(this.repository, now)
-    const plan = planClearCollection(
+    const contents = filterClearContents(
       CLEAR_CONTENTS,
-      await this.repository.readPopulations(),
-      startedAt
+      await this.repository.readSettings(),
+      'collected'
     )
+    const plan = planClearCollection(contents, await this.repository.readPopulations(), startedAt)
     const plannedWeeks = new Set(
       plan.weeks.map(({ contentId, weekStart }) => weekKey(contentId, weekStart))
     )
+    // 수집을 끈 컨텐츠도 하한에 넣어, 끄고 켤 때 남은 컨텐츠의 분모 기준이 바뀌지 않게 한다.
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
     // 분모는 비활성을 포함한 수집 대상 전체로 두고, 최근 구간만 받을 때는 요청을 활성 캐릭터에만 보낸다.
     // 다시 접속한 비활성 캐릭터의 클리어는 활동이 다시 기록될 때까지 빠지는 대신 매주 요청이 줄어든다.
@@ -103,7 +106,7 @@ export class ContentClearCollectionService {
           }
 
           for (const row of rows) {
-            const clear = toContentClearInput(character, row)
+            const clear = toContentClearInput(character, row, contents)
             if (
               clear !== undefined &&
               plannedWeeks.has(weekKey(clear.contentId, clear.weekStart))
@@ -137,7 +140,7 @@ export class ContentClearCollectionService {
     })
 
     const collectedAt = now()
-    for (const content of CLEAR_CONTENTS) {
+    for (const content of contents) {
       const minFame = toPopulationMinFame(content, collectionMinFame)
       const jobs = await this.repository.readPopulationJobs(minFame)
       const members = jobs.reduce((sum, { count }) => sum + count, 0)

@@ -16,6 +16,10 @@
       "types": "./dist/buff-switching.d.ts",
       "import": "./dist/buff-switching.js"
     },
+    "./content-clear-catalog": {
+      "types": "./dist/content-clear-catalog.d.ts",
+      "import": "./dist/content-clear-catalog.js"
+    },
     "./equipment-variants": {
       "types": "./dist/equipment-variants.d.ts",
       "import": "./dist/equipment-variants.js"

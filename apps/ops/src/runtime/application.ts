@@ -2,6 +2,7 @@ import { type DatabaseConfiguration, createDatabaseClient } from '@dfragon/datab
 import {
   DatabaseBatchNeopleKeyRepository,
   DatabaseCollectionRepository,
+  DatabaseContentClearSettingRepository,
   DatabaseJobRepository,
   DatabaseLabCandidateRepository,
   DatabaseLabCurrencyRepository,
@@ -20,6 +21,7 @@ export function createOpsRuntime(database: DatabaseConfiguration) {
     readQueueCounts: () => queues.readCounts(),
     collection: new DatabaseCollectionRepository(client),
     batchNeopleKeys: new DatabaseBatchNeopleKeyRepository(client),
+    contentClearSettings: new DatabaseContentClearSettingRepository(client),
     labItems: new DatabaseLabItemRepository(client),
     labCurrencies: new DatabaseLabCurrencyRepository(client),
     labItemDetails: new DatabaseLabItemDetailRepository(client),

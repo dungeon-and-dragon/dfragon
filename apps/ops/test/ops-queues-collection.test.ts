@@ -61,6 +61,10 @@ async function startOpsApp(
       setPaused: unusedJobs
     },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
+    contentClearSettings: {
+      readSettings: () => assert.fail('컨텐츠 설정을 읽으면 안 된다'),
+      change: () => assert.fail('컨텐츠 설정을 바꾸면 안 된다')
+    },
     labItems: unusedLabItemStore,
     labCurrencies: unusedLabCurrencyStore,
     labItemDetails: unusedLabItemDetailStore,

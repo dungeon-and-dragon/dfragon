@@ -143,6 +143,10 @@ async function startOpsApp(t: test.TestContext, store: JobRepository, logs: stri
     readQueueCounts: () => assert.fail('job 경로 테스트는 queue를 읽으면 안 된다'),
     collection: { readSummary: unusedCollection, requeue: unusedCollection },
     batchNeopleKeys: unusedBatchNeopleKeyStore,
+    contentClearSettings: {
+      readSettings: () => assert.fail('컨텐츠 설정을 읽으면 안 된다'),
+      change: () => assert.fail('컨텐츠 설정을 바꾸면 안 된다')
+    },
     labItems: unusedLabItemStore,
     labCurrencies: unusedLabCurrencyStore,
     labItemDetails: unusedLabItemDetailStore,

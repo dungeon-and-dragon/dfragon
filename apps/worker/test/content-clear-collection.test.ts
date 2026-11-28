@@ -11,6 +11,7 @@ import type {
   CollectedCharacter,
   ContentClearCollectionProgress,
   ContentClearInput,
+  ContentClearSetting,
   StoredClearPopulation,
   TimelineCharacter
 } from '@dfragon/database'
@@ -179,7 +180,8 @@ const compareCharacters = (left: TimelineCharacter, right: TimelineCharacter) =>
 function memoryClearStore(
   population: ClearPopulationCharacter[],
   seeded: StoredClearPopulation[] = [],
-  inactiveIds: ReadonlySet<string> = new Set()
+  inactiveIds: ReadonlySet<string> = new Set(),
+  settings: ContentClearSetting[] = []
 ) {
   const state = {
     population,
@@ -200,6 +202,7 @@ function memoryClearStore(
       .sort(compareCharacters)
 
   const store: ClearCollectionRepository = {
+    readSettings: async () => settings,
     countPopulation: async (selection) => {
       state.populationMinFames.push(selection.minMaxFame)
 
@@ -411,6 +414,41 @@ test('한 번 돌면 수집 대상 캐릭터마다 code 201, 209, 210, 504로 �
     skipped: 0
   })
   assert.equal(state.progress, undefined)
+})
+
+test('수집을 끈 컨텐츠는 클리어와 분모를 저장하지 않고, 수집 하한은 끈 컨텐츠의 입장 명성까지 그대로 둔다', async () => {
+  const off = (contentId: string): ContentClearSetting => ({
+    contentId,
+    collected: false,
+    shown: true,
+    updatedAt: at('2026-11-10T10:00')
+  })
+  const { state, store } = memoryClearStore(
+    [character('a', 130_000), character('b', 50_000)],
+    closedPastWeeks(),
+    new Set(),
+    [off('michaela-hard'), off('nabel-normal'), off('nabel-hard')]
+  )
+  const { neople, requests } = fakeNeople({
+    a: [michaelaHard('2026-11-07 21:15'), diregieHard('2026-11-08 20:00')]
+  })
+
+  await collect(store, neople, COLLECTED_AT)
+
+  const week = LAST_WEEK.toISOString()
+  assert.deepEqual(storedClears(state), [`diregie-hard/a/${week}/null`])
+  assert.deepEqual(populationsOf(state, LAST_WEEK), [
+    'diregie-hard/1/true',
+    'diregie-normal/1/true',
+    'engraved-nightmare-1/1/true',
+    'inae-twilight/1/true',
+    'michaela-normal/1/true'
+  ])
+  // 나벨 둘을 꺼도 하한이 나벨 입장 명성 47,684라 그보다 낮은 디레지에 하한으로 오르지 않고 b도 받는다.
+  assert.deepEqual(
+    requests.map(({ characterId }) => characterId),
+    ['a', 'b']
+  )
 })
 
 test('비활성 캐릭터는 Neople에 요청하지 않고 클리어가 없는 캐릭터로 분모에만 넣는다', async () => {

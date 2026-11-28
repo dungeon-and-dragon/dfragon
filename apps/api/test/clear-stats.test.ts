@@ -8,6 +8,7 @@ import type {
   ClearWeekGroupSample,
   ClearWeekRatioCount,
   ClearWeekSelection,
+  ContentClearSetting,
   StoredClearPopulation
 } from '@dfragon/database'
 import type { HttpAppHandle } from '@dfragon/http-server'
@@ -68,6 +69,7 @@ const counts = [
 function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRepository {
   return {
     readCollectedAt: async () => at('2026-11-10T06:30:00'),
+    readSettings: async () => [],
     readPopulations: async () => populations,
     readWeekRatioCounts: async () => counts,
     readContentWeekSamples: async () => null,
@@ -478,6 +480,50 @@ test('클리어 집계는 마지막 수집 시각이 같으면 캐시를 쓰고,
   }
 })
 
+test('노출을 끈 컨텐츠는 목록, 전체 개요, 상세에서 빠지고, 노출 설정이 바뀌면 다시 계산한 값을 준다', async () => {
+  const hidden = (contentId: string): ContentClearSetting => ({
+    contentId,
+    collected: true,
+    shown: false,
+    updatedAt: at('2026-11-12T10:00:00')
+  })
+  let settings = [hidden('michaela-hard'), hidden('legion-venus')]
+  const { app, origin, refreshClearStats } = await listen(
+    fakeReader({
+      readSettings: async () => settings,
+      readPopulations: async () => [...populations, population('legion-venus', '2026-11-05', 900)]
+    })
+  )
+  const shownIds = async () => {
+    const { body } = await getJson(origin, '/stats/clears')
+    const overview = await getJson(origin, '/stats/clears/overview')
+
+    return {
+      contents: body.contents.map(({ id }: { id: string }) => id),
+      legions: body.legions.map(({ id }: { id: string }) => id),
+      overview: overview.body.contents.map(({ id }: { id: string }) => id)
+    }
+  }
+  try {
+    const before = await shownIds()
+    assert.equal(before.contents.includes('michaela-hard'), false)
+    assert.deepEqual(before.legions, ['legion-apocalypse'])
+    assert.deepEqual(before.overview, ['engraved-nightmare-1'])
+    assert.equal((await getJson(origin, '/stats/clears/michaela-hard')).status, 404)
+    assert.equal((await getJson(origin, '/stats/clears/legion-venus')).status, 404)
+
+    settings = []
+    await refreshClearStats()
+    const after = await shownIds()
+    assert.equal(after.contents.includes('michaela-hard'), true)
+    assert.deepEqual(after.legions, ['legion-apocalypse', 'legion-venus'])
+    assert.deepEqual(after.overview, ['michaela-hard', 'engraved-nightmare-1'])
+    assert.equal((await getJson(origin, '/stats/clears/michaela-hard')).status, 200)
+  } finally {
+    await app.close()
+  }
+})
+
 test('클리어 목록은 읽기 실패를 캐시하지 않는다', async () => {
   let failing = true
   const { app, origin } = await listen(
@@ -825,6 +871,7 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
   const base = fakeReader()
   const reader: ClearStatsRepository = {
     readCollectedAt: base.readCollectedAt,
+    readSettings: base.readSettings,
     readPopulations: counted(base.readPopulations),
     readWeekRatioCounts: counted(base.readWeekRatioCounts),
     readContentWeekSamples: counted(base.readContentWeekSamples),

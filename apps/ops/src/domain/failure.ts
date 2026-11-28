@@ -6,6 +6,7 @@ export type OpsFailureKind =
   | 'jobNotScheduled'
   | 'batchNeopleKeyNotFound'
   | 'batchNeopleKeyDuplicate'
+  | 'contentClearNotFound'
   | 'labCurrencyNotFound'
   | 'labCurrencyDuplicate'
   | 'labItemIconNotFound'

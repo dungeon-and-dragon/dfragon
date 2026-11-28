@@ -261,6 +261,8 @@ export type {
   PopulationActivity,
   StoredClearPopulation
 } from './content-clear.js'
+export { changeContentClearSetting, readContentClearSettings } from './content-clear-setting.js'
+export type { ContentClearSetting, ContentClearSettingChange } from './content-clear-setting.js'
 export {
   readContentClearOverviewSampleWeeks,
   readContentClearOverviewSamples,

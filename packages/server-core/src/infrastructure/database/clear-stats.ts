@@ -25,6 +25,7 @@ import {
   type ClearWeekRatioCount,
   type ClearWeekSelection,
   type ContentClearPopulationInput,
+  type ContentClearSetting,
   type DatabaseClient,
   type LegionClearWeek,
   type StoredClearPopulation,
@@ -34,6 +35,7 @@ import {
   readClearRecordRaidStageCounts,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
+  readContentClearSettings,
   readContentClearFameBands,
   readContentClearFames,
   readContentClearFirstWeeks,
@@ -72,6 +74,10 @@ export class DatabaseClearStatsRepository
 
   readCollectedAt(): Promise<Date | null> {
     return readContentClearCollectedAt(this.client)
+  }
+
+  readSettings(): Promise<ContentClearSetting[]> {
+    return readContentClearSettings(this.client)
   }
 
   readPopulations(): Promise<StoredClearPopulation[]> {

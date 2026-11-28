@@ -7,6 +7,7 @@ import {
 } from '@tanstack/react-query'
 import { createContext, use, useEffect, useRef } from 'react'
 import type {
+  ContentClearSettingChange,
   LabCandidateQuery,
   LabCurrencyDraft,
   LabItemDetailDraft,
@@ -20,6 +21,7 @@ const JOBS_KEY = ['jobs'] as const
 const QUEUES_KEY = ['queues'] as const
 const COLLECTION_KEY = ['collection'] as const
 const BATCH_KEYS_KEY = ['batch-keys'] as const
+const CONTENT_CLEAR_SETTINGS_KEY = ['content-clear-settings'] as const
 const LAB_ITEMS_KEY = ['lab-items'] as const
 const LAB_CURRENCIES_KEY = ['lab-currencies'] as const
 const LAB_ITEM_DETAILS_KEY = ['lab-item-details'] as const
@@ -89,6 +91,16 @@ export function useBatchKeys() {
   })
 }
 
+export function useContentClearSettings() {
+  const client = useOpsClient()
+
+  return useQuery({
+    queryKey: CONTENT_CLEAR_SETTINGS_KEY,
+    queryFn: client.readContentClearSettings,
+    refetchInterval: REFRESH_INTERVAL_MS
+  })
+}
+
 // 소유자가 체크를 바꾸는 동안 목록이 바뀌지 않게 주기적으로 다시 읽지 않는다.
 export function useLabItems() {
   const client = useOpsClient()
@@ -151,6 +163,20 @@ export function useSetBatchKeyEnabled(): UseMutationResult<void, Error, BatchKey
   return useMutation({
     mutationFn: ({ id, enabled }: BatchKeyEnabledChange) => client.setBatchKeyEnabled(id, enabled),
     onSettled: () => queryClient.invalidateQueries({ queryKey: BATCH_KEYS_KEY })
+  })
+}
+
+export function useChangeContentClearSetting(): UseMutationResult<
+  void,
+  Error,
+  ContentClearSettingChange
+> {
+  const client = useOpsClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: client.changeContentClearSetting,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: CONTENT_CLEAR_SETTINGS_KEY })
   })
 }
 

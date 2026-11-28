@@ -7,7 +7,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
-import { CLEAR_CONTENTS } from '@dfragon/server-core/domain/content-clears/index.js'
+import type { ClearContent } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearFameDistribution,
   type ClearJobStats,
@@ -45,6 +45,7 @@ export function toEmptyClearOverview(): ClearOverview {
 }
 
 export function toClearOverview(
+  shownContents: readonly ClearContent[],
   weekStart: Date,
   populations: readonly StoredClearPopulation[],
   { fames, jobFames, scores, jobScores, raidTimes }: ClearOverviewSamples
@@ -55,7 +56,7 @@ export function toClearOverview(
       .map((population) => [population.contentId, population])
   )
 
-  const weekContents = CLEAR_CONTENTS.flatMap(({ id }) => {
+  const weekContents = shownContents.flatMap(({ id }) => {
     const population = weekPopulations.get(id)
 
     if (population === undefined) {

@@ -1,5 +1,6 @@
 export {
   CLEAR_CONTENTS,
+  filterClearContents,
   findContentClear,
   findStagePair,
   hasScoreStats,

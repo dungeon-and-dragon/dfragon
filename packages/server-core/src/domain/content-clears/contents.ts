@@ -1,4 +1,9 @@
-import type { ContentClearInput, ContentClearKind, TimelineCharacter } from '@dfragon/database'
+import type {
+  ContentClearInput,
+  ContentClearKind,
+  ContentClearSetting,
+  TimelineCharacter
+} from '@dfragon/database'
 import { z } from 'zod'
 import { toRaidStageLabel } from '#domain/raid-stage.js'
 import {
@@ -116,6 +121,21 @@ export const CLEAR_CONTENTS: readonly ClearContent[] = [
   }
 ]
 
+export type ClearContentSwitch = 'collected' | 'shown'
+
+// 설정 행이 없는 컨텐츠는 켜진 것으로 본다.
+export function filterClearContents(
+  contents: readonly ClearContent[],
+  settings: readonly ContentClearSetting[],
+  key: ClearContentSwitch
+): ClearContent[] {
+  const turnedOff = new Set(
+    settings.filter((setting) => !setting[key]).map(({ contentId }) => contentId)
+  )
+
+  return contents.filter(({ id }) => !turnedOff.has(id))
+}
+
 // 배율을 올려 깬 기록에만 data.ratio가 있다.
 const ratioData = z.object({ ratio: z.number().int().nullable().catch(null) })
 const raidNameData = z.object({ raidName: z.string().nullable().catch(null) })
@@ -159,9 +179,10 @@ export function findContentClear(
 
 export function toContentClearInput(
   character: TimelineCharacter,
-  row: TimelineRow
+  row: TimelineRow,
+  contents: readonly ClearContent[] = CLEAR_CONTENTS
 ): ContentClearInput | undefined {
-  const match = findContentClear(row)
+  const match = findContentClear(row, contents)
   if (match === undefined) {
     return undefined
   }

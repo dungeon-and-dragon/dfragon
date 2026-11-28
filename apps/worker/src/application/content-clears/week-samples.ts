@@ -2,6 +2,7 @@ import type { ClearPopulationJob, StoredClearPopulation } from '@dfragon/databas
 import {
   CLEAR_CONTENTS,
   CLEAR_LEGIONS,
+  filterClearContents,
   toCollectionMinFame,
   toPopulationMinFame,
   type ClearContent
@@ -120,8 +121,13 @@ export class ClearWeekSampleService {
 
   // 레기온 클리어를 먼저 옮기고 분모를 마감해야 아래 상세 집계가 그 주를 계산한다.
   private async moveLegionClears(): Promise<number> {
+    const legions = filterClearContents(
+      CLEAR_LEGIONS,
+      await this.repository.readSettings(),
+      'collected'
+    )
     const populations = await this.repository.readPopulations()
-    const moves = planLegionClearMoves(CLEAR_LEGIONS, populations, this.now())
+    const moves = planLegionClearMoves(legions, populations, this.now())
     const collectionMinFame = toCollectionMinFame(CLEAR_CONTENTS)
     const jobsByMinFame = new Map<number, ClearPopulationJob[]>()
 

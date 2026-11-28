@@ -9,11 +9,13 @@ import type {
   ContentClearCollectionProgress,
   ContentClearInput,
   ContentClearPopulationInput,
+  ContentClearSetting,
   StoredClearPopulation,
   TimelineCharacter
 } from '@dfragon/database'
 
 export interface ClearCollectionRepository {
+  readSettings(): Promise<ContentClearSetting[]>
   countPopulation(selection: ClearPopulationSelection): Promise<number>
   readPopulationPage(
     selection: ClearPopulationSelection,

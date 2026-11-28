@@ -4,7 +4,8 @@ import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   CLEAR_CONTENTS,
   CLEAR_LEGIONS,
-  type ClearContent
+  type ClearContent,
+  filterClearContents
 } from '@dfragon/server-core/domain/content-clears/index.js'
 import {
   type ClearContentStats,
@@ -20,15 +21,18 @@ import {
 import type { ClearStatsRepository } from '@dfragon/server-core/application/content-clears/repository.js'
 import { ClearSampleLoader } from '@dfragon/server-core/application/content-clears/index.js'
 
-const DETAIL_CONTENTS: readonly ClearContent[] = [...CLEAR_CONTENTS, ...CLEAR_LEGIONS]
-
 type ClearSummary = {
   stats: ClearStats
   populations: StoredClearPopulation[]
 }
 
-type ClearSnapshot = {
-  collectedAt: number | null
+type ClearVersion = {
+  key: string
+  contents: readonly ClearContent[]
+  legions: readonly ClearContent[]
+}
+
+type ClearSnapshot = ClearVersion & {
   summary?: Promise<ClearSummary>
   firstWeeks: Map<string, Promise<ClearFirstWeekCount[]>>
   contentStats: Map<string, Promise<ClearContentStats>>
@@ -80,9 +84,9 @@ function createSerialQueue() {
   }
 }
 
-function emptySnapshot(collectedAt: number | null): ClearSnapshot {
+function emptySnapshot(version: ClearVersion): ClearSnapshot {
   return {
-    collectedAt,
+    ...version,
     firstWeeks: new Map(),
     contentStats: new Map(),
     overviews: new Map()
@@ -119,10 +123,10 @@ export class ClearStatsService {
   // 실패는 던지지 않고 진단 code로 남긴다.
   async refresh(): Promise<void> {
     try {
-      const collectedAt = await this.readCollectedAt()
+      const version = await this.readVersion()
 
-      if (this.served?.collectedAt !== collectedAt) {
-        await this.refreshTo(collectedAt).ready
+      if (this.served?.key !== version.key) {
+        await this.refreshTo(version).ready
       }
     } catch {
       // 요청이 아니라 응답할 곳이 없으므로 진단 code만 남긴다.
@@ -135,12 +139,12 @@ export class ClearStatsService {
     this.queue.close()
   }
 
-  private async loadSummary(): Promise<ClearSummary> {
+  private async loadSummary(current: ClearSnapshot): Promise<ClearSummary> {
     // 마감하지 않은 주는 다 받지 않은 값이라 보여 주지 않는다.
     const populations = (await this.repository.readPopulations()).filter(({ closed }) => closed)
     const counts = await this.repository.readWeekRatioCounts()
-    const contents = toClearSummaries(CLEAR_CONTENTS, populations, counts)
-    const legions = toClearSummaries(CLEAR_LEGIONS, populations, counts)
+    const contents = toClearSummaries(current.contents, populations, counts)
+    const legions = toClearSummaries(current.legions, populations, counts)
     const stats = { contents, legions }
 
     return { stats, populations }
@@ -148,7 +152,7 @@ export class ClearStatsService {
 
   private summaryOf(current: ClearSnapshot): Promise<ClearSummary> {
     current.summary ??= cacheUntilFailure(
-      this.queue.run(() => this.loadSummary()),
+      this.queue.run(() => this.loadSummary(current)),
       () => {
         current.summary = undefined
       }
@@ -195,6 +199,7 @@ export class ClearStatsService {
   }
 
   private async loadOverview(
+    current: ClearSnapshot,
     weekStart: Date,
     populations: readonly StoredClearPopulation[]
   ): Promise<ClearOverview> {
@@ -202,7 +207,7 @@ export class ClearStatsService {
       (await this.repository.readOverviewSamples(weekStart)) ??
       (await this.samples.loadOverview(weekStart))
 
-    return toClearOverview(weekStart, populations, samples)
+    return toClearOverview(current.contents, weekStart, populations, samples)
   }
 
   private async contentStatsOf(
@@ -210,7 +215,7 @@ export class ClearStatsService {
     contentId: string,
     weekStart: string | undefined
   ): Promise<ClearContentStats> {
-    const content = DETAIL_CONTENTS.find(({ id }) => id === contentId)
+    const content = [...current.contents, ...current.legions].find(({ id }) => id === contentId)
     if (content === undefined) {
       throw new CharacterDetailFailure('notFound')
     }
@@ -260,7 +265,7 @@ export class ClearStatsService {
     // 첫 레이드 전 베누스만 있던 주는 개요에 보일 레이드 집계가 없어 고를 주에서 뺀다.
     const weekStarts = new Map(
       populations
-        .filter(({ contentId }) => CLEAR_CONTENTS.some(({ id }) => id === contentId))
+        .filter(({ contentId }) => current.contents.some(({ id }) => id === contentId))
         .map((population) => [formatResetDate(population.weekStart), population.weekStart])
     )
 
@@ -283,7 +288,7 @@ export class ClearStatsService {
     }
 
     const loading = cacheUntilFailure(
-      this.queue.run(() => this.loadOverview(selectedWeekStart, populations)),
+      this.queue.run(() => this.loadOverview(current, selectedWeekStart, populations)),
       () => {
         current.overviews.delete(selectedWeek)
       }
@@ -300,7 +305,7 @@ export class ClearStatsService {
 
     const loads = [
       () => this.overviewOf(current, undefined),
-      ...DETAIL_CONTENTS.map(
+      ...[...current.contents, ...current.legions].map(
         ({ id }) =>
           () =>
             this.contentStatsOf(current, id, undefined)
@@ -320,22 +325,24 @@ export class ClearStatsService {
     }
   }
 
-  private async readCollectedAt(): Promise<number | null> {
+  // 노출 설정은 운영 화면에서 바뀌므로 수집 시각과 함께 읽어, 둘 중 하나가 바뀌면 다시 계산한다.
+  private async readVersion(): Promise<ClearVersion> {
     const collectedAt = await this.repository.readCollectedAt()
+    const settings = await this.repository.readSettings()
+    const contents = filterClearContents(CLEAR_CONTENTS, settings, 'shown')
+    const legions = filterClearContents(CLEAR_LEGIONS, settings, 'shown')
+    const shownIds = [...contents, ...legions].map(({ id }) => id)
+    const key = JSON.stringify([collectedAt?.getTime() ?? null, shownIds])
 
-    if (collectedAt === null) {
-      return null
-    }
-
-    return collectedAt.getTime()
+    return { key, contents, legions }
   }
 
-  private refreshTo(collectedAt: number | null): ClearRefresh {
-    if (this.refreshing?.snapshot.collectedAt === collectedAt) {
+  private refreshTo(version: ClearVersion): ClearRefresh {
+    if (this.refreshing?.snapshot.key === version.key) {
       return this.refreshing
     }
 
-    const snapshot = emptySnapshot(collectedAt)
+    const snapshot = emptySnapshot(version)
     const ready = this.warm(snapshot).then(
       () => {
         if (this.refreshing?.snapshot === snapshot) {
@@ -360,22 +367,22 @@ export class ClearStatsService {
   }
 
   private async currentSnapshot(): Promise<ClearSnapshot> {
-    const collectedAt = await this.readCollectedAt()
+    const version = await this.readVersion()
 
     if (this.served !== undefined) {
-      if (this.served.collectedAt !== collectedAt) {
-        this.refreshTo(collectedAt)
+      if (this.served.key !== version.key) {
+        this.refreshTo(version)
       }
 
       return this.served
     }
 
-    if (this.refreshing?.snapshot.collectedAt === collectedAt) {
+    if (this.refreshing?.snapshot.key === version.key) {
       return this.refreshing.snapshot
     }
 
     // 이전 결과가 없으면 미리 계산하지 않고 요청한 것만 계산한다. 더 오래된 시각의 미리 계산이 끝나도 이 결과를 덮지 않게 버린다.
-    this.served = emptySnapshot(collectedAt)
+    this.served = emptySnapshot(version)
     this.refreshing = undefined
 
     return this.served
@@ -384,6 +391,7 @@ export class ClearStatsService {
 
 export const emptyClearStatsRepository: ClearStatsRepository = {
   readCollectedAt: async () => null,
+  readSettings: async () => [],
   readPopulations: async () => [],
   readWeekRatioCounts: async () => [],
   readContentWeekSamples: async () => null,
