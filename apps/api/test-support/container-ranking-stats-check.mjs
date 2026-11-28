@@ -242,7 +242,7 @@ try {
   )
   await client.characterStatsSnapshot.update({ where: { id: 1 }, data: { jobs: savedStats.jobs } })
 
-  // 두 세트를 낀 캐릭터 105명이다. 99~102위가 같은 명성이고 서버가 번갈아, 100위와 101위 사이 page 경계가 같은 명성의 서버 순서에 걸린다.
+  // 두 세트를 낀 캐릭터 105명이다. 99~102위가 같은 명성이고 서버가 번갈아, 5쪽과 6쪽 사이인 100위와 101위 경계가 같은 명성의 서버 순서에 걸린다.
   const fairy = { id: 'set-rank-fairy', name: '소울 페어리 세트' }
   const golden = { id: 'set-rank-golden', name: '영원히 이어지는 황금향 세트' }
   const dragon = (option) => ({ id: 16204, name: '야망의 용투 서약', option })
@@ -319,25 +319,21 @@ try {
     )
     .map(({ characterId }) => characterId)
   const readAllPages = async (query) => {
-    const pages = []
-    let cursor = null
+    const first = await get(`/rankings/fame?${query}`)
+    const rest = []
 
-    do {
-      const page = await get(
-        `/rankings/fame?${query}${cursor !== null ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
-      )
-      pages.push(page)
-      cursor = page.nextCursor
-    } while (cursor !== null)
+    for (let page = 2; page <= first.pageCount; page += 1) {
+      rest.push(await get(`/rankings/fame?${query}&page=${page}`))
+    }
 
-    return pages
+    return [first, ...rest]
   }
   const bothSetsQuery = `jobId=${setFilteredJob}&equipmentSetId=${fairy.id}&oathSetId=16204`
   const bothSetsPages = await readAllPages(bothSetsQuery)
   const bothSetsRows = bothSetsPages.flatMap(({ characters }) => characters)
   assert.deepEqual(
     bothSetsPages.map(({ characters }) => characters.length),
-    [100, 5]
+    [20, 20, 20, 20, 20, 5]
   )
   assert.deepEqual(
     bothSetsRows.map(({ characterId }) => characterId),
@@ -377,7 +373,7 @@ try {
   const weaponRows = weaponPages.flatMap(({ characters }) => characters)
   assert.deepEqual(
     weaponPages.map(({ characters }) => characters.length),
-    [100, 5]
+    [20, 20, 20, 20, 20, 5]
   )
   assert.deepEqual(
     weaponRows.map(({ characterId }) => characterId),
@@ -404,7 +400,7 @@ try {
   )
   assert.deepEqual(await get(`/rankings/fame?itemIds=item-rank-nobody`), {
     characters: [],
-    nextCursor: null
+    pageCount: 0
   })
 
   const evolutionSkill = '합성 랭킹 스킬 (각성)'
@@ -449,12 +445,12 @@ try {
     (await readAllPages(query)).flatMap(({ characters }) =>
       characters.map(({ characterId }) => characterId)
     )
-  // 보조 스킬은 스킬 스타일이 있는 103명이 모두 골라 100명 page 경계를 넘는다.
+  // 보조 스킬은 스킬 스타일이 있는 103명이 모두 골라 여러 page에 걸친다.
   const auxiliaryQuery = `jobId=${setFilteredJob}&jobGrowId=grow-set&evolutions=${encodeURIComponent('합성 랭킹 보조 스킬~1')}`
   const auxiliaryPages = await readAllPages(auxiliaryQuery)
   assert.deepEqual(
     auxiliaryPages.map(({ characters }) => characters.length),
-    [100, 3]
+    [20, 20, 20, 20, 20, 3]
   )
   assert.deepEqual(
     auxiliaryPages.flatMap(({ characters }) => characters.map(({ characterId }) => characterId)),
@@ -493,15 +489,19 @@ try {
       ORDER BY fame DESC, server_id, character_id
       LIMIT 200`
   ).map(({ characterId }) => characterId)
-  const commonFirst = await get(`/rankings/fame?jobId=${commonJob}&itemIds=item-rank-common`)
-  const commonSecond = await get(
-    `/rankings/fame?jobId=${commonJob}&itemIds=item-rank-common&cursor=${encodeURIComponent(commonFirst.nextCursor)}`
+  const commonPages = await Promise.all(
+    [1, 2, 10].map((page) =>
+      get(`/rankings/fame?jobId=${commonJob}&itemIds=item-rank-common&page=${page}`)
+    )
   )
   assert.deepEqual(
-    [...commonFirst.characters, ...commonSecond.characters].map(({ characterId }) => characterId),
-    commonExpected
+    commonPages.map(({ characters }) => characters.map(({ characterId }) => characterId)),
+    [commonExpected.slice(0, 20), commonExpected.slice(20, 40), commonExpected.slice(180, 200)]
   )
-  assert.equal(typeof commonSecond.nextCursor, 'string')
+  assert.deepEqual(
+    commonPages.map(({ pageCount }) => pageCount),
+    [500, 500, 500]
+  )
 
   // 흔한 무기 캐릭터 1만 명 가운데 10의 배수 번째는 버프점수, 7의 배수 번째는 점수 없음, 나머지는 장비점수다.
   // 장비점수는 서른 명씩 같아, 위 조건으로 빠지는 캐릭터를 빼도 page 경계가 같은 점수 사이에 걸린다. 13의 배수 번째는 점수를 계산한 전직이 지금과 다르다.
@@ -524,12 +524,11 @@ try {
       ORDER BY s.score DESC, c.server_id, c.character_id
       LIMIT 200`
   const scoreQuery = `sort=equipmentScore&jobId=${commonJob}&jobGrowId=grow-common`
-  const scorePages = [await get(`/rankings/fame?${scoreQuery}`)]
-  scorePages.push(
-    await get(`/rankings/fame?${scoreQuery}&cursor=${encodeURIComponent(scorePages[0].nextCursor)}`)
+  const scorePages = await Promise.all(
+    [5, 6].map((page) => get(`/rankings/fame?${scoreQuery}&page=${page}`))
   )
   const scoreRows = scorePages.flatMap(({ characters }) => characters)
-  const equipmentExpected = await scoreExpected('equipment')
+  const equipmentExpected = (await scoreExpected('equipment')).slice(80, 120)
   assert.deepEqual(
     scoreRows.map(({ characterId, score }) => [characterId, score]),
     equipmentExpected.map(({ characterId, score }) => [
@@ -537,7 +536,7 @@ try {
       { calculator: 'equipment', value: score, approximate: null }
     ])
   )
-  assert.equal(scoreRows[99].score.value, scoreRows[100].score.value)
+  assert.equal(scoreRows[19].score.value, scoreRows[20].score.value)
   assert.equal(
     scoreRows.some(({ characterId }) => Number(characterId.slice('common-'.length)) % 13 === 0),
     false
@@ -547,7 +546,7 @@ try {
   ).characters
   assert.deepEqual(
     buffRows.map(({ characterId }) => characterId),
-    (await scoreExpected('buff')).slice(0, 100).map(({ characterId }) => characterId)
+    (await scoreExpected('buff')).slice(0, 20).map(({ characterId }) => characterId)
   )
   const rangeRows = (
     await get(
@@ -560,7 +559,7 @@ try {
   )
   assert.ok(rangeRows.length > 0)
   for (const path of [
-    `/rankings/fame?jobId=${commonJob}&cursor=${encodeURIComponent(scorePages[0].nextCursor)}`,
+    `/rankings/fame?jobId=${commonJob}&page=0`,
     `/rankings/fame?${scoreQuery}&fameFrom=1`,
     `/rankings/fame?jobId=${commonJob}&scoreFrom=1`
   ]) {
