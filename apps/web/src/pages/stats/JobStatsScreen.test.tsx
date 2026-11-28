@@ -489,6 +489,9 @@ it('조합과 무기 상자는 각자 통계를 받지 못하거나 통계가 �
   )
   expect(box('무기').textContent).toBe('무기아이템 통계가 없습니다.')
   expect(box('유일 장비').textContent).toBe('유일 장비아이템 통계가 없습니다.')
+  expect(box('칭호, 크리쳐, 무기 아바타 Lv').textContent).toBe(
+    '칭호, 크리쳐, 무기 아바타 Lv아이템 통계가 없습니다.'
+  )
   expect(cellOf('발도').level).toBe('20')
 })
 
@@ -532,16 +535,17 @@ it('맨 윗줄은 조합, 무기, 유일 장비 순의 세 칸이고, 유일 장
 
 it('유일 장비 인원은 1,000명부터 천, 만 단위로 소수 한 자리까지 줄이고 그 아래는 그대로 쓴다', async () => {
   const counts = [999, 1400, 14000, 100000]
+  const uniqueSlots = ['RING', 'SUPPORT', 'MAGIC_STON', 'EARRING']
   const uniques = ITEM_STATS.slots
-    .filter(({ slotId }) => slotId !== 'WEAPON')
+    .filter(({ slotId }) => uniqueSlots.includes(slotId))
     .map((slot, index) => ({
       ...slot,
       items: slot.items.map((item) => ({ ...item, count: counts[index]! }))
     }))
-  const weapons = ITEM_STATS.slots.filter(({ slotId }) => slotId === 'WEAPON')
+  const others = ITEM_STATS.slots.filter(({ slotId }) => !uniqueSlots.includes(slotId))
   server.use(
     http.get(ITEM_STATS_URL, () =>
-      HttpResponse.json({ ...ITEM_STATS, slots: [...weapons, ...uniques] })
+      HttpResponse.json({ ...ITEM_STATS, slots: [...others, ...uniques] })
     )
   )
   await renderStats(skillStatsFixture)
@@ -551,5 +555,24 @@ it('유일 장비 인원은 1,000명부터 천, 만 단위로 소수 한 자리�
     '1.4천명',
     '1.4만명',
     '10만명'
+  ])
+})
+
+it('칭호, 크리쳐, 무기 아바타 Lv 상자는 세 부위를 범례로 두고 Lv을 x축에 오름차순으로 둔다', async () => {
+  await renderStats(skillStatsFixture)
+
+  const levels = box('칭호, 크리쳐, 무기 아바타 Lv')
+  const ticks = [...levels.querySelectorAll('svg text')].map((text) => text.textContent)
+
+  expect(levels.textContent).toContain('칭호크리쳐무기 아바타')
+  expect(ticks.filter((tick) => /^\d+$/.test(tick ?? ''))).toEqual([
+    '30',
+    '35',
+    '40',
+    '45',
+    '60',
+    '75',
+    '80',
+    '100'
   ])
 })
