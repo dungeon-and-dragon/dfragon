@@ -1,5 +1,5 @@
 import { ENCHANT_GRADE_SLOTS } from '@dfragon/lib/enchant-grades'
-import { LAB_ITEM_TIERS } from '@dfragon/lib/lab-items'
+import { LAB_ITEM_TIERS, SLOT_ITEM_CATEGORIES } from '@dfragon/lib/lab-items'
 import { z } from 'zod'
 import { createJsonRequest } from '#shared/api/json-request'
 import { API_BASE_URL, BROWSER_API_PATH, dfragonHttp } from '#shared/api/dfragon-api'
@@ -44,6 +44,22 @@ const cardSchema = z
     return { ...card, iconUrl }
   })
 
+const slotItemCardSchema = z
+  .object({
+    itemName: z.string(),
+    gameItemName: z.string(),
+    itemId: z.string().nullable(),
+    itemRarity: z.string().nullable(),
+    iconPath: z.string().nullable(),
+    unitPrice: z.number().int().positive().nullable(),
+    cost: currencyCostSchema.nullable()
+  })
+  .transform(({ iconPath, ...card }) => {
+    const iconUrl = browserApiUrl(iconPath)
+
+    return { ...card, iconUrl }
+  })
+
 export const enchantOptionsSchema = z.object({
   slots: z.array(
     z.object({
@@ -65,6 +81,17 @@ export const enchantOptionsSchema = z.object({
         })
       )
     })
+  ),
+  slotItems: z.array(
+    z.object({
+      category: z.enum(SLOT_ITEM_CATEGORIES),
+      tiers: z.array(
+        z.object({
+          tier: z.enum(LAB_ITEM_TIERS),
+          options: z.array(z.object({ id: z.string(), cards: z.array(slotItemCardSchema).min(1) }))
+        })
+      )
+    })
   )
 })
 
@@ -72,6 +99,9 @@ export type EnchantOptionsResponse = z.input<typeof enchantOptionsSchema>
 export type EnchantOptions = z.output<typeof enchantOptionsSchema>
 export type LabEnchantOption = EnchantOptions['slots'][number]['tiers'][number]['options'][number]
 export type LabEnchantCard = LabEnchantOption['cards'][number]
+export type LabSlotItemOption =
+  EnchantOptions['slotItems'][number]['tiers'][number]['options'][number]
+export type LabSlotItemCard = LabSlotItemOption['cards'][number]
 
 const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)
 

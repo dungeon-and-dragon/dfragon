@@ -3,7 +3,8 @@ import { createNeopleClient } from '@dfragon/neople'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import {
   createNeopleCatalog,
-  createNeopleCharacterDetails
+  createNeopleCharacterDetails,
+  createNeopleItemSearch
 } from '@dfragon/server-core/infrastructure/neople/index.js'
 import {
   DatabaseAdventureGuildRepository,
@@ -104,6 +105,7 @@ export function createApiRuntimeOptions(configuration: RuntimeConfiguration): Ap
     ...database,
     todayGrade: { fetchShopGrade: createNeopleShopGrade(neople) },
     soulPrices: { fetchLowestListing: createNeopleLowestListing(neople) },
+    findGameItem: createNeopleItemSearch(neople),
     httpsOptions: configuration.localHttps,
     scoreLibraryPath: configuration.scoreLibraryPath
   }

@@ -17,7 +17,10 @@ import {
   type LabItemCategory,
   type LabItemRole,
   type LabItemTier,
-  labItemRolesOf
+  labItemRolesOf,
+  SLOT_ITEM_CATEGORIES,
+  SLOT_ITEM_LAB_CATEGORIES,
+  type SlotItemCategory
 } from '@dfragon/lib/lab-items'
 import { CATALOG_LIMITS } from '@dfragon/server-core/domain/character-catalog/index.js'
 import type { EnchantEntry } from '@dfragon/lib/enchant-grades'
@@ -25,11 +28,14 @@ import { type ItemCard, projectItemDetail } from '#domain/item-detail/index.js'
 import {
   type LabEnchantSlot,
   type LabEnchantSource,
+  type LabSlotItemGroup,
+  type LabSlotItemSource,
   labEnchantOptions,
+  labSlotItemOptions,
   neopleCardEntry,
   ownerCardEntry
 } from '#domain/lab-enchant-options/index.js'
-import type { LoadItemDetails } from './ports.js'
+import type { FindGameItem, FoundGameItem, LoadItemDetails } from './ports.js'
 import type { LabItemRepository } from './repository.js'
 
 export interface LabItemCurrencyCost {
@@ -79,6 +85,13 @@ export type LabEnchantCard = Pick<
 
 export interface LabEnchantOptions {
   slots: LabEnchantSlot<LabEnchantCard>[]
+}
+
+/** gameItemName은 엔진이 아는 게임 아이템 이름이라 오라 상자, 크리쳐 알이면 itemName과 다르다. */
+export type LabSlotItemCard = LabEnchantCard & { gameItemName: string }
+
+export interface LabSlotItemOptions {
+  slotItems: LabSlotItemGroup<LabSlotItemCard>[]
 }
 
 const FAME_STATUS = '모험가 명성'
@@ -304,6 +317,27 @@ function isEnchantRow(row: LabItemPriceRow): boolean {
   return ENCHANT_CATEGORIES.has(row.category)
 }
 
+function slotItemCategoryOf(row: LabItemPriceRow): SlotItemCategory | null {
+  const category = SLOT_ITEM_CATEGORIES.find(
+    (candidate) => SLOT_ITEM_LAB_CATEGORIES[candidate] === row.category
+  )
+
+  if (category === undefined) {
+    return null
+  }
+
+  return category
+}
+
+// 오라 상자, 크리쳐 알은 이은 후보가 엔진이 아는 게임 아이템 이름이다.
+function gameItemNameOf({ candidate, itemName }: LabItemPriceRow): string {
+  if (candidate === null) {
+    return itemName
+  }
+
+  return candidate.itemName
+}
+
 function enchantSourceOf(
   row: LabItemPriceRow,
   details: ReadonlyMap<string, CatalogDetail>
@@ -451,10 +485,81 @@ export class LabItemService {
     }
   })
 
+  // 게임 아이템 이름의 Neople id는 바뀌지 않아 찾지 못한 결과까지 process 동안 둔다. 검색 요청이 실패한 이름만 다음 요청이 다시 찾는다.
+  private readonly gameItems = new Map<string, Promise<FoundGameItem | null>>()
+
   constructor(
     private readonly repository: LabItemRepository,
-    private readonly loadItemDetails: LoadItemDetails
+    private readonly loadItemDetails: LoadItemDetails,
+    private readonly findGameItem: FindGameItem
   ) {}
+
+  private gameItem(itemName: string): Promise<FoundGameItem | null> {
+    const known = this.gameItems.get(itemName)
+
+    if (known !== undefined) {
+      return known
+    }
+
+    const found = this.findGameItem(itemName).catch(() => {
+      this.gameItems.delete(itemName)
+
+      return null
+    })
+
+    this.gameItems.set(itemName, found)
+
+    return found
+  }
+
+  private async slotItemSource(
+    row: LabItemPriceRow,
+    category: SlotItemCategory
+  ): Promise<LabSlotItemSource<LabSlotItemCard> | null> {
+    const tier = LAB_ITEM_TIERS.find((candidate) => candidate === row.tier)
+
+    if (tier === undefined) {
+      return null
+    }
+
+    const fame = row.detail?.fame ?? row.candidate?.fame ?? null
+    const price = toPrice(row, fame, row.candidate)
+    const itemName = gameItemNameOf(row)
+    const found = await this.gameItem(itemName)
+    const item = found !== null ? { itemName, ...found } : null
+    const itemId = found?.itemId ?? null
+    const card: LabSlotItemCard = {
+      itemName: price.itemName,
+      gameItemName: itemName,
+      itemId,
+      itemRarity: price.itemRarity,
+      iconPath: price.iconPath,
+      unitPrice: price.unitPrice,
+      cost: price.cost
+    }
+
+    return { category, tier, fame, performanceKey: price.performanceKey, card, item }
+  }
+
+  /** 이름으로 Neople 아이템을 찾지 못한 항목은 다른 항목과 묶인 카드로만 보이고 혼자서는 선택지가 되지 않는다. */
+  private async slotItemOptionsOf(rows: readonly LabItemPriceRow[]): Promise<LabSlotItemOptions> {
+    const sources = await Promise.all(
+      rows.map((row) => {
+        const category = slotItemCategoryOf(row)
+
+        if (category === null) {
+          return null
+        }
+
+        return this.slotItemSource(row, category)
+      })
+    )
+
+    const slotItemSources = sources.filter((source) => source !== null)
+    const slotItems = labSlotItemOptions(SLOT_ITEM_CATEGORIES, slotItemSources, digestOptionKey)
+
+    return { slotItems }
+  }
 
   private async itemDetails(
     itemIds: readonly string[],
@@ -481,14 +586,36 @@ export class LabItemService {
   }
 
   /** 아이템 상세를 받지 못한 카드는 빼고 나머지로 선택지를 만든다. */
-  async enchantOptions(signal: AbortSignal): Promise<LabEnchantOptions> {
-    const rows = (await this.repository.readLabItemPrices()).filter(isEnchantRow)
+  private async enchantOptionsOf(
+    allRows: readonly LabItemPriceRow[],
+    signal: AbortSignal
+  ): Promise<LabEnchantOptions> {
+    const rows = allRows.filter(isEnchantRow)
     const itemIds = rows.flatMap(({ itemId }) => (itemId !== null ? [itemId] : []))
     const details = await this.itemDetails(itemIds, signal)
     const sources = rows.flatMap((row) => enchantSourceOf(row, details))
     const slots = labEnchantOptions(sources, digestOptionKey)
 
     return { slots }
+  }
+
+  async enchantOptions(signal: AbortSignal): Promise<LabEnchantOptions> {
+    const rows = await this.repository.readLabItemPrices()
+
+    return await this.enchantOptionsOf(rows, signal)
+  }
+
+  async slotItemOptions(): Promise<LabSlotItemOptions> {
+    const rows = await this.repository.readLabItemPrices()
+
+    return await this.slotItemOptionsOf(rows)
+  }
+
+  /** 시뮬레이터 화면이 받는 마법부여와 칭호, 크리쳐, 오라 선택지를 실험실 목록 한 번 읽은 것으로 만든다. */
+  async simulatorOptions(signal: AbortSignal): Promise<[LabEnchantOptions, LabSlotItemOptions]> {
+    const rows = await this.repository.readLabItemPrices()
+
+    return await Promise.all([this.enchantOptionsOf(rows, signal), this.slotItemOptionsOf(rows)])
   }
 
   async get(signal: AbortSignal): Promise<LabItems> {

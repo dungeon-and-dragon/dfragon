@@ -48,10 +48,6 @@
       "types": "./dist/port.d.ts",
       "import": "./dist/port.js"
     },
-    "./slot-items": {
-      "types": "./dist/slot-items.d.ts",
-      "import": "./dist/slot-items.js"
-    },
     "./utils/assert": {
       "types": "./dist/utils/assert.d.ts",
       "import": "./dist/utils/assert.js"

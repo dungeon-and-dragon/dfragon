@@ -147,7 +147,7 @@ function priceRank({ unitPrice, cost }: LabEnchantCardPrice): number {
   return 2
 }
 
-function compareCards(left: LabEnchantCardPrice, right: LabEnchantCardPrice): number {
+export function compareCards(left: LabEnchantCardPrice, right: LabEnchantCardPrice): number {
   const rankOrder = priceRank(left) - priceRank(right)
 
   if (rankOrder !== 0) {

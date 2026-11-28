@@ -39,6 +39,7 @@ import type { ClearStatsRepository } from '@dfragon/server-core/application/cont
 import { ClearStatsService, emptyClearStatsRepository } from '#application/content-clears/index.js'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
 import { LabItemService, emptyLabItemRepository } from '#application/lab-items/index.js'
+import type { FindGameItem } from '#application/lab-items/ports.js'
 import type { RankingStatsRepository } from '#application/ranking-stats/repository.js'
 import {
   RankingStatsService,
@@ -85,6 +86,7 @@ export interface ApiServicesOptions {
   readonly adventureGuild?: AdventureGuildRepository
   readonly rankingStats?: RankingStatsRepository
   readonly labItems?: LabItemRepository
+  readonly findGameItem?: FindGameItem
   readonly clearStats?: ClearStatsRepository
   readonly todayGrade: { readonly fetchShopGrade: FetchShopGrade }
   readonly soulPrices?: { readonly fetchLowestListing: FetchLowestListing }
@@ -101,6 +103,8 @@ const unrecordedTimings: NeopleStageTimings = {
   record: () => undefined,
   markShared: () => undefined
 }
+
+const noGameItem: FindGameItem = async () => null
 
 // 경매장 조회를 넘기지 않은 실행에서는 Neople을 부를 수 없으므로 조회할 수 없음으로 답한다.
 const noLowestListing: FetchLowestListing = async () => {
@@ -227,13 +231,15 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
   })
   const labItems = new LabItemService(
     options.labItems ?? emptyLabItemRepository,
-    (itemIds, signal) => options.details.catalog.load(itemIds, signal)
+    (itemIds, signal) => options.details.catalog.load(itemIds, signal),
+    options.findGameItem ?? noGameItem
   )
   const equipmentSimulation = new EquipmentSimulationService(
     (identity, signal) => details.scoreSource(identity, signal, unrecordedTimings),
     (itemIds, signal) => options.details.catalog.load(itemIds, signal),
     engine.calculate,
-    async (signal) => (await labItems.enchantOptions(signal)).slots
+    async (signal) => (await labItems.enchantOptions(signal)).slots,
+    async () => (await labItems.slotItemOptions()).slotItems
   )
   const characterHistory = new CharacterHistoryService(
     options.characterHistory ?? emptyCharacterHistoryRepository,
