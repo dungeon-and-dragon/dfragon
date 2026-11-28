@@ -44,7 +44,7 @@ export class LabItemController {
         return c.notFound()
       }
 
-      const icon = await this.service.readCurrencyIcon(id)
+      const icon = await this.service.readCurrencyIcon(id, c.req.query('v') ?? '')
 
       if (icon === null) {
         return c.notFound()
@@ -60,7 +60,7 @@ export class LabItemController {
         return c.notFound()
       }
 
-      const icon = await this.service.readItemIcon(itemName)
+      const icon = await this.service.readItemIcon(itemName, c.req.query('v') ?? '')
 
       if (icon === null) {
         return c.notFound()

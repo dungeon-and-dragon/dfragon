@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { LRUCache } from 'lru-cache'
 import type { CatalogDetail } from '@dfragon/server-core/domain/character-catalog/index.js'
 import type {
   LabCurrencyIcon,
@@ -428,7 +429,28 @@ function fameOf(
   return candidateFame
 }
 
+type IconRead = () => Promise<LabCurrencyIcon | null>
+
+// 운영 아이콘은 2KB 안쪽이라 8MB면 표의 아이콘과 후보 아이콘이 모두 남는다.
+const ICON_CACHE_MAX_BYTES = 8 * 1024 * 1024
+
 export class LabItemService {
+  // 표를 열면 아이콘 수십 개가 한꺼번에 와 DB 연결을 기다리므로, 주소의 v까지 key로 두어 바꾼 아이콘은 새로 읽는다.
+  // fetch는 같은 key를 동시에 읽는 요청을 하나로 묶고, 없는 아이콘(undefined)은 기억하지 않는다.
+  private readonly icons = new LRUCache<string, LabCurrencyIcon, IconRead>({
+    maxSize: ICON_CACHE_MAX_BYTES,
+    sizeCalculation: (icon) => Math.max(icon.bytes.byteLength, 1),
+    fetchMethod: async (_key, _stale, { context }) => {
+      const icon = await context()
+
+      if (icon === null) {
+        return undefined
+      }
+
+      return icon
+    }
+  })
+
   constructor(
     private readonly repository: LabItemRepository,
     private readonly loadItemDetails: LoadItemDetails
@@ -491,11 +513,25 @@ export class LabItemService {
     return { groups: filled }
   }
 
-  readCurrencyIcon(id: number): Promise<LabCurrencyIcon | null> {
-    return this.repository.readCurrencyIcon(id)
+  private async cachedIcon(key: string, read: IconRead): Promise<LabCurrencyIcon | null> {
+    const icon = await this.icons.fetch(key, { context: read })
+
+    if (icon === undefined) {
+      return null
+    }
+
+    return icon
   }
 
-  readItemIcon(itemName: string): Promise<LabCurrencyIcon | null> {
-    return this.repository.readItemIcon(itemName)
+  readCurrencyIcon(id: number, version: string): Promise<LabCurrencyIcon | null> {
+    return this.cachedIcon(JSON.stringify(['currency', id, version]), () =>
+      this.repository.readCurrencyIcon(id)
+    )
+  }
+
+  readItemIcon(itemName: string, version: string): Promise<LabCurrencyIcon | null> {
+    return this.cachedIcon(JSON.stringify(['item', itemName, version]), () =>
+      this.repository.readItemIcon(itemName)
+    )
   }
 }
