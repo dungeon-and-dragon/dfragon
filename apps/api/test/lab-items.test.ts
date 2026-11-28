@@ -458,6 +458,32 @@ test('크리쳐는 레벨 꼬리표 판에만 붙는 무게 한도와 최종 데
   assert.notEqual(keys.get('합성 칭호 레벨'), keys.get('합성 칭호'))
 })
 
+test('칭호, 크리쳐는 옵션이 같아도 이름에 플래티넘이 있는 아이템과 없는 아이템을 다른 performanceKey로 가른다', async (t) => {
+  const strength = { name: '힘', value: '100' }
+  const candidate = { ...EMPTY_CANDIDATE, fame: 1261, options: [strength] }
+  const item = (category: string, itemName: string) => ({
+    ...row(category, 'all', '종결', itemName, 1_000),
+    candidate
+  })
+  const keys = await performanceKeys(t, [
+    item('CREATURE', '합성 크리쳐 알'),
+    item('CREATURE', '합성 다른 크리쳐 알'),
+    item('CREATURE', '합성 크리쳐 플래티넘 알'),
+    item('CREATURE', '합성 다른 크리쳐 플래티넘 알'),
+    item('TITLE', '합성 칭호'),
+    item('TITLE', '합성 칭호 플래티넘'),
+    item('AURA', '합성 오라'),
+    item('AURA', '합성 오라 플래티넘')
+  ])
+
+  assert.equal(typeof keys.get('합성 크리쳐 알'), 'string')
+  assert.equal(keys.get('합성 다른 크리쳐 알'), keys.get('합성 크리쳐 알'))
+  assert.equal(keys.get('합성 다른 크리쳐 플래티넘 알'), keys.get('합성 크리쳐 플래티넘 알'))
+  assert.notEqual(keys.get('합성 크리쳐 플래티넘 알'), keys.get('합성 크리쳐 알'))
+  assert.notEqual(keys.get('합성 칭호 플래티넘'), keys.get('합성 칭호'))
+  assert.equal(keys.get('합성 오라 플래티넘'), keys.get('합성 오라'))
+})
+
 test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 설명, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
   const currencyUpdatedAt = new Date('2026-11-27T01:02:03.004Z')
   const exchanged: LabItemPriceRow = {
