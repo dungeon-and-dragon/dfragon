@@ -289,7 +289,7 @@ function DetailStats({
   const groupRows =
     stats.weekOverWeek !== null ? weekGroupRows(stats.weekOverWeek, ({ fame }) => fame) : []
   const streaks = streakColumns(stats.streaks)
-  const ratios = ratioBars(content, week)
+  const ratios = ratioBars(week)
   const adventures = splitAdventureColumns(
     adventureColumns(
       stats.adventures,

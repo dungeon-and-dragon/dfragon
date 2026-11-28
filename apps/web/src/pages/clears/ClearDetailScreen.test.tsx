@@ -74,7 +74,10 @@ const michaelaHard = content(
   '무너진 성자 미카엘라 (하드)',
   MICHAELA_RELEASE,
   [
-    week(PREVIOUS_WEEK, 61),
+    week(PREVIOUS_WEEK, 61, [
+      { ratio: null, cleared: 61 },
+      { ratio: 50, cleared: 0 }
+    ]),
     week(LAST_CLOSED_WEEK, 57, [
       { ratio: null, cleared: 47 },
       { ratio: 50, cleared: 10 }
@@ -416,7 +419,7 @@ it('휠의 이전 주를 누르면 그 주를 고른다', async () => {
   expect(onWeekSelect).toHaveBeenCalledWith(LAST_CLOSED_WEEK)
 })
 
-it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 배율 클리어가 한 번이라도 있는 컨텐츠에만 배율별 클리어를 둔다', async () => {
+it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 클리어가 있는 배율이 둘 이상인 주에만 배율별 클리어를 둔다', async () => {
   await open({ contentKey: 'michaela', week: LAST_CLOSED_WEEK })
 
   expect(panelNames()).toEqual([
@@ -433,7 +436,10 @@ it('일반과 하드가 있는 레이드는 상세 카드를 모두 두고, 배�
   ])
 
   await open({ contentKey: 'michaela', week: LATEST_WEEK })
-  expect(panelNames()).toContain('배율별 클리어')
+  expect(panelNames()).not.toContain('배율별 클리어')
+
+  await open({ contentKey: 'michaela', week: PREVIOUS_WEEK })
+  expect(panelNames()).not.toContain('배율별 클리어')
 
   await open({ contentKey: 'michaela', stage: 'normal', week: LAST_CLOSED_WEEK })
   expect(panelNames()).not.toContain('배율별 클리어')

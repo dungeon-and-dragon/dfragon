@@ -393,12 +393,10 @@ function ratioLabel(ratio: number | null): string {
   return `${100 + ratio}%`
 }
 
-// 배율 클리어가 한 번이라도 있는 컨텐츠는 배율 클리어가 없는 주에도 카드를 둔다.
-export function ratioBars({ weeks }: ClearContent, { ratios }: ClearWeek): Bar[] {
-  const hasRatioClears = weeks.some((item) =>
-    item.ratios.some(({ ratio, cleared }) => ratio !== null && cleared > 0)
-  )
-  if (!hasRatioClears) {
+// 클리어가 있는 배율이 하나뿐이면 비교할 대상이 없다.
+export function ratioBars({ ratios }: ClearWeek): Bar[] {
+  const clearedRatios = ratios.filter(({ cleared }) => cleared > 0)
+  if (clearedRatios.length < 2) {
     return []
   }
 
