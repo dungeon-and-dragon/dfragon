@@ -4,11 +4,10 @@ import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useMyAdventureStore } from '#entities/adventure-guild'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
-import { rankingSetLines } from '#widgets/ranking-filter'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
-import { storyAdventureCharacters, storyRecoveries } from './api/epic-souls.fixture'
+import { storyRecoveries } from './api/epic-souls.fixture'
 import { epicSoulsHandlers } from './api/epic-souls.handlers'
 import { LabEpicSoulsPage } from './LabEpicSoulsPage'
 
@@ -120,11 +119,12 @@ it('줄마다 검색 화면처럼 세트, 명성, 점수를 보이고 그 뒤에
   const headings = [...container.querySelectorAll('table > thead th')].map(
     (cell) => cell.textContent
   )
-  const [first] = storyAdventureCharacters().characters
-  const [, set, fame] = rowText(characterRows()[0]!)
+  const [, set, fame, score] = rowText(characterRows()[0]!)
+
   expect(headings).toEqual(['펼치기', '캐릭터', '세트', '명성', '점수', '에픽 소울'])
-  expect(set).toContain(rankingSetLines(first!, null).equipment)
-  expect(fame).toBe(new Intl.NumberFormat('ko-KR').format(first!.fame!))
+  expect(set).toBe('황금향' + '용투 : 세계를 태우는 불꽃')
+  expect(fame).toBe('136,647')
+  expect(score).toContain('1,388,832')
 })
 
 it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 받은 줄의 에픽 소울을 더한다', async () => {
