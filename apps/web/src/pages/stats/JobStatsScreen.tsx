@@ -38,7 +38,6 @@ import {
 import { StatsNote } from './StatsNote'
 
 const BAR_LIMIT = 5
-// 900px 미만에서는 세 상자를 한 열로 쌓고, 세로로 쌓인 칸 사이에는 위 선을 긋는다.
 const TOP_ROW =
   'section section-cols md:grid-cols-3 max-md:grid-cols-1 max-md:[&>*+*]:border-l-0 max-md:[&>*+*]:border-t max-md:[&>*+*]:border-line'
 const COMBO_BOX = {
