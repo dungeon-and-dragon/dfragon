@@ -16,12 +16,22 @@ const LINE_MARK_CLASS = 'shrink-0 h-[2px] w-[14px] rounded-none'
 const WIDE_MARK_CLASS = 'shrink-0 h-2 w-[14px] rounded-[2px]'
 const DOT_MARK_CLASS = 'shrink-0 h-2 w-2 rounded-full'
 
+const TOGGLE_CLASS = 'flex cursor-pointer items-center gap-2 transition-colors hover:text-fg'
+const HIDDEN_TOGGLE_CLASS = 'text-fg-subtle line-through'
+
+type LegendToggle = Readonly<{
+  hiddenKeys: ReadonlySet<string>
+  onToggle: (key: string) => void
+}>
+
 export function ChartLegend({
   items,
-  below = false
+  below = false,
+  toggle
 }: {
   items: readonly LegendItem[]
   below?: boolean
+  toggle?: LegendToggle
 }): React.JSX.Element | null {
   if (items.length < MIN_LEGEND_ITEMS) {
     return null
@@ -29,17 +39,54 @@ export function ChartLegend({
 
   return (
     <ul className={`${LEGEND_CLASS} ${below ? 'mt-3' : 'mb-3'}`}>
-      {items.map(({ key, name, color, faded, mark }) => (
-        <li key={key} className={LEGEND_ITEM_CLASS}>
-          <i
-            aria-hidden="true"
-            className={`${mark === 'line' ? LINE_MARK_CLASS : MARK_CLASS} ${faded ? 'opacity-50' : ''}`}
-            style={{ backgroundColor: color }}
-          />
-          {name}
+      {items.map((item) => (
+        <li key={item.key} className={LEGEND_ITEM_CLASS}>
+          <LegendItemView item={item} toggle={toggle} />
         </li>
       ))}
     </ul>
+  )
+}
+
+function LegendItemView({
+  item,
+  toggle
+}: {
+  item: LegendItem
+  toggle: LegendToggle | undefined
+}): React.JSX.Element {
+  if (toggle != null) {
+    const off = toggle.hiddenKeys.has(item.key)
+    const handleClick = (): void => toggle.onToggle(item.key)
+
+    return (
+      <button
+        type="button"
+        aria-pressed={!off}
+        className={`${TOGGLE_CLASS} ${off ? HIDDEN_TOGGLE_CLASS : ''}`}
+        onClick={handleClick}
+      >
+        <LegendEntry item={item} off={off} />
+      </button>
+    )
+  }
+
+  return <LegendEntry item={item} off={false} />
+}
+
+function LegendEntry({ item, off }: { item: LegendItem; off: boolean }): React.JSX.Element {
+  const { name, color, faded, mark } = item
+  const dimmed = faded || off
+
+  return (
+    <>
+      <i
+        aria-hidden="true"
+        className={`${mark === 'line' ? LINE_MARK_CLASS : MARK_CLASS} ${dimmed ? 'opacity-50' : ''}`}
+        style={{ backgroundColor: off ? 'var(--color-chart-base)' : color }}
+      />
+      {name}
+    </>
   )
 }
 
