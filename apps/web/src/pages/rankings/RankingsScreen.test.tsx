@@ -715,7 +715,7 @@ it('거른 결과가 비면 조건에 맞는 캐릭터가 없다고 알린다', 
   expect(container.querySelector('p.state')?.textContent).toBe('조건에 맞는 캐릭터가 없습니다.')
 })
 
-// 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다.
+// 합성 아이템 통계다. 유일 장비 이름은 게임 데이터 그대로다. 칭호, 크리쳐, 무기 아바타는 유일 장비 셀렉트에 들지 않아야 하는 부위다.
 function itemStatsOf(weapons: readonly [string, number][]): ItemStats {
   return {
     computedAt: '2026-11-18T15:38:47.900Z',
@@ -731,6 +731,10 @@ function itemStatsOf(weapons: readonly [string, number][]): ItemStats {
         }))
       },
       {
+        slotId: 'TITLE',
+        items: [{ itemId: 'title-1', name: '합성 칭호[30Lv]', typeDetail: '칭호', count: 5 }]
+      },
+      {
         slotId: 'RING',
         items: [{ itemId: 'ring-1', name: '광휘를 머금은 눈동자', typeDetail: null, count: 7 }]
       },
@@ -740,6 +744,14 @@ function itemStatsOf(weapons: readonly [string, number][]): ItemStats {
           { itemId: 'support-2', name: '합성 보조장비', typeDetail: null, count: 2 },
           { itemId: 'support-1', name: '만병을 잉태한 역병의 심장', typeDetail: null, count: 6 }
         ]
+      },
+      {
+        slotId: 'CREATURE',
+        items: [{ itemId: 'creature-1', name: '합성 크리쳐[75Lv]', typeDetail: null, count: 4 }]
+      },
+      {
+        slotId: 'WEAPON_AVATAR',
+        items: [{ itemId: 'avatar-1', name: '합성 무기 아바타[30Lv]', typeDetail: null, count: 3 }]
       }
     ]
   }
@@ -771,7 +783,7 @@ function optionIcons(label: string): number[] {
   )
 }
 
-it('무기 셀렉트는 많이 낀 순에 무기마다 아이콘을 두고, 유일 장비 셀렉트는 부위별로 묶어 많이 낀 순으로 둔다', async () => {
+it('무기 셀렉트는 많이 낀 순에 무기마다 아이콘을 두고, 유일 장비 셀렉트는 부위별로 묶어 많이 낀 순으로 두며 칭호, 크리쳐, 무기 아바타는 두지 않는다', async () => {
   const jobId = RANKING_JOBS[0].jobId
   await render(
     async () => rankingOf(1),
