@@ -9,6 +9,7 @@ import {
   type ContentClearCollectionProgress,
   type ContentClearInput,
   type ContentClearPopulationInput,
+  type ContentClearSetting,
   type DatabaseClient,
   type StoredClearPopulation,
   type TimelineCharacter,
@@ -21,6 +22,7 @@ import {
   readClearRecordCursors,
   readContentClearCollection,
   readContentClearPopulations,
+  readContentClearSettings,
   recordClearRecordBackfillProgress,
   recordClearRecordCursors,
   recordCharactersActive,
@@ -38,6 +40,10 @@ import type {
 
 export class DatabaseClearCollectionRepository implements ClearCollectionRepository {
   constructor(private readonly client: DatabaseClient) {}
+
+  readSettings(): Promise<ContentClearSetting[]> {
+    return readContentClearSettings(this.client)
+  }
 
   countPopulation(selection: ClearPopulationSelection): Promise<number> {
     return countClearPopulation(this.client, selection)

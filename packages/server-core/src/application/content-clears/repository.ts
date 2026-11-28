@@ -25,6 +25,7 @@ import type {
   ClearWeekRatioCount,
   ClearWeekSelection,
   ContentClearPopulationInput,
+  ContentClearSetting,
   LegionClearWeek,
   StoredClearPopulation
 } from '@dfragon/database'
@@ -54,6 +55,7 @@ export interface ClearSampleRepository {
 
 export interface ClearStatsRepository extends ClearSampleRepository {
   readCollectedAt(): Promise<Date | null>
+  readSettings(): Promise<ContentClearSetting[]>
   readPopulations(): Promise<StoredClearPopulation[]>
   readWeekRatioCounts(): Promise<ClearWeekRatioCount[]>
   readFirstWeeks(contentId: string): Promise<ClearFirstWeekCount[]>
@@ -62,6 +64,7 @@ export interface ClearStatsRepository extends ClearSampleRepository {
 }
 
 export interface ClearWeekSampleRepository extends ClearSampleRepository {
+  readSettings(): Promise<ContentClearSetting[]>
   readPopulations(): Promise<StoredClearPopulation[]>
   readContentWeekSampleWeeks(): Promise<ClearContentWeek[]>
   readOverviewSampleWeeks(): Promise<Date[]>
