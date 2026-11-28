@@ -1,0 +1,31 @@
+<!-- @dsCard group="Components" height=200 -->
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+    }
+    .sample {
+      background-image: linear-gradient(135deg, var(--color-chart-1), var(--color-chart-3));
+    }
+    </style>
+  </head>
+  <body class="bg-canvas text-fg">
+    <div class="image-chip-group" role="group" aria-label="직업">
+      <button class="image-chip sample" data-image aria-pressed="true" data-pressed>
+        <span class="image-chip-name">고른 그림 칩</span>
+      </button>
+      <button class="image-chip sample" data-image aria-pressed="false">
+        <span class="image-chip-name">그림 칩</span>
+      </button>
+      <button class="image-chip" aria-pressed="false">
+        <span class="image-chip-name">그림 없는 칩</span>
+      </button>
+    </div>
+  </body>
+</html>

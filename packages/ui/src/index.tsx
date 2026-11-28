@@ -37,6 +37,12 @@ export { Chip } from './chip'
 export type { ChipProps } from './chip'
 export { ChipGroup } from './chip-group'
 export type { ChipGroupItem, ChipGroupProps } from './chip-group'
+export { ImageChipGroup } from './image-chip-group'
+export type {
+  ImageChipGroupItem,
+  ImageChipGroupProps,
+  ImageChipSprite
+} from './image-chip-group'
 export { Popover } from './popover'
 export type { PopoverChangeEventDetails, PopoverPopupProps, PopoverTitleProps } from './popover'
 export { ConfirmPopover } from './confirm-popover'
