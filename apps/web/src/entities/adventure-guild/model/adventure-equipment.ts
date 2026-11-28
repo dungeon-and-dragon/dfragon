@@ -15,8 +15,8 @@ export const EQUIPMENT_SLOTS = [
   '귀걸이'
 ] as const
 
-// 높은 등급부터 둔다. 서약 결정 열도 이 순서다.
-export const HOLDING_RARITIES = ['태초', '에픽', '레전더리'] as const
+// 높은 등급부터 둔다. 서약 결정 열도 이 순서다. 레전더리 이하는 보이지 않는다.
+export const HOLDING_RARITIES = ['태초', '에픽'] as const
 
 const holdingSchema = z.object({
   setItemId: z.string(),
@@ -55,21 +55,41 @@ export type HoldingCell = Readonly<{
   rarityCounts: readonly number[]
 }>
 
+export type CrystalCell = Readonly<{
+  itemId: string
+  itemName: string
+  rarity: string
+  count: number
+}>
+
 export type EquipmentBoardRow = Readonly<{
   character: EquipmentCharacter
   slots: readonly Readonly<{ slot: EquipmentSlot; cell: HoldingCell | null }>[]
   oath: HoldingCell | null
-  crystalCounts: readonly number[]
+  crystals: readonly (CrystalCell | null)[]
 }>
 
 function rarityRank(rarity: string): number {
-  const rank = HOLDING_RARITIES.findIndex((name) => name === rarity)
+  return HOLDING_RARITIES.findIndex((name) => name === rarity)
+}
 
-  if (rank === -1) {
-    return HOLDING_RARITIES.length
-  }
+function isShownRarity(holding: Holding): boolean {
+  return rarityRank(holding.rarity) !== -1
+}
 
-  return rank
+function toCrystalCells(crystals: readonly Holding[]): (CrystalCell | null)[] {
+  return HOLDING_RARITIES.map((rarity) => {
+    const holdings = crystals.filter((holding) => holding.rarity === rarity)
+    const first = holdings[0]
+
+    if (first === undefined) {
+      return null
+    }
+
+    const count = holdings.reduce((sum, holding) => sum + holding.count, 0)
+
+    return { itemId: first.itemId, itemName: first.itemName, rarity, count }
+  })
 }
 
 function countByRarity(holdings: readonly Holding[]): number[] {
@@ -120,13 +140,16 @@ export function toEquipmentBoard(
   setItemId: string | undefined
 ): EquipmentBoardRow[] {
   return characters.toSorted(compareFame).map((character) => {
-    const equipment = character.equipment.filter((holding) => holding.setItemId === setItemId)
-    const oaths = character.oaths.filter((holding) => holding.setItemId === setItemId)
-    const crystals = oaths.filter(({ kind }) => kind === 'crystal')
-    const crystalCounts = countByRarity(crystals)
+    const equipment = character.equipment.filter(
+      (holding) => holding.setItemId === setItemId && isShownRarity(holding)
+    )
+    const oaths = character.oaths.filter(
+      (holding) => holding.setItemId === setItemId && isShownRarity(holding)
+    )
+    const crystals = toCrystalCells(oaths.filter(({ kind }) => kind === 'crystal'))
     const slots = toSlots(equipment)
     const oath = toCell(oaths.filter(({ kind }) => kind === 'oath'))
 
-    return { character, slots, oath, crystalCounts }
+    return { character, slots, oath, crystals }
   })
 }

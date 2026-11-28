@@ -2,17 +2,18 @@ import { Tooltip } from '@dfragon/ui'
 import { Link } from '@tanstack/react-router'
 import type { ReactElement } from 'react'
 import {
+  type CrystalCell,
   EQUIPMENT_SLOTS,
   type EquipmentBoardRow,
   type EquipmentCharacter,
   HOLDING_RARITIES,
   type HoldingCell
 } from '#entities/adventure-guild'
+import { oathItemIconOf, useOathCatalog } from '#entities/catalog'
 import {
   characterImageUrl,
   displayJobName,
   ItemIcon,
-  ItemName,
   itemRarityOfGrade,
   Portrait,
   raritySolidOfName
@@ -23,7 +24,8 @@ import { STICKY_HEAD, STICKY_HEAD_CELL, STICKY_TABLE_FRAME } from './sticky-head
 export const LOADING_ROWS = 4
 
 const CHARACTER_COLUMN = 'w-[232px]'
-const CRYSTAL_COLUMN = 'w-[112px]'
+const CRYSTAL_COLUMN = 'w-[160px]'
+const CRYSTAL_ICON_LIMIT = 3
 const SLOT_CELL = 'px-0 text-center'
 const MISSING = <span className="text-fg-subtle">{MISSING_VALUE}</span>
 
@@ -74,7 +76,13 @@ function RarityCountTooltip({
   )
 }
 
-function HoldingIcon({ cell }: { cell: HoldingCell | null }): React.JSX.Element {
+function HoldingIcon({
+  cell,
+  src
+}: {
+  cell: HoldingCell | null
+  src?: string | null
+}): React.JSX.Element {
   if (cell === null) {
     return MISSING
   }
@@ -87,7 +95,13 @@ function HoldingIcon({ cell }: { cell: HoldingCell | null }): React.JSX.Element 
         aria-label={`${cell.rarity} ${cell.itemName}`}
         className="relative inline-block align-middle focus-ring"
       >
-        <ItemIcon itemId={cell.itemId} rarity={itemRarityOfGrade(cell.rarity)} />
+        {/* 서약 본체는 Neople 그림이 없어 실패한 뒤 카탈로그 그림이 오므로, src가 바뀌면 실패 상태를 버리고 다시 그린다. */}
+        <ItemIcon
+          key={src ?? cell.itemId}
+          itemId={cell.itemId}
+          src={src}
+          rarity={itemRarityOfGrade(cell.rarity)}
+        />
         {cell.extraCount > 0 && (
           <span className="absolute -right-2 -bottom-1 flex h-4 min-w-4 items-center justify-center rounded-badge border border-line bg-canvas px-1 num text-2xs text-fg-muted">
             {`+${cell.extraCount}`}
@@ -223,13 +237,48 @@ export function EquipmentSkeleton(): React.JSX.Element {
   )
 }
 
-function CrystalCount({ count, rarity }: { count: number; rarity: string }): React.JSX.Element {
-  const tone = count > 0 ? `font-semibold ${raritySolidOfName(rarity) ?? ''}` : 'text-fg-subtle'
+function CrystalIcons({ crystal }: { crystal: CrystalCell | null }): React.JSX.Element {
+  if (crystal === null) {
+    return MISSING
+  }
 
-  return <td className={`table-num ${tone}`}>{count}</td>
+  const rarity = itemRarityOfGrade(crystal.rarity)
+  const shown = Math.min(crystal.count, CRYSTAL_ICON_LIMIT)
+  const extraCount = crystal.count - shown
+
+  return (
+    <span
+      role="img"
+      aria-label={`${crystal.itemName} ${crystal.count}개`}
+      className="inline-flex items-center gap-1 align-middle"
+    >
+      {Array.from({ length: shown }, (_, index) => (
+        <ItemIcon key={index} itemId={crystal.itemId} rarity={rarity} />
+      ))}
+      {extraCount > 0 && <span className="num text-xs text-fg-muted">{`+${extraCount}`}</span>}
+    </span>
+  )
+}
+
+function useOathIconOf(): (cell: HoldingCell) => string | null {
+  const catalog = useOathCatalog()
+  const loaded = catalog.status === 'success' ? catalog.value : null
+
+  return (cell) => {
+    if (loaded === null) {
+      return null
+    }
+
+    const rarity = itemRarityOfGrade(cell.rarity)
+    const item = { itemId: cell.itemId, itemName: cell.itemName, rarity }
+
+    return oathItemIconOf(loaded, item)
+  }
 }
 
 export function OathSection({ rows }: { rows: readonly EquipmentBoardRow[] }): React.JSX.Element {
+  const oathIconOf = useOathIconOf()
+
   return (
     <section aria-label="서약" className="section min-w-0">
       <h2 className="section-title">서약</h2>
@@ -251,31 +300,25 @@ export function OathSection({ rows }: { rows: readonly EquipmentBoardRow[] }): R
                 서약
               </th>
               {HOLDING_RARITIES.map((rarity) => (
-                <th key={rarity} scope="col" className={`table-num ${STICKY_HEAD_CELL}`}>
+                <th key={rarity} scope="col" className={STICKY_HEAD_CELL}>
                   {`${rarity} 결정`}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ character, oath, crystalCounts }) => (
+            {rows.map(({ character, oath, crystals }) => (
               <tr key={character.characterId}>
                 <td className="py-0">
                   <CharacterIdentity character={character} />
                 </td>
                 <td>
-                  {oath !== null ? (
-                    <RarityCountTooltip cell={oath}>
-                      <span tabIndex={0} className="inline-flex max-w-full focus-ring">
-                        <ItemName name={oath.itemName} rarity={itemRarityOfGrade(oath.rarity)} />
-                      </span>
-                    </RarityCountTooltip>
-                  ) : (
-                    MISSING
-                  )}
+                  <HoldingIcon cell={oath} src={oath !== null ? oathIconOf(oath) : null} />
                 </td>
                 {HOLDING_RARITIES.map((rarity, index) => (
-                  <CrystalCount key={rarity} rarity={rarity} count={crystalCounts[index] ?? 0} />
+                  <td key={rarity}>
+                    <CrystalIcons crystal={crystals[index] ?? null} />
+                  </td>
                 ))}
               </tr>
             ))}

@@ -21,6 +21,7 @@ export {
 } from './model/adventure-equipment'
 export type {
   AdventureEquipment,
+  CrystalCell,
   EquipmentBoardRow,
   EquipmentCharacter,
   EquipmentSelection,

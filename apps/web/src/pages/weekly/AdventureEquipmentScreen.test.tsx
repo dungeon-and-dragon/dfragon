@@ -4,6 +4,8 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import type { AdventureEquipment, EquipmentCharacter } from '#entities/adventure-guild'
+import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
+import { OATH_CATALOG_URL, oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -23,6 +25,7 @@ let changes: EquipmentSearch[]
 beforeEach(() => {
   requests = []
   changes = []
+  server.use(oathCatalogHandlers.notUploaded)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -93,6 +96,22 @@ const highFameOaths: EquipmentCharacter['oaths'] = [
     itemId: 'crystal-1',
     itemName: '합성 결정',
     count: 3
+  },
+  {
+    setItemId: ONYX,
+    kind: 'crystal',
+    rarity: '태초',
+    itemId: 'crystal-2',
+    itemName: '합성 태초 결정',
+    count: 5
+  },
+  {
+    setItemId: ONYX,
+    kind: 'crystal',
+    rarity: '레전더리',
+    itemId: 'crystal-3',
+    itemName: '합성 레전더리 결정',
+    count: 9
   }
 ]
 const cainCharacters = [
@@ -235,23 +254,90 @@ it('응답이 고른 서버와 세트의 칩을 켜고 세트 칩은 응답 순�
   expect(topRow.querySelectorAll('td')[1]?.textContent).toBe('+1')
 
   expect(tableRows('서약')).toEqual([
-    ['합성2합성 전직', '합성 서약', '0', '3', '0'],
-    ['합성1합성 전직', '-', '0', '0', '0']
+    ['합성2합성 전직', '태초 합성 서약', '합성 태초 결정 5개', '합성 결정 3개'],
+    ['합성1합성 전직', '-', '-', '-']
   ])
 })
 
-it('장비 칸과 서약에 마우스를 올리면 태초, 에픽, 레전더리 개수를 따로 보인다', async () => {
+it('결정은 아이콘을 3개까지 보이고 남은 개수를 +N으로 보인다', async () => {
+  serve(json(equipment))
+  await render({})
+  await waitForTable()
+
+  const crystalCells = container
+    .querySelector('section[aria-label="서약"] table tbody tr')!
+    .querySelectorAll('td')
+  const primeval = crystalCells[2]!
+  const epic = crystalCells[3]!
+
+  expect(primeval.querySelectorAll('img')).toHaveLength(3)
+  expect(primeval.textContent).toBe('+2')
+  expect(epic.querySelectorAll('img')).toHaveLength(3)
+  expect(epic.textContent).toBe('')
+})
+
+it('서약 본체 아이콘은 서약 카탈로그의 그림을 쓴다', async () => {
+  const oath = {
+    ...highFameOaths[0]!,
+    rarity: '에픽',
+    itemName: '세계를 태우는 용투 서약'
+  }
+  const top = character(2, 'cain', 300, [], [oath])
+  server.use(oathCatalogHandlers.catalog(oathCatalogFixture.characterDetail))
+  serve(json({ ...equipment, servers: [{ serverId: 'cain', characters: [top] }] }))
+  await render({})
+
+  await vi.waitFor(() =>
+    expect(
+      container
+        .querySelector('section[aria-label="서약"] tbody [role="img"] img')
+        ?.getAttribute('src')
+    ).toBe('https://skilltab.test/oath-item/epic.webp')
+  )
+})
+
+it('서약 그림을 먼저 받지 못해도 카탈로그가 늦게 오면 카탈로그 그림을 보인다', async () => {
+  const oath = { ...highFameOaths[0]!, rarity: '에픽', itemName: '세계를 태우는 용투 서약' }
+  const top = character(2, 'cain', 300, [], [oath])
+  let release!: () => void
+  const released = new Promise<void>((resolve) => {
+    release = resolve
+  })
+
+  server.use(
+    http.get(OATH_CATALOG_URL, async () => {
+      await released
+
+      return HttpResponse.json(oathCatalogFixture.characterDetail)
+    })
+  )
+  serve(json({ ...equipment, servers: [{ serverId: 'cain', characters: [top] }] }))
+  await render({})
+  await waitForTable()
+
+  const oathIcon = () =>
+    container.querySelector('section[aria-label="서약"] tbody [role="img"] img')
+  await act(async () => oathIcon()!.dispatchEvent(new Event('error')))
+  expect(oathIcon()).toBeNull()
+
+  await act(async () => release())
+  await vi.waitFor(() =>
+    expect(oathIcon()?.getAttribute('src')).toBe('https://skilltab.test/oath-item/epic.webp')
+  )
+})
+
+it('장비 칸과 서약에 마우스를 올리면 태초, 에픽 개수를 따로 보인다', async () => {
   serve(json(equipment))
   await render({})
   await waitForTable()
 
   const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
   await act(async () => hover(topRow.querySelector('[role="img"]')!))
-  expect(tooltipRows()).toEqual(['태초2개', '에픽2개', '레전더리0개'])
+  expect(tooltipRows()).toEqual(['태초2개', '에픽2개'])
 
   const oathRow = container.querySelector('section[aria-label="서약"] table tbody tr')!
-  await act(async () => hover(oathRow.querySelectorAll('td')[1]!.firstElementChild!))
-  expect(tooltipRows()).toEqual(['태초1개', '에픽0개', '레전더리0개'])
+  await act(async () => hover(oathRow.querySelector('[role="img"]')!))
+  expect(tooltipRows()).toEqual(['태초1개', '에픽0개'])
 })
 
 it('세트 칩을 누르면 지금 서버와 고른 세트를 주소 값으로 넘긴다', async () => {
