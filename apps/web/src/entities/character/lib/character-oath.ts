@@ -1,3 +1,4 @@
+import { oathUpgradeSteps } from '@dfragon/lib/equipment-variants'
 import type { ItemRarity } from './character-detail-display'
 import type { CharacterDetailView } from '#entities/character/model/character-detail-view'
 import { type ItemView, itemRarityOfGrade, toItemView, tuneNumeral } from './character-item'
@@ -7,6 +8,8 @@ type OathUpgrade = NonNullable<NonNullable<Oath['info']>['oathUpgrade']>
 
 const UPGRADE_TITLE_PATTERN = /<([^>]+)>/
 const UPGRADE_STEP_PREFIX = /^<[^>]+>\s*-\s*/
+// 서약 결정 칸은 slotNo 0~10이다.
+const CRYSTAL_SLOTS = 11
 // 진의 선택지 이름은 게임 원천(oathSystemScript [oath reinforce])에서 단계마다 세 개다.
 // 1~4단계는 최종 데미지, 스킬 쿨타임 감소, 서약 포인트, 5~9단계는 모든 속도, 스킬 범위, 받는 피해 감소 순이다.
 const UPGRADE_CHOICES: Readonly<Record<string, OathUpgradeChoice>> = {
@@ -58,51 +61,43 @@ export type OathUpgradeChoice =
   | 'range'
   | 'defense'
 
-export type OathUpgradeStep = Readonly<{ name: string; choice: OathUpgradeChoice }>
+export type OathUpgradeStep = Readonly<{ name: string; choice: OathUpgradeChoice | null }>
 export type OathUpgradeView = Readonly<{ title: string | null; steps: OathUpgradeStep[] }>
 
 export type OathView = Readonly<{
   info: ItemView | null
   set: OathSet | null
   crystals: OathCrystal[]
+  emptyCrystalSlots: number
   upgrade: OathUpgradeView | null
 }>
 
-// 묶음의 화면 이름이 정해지지 않아, "<묵언의 진의> - 첫 번째 진의"처럼 단계 이름의 꺾쇠 안 글자를 제목으로 쓴다.
-function upgradeTitle(upgrade: OathUpgrade): string | null {
-  for (const { stepName } of upgrade.options) {
-    const title = stepName?.match(UPGRADE_TITLE_PATTERN)?.[1]
+function stepChoiceOf(upgrade: OathUpgrade | null, stepName: string): OathUpgradeChoice | null {
+  const optionName = upgrade?.options.find((option) => option.stepName === stepName)?.optionName
 
-    if (title !== undefined) {
-      return title
-    }
+  if (optionName == null) {
+    return null
   }
 
-  return null
+  const choice = UPGRADE_CHOICES[optionName]
+
+  if (choice === undefined) {
+    return null
+  }
+
+  return choice
 }
 
-function toUpgradeView(upgrade: OathUpgrade | null): OathUpgradeView | null {
-  if (upgrade == null) {
-    return null
-  }
+// 단계 이름은 "<묵언의 진의> - 첫 번째 진의" 모양이라, 꺾쇠 안 글자를 제목으로, 그 뒤를 단계 이름으로 쓴다.
+function toUpgradeView(upgrade: OathUpgrade | null): OathUpgradeView {
+  const libSteps = oathUpgradeSteps()
+  const steps = libSteps.map(({ name }) => {
+    const stepName = name.replace(UPGRADE_STEP_PREFIX, '')
+    const choice = stepChoiceOf(upgrade, name)
 
-  const steps = upgrade.options.flatMap(({ stepName, optionName }) => {
-    const choice = optionName != null ? UPGRADE_CHOICES[optionName] : undefined
-
-    if (stepName == null || choice === undefined) {
-      return []
-    }
-
-    const name = stepName.replace(UPGRADE_STEP_PREFIX, '')
-
-    return [{ name, choice }]
+    return { name: stepName, choice }
   })
-
-  if (steps.length === 0) {
-    return null
-  }
-
-  const title = upgradeTitle(upgrade)
+  const title = libSteps[0]?.name.match(UPGRADE_TITLE_PATTERN)?.[1] ?? null
 
   return { title, steps }
 }
@@ -157,10 +152,14 @@ function bySetPointThenSlot(a: OathCrystal, b: OathCrystal): number {
 }
 
 export function toOathView(oath: Oath): OathView {
+  const emptyCrystalSlots = Math.max(CRYSTAL_SLOTS - oath.crystal.length, 0)
+  const upgrade = oath.info != null ? toUpgradeView(oath.info.oathUpgrade ?? null) : null
+
   return {
     info: toInfoView(oath.info),
     set: toSetView(oath.setInfo),
     crystals: oath.crystal.map(toCrystalView).sort(bySetPointThenSlot),
-    upgrade: toUpgradeView(oath.info?.oathUpgrade ?? null)
+    emptyCrystalSlots,
+    upgrade
   }
 }

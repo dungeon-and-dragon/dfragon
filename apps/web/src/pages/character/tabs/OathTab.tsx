@@ -37,6 +37,16 @@ const UPGRADE_CHOICE_TONES: Readonly<Partial<Record<OathUpgradeChoice, string>>>
   cooldown: 'text-game-enhance'
 }
 
+function choiceToneOf(choice: OathUpgradeChoice | null): string {
+  const tone = choice !== null ? UPGRADE_CHOICE_TONES[choice] : undefined
+
+  if (tone === undefined) {
+    return ''
+  }
+
+  return tone
+}
+
 const OPTION = 'm-0 flex items-start gap-4 rounded-control border p-4'
 const OPTION_IDLE = 'border-dashed border-line-strong bg-canvas'
 const OPTION_PICKED = 'border-solid border-signal bg-surface shadow-selected'
@@ -200,10 +210,12 @@ function OathStrip({
   )
 }
 
-function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Element | null {
-  if (crystals.length === 0) {
-    return null
-  }
+function OathCrystals({
+  view: { crystals, emptyCrystalSlots }
+}: {
+  view: OathView
+}): React.JSX.Element {
+  const emptySlots = Array.from({ length: emptyCrystalSlots }, (_, index) => index)
 
   return (
     <section aria-label="서약 결정">
@@ -223,6 +235,15 @@ function OathCrystals({ view: { crystals } }: { view: OathView }): React.JSX.Ele
                     <ItemName name={crystal.itemName} rarity={crystal.rarity} />
                     <TuneNumeral numeral={crystal.tune} />
                   </span>
+                </div>
+              </td>
+            </tr>
+          ))}
+          {emptySlots.map((index) => (
+            <tr key={`empty-${index}`}>
+              <td>
+                <div className={itemClasses.item}>
+                  <ItemIcon itemId={null} rarity={null} />
                 </div>
               </td>
             </tr>
@@ -258,8 +279,8 @@ function UpgradeSection({
             className="flex min-h-[40px] items-center justify-between gap-3 border-b border-line px-4"
           >
             <dt className="text-fg-muted">{name}</dt>
-            <dd className={`font-semibold ${UPGRADE_CHOICE_TONES[choice] ?? ''}`}>
-              {UPGRADE_CHOICE_LABELS[choice]}
+            <dd className={`font-semibold ${choiceToneOf(choice)}`}>
+              {choice !== null && UPGRADE_CHOICE_LABELS[choice]}
             </dd>
           </div>
         ))}
