@@ -4,9 +4,11 @@ import type {
   LabCurrencyIcon,
   LabItemCard,
   LabItemPlatinumPrice,
+  LabItemPriceCandidate,
   LabItemPriceCost,
   LabItemPriceDetail,
-  LabItemPriceRow
+  LabItemPriceRow,
+  LabItemStatusLine
 } from '@dfragon/database'
 import {
   isEnchantCategory,
@@ -57,6 +59,7 @@ export interface LabItemPrice {
   checkedAt: Date | null
   platinum: LabItemPlatinumPrice | null
   cost: LabItemCurrencyCost | null
+  performanceKey: string | null
 }
 
 export interface LabItemGroupPrices {
@@ -237,9 +240,10 @@ function chunks<T>(values: readonly T[], size: number): T[][] {
 function toPrice(
   { itemName, itemId, itemRarity, unitPrice, checkedAt, platinum, cost, detail }: LabItemPriceRow,
   fame: number | null,
-  candidate: LabItemPriceDetail | null
+  candidate: LabItemPriceCandidate | null
 ): LabItemPrice {
   const look = lookOf(itemName, itemRarity, detail, candidate)
+  const performanceKey = performanceKeyOf(detail, candidate, fame, cost)
 
   if (cost !== null) {
     const currencyCost = toCurrencyCost(cost)
@@ -252,11 +256,22 @@ function toPrice(
       unitPrice: null,
       checkedAt,
       platinum,
-      cost: currencyCost
+      cost: currencyCost,
+      performanceKey
     }
   }
 
-  return { itemName, itemId, ...look, fame, unitPrice, checkedAt, platinum, cost: null }
+  return {
+    itemName,
+    itemId,
+    ...look,
+    fame,
+    unitPrice,
+    checkedAt,
+    platinum,
+    cost: null,
+    performanceKey
+  }
 }
 
 function enchantEntryOf(
@@ -317,6 +332,79 @@ function enchantSourceOf(
 
 function digestOptionKey(key: string): string {
   return createHash('sha256').update(key).digest('hex').slice(0, 16)
+}
+
+type PerformanceOptions = { slots: string[]; options: string[] }
+
+const NO_PERFORMANCE_OPTIONS: PerformanceOptions = { slots: [], options: [] }
+
+function statusLinesOf(status: readonly LabItemStatusLine[]): string[] {
+  return status.map(({ name, value }) => `${name}:${value}`)
+}
+
+// 마법부여 카드는 낮은 단계 옵션이 달라도 가장 높은 강화 단계의 옵션이 같으면 같은 성능이다.
+function cardPerformanceOf({ slots, enchants }: LabItemCard): PerformanceOptions {
+  const top = enchants.reduce<LabItemCard['enchants'][number] | null>(
+    (best, enchant) => (best === null || enchant.upgrade > best.upgrade ? enchant : best),
+    null
+  )
+  const options = statusLinesOf(top?.status ?? [])
+
+  return { slots, options }
+}
+
+function performanceOptionsOf(
+  detail: LabItemPriceDetail | null,
+  candidate: LabItemPriceCandidate | null
+): PerformanceOptions {
+  if (detail?.card != null) {
+    return cardPerformanceOf(detail.card)
+  }
+
+  if (candidate === null) {
+    return NO_PERFORMANCE_OPTIONS
+  }
+
+  if (candidate.card !== null) {
+    return cardPerformanceOf(candidate.card)
+  }
+
+  const options = statusLinesOf(candidate.options)
+
+  return { slots: [], options }
+}
+
+function sorted(values: readonly string[]): string[] {
+  return [...values].sort()
+}
+
+// 같은 묶음 안에서 옵션 줄, 버프 줄, 명성, 구매 방법이 모두 같은 아이템끼리 같은 키다.
+function performanceKeyOf(
+  detail: LabItemPriceDetail | null,
+  candidate: LabItemPriceCandidate | null,
+  fame: number | null,
+  cost: LabItemPriceCost | null
+): string | null {
+  const { slots, options } = performanceOptionsOf(detail, candidate)
+  const buffLines = candidate?.buffLines ?? []
+
+  if (options.length === 0) {
+    return null
+  }
+
+  const currencyId = cost?.currencyId ?? null
+  const sortedSlots = sorted(slots)
+  const sortedOptions = sorted(options)
+  const sortedBuffLines = sorted(buffLines)
+  const key = JSON.stringify({
+    slots: sortedSlots,
+    options: sortedOptions,
+    buffLines: sortedBuffLines,
+    fame,
+    currencyId
+  })
+
+  return digestOptionKey(key)
 }
 
 function needsNeopleFame(row: LabItemPriceRow): row is LabItemPriceRow & { itemId: string } {

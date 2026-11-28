@@ -87,9 +87,11 @@ export type {
   LabItemEntry,
   LabItemGroup,
   LabItemPlatinumPrice,
+  LabItemPriceCandidate,
   LabItemPriceCost,
   LabItemPriceDetail,
-  LabItemPriceRow
+  LabItemPriceRow,
+  LabItemStatusLine
 } from './lab-item.js'
 export {
   TIMELINE_SYNC_REQUEST_KINDS,
