@@ -9,8 +9,10 @@ import {
   findWeaponVariant,
   weaponVariantsOf
 } from '@dfragon/lib/equipment-variants'
+import type { StoredCharacterHistorySnapshot } from '@dfragon/database'
 import { CatalogService } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterPayloads } from '@dfragon/server-core/domain/character-detail/index.js'
+import { toSectionBodies } from '@dfragon/server-core/domain/character-history/index.js'
 import type {
   ScoreCalculator,
   ScoreEngineInput,
@@ -27,6 +29,7 @@ import {
   payloadsFromEngineInput,
   readEngineInput
 } from '@dfragon/server-core/test/score-fixtures.js'
+import type { CharacterHistoryRepository } from '../src/application/character-history/repository.js'
 import { supportsSimulation } from '../src/domain/equipment-simulation/index.js'
 import { type ApiHttpAppOptions, createApiHttpApp } from '../src/runtime/api-app.js'
 
@@ -277,6 +280,40 @@ async function listen(t: TestContext, options: Partial<ApiHttpAppOptions>) {
   return await app.getUrl()
 }
 
+function storedHistory(
+  payloads: CharacterPayloads,
+  sections: StoredCharacterHistorySnapshot['sections'] = toSectionBodies(payloads)
+): CharacterHistoryRepository {
+  const basic = payloads.basic as Record<string, unknown>
+  const observedAt = new Date('2026-11-27T00:00:00Z')
+  const snapshot: StoredCharacterHistorySnapshot = {
+    observedAt,
+    basic: {
+      characterName: String(basic.characterName),
+      adventureName: String(basic.adventureName),
+      level: Number(basic.level),
+      jobId: String(basic.jobId),
+      jobGrowId: String(basic.jobGrowId),
+      jobName: String(basic.jobName),
+      jobGrowName: String(basic.jobGrowName),
+      fame: Number(basic.fame),
+      guildId: null,
+      guildName: null,
+      observedAt,
+      lastSeenAt: observedAt
+    },
+    score: null,
+    sections
+  }
+
+  return {
+    readHistory: async () => assert.fail('이력을 부르면 안 된다'),
+    readSnapshot: async () => snapshot,
+    readNameChangeEvents: async () => assert.fail('이름 변경을 부르면 안 된다'),
+    readSections: async () => assert.fail('섹션 이력을 부르면 안 된다')
+  }
+}
+
 async function post(origin: string, path: string, body: unknown) {
   const response = await fetch(new URL(path, origin), {
     method: 'POST',
@@ -354,6 +391,41 @@ test('3조율 에픽 무기와 2조율 에픽 상의는 67개를 돌려받고, �
   assert.equal(engine.requests.length, equipmentSets().length * 2)
   assert.equal(fetches(), 1)
   assert.equal(new Set(catalogRequests).size, catalogRequests.length)
+})
+
+test('저장한 원문이 있으면 Neople 상세를 받지 않고 그 원문으로 회수량과 최고 세팅을 낸다', async (t) => {
+  const { payloads, details, path, fetches } = fixture(epicWeaponAndJacket)
+  const engine = scoring()
+  const origin = await listen(t, {
+    details,
+    characterHistory: storedHistory(payloads),
+    ...engine.options
+  })
+
+  const response = await recover(origin, path, false)
+
+  assert.equal(response.status, 200)
+  assert.equal(fetches(), 0)
+  assert.equal(response.body.souls.total, 67)
+  assert.equal(response.body.best.setItemId, GOLDEN_SET)
+  assert.equal(response.body.best.weaponVariantId, STAR_LEGENDARY_GREATSWORD)
+})
+
+test('저장한 원문에 빠진 섹션이 있으면 상세 조회처럼 Neople 상세를 받아 계산한다', async (t) => {
+  const { payloads, details, path, fetches } = fixture(epicWeaponAndJacket)
+  const { equipment: _equipment, ...withoutEquipment } = toSectionBodies(payloads)
+  const engine = scoring()
+  const origin = await listen(t, {
+    details,
+    characterHistory: storedHistory(payloads, withoutEquipment),
+    ...engine.options
+  })
+
+  const response = await recover(origin, path, false)
+
+  assert.equal(response.status, 200)
+  assert.equal(fetches(), 1)
+  assert.equal(response.body.souls.total, 67)
 })
 
 test('에픽 무기와 상의는 조율 0의 레전더리로 바꾸고 강화, 증폭은 착용 그대로 둔다', async (t) => {
