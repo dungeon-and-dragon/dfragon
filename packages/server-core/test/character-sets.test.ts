@@ -39,6 +39,12 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
         typeDetail: null
       },
       {
+        slotId: 'WEAPON_AVATAR',
+        itemId: '67c9b1b3d2605e8b50a58775ef0f05db',
+        itemName: '무기 클론 아바타',
+        typeDetail: null
+      },
+      {
         slotId: 'CREATURE',
         itemId: 'bf04e5b415fea3989e8607efb4987d14',
         itemName: '운명을 담는 재단사',
@@ -67,6 +73,12 @@ test('실응답 fixture에서 장비 세트는 등급별 이름이 아닌 부위
         slotId: 'AURORA',
         itemId: 'e3a8f465174ad184ee15dafb221634d2',
         itemName: '[EVENT]세리아의 파스텔 버블 Ver.2',
+        typeDetail: null
+      },
+      {
+        slotId: 'WEAPON_AVATAR',
+        itemId: 'e0011085622b7f21a88786efc62453c4',
+        itemName: '일렉 기타',
         typeDetail: null
       },
       {
@@ -136,7 +148,7 @@ test('세트 항목의 모양이 다르면 세트 값을 뽑지 않는다', () =
 test('가명 처리한 실응답의 장비에서 무기, 칭호와 exaltedInfo가 있는 유일 장비 부위만 뽑는다', () => {
   const payloads = payloadsFromEngineInput(readEngineInput('buffer-muse'))
   const equipmentItems = parseCharacterSets(payloads)?.items.filter(
-    ({ slotId }) => slotId !== 'AURORA' && slotId !== 'CREATURE'
+    ({ slotId }) => !['AURORA', 'CREATURE', 'WEAPON_AVATAR'].includes(slotId)
   )
 
   assert.deepEqual(equipmentItems, [
@@ -272,7 +284,7 @@ test('빈 itemTypeDetail은 종류를 모르는 것으로 null로 뽑는다', ()
   ])
 })
 
-test('아바타에서는 오라 부위만, 크리쳐는 CREATURE 부위로 뽑고 다른 아바타 부위는 뽑지 않는다', () => {
+test('아바타에서는 오라와 WEAPON_AVATAR 부위로 바꾼 무기 아바타만, 크리쳐는 CREATURE 부위로 뽑고 다른 아바타 부위는 뽑지 않는다', () => {
   const sets = parseCharacterSets({
     equipment: { ...header, equipment: [], setItemInfo: [] },
     oath: { ...header, oath: null },
@@ -281,7 +293,7 @@ test('아바타에서는 오라 부위만, 크리쳐는 CREATURE 부위로 뽑�
       avatar: [
         { slotId: 'HEADGEAR', itemId: 'headgear', itemName: '합성 모자 아바타' },
         { slotId: 'AURORA', itemId: 'aura', itemName: '합성 오라' },
-        { slotId: 'WEAPON', itemId: 'weapon-avatar', itemName: '합성 무기 아바타' }
+        { slotId: 'WEAPON', itemId: 'weapon-avatar', itemName: '합성 무기 아바타[30Lv]' }
       ]
     },
     creature: { ...header, creature: { itemId: 'creature', itemName: '합성 크리쳐[30Lv]' } }
@@ -289,6 +301,12 @@ test('아바타에서는 오라 부위만, 크리쳐는 CREATURE 부위로 뽑�
 
   assert.deepEqual(sets?.items, [
     { slotId: 'AURORA', itemId: 'aura', itemName: '합성 오라', typeDetail: null },
+    {
+      slotId: 'WEAPON_AVATAR',
+      itemId: 'weapon-avatar',
+      itemName: '합성 무기 아바타[30Lv]',
+      typeDetail: null
+    },
     { slotId: 'CREATURE', itemId: 'creature', itemName: '합성 크리쳐[30Lv]', typeDetail: null }
   ])
 })
