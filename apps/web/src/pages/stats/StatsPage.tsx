@@ -1,36 +1,19 @@
-import { Fragment } from 'react'
 import { BarLineChart } from '#shared/ui/chart/BarLineChart'
 import { Columns } from '#shared/ui/chart/Columns'
-import { type Bar, type BarTone, RowBars } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
 import { StatsTabs } from '#widgets/stats-tabs'
 import { useCharacterStats } from './api/useCharacterStats'
-import {
-  type FameBar,
-  fameBars,
-  type JobFameChart,
-  jobFameChart,
-  serverBars
-} from '#entities/ranking'
+import { type FameBar, fameBars, type JobFameChart, jobFameChart } from '#entities/ranking'
 import { StatsNote } from './StatsNote'
 
 const SCREEN = 'flex flex-col'
 const STAT_BOX_NAMES = {
-  server: '서버 인구',
   fame: '명성 분포',
   jobFame: '직업별 명성'
 } as const
 
 type StatBoxId = keyof typeof STAT_BOX_NAMES
-const STAT_BOX_ROWS: readonly (readonly StatBoxId[])[] = [['server', 'fame'], ['jobFame']]
-
-function rowClassOf(row: readonly StatBoxId[]): string {
-  if (row.length > 1) {
-    return 'section section-cols'
-  }
-
-  return 'section'
-}
+const STAT_BOX_IDS: readonly StatBoxId[] = ['fame', 'jobFame']
 
 export function StatsPage(): React.JSX.Element {
   return (
@@ -57,7 +40,6 @@ function CharacterStatsBody(): React.JSX.Element {
     case 'success': {
       const stats = result.value
       const boxes: Record<StatBoxId, React.JSX.Element> = {
-        server: <StatBox name={STAT_BOX_NAMES.server} bars={serverBars(stats)} />,
         fame: <FameBox bars={fameBars(stats)} />,
         jobFame: <JobFameBox chart={jobFameChart(stats)} />
       }
@@ -65,11 +47,9 @@ function CharacterStatsBody(): React.JSX.Element {
       return (
         <div className={SCREEN}>
           <StatsNote count={stats.total} computedAt={stats.computedAt} />
-          {STAT_BOX_ROWS.map((row) => (
-            <div key={row.join()} className={rowClassOf(row)}>
-              {row.map((id) => (
-                <Fragment key={id}>{boxes[id]}</Fragment>
-              ))}
+          {STAT_BOX_IDS.map((id) => (
+            <div key={id} className="section">
+              {boxes[id]}
             </div>
           ))}
         </div>
@@ -82,37 +62,15 @@ function StatsSkeleton(): React.JSX.Element {
   return (
     <div aria-busy="true" className={SCREEN}>
       <div aria-hidden="true">
-        {STAT_BOX_ROWS.map((row) => (
-          <div key={row.join()} className={rowClassOf(row)}>
-            {row.map((id) => (
-              <ListBox key={id} name={STAT_BOX_NAMES[id]}>
-                <span className="skeleton h-[256px]" />
-              </ListBox>
-            ))}
+        {STAT_BOX_IDS.map((id) => (
+          <div key={id} className="section">
+            <ListBox name={STAT_BOX_NAMES[id]}>
+              <span className="skeleton h-[256px]" />
+            </ListBox>
           </div>
         ))}
       </div>
     </div>
-  )
-}
-
-function StatBox({
-  name,
-  bars,
-  tone
-}: {
-  name: string
-  bars: readonly Bar[]
-  tone?: BarTone
-}): React.JSX.Element {
-  if (bars.length === 0) {
-    return <ListBox name={name} />
-  }
-
-  return (
-    <ListBox name={name}>
-      <RowBars bars={bars} tone={tone} barFromMd />
-    </ListBox>
   )
 }
 

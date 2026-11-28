@@ -1,9 +1,8 @@
-import { CHARACTER_SERVER_NAMES, displayJobName } from '#entities/character/@x/ranking'
+import { displayJobName } from '#entities/character/@x/ranking'
 import type { CharacterStats } from '#entities/ranking/model/ranking-stats'
 import type { BarSeries } from '#shared/ui/chart/BarLineChart'
 import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { ChartX } from '#shared/ui/chart/plot-layout'
-import type { Bar } from '#shared/ui/chart/RowBars'
 
 const AWAKENING_MARK = '眞'
 
@@ -19,15 +18,6 @@ export function shareText(count: number, total: number): string {
   }
 
   return percent.format(count / total)
-}
-
-export function serverBars({ servers, total }: CharacterStats): Bar[] {
-  return servers.map(({ serverId, count }) => ({
-    key: serverId,
-    name: CHARACTER_SERVER_NAMES[serverId],
-    value: count,
-    share: shareText(count, total)
-  }))
 }
 
 export function isAwakenedJob({ jobGrowName }: Readonly<{ jobGrowName: string | null }>): boolean {
@@ -82,7 +72,7 @@ type FameBucket = CharacterStats['fameDistribution'][number]
 
 const FINE_FROM = 120_000
 const HIGH_FROM = 130_000
-const COARSE_WIDTH = 40_000
+const COARSE_FROMS = [0, 40_000, 80_000, 100_000] as const
 const LABEL_STEP = 5_000
 const DENSITY_WIDTH = 1_000
 const MAN = 10_000
@@ -98,9 +88,8 @@ function fameText(fame: number): string {
 }
 
 function coarseBuckets(distribution: readonly FameBucket[]): FameBucket[] {
-  return Array.from({ length: FINE_FROM / COARSE_WIDTH }, (_, index) => {
-    const from = index * COARSE_WIDTH
-    const to = from + COARSE_WIDTH
+  return COARSE_FROMS.map((from, index) => {
+    const to = COARSE_FROMS[index + 1] ?? FINE_FROM
     const count = distribution
       .filter((bucket) => bucket.from >= from && bucket.from < to)
       .reduce((sum, bucket) => sum + bucket.count, 0)

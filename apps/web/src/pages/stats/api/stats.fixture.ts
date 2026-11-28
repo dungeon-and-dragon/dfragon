@@ -42,7 +42,8 @@ export function storyCharacterStats(computedAt: string): CharacterStats {
   const coarse = [
     { from: 10_000, to: 11_000, count: 3820 },
     { from: 52_000, to: 53_000, count: 7410 },
-    { from: 95_000, to: 96_000, count: 11_260 }
+    { from: 95_000, to: 96_000, count: 11_260 },
+    { from: 112_000, to: 113_000, count: 14_380 }
   ]
   const fine = FINE_BUCKETS.map((count, index) => {
     const from = 120_000 + index * 1000

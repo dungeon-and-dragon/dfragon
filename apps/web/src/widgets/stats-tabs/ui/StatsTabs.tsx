@@ -4,7 +4,7 @@ const STATS_TABS = [
   { to: '/stats/sets', label: '세트' },
   { to: '/stats/weapons', label: '무기' },
   { to: '/stats/combos', label: '조합' },
-  { to: '/stats', label: '캐릭터' },
+  { to: '/stats', label: '명성' },
   { to: '/stats/skills', label: '스킬' },
   { to: '/clears', label: '클리어' }
 ] as const

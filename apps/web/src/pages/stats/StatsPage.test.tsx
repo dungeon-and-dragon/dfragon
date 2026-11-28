@@ -108,22 +108,23 @@ it('제목 상자 없이 통계 상자만 그린다', async () => {
   expect(container.querySelector('header')).toBeNull()
 })
 
-it('큰 수는 줄여 쓰고 상자 셋을 서버 인구, 명성 분포, 직업별 명성 순으로 그린다', async () => {
+it('큰 수는 줄여 쓰고 서버 인구 없이 명성 분포, 직업별 명성 상자를 한 줄씩 그린다', async () => {
   await render(stats)
 
   expect([...container.querySelectorAll('h2')].map((name) => name.textContent)).toEqual([
-    '서버 인구',
     '명성 분포',
     '직업별 명성'
   ])
-  expect(rowsOf('서버 인구')).toEqual([
-    ['카인', '', '600'],
-    ['바칼', '', '300']
-  ])
+  expect(
+    [...container.querySelectorAll('section[aria-label]')].map(
+      (box) => box.parentElement?.querySelectorAll(':scope > section').length
+    )
+  ).toEqual([1, 1])
   expect(rowsOf('명성 분포')).toEqual([
     ['', '0'],
     ['', '4만'],
     ['', '8만'],
+    ['', '10만'],
     ['', '12만'],
     ['', '']
   ])
@@ -149,11 +150,12 @@ function moveMouse(from: Element, to: Element): Promise<void> {
   })
 }
 
-it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
+it('명성 분포는 12만 미만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
   await render(stats)
 
   const items = [...boxOf('명성 분포').querySelectorAll('li')]
   expect(items.map((item) => item.getAttribute('aria-hidden'))).toEqual([
+    null,
     null,
     null,
     null,
@@ -186,15 +188,15 @@ it('명성 분포는 12만~13만 막대와 13만 이상 막대 사이에도 구�
     item.getAttribute('aria-hidden') === 'true' ? [index] : []
   )
 
-  expect(items).toHaveLength(3 + 1 + 10 + 1 + 1)
-  expect(dividerIndexes).toEqual([3, 14])
+  expect(items).toHaveLength(4 + 1 + 10 + 1 + 1)
+  expect(dividerIndexes).toEqual([4, 15])
 })
 
 it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
   await render(stats)
 
   const chart = boxOf('명성 분포').querySelector('ul')!
-  const [, coarseBar, , divider, firstFineBar] = [...chart.querySelectorAll('li')]
+  const [, coarseBar, , , divider, firstFineBar] = [...chart.querySelectorAll('li')]
   await moveMouse(document.body, coarseBar!)
   expect(tooltipText('명성 분포')).toBe('4만~8만10')
 
@@ -207,35 +209,6 @@ it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫�
 
   await moveMouse(firstFineBar!, document.body)
   expect(tooltipText('명성 분포')).toBeNull()
-})
-
-it('서버 인구 행에 마우스를 올리면 전체 캐릭터 수 대비 비율을 띄우고 목록을 벗어나면 지운다', async () => {
-  await render({ ...stats, total: 1000 })
-
-  const serverRow = boxOf('서버 인구').querySelector('li')!
-  expect(tooltipText('서버 인구')).toBeNull()
-
-  await moveMouse(document.body, serverRow)
-  expect(tooltipText('서버 인구')).toBe('60.0%')
-
-  await moveMouse(serverRow, document.body)
-  expect(tooltipText('서버 인구')).toBeNull()
-})
-
-it('행 사이 간격을 지나도 비율 툴팁을 닫지 않고 다음 행의 비율로 바꾼다', async () => {
-  await render({ ...stats, total: 1000 })
-
-  const list = boxOf('서버 인구').querySelector('ul')!
-  const [firstRow, secondRow] = [...list.querySelectorAll('li')]
-  await moveMouse(document.body, firstRow!)
-  await moveMouse(firstRow!, list)
-  expect(tooltipText('서버 인구')).toBe('60.0%')
-
-  await moveMouse(list, secondRow!)
-  expect(tooltipText('서버 인구')).toBe('30.0%')
-
-  await moveMouse(secondRow!, document.body)
-  expect(tooltipText('서버 인구')).toBeNull()
 })
 
 function jobNamesOf(): string[] {
@@ -300,7 +273,8 @@ it('빈 통계는 상자마다 이름 한 줄만 둔다', async () => {
   })
 
   expect(container.querySelectorAll('li')).toHaveLength(0)
-  expect(boxOf('서버 인구').textContent).toBe('서버 인구')
+  expect(boxOf('명성 분포').textContent).toBe('명성 분포')
+  expect(boxOf('직업별 명성').textContent).toBe('직업별 명성')
 })
 
 it('집계 시각이 null인 빈 통계도 오류 없이 표시한다', async () => {
