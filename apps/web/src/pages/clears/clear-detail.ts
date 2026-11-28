@@ -362,14 +362,6 @@ export function scoreBandColumns(scoreBands: readonly ClearScoreBand[]): ColumnB
   })
 }
 
-export function stageBars(stages: ClearContentStats['stages']): Bar[] {
-  if (stages === null || !stages.some(({ characters }) => characters > 0)) {
-    return []
-  }
-
-  return stages.map(({ stage, characters }) => ({ key: stage, name: stage, value: characters }))
-}
-
 const STREAK_TICK_COUNT = 14
 
 export function streakColumns(streaks: ClearContentStats['streaks']): ColumnBar[] {

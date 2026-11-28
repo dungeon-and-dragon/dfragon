@@ -10,10 +10,6 @@ import {
   type ClearJobScoreSample,
   type ClearOverviewWeekSamples,
   type ClearPopulationJob,
-  type ClearRecordRaidMode,
-  type ClearRecordRaidSelection,
-  type ClearRecordRaidStage,
-  type ClearRecordStageCount,
   type ClearScoreBandCount,
   type ClearWeekMoveCount,
   type ClearWeekMoveSelection,
@@ -31,8 +27,6 @@ import {
   type StoredClearPopulation,
   analyzeContentClears,
   readClearPopulationJobs,
-  readClearRecordRaidModes,
-  readClearRecordRaidStageCounts,
   readContentClearAdventureSizes,
   readContentClearCollectedAt,
   readContentClearSettings,
@@ -118,17 +112,6 @@ export class DatabaseClearStatsRepository
 
   readStreaks(selection: ClearWeekSelection): Promise<ClearStreakCount[]> {
     return readContentClearStreaks(this.client, selection)
-  }
-
-  readRaidModes(selection: ClearRecordRaidSelection): Promise<ClearRecordRaidMode[]> {
-    return readClearRecordRaidModes(this.client, selection)
-  }
-
-  readRaidStageCounts(
-    selection: ClearRecordRaidSelection,
-    stages: readonly ClearRecordRaidStage[]
-  ): Promise<ClearRecordStageCount[]> {
-    return readClearRecordRaidStageCounts(this.client, selection, stages)
   }
 
   readContentJobScores(selection: ClearWeekSelection): Promise<ClearJobScoreSample[]> {

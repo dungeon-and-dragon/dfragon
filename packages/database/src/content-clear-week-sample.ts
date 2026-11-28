@@ -1,4 +1,3 @@
-import type { ClearRecordStageCount } from './clear-record.js'
 import type { DatabaseClient } from './client.js'
 import type {
   ClearAdventureSize,
@@ -26,7 +25,6 @@ export type ClearContentWeekSamples = {
   weekGroupScores: ClearWeekGroupScoreSample[] | null
   weekMoves: ClearWeekMoveCount[] | null
   streaks: ClearStreakCount[] | null
-  stages: ClearRecordStageCount[] | null
 }
 
 export type ClearOverviewWeekSamples = {

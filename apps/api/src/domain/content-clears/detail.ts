@@ -5,7 +5,6 @@ import type {
   ClearFirstWeekCount,
   ClearJobFameSample,
   ClearJobScoreSample,
-  ClearRecordStageCount,
   ClearScoreBandCount,
   ClearStreakCount,
   ClearTimeCount,
@@ -17,7 +16,6 @@ import type {
   ClearWeekMoveTo,
   StoredClearPopulation
 } from '@dfragon/database'
-import { RAID_STAGE_ORDER } from '@dfragon/server-core/domain/raid-stage.js'
 import { formatResetDate } from '@dfragon/server-core/domain/seoul-time.js'
 import {
   type ClearFameDistribution,
@@ -57,17 +55,15 @@ export type ClearContentStats = ClearContentHeader &
     weekOverWeek: Record<ClearWeekGroup, ClearWeekGroupStats> | null
     weekMoves: ClearWeekMoveCount[] | null
     streaks: ClearStreakCount[] | null
-    stages: ClearRecordStageCount[] | null
     scoreBands: Record<CharacterScoreKind, ClearScoreBand[]>
   }
 
-// 레이드가 아니면 weekGroups, weekGroupScores, streaks, stages가 null이고, 일반과 하드 짝이 없으면 weekMoves가 null이다.
+// 레이드가 아니면 weekGroups, weekGroupScores, streaks가 null이고, 일반과 하드 짝이 없으면 weekMoves가 null이다.
 export type ClearContentSamples = {
   jobFames: readonly ClearJobFameSample[]
   jobScores: readonly ClearJobScoreSample[]
   scoreBands: readonly ClearScoreBandCount[]
   weekGroupScores: readonly ClearWeekGroupScoreSample[] | null
-  stages: readonly ClearRecordStageCount[] | null
   adventures: ClearAdventureSize[]
   firstWeeks: readonly ClearFirstWeekCount[]
   fameBands: ClearFameBandCount[]
@@ -157,23 +153,6 @@ function toScoreBands(
   return { equipment, buff }
 }
 
-function toStages(counts: readonly ClearRecordStageCount[]): ClearRecordStageCount[] {
-  const orderOf = (stage: string) => {
-    const index = RAID_STAGE_ORDER.indexOf(stage)
-
-    if (index === -1) {
-      return RAID_STAGE_ORDER.length
-    }
-
-    return index
-  }
-
-  return counts.toSorted(
-    (left, right) =>
-      orderOf(left.stage) - orderOf(right.stage) || left.stage.localeCompare(right.stage)
-  )
-}
-
 export function toEmptyContentStats({
   weeks: _weeks,
   ...header
@@ -188,7 +167,6 @@ export function toEmptyContentStats({
     weekOverWeek: null,
     weekMoves: null,
     streaks: null,
-    stages: null,
     scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
@@ -210,7 +188,6 @@ export function toClearContentStats(
       : null
   const weekMoves = samples.weekMoves !== null ? toWeekMoves(samples.weekMoves) : null
   const times = toClearTimes(samples.times)
-  const stages = samples.stages !== null ? toStages(samples.stages) : null
   const scoreBands = toScoreBands(samples.scoreBands)
 
   return {
@@ -223,7 +200,6 @@ export function toClearContentStats(
     weekOverWeek,
     weekMoves,
     streaks: samples.streaks,
-    stages,
     scoreBands,
     ...times
   }

@@ -258,15 +258,6 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
       ]
     : null
 
-  const stages =
-    header.kind === 'raid'
-      ? [
-          { stage: '싱글/매칭', characters: 1800 },
-          { stage: '일반', characters: 900 },
-          { stage: '하드', characters: 500 }
-        ]
-      : null
-
   const weeklyClears = weeks.map((item, index) => {
     const firstCleared = Math.round(item.cleared * (index === 0 ? 1 : 0.12))
     const repeatCleared = Math.round(item.cleared * (index === 0 ? 0 : 0.88))
@@ -309,7 +300,6 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
     weekOverWeek,
     weekMoves,
     streaks,
-    stages,
     scoreBands: { equipment: equipmentBands, buff: buffBands },
     weekdays,
     hours

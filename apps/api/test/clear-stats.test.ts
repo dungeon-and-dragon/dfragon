@@ -82,8 +82,6 @@ function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRe
     readWeekGroups: async () => [],
     readWeekMoves: async () => [],
     readStreaks: async () => [],
-    readRaidModes: async () => [],
-    readRaidStageCounts: async () => [],
     readContentJobScores: async () => [],
     readWeekGroupScores: async () => [],
     readScoreBands: async () => [],
@@ -296,8 +294,7 @@ const storedContentSamples: ClearContentWeekSamples = {
     { from: 'normal', to: 'hard', characters: 4 },
     { from: 'hard', to: 'hard', characters: 9 }
   ],
-  streaks: [{ weeks: 2, characters: 5 }],
-  stages: []
+  streaks: [{ weeks: 2, characters: 5 }]
 }
 
 test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산하지 않고, 첫 클리어 주는 컨텐츠마다 한 번 읽는다', async () => {
@@ -567,7 +564,6 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
       weekOverWeek: null,
       weekMoves: null,
       streaks: null,
-      stages: null,
       scoreBands: { equipment: [], buff: [] },
       weekdays: [],
       hours: []
@@ -884,8 +880,6 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
     readWeekGroups: counted(base.readWeekGroups),
     readWeekMoves: counted(base.readWeekMoves),
     readStreaks: counted(base.readStreaks),
-    readRaidModes: counted(base.readRaidModes),
-    readRaidStageCounts: counted(base.readRaidStageCounts),
     readContentJobScores: counted(base.readContentJobScores),
     readWeekGroupScores: counted(base.readWeekGroupScores),
     readScoreBands: counted(base.readScoreBands),
@@ -1377,8 +1371,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
 
         return [{ group: 'both', cleared: 7, characters: 7, quantiles: null, max: null }]
       },
-      readStreaks: async () => [{ weeks: 2, characters: 7 }],
-      readRaidModes: async () => assert.fail('레기온 기록에는 단계가 없어 단계 기록을 읽지 않는다')
+      readStreaks: async () => [{ weeks: 2, characters: 7 }]
     })
   )
   try {
@@ -1405,8 +1398,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
         cleared: detail.body.week.cleared,
         bothCleared: detail.body.weekOverWeek?.both.cleared,
         streaks: detail.body.streaks,
-        weekMoves: detail.body.weekMoves,
-        stages: detail.body.stages
+        weekMoves: detail.body.weekMoves
       },
       {
         kind: 'legion',
@@ -1417,79 +1409,10 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
         cleared: 7,
         bothCleared: 7,
         streaks: [{ weeks: 2, characters: 7 }],
-        weekMoves: null,
-        stages: null
+        weekMoves: null
       }
     )
     assert.equal(rejected.status, 400)
-  } finally {
-    await app.close()
-  }
-})
-
-test('단계별 클리어는 수집 판정과 같은 단계 라벨로 묶어 읽고 단계표 순서로 준다', async () => {
-  const stageArguments: Parameters<ClearStatsRepository['readRaidStageCounts']>[] = []
-  const { app, origin } = await listen(
-    fakeReader({
-      readRaidModes: async () => [
-        { modeName: '무너진 성자 미카엘라', hard: true },
-        { modeName: '미카엘라 : 균열서', hard: false },
-        { modeName: '무너진 성자 미카엘라', hard: false }
-      ],
-      readRaidStageCounts: async (selection, stages) => {
-        stageArguments.push([selection, stages])
-
-        return [
-          { stage: '하드', characters: 5 },
-          { stage: '일반', characters: 9 },
-          { stage: '싱글/매칭', characters: 4 }
-        ]
-      }
-    })
-  )
-  try {
-    const { body } = await getJson(origin, '/stats/clears/michaela-hard?week=2026-11-05')
-    const [[selection, stages]] = stageArguments
-
-    assert.equal(stageArguments.length, 1)
-    assert.deepEqual(selection, { raidName: '무너진 성자 미카엘라', weekStart: week('2026-11-05') })
-    assert.deepEqual(
-      stages.map(({ modeName, hard, stage }) => `${modeName}/${hard}/${stage}`).sort(),
-      [
-        '무너진 성자 미카엘라/false/일반',
-        '무너진 성자 미카엘라/true/하드',
-        '미카엘라 : 균열서/false/싱글/매칭'
-      ]
-    )
-    assert.deepEqual(body.stages, [
-      { stage: '싱글/매칭', characters: 4 },
-      { stage: '일반', characters: 9 },
-      { stage: '하드', characters: 5 }
-    ])
-  } finally {
-    await app.close()
-  }
-})
-
-test('레이드 기록이 없거나 단계 라벨이 없는 주의 단계별 클리어는 빈 배열이고, 챌린지는 null이다', async () => {
-  const unread = async (): Promise<never> =>
-    assert.fail('단계 라벨이 없으면 단계별 수를 읽지 않는다')
-  const { app, origin } = await listen(
-    fakeReader({
-      readPopulations: async () => [...populations, population('inae-twilight', '2026-11-05', 700)],
-      readRaidModes: async ({ raidName }) =>
-        raidName === '이내 황혼전' ? [{ modeName: null, hard: false }] : [],
-      readRaidStageCounts: unread
-    })
-  )
-  try {
-    const inae = await getJson(origin, '/stats/clears/inae-twilight')
-    const michaela = await getJson(origin, '/stats/clears/michaela-hard')
-    const challenge = await getJson(origin, '/stats/clears/engraved-nightmare-1')
-
-    assert.deepEqual(inae.body.stages, [])
-    assert.deepEqual(michaela.body.stages, [])
-    assert.equal(challenge.body.stages, null)
   } finally {
     await app.close()
   }

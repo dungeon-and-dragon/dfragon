@@ -263,6 +263,30 @@ test('점수 구간의 분모와 클리어 수를 같은 엔진 버전의 이력
   ])
 })
 
+test('클리어 뒤 지금 점수의 엔진 버전이 바뀐 캐릭터는 점수 구간의 분모와 클리어 수에서 함께 빠진다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await prepareDatabase(t, 'content_clear_score_band_engine')
+  const selection = { contentId: 'raid-a', kind: 'raid', weekStart }
+
+  for (const characterId of ['steady', 'rescored']) {
+    await recordCharacterBasic(client, basic(characterId, 66_000))
+    await recordCharacterScore(client, score(characterId, 1_160_000))
+  }
+  await recordContentClears(client, [
+    clear('raid-a', 'raid', 'steady', '2026-11-13T12:00:00Z'),
+    clear('raid-a', 'raid', 'rescored', '2026-11-13T12:00:00Z')
+  ])
+  await recordCharacterScore(
+    client,
+    score('rescored', 1_360_000, { engine: { ...engine, bundleId: 'phase33-rev15a' } })
+  )
+
+  assert.deepEqual(await readContentClearScoreBands(client, selection, 60_000), [
+    { kind: 'equipment', score: 1_150_000, population: 1, cleared: 1 }
+  ])
+})
+
 test('명성 구간과 점수 구간의 분모는 眞 각성 전 캐릭터를 빼고 센다', {
   skip: port === undefined
 }, async (t) => {

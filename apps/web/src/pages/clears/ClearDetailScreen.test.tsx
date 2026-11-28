@@ -179,7 +179,6 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
   const weekOverWeek = raid ? RAID_WEEK_OVER_WEEK : null
   const weekMoves = contentId.startsWith('michaela') ? MICHAELA_WEEK_MOVES : null
   const streaks = raid ? RAID_STREAKS : null
-  const stages = raid ? [] : null
   const weekdays = [4, 5, 6, 7, 1, 2, 3].map((weekday) => {
     const cleared = weekday === 6 ? 50 : 1
 
@@ -220,7 +219,6 @@ function statsOf(contentId: string, weekStart: string): ClearContentStats {
     weekOverWeek,
     weekMoves,
     streaks,
-    stages,
     scoreBands: { equipment: [], buff: [] },
     weekdays,
     hours: Array.from({ length: 24 }, (_, hour) => ({ hour, cleared: hour }))
@@ -653,11 +651,6 @@ function scoredStatsOf(contentId: string, weekStart: string): ClearContentStats 
     ...base,
     jobs: base.jobs.map((item) => ({ ...item, scores: { equipment, buff: null } })),
     weekOverWeek,
-    stages: [
-      { stage: '싱글/매칭', characters: 180 },
-      { stage: '일반', characters: 90 },
-      { stage: '하드', characters: 50 }
-    ],
     scoreBands: {
       equipment: [
         { score: 300000, population: 50, cleared: 10 },
@@ -674,7 +667,7 @@ function panelTicks(name: string): string[] {
   )
 }
 
-it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점수 구간별 클리어율, 단계별 클리어 캐릭터를 시안 자리에 둔다', async () => {
+it('점수가 있으면 그룹별 장비 점수와 장비 점수 구간별 클리어율을 시안 자리에 둔다', async () => {
   await open(
     { contentKey: 'michaela', week: LAST_CLOSED_WEEK },
     {
@@ -693,17 +686,8 @@ it('점수와 단계별 기록이 있으면 그룹별 장비 점수, 장비 점�
     '클리어 요일과 시간대',
     '배율별 클리어',
     '장비 점수 구간별 클리어율',
-    '단계별 클리어 캐릭터',
     '모험단 기준 클리어 횟수',
     '전직별 클리어'
-  ])
-  const stageRows = [...(panel('단계별 클리어 캐릭터')?.querySelectorAll('li') ?? [])].map((row) =>
-    [...row.children].map((cell) => cell.textContent)
-  )
-  expect(stageRows).toEqual([
-    ['싱글/매칭', '', '180'],
-    ['일반', '', '90'],
-    ['하드', '', '50']
   ])
 })
 
@@ -786,12 +770,11 @@ it('전직 표는 전직 점수가 있으면 명성, 장비 점수 전환을 두
   expect(head?.textContent).toContain('30만')
 })
 
-it('점수와 단계별 기록이 없으면 점수 카드, 단계별 카드와 전직 표의 전환을 두지 않는다', async () => {
+it('점수가 없으면 점수 카드와 전직 표의 전환을 두지 않는다', async () => {
   await open({ contentKey: 'michaela' })
 
   expect(panelNames()).not.toContain('클리어 캐릭터의 장비 점수')
   expect(panelNames()).not.toContain('장비 점수 구간별 클리어율')
-  expect(panelNames()).not.toContain('단계별 클리어 캐릭터')
   expect(panel('전직별 클리어')?.querySelector('[aria-label="분포"]')).toBeNull()
 })
 

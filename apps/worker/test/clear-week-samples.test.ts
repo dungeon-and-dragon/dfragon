@@ -29,8 +29,6 @@ const emptySampleRepository: ClearSampleRepository &
   readWeekGroups: async () => [],
   readWeekMoves: async () => [],
   readStreaks: async () => [],
-  readRaidModes: async () => [],
-  readRaidStageCounts: async () => [],
   readContentJobScores: async () => [],
   readWeekGroupScores: async () => [],
   readScoreBands: async () => [],
