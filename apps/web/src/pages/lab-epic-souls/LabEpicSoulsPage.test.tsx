@@ -135,11 +135,20 @@ it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 �
 
   const rows = characterRows()
   expect(rowText(rows[0]!)[4]).toBe(String(recoveries[0]!.total))
-  expect(rowText(rows[3]!)[4]).toBe('-')
-  expect(rowText(rows[5]!)[4]).toBe('0')
-  expect(rows[5]!.querySelector('button')).toBeNull()
+  expect(rowText(rows[4]!)[4]).toBe('0')
+  expect(rows[4]!.querySelector('button')).toBeNull()
+  expect(rowText(rows[5]!)[4]).toBe('-')
   // 계산하지 못한 넷째 캐릭터를 빼고 226 + 21 + 67 + 11 + 0이다.
   expect(totalText()).toBe('325')
+})
+
+it('에픽 소울이 많은 캐릭터부터 위에 두고, 계산하지 못한 캐릭터는 맨 아래에 둔다', async () => {
+  server.use(epicSoulsHandlers.characters, epicSoulsHandlers.recoveries)
+  await render()
+  await search()
+  await waitForRecoveries()
+
+  expect(characterRows().map((row) => rowText(row)[4])).toEqual(['226', '67', '21', '11', '0', '-'])
 })
 
 it('줄을 펼치면 에픽 부위마다 착용 장비와 조율, 에픽 소울을 보이고 무기는 계열 이름으로 부른다', async () => {

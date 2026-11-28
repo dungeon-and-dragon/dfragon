@@ -41,6 +41,14 @@ export function EpicSoulTable({
     return sum + result.souls.total
   }, 0)
 
+  const rows = characters
+    .map((character, index) => {
+      const result = results[index] ?? ({ status: 'loading' } as const)
+
+      return { character, result }
+    })
+    .toSorted((a, b) => soulCount(b.result) - soulCount(a.result))
+
   return (
     <div className="table-scroll">
       <table className="table table-fixed table-wide max-sm:min-w-0">
@@ -73,12 +81,12 @@ export function EpicSoulTable({
           </tr>
         </thead>
         <tbody>
-          {characters.map((character, index) => (
+          {rows.map(({ character, result }) => (
             <CharacterRows
               key={`${character.serverId}/${character.characterId}`}
               character={character}
               catalog={catalog}
-              result={results[index] ?? { status: 'loading' }}
+              result={result}
             />
           ))}
         </tbody>
@@ -95,6 +103,15 @@ export function EpicSoulTable({
       </table>
     </div>
   )
+}
+
+// 받지 못했거나 계산하지 못한 줄은 0개인 줄보다 아래에 둔다.
+function soulCount(result: EpicSoulRecoveryResult): number {
+  if (result.status !== 'success') {
+    return -1
+  }
+
+  return result.souls.total
 }
 
 function CharacterRows({
