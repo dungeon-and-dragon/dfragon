@@ -3,6 +3,7 @@ import { BoxPlotChart } from './BoxPlot'
 import { Columns } from './Columns'
 import { LineChart } from './LineChart'
 import { RowBars } from './RowBars'
+import { Sankey } from './Sankey'
 import { SplitBar } from './SplitBar'
 
 const meta = {
@@ -185,5 +186,54 @@ export const 상자그림: Story = {
         })}
       />
     </div>
+  )
+}
+
+const STAGE_COLOR = 'var(--color-chart-base)'
+const MOVE_COLOR = 'var(--color-chart-7)'
+const RETURNED_COLOR = 'var(--color-chart-3)'
+const FIRST_COLOR = 'var(--color-chart-1)'
+const LEFT_COLOR = 'var(--color-chart-8)'
+
+const moveFlow = (from: string, to: string, name: string, value: number, color: string) => ({
+  key: `${from}-${to}`,
+  name,
+  from,
+  to,
+  value,
+  color
+})
+
+export const 생키: Story = {
+  render: () => (
+    <Sankey
+      label="지난주 대비 이동"
+      sourceTitle="15주차"
+      targetTitle="16주차"
+      formatValue={formatCount}
+      sources={[
+        { key: 'hard', name: '하드', color: STAGE_COLOR },
+        { key: 'normal', name: '일반', color: STAGE_COLOR, faded: true },
+        { key: 'returned', name: '복귀', color: RETURNED_COLOR },
+        { key: 'first', name: '신규', color: FIRST_COLOR }
+      ]}
+      targets={[
+        { key: 'hard', name: '하드', color: STAGE_COLOR },
+        { key: 'normal', name: '일반', color: STAGE_COLOR, faded: true },
+        { key: 'left', name: '이탈', color: LEFT_COLOR }
+      ]}
+      flows={[
+        moveFlow('hard', 'hard', '하드 → 하드', 43_696, STAGE_COLOR),
+        moveFlow('hard', 'normal', '하드 → 일반', 3_708, MOVE_COLOR),
+        moveFlow('hard', 'left', '하드 → 이탈', 7_272, LEFT_COLOR),
+        moveFlow('normal', 'hard', '일반 → 하드', 3_627, MOVE_COLOR),
+        moveFlow('normal', 'normal', '일반 → 일반', 68_087, STAGE_COLOR),
+        moveFlow('normal', 'left', '일반 → 이탈', 22_657, LEFT_COLOR),
+        moveFlow('returned', 'hard', '복귀 → 하드', 2_900, RETURNED_COLOR),
+        moveFlow('returned', 'normal', '복귀 → 일반', 13_400, RETURNED_COLOR),
+        moveFlow('first', 'hard', '신규 → 하드', 1_807, FIRST_COLOR),
+        moveFlow('first', 'normal', '신규 → 일반', 2_946, FIRST_COLOR)
+      ]}
+    />
   )
 }
