@@ -11,7 +11,7 @@ export const LAB_CURRENCY_ICON_PATH = '/lab/currencies/1/icon?v=1764135000000'
 export const LAB_ITEM_ICON_PATH = `/lab/item-icon?${new URLSearchParams({ itemName: '합성 무기 보주', v: '1764135000000' })}`
 
 // 카드 이름은 지금은 지운 마법부여 등급표에 있던 이름, 칭호, 크리쳐, 오라 이름은 부위별 아이템 id 파일에 있는 이름이고, 칭호, 크리쳐, 오라의 itemId와 레어리티는 그 파일 그대로다.
-// 카드의 itemId는 그 파일에 없어 바칼 카드만 Neople 응답에서 받은 itemId를 쓰고 나머지는 null로 두며, 가격과 명성은 합성 값이다. 보주와 재화의 이름, 설명, 보주의 tooltip 값은 지어낸 값이다.
+// 카드의 itemId는 그 파일에 없어 바칼 카드만 Neople 응답에서 받은 itemId를 쓰고 나머지는 null로 두며, 가격, 명성, performanceKey는 합성 값이다. 보주, 합성 무기 카드와 재화의 이름, 설명, 보주의 tooltip 값은 지어낸 값이다.
 export const labItemsFixture = {
   items: {
     groups: [
@@ -29,7 +29,20 @@ export const labItemsFixture = {
             description: null,
             unitPrice: 1_480_000_000,
             checkedAt: CHECKED_AT,
-            cost: null
+            cost: null,
+            performanceKey: 'synthetic-bakal'
+          },
+          {
+            itemName: '합성 무기 카드',
+            fame: 210,
+            itemId: null,
+            itemRarity: '레전더리',
+            iconPath: null,
+            description: null,
+            unitPrice: 1_520_000_000,
+            checkedAt: CHECKED_AT,
+            cost: null,
+            performanceKey: 'synthetic-bakal'
           }
         ]
       },

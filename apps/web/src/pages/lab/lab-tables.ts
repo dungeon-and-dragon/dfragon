@@ -4,12 +4,68 @@ import type { LabItem, LabItemGroup } from './api/useLabItems'
 
 export type { EnchantRole }
 
-export type LabTierRows = Readonly<{ tier: LabItemGroup['tier']; items: readonly LabItem[] }>
+export type LabItemRow = Readonly<{ item: LabItem; others: readonly LabItem[] }>
+
+export type LabTierRows = Readonly<{ tier: LabItemGroup['tier']; items: readonly LabItemRow[] }>
 
 export type LabCategoryRows = Readonly<{
   category: LabItemCategory
   tiers: readonly LabTierRows[]
 }>
+
+// 같은 성능 아이템은 구매 방법도 같아 경매장 최저가끼리, 또는 같은 재화의 개수끼리 비교한다.
+function priceOf({ cost, unitPrice }: LabItem): number | null {
+  if (cost !== null) {
+    return cost.count
+  }
+
+  return unitPrice
+}
+
+function isCheaper(item: LabItem, than: LabItem): boolean {
+  const price = priceOf(item)
+  const current = priceOf(than)
+
+  return price !== null && (current === null || price < current)
+}
+
+function itemRowOf(sameItems: readonly LabItem[]): LabItemRow {
+  const item = sameItems.reduce((cheapest, candidate) => {
+    if (isCheaper(candidate, cheapest)) {
+      return candidate
+    }
+
+    return cheapest
+  })
+
+  const others = sameItems.filter((candidate) => candidate !== item)
+
+  return { item, others }
+}
+
+function itemRowsOf(items: readonly LabItem[]): LabItemRow[] {
+  const sameItemsByKey = new Map<string, LabItem[]>()
+  const rows: LabItem[][] = []
+
+  for (const item of items) {
+    const key = item.performanceKey
+    const sameItems = key !== null ? sameItemsByKey.get(key) : undefined
+
+    if (sameItems !== undefined) {
+      sameItems.push(item)
+      continue
+    }
+
+    const row = [item]
+    rows.push(row)
+
+    if (key !== null) {
+      sameItemsByKey.set(key, row)
+    }
+  }
+
+  return rows.map(itemRowOf)
+}
 
 // 응답이 묶음을 부위, 등급 순으로 주므로 순서는 그대로 두고, 같은 부위의 이어진 묶음만 한 칸으로 모은다.
 function categoryRowsOf(groups: readonly LabItemGroup[]): LabCategoryRows[] {
@@ -21,11 +77,13 @@ function categoryRowsOf(groups: readonly LabItemGroup[]): LabCategoryRows[] {
     }
 
     const last = rows.at(-1)
+    const itemRows = itemRowsOf(items)
+    const tierRows = { tier, items: itemRows }
 
     if (last?.category === category) {
-      last.tiers.push({ tier, items })
+      last.tiers.push(tierRows)
     } else {
-      rows.push({ category, tiers: [{ tier, items }] })
+      rows.push({ category, tiers: [tierRows] })
     }
   }
 
