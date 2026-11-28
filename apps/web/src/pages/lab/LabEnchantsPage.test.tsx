@@ -760,3 +760,162 @@ it('API가 배럭 묶음을 주면 등급 열에 배럭으로 보인다', async 
     ['배럭', '합성 배럭 카드', '-', '100']
   ])
 })
+
+type SamePerformanceItem = LabItemsResponse['groups'][number]['items'][number]
+
+function samePerformanceItem(
+  itemName: string,
+  performanceKey: string | null,
+  unitPrice: number | null,
+  extra: Partial<SamePerformanceItem> = {}
+): SamePerformanceItem {
+  return {
+    itemName,
+    itemId: null,
+    itemRarity: null,
+    iconPath: null,
+    description: null,
+    unitPrice,
+    checkedAt: null,
+    cost: null,
+    performanceKey,
+    ...extra
+  }
+}
+
+function samePerformanceLines(): string[] {
+  return [...document.querySelectorAll('.tooltip-item > ul:last-child > li')].map(
+    (line) => line.textContent ?? ''
+  )
+}
+
+it('같은 묶음의 performanceKey가 같은 카드는 가장 싼 카드 한 줄로 보이고, 그 tooltip 아래에 나머지 카드를 응답 순서대로 이름 | 가격으로 보인다', async () => {
+  server.use(
+    itemDetailHandlers.detail,
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '종결',
+            items: [
+              samePerformanceItem('합성 카드 C', 'same', null),
+              samePerformanceItem('합성 카드 A', 'same', 300),
+              samePerformanceItem('합성 카드 B', 'same', 100, { itemId: 'synthetic-card' }),
+              samePerformanceItem('합성 카드 D', null, 50),
+              samePerformanceItem('합성 카드 E', null, 60)
+            ]
+          },
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '준종결',
+            items: [samePerformanceItem('합성 카드 F', 'same', 10)]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  expect(cellTexts(enchantTable())).toEqual([
+    ['무기', '종결', '합성 카드 B', '-', '100'],
+    ['합성 카드 D', '-', '50'],
+    ['합성 카드 E', '-', '60'],
+    ['준종결', '합성 카드 F', '-', '10']
+  ])
+
+  await hover(nameOf(enchantTable(), '합성 카드 B').parentElement!)
+
+  await vi.waitFor(() => expect(document.body.textContent).toContain('레벨제한 115'))
+  expect(samePerformanceLines()).toEqual(['합성 카드 C | -', '합성 카드 A | 300'])
+
+  await leave(nameOf(enchantTable(), '합성 카드 B').parentElement!)
+  await vi.waitFor(() => expect(openTooltips()).toEqual([]))
+  await hover(nameOf(enchantTable(), '합성 카드 D').parentElement!)
+  await hover(nameOf(enchantTable(), '합성 카드 F').parentElement!)
+
+  expect(openTooltips()).toEqual([])
+})
+
+it('같은 성능 재화 아이템은 재화 개수가 가장 작은 아이템 한 줄로 보이고, 운영 화면에서 넣은 상세 아래의 나머지 가격은 표처럼 개수와 재화 아이콘이다', async () => {
+  const cost = (count: number) => ({
+    currencyName: '합성 주화',
+    description: null,
+    count,
+    iconPath: LAB_CURRENCY_ICON_PATH
+  })
+  const tooltip = { typeDetail: '합성 재료', availableLevel: 115, fame: null, card: null }
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'WEAPON',
+            role: 'dealer',
+            tier: '준종결',
+            items: [
+              samePerformanceItem('합성 보주 A', 'same', null, { cost: cost(5), tooltip }),
+              samePerformanceItem('합성 보주 B', 'same', null, { cost: cost(2), tooltip })
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(container.querySelector('table')).not.toBeNull())
+
+  expect(cellTexts(enchantTable())).toEqual([['무기', '준종결', '합성 보주 B', '-', '2']])
+
+  await hover(nameOf(enchantTable(), '합성 보주 B').parentElement!)
+
+  expect(document.body.textContent).toContain('레벨제한 115')
+  expect(samePerformanceLines()).toEqual(['합성 보주 A | 5'])
+
+  const line = document.querySelector('.tooltip-item > ul:last-child > li')!
+  expect(line.querySelector('img')?.getAttribute('alt')).toBe('합성 주화')
+})
+
+it('플래티넘 표는 같은 성능 칭호를 플래티넘 최저가가 가장 싼 칭호 한 줄로 보이고, tooltip 아래 나머지 가격도 플래티넘 최저가다', async () => {
+  const platinum = (unitPrice: number) => ({
+    itemId: null,
+    itemRarity: null,
+    unitPrice,
+    checkedAt: null
+  })
+  server.use(
+    http.get(LAB_ITEMS_URL, () =>
+      HttpResponse.json({
+        groups: [
+          {
+            category: 'TITLE',
+            role: 'all',
+            tier: '종결',
+            items: [
+              samePerformanceItem('합성 칭호 X', 'same', 100, { platinum: platinum(500) }),
+              samePerformanceItem('합성 칭호 Y', 'same', 300, { platinum: platinum(200) })
+            ]
+          }
+        ]
+      } satisfies LabItemsResponse)
+    )
+  )
+  await render()
+  await vi.waitFor(() => expect(platinumTable()).not.toBeNull())
+
+  expect(cellTexts(accessoryTable())).toEqual([['칭호', '종결', '합성 칭호 X', '-', '100']])
+  expect(cellTexts(platinumTable()!)).toEqual([['칭호', '종결', '합성 칭호 Y', '-', '200']])
+
+  await hover(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
+
+  expect(samePerformanceLines()).toEqual(['합성 칭호 Y | 300'])
+
+  await leave(nameOf(accessoryTable(), '합성 칭호 X').parentElement!)
+  await vi.waitFor(() => expect(openTooltips()).toEqual([]))
+  await hover(nameOf(platinumTable()!, '합성 칭호 Y').parentElement!)
+
+  expect(samePerformanceLines()).toEqual(['합성 칭호 X | 500'])
+})
