@@ -90,6 +90,31 @@ describe('BarLineChart', () => {
     expect(pieceCount()).toBe(6)
   })
 
+  it('합으로 정렬하면 켜 둔 계열의 합이 큰 칸부터 두고 범례로 끄면 다시 정렬한다', async () => {
+    const named = weeks.map((week) => ({ ...week, tick: week.title }))
+    await render(
+      <BarLineChart
+        label="주차별 클리어"
+        x={named}
+        bars={bars}
+        layout="stack"
+        formats={formats}
+        toggleable
+        sortByTotal
+      />
+    )
+
+    const ticks = () =>
+      [...container.querySelectorAll('svg text[text-anchor="middle"]')].map(
+        (tick) => tick.textContent
+      )
+    expect(ticks()).toEqual(['4주차', '3주차', '2주차', '1주차'])
+
+    const [again] = [...container.querySelectorAll<HTMLButtonElement>('ul li button')]
+    await act(async () => again!.click())
+    expect(ticks()).toEqual(['1주차', '4주차', '2주차', '3주차'])
+  })
+
   it('범례를 켤 수 없으면 범례에 버튼을 두지 않는다', async () => {
     await render(
       <BarLineChart label="주차별 클리어" x={weeks} bars={bars} layout="stack" formats={formats} />
