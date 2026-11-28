@@ -300,9 +300,9 @@ export function weekGroupRows(
 }
 
 const SCORE_TICK_COUNT = 5
-// 캐릭터가 이만큼 처음 몰리는 구간 아래는 그 컨텐츠를 볼 만한 점수가 아니라서 막대 하나로 접는다.
-// 높은 점수 쪽은 사람이 적어도 구간마다 따로 그린다.
-const DENSE_BAND_POPULATION_SHARE = 0.05
+// 분모가 이 비율보다 적은 구간은 클리어율이 그 점수의 클리어 가능성을 말해 주지 못해, 다음 구간과 이 비율을 넘을 때까지 묶는다.
+// 끝에 남은 구간도 이 비율에 못 미치면 바로 앞 막대에 묶는다.
+const MIN_BAND_POPULATION_SHARE = 0.03
 
 interface ScoreBandColumn {
   band: ClearScoreBand
@@ -317,29 +317,45 @@ function joinBands(lower: ClearScoreBand, upper: ClearScoreBand): ClearScoreBand
   return { score: lower.score, population, cleared }
 }
 
-function openBandColumn(band: ClearScoreBand): ScoreBandColumn {
-  const label = formatScoreTick(band.score)
-  const range = `${integer.format(band.score)}~`
+function groupBands(bands: readonly ClearScoreBand[]): ClearScoreBand[] {
+  const total = bands.reduce((sum, { population }) => sum + population, 0)
+  const minPopulation = total * MIN_BAND_POPULATION_SHARE
+  const groups: ClearScoreBand[] = []
+  let pending: ClearScoreBand | undefined
 
-  return { band, label, range }
+  for (const band of bands) {
+    pending = pending !== undefined ? joinBands(pending, band) : band
+
+    if (pending.population >= minPopulation) {
+      groups.push(pending)
+      pending = undefined
+    }
+  }
+
+  if (pending === undefined) {
+    return groups
+  }
+
+  const last = groups.at(-1)
+
+  if (last === undefined) {
+    return [pending]
+  }
+
+  return [...groups.slice(0, -1), joinBands(last, pending)]
 }
 
 function scoreBandColumnsOf(bands: readonly ClearScoreBand[]): ScoreBandColumn[] {
-  const total = bands.reduce((sum, { population }) => sum + population, 0)
-  const denseStart = bands.findIndex(
-    ({ population }) => population >= total * DENSE_BAND_POPULATION_SHARE
-  )
-  const dense = bands[denseStart]
+  const groups = groupBands(bands)
 
-  if (denseStart < 2 || dense === undefined) {
-    return bands.map(openBandColumn)
-  }
+  return groups.map((band, index) => {
+    const label = formatScoreTick(band.score)
+    const next = groups[index + 1]
+    const end = next !== undefined ? integer.format(next.score) : ''
+    const range = `${integer.format(band.score)}~${end}`
 
-  const folded = bands.slice(0, denseStart).reduce(joinBands)
-  const label = `~${formatScoreTick(dense.score)}`
-  const range = `~${integer.format(dense.score)}`
-
-  return [{ band: folded, label, range }, ...bands.slice(denseStart).map(openBandColumn)]
+    return { band, label, range }
+  })
 }
 
 // 막대 높이는 그 구간 캐릭터 가운데 클리어한 비율이고, 가장 높은 구간을 기준으로 맞춘다.
