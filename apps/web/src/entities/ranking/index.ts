@@ -7,8 +7,11 @@ export {
   catalogOptionNamesOf,
   equipmentSetShortName,
   NO_SET_NAME,
+  OATH_OPTION_POSITIONS,
   oathOptionShortName,
-  oathSetShortName
+  oathSetShortName,
+  sameFamilyOathShortName,
+  SET_FAMILY_EQUIPMENT_SET_IDS
 } from './lib/set-names'
 export { fameBars, isAwakenedJob, jobFameChart, shareText } from './lib/stats-bars'
 export type { FameBar, JobFameChart } from './lib/stats-bars'

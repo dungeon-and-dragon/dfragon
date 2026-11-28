@@ -3,18 +3,17 @@ import type { Bar } from '#shared/ui/chart/RowBars'
 import type { OathCatalog } from '#entities/catalog'
 import type { RankingSearch } from '#widgets/ranking-filter'
 import {
-  catalogOptionNamesOf,
   equipmentSetShortName,
-  NO_SET_NAME,
-  oathOptionShortName,
+  OATH_OPTION_POSITIONS,
   oathSetShortName,
-  type OathSetCount,
+  sameFamilyOathShortName,
+  SET_FAMILY_EQUIPMENT_SET_IDS,
   type SetStats,
   type SetStatsFilter
 } from '#entities/ranking'
 
-const NO_OPTION_NAME = '선택지 없음'
 const COMBO_LIMIT = 10
+const OATH_OPTION_NAME_SEPARATOR = ' : '
 export const FULL_SHARE = 100
 
 const percent = new Intl.NumberFormat('ko-KR', {
@@ -51,122 +50,85 @@ export function byCountWithBaseLast(a: Bar, b: Bar): number {
   return -1
 }
 
-export function equipmentSetBars(stats: SetStats, filter: SetStatsFilter): Bar[] {
-  return stats.equipmentSets
-    .map(({ setId, name, count }): Bar => {
-      const value = shareOf(count, stats.sampleSize)
-      if (setId === null) {
-        return { key: NO_SET_NAME, name: NO_SET_NAME, value, base: true }
-      }
+export type OathOptionShare = Readonly<{ position: string; name: string; share: number }>
 
-      const shortName = equipmentSetShortName(setId, name)
-      const link = rankingLink(filter, { equipmentSetId: setId })
+export type SetColumn = Readonly<{
+  key: string
+  name: string
+  value: number
+  link?: Bar['link']
+  options: readonly OathOptionShare[]
+}>
 
-      return { key: setId, name: shortName, value, link }
-    })
-    .toSorted(byCountWithBaseLast)
-}
+function optionSharesOf(stats: SetStats, oathSet: OathCatalog['sets'][number]): OathOptionShare[] {
+  const counted = stats.oathSets.find(({ setId }) => setId === oathSet.setId)
+  const countOf = new Map(counted?.options.map((option) => [option.name, option.count]))
 
-function optionBars(
-  { setId, name, count, options }: OathSetCount & { setId: number },
-  catalog: OathCatalog | null,
-  filter: SetStatsFilter
-): Bar[] {
-  const catalogNames = catalogOptionNamesOf(catalog, setId)
-  const countOf = new Map(options.map((option) => [option.name, option.count]))
-  const unknownNames = options.flatMap((option) => {
-    if (option.name === null || catalogNames.includes(option.name)) {
+  return oathSet.options.flatMap(({ name }, index) => {
+    const position = OATH_OPTION_POSITIONS[index]
+    if (position === undefined) {
       return []
     }
 
-    return [option.name]
+    const share = shareOf(countOf.get(name) ?? 0, counted?.count ?? 0)
+    const shortName = name.split(OATH_OPTION_NAME_SEPARATOR).at(-1) ?? name
+
+    return [{ position, name: shortName, share }]
   })
-  const named = [...catalogNames, ...unknownNames].map((optionName) => {
-    const shortName = oathOptionShortName(name, optionName, catalogNames)
-    const value = shareOf(countOf.get(optionName) ?? 0, count)
-    const link = rankingLink(filter, { oathSetId: setId, oathSetOption: optionName })
-
-    return { key: `${setId}/${optionName}`, name: shortName, value, link }
-  })
-  const unnamedCount = countOf.get(null)
-  if (unnamedCount === undefined) {
-    return named
-  }
-
-  const unnamedValue = shareOf(unnamedCount, count)
-
-  return [...named, { key: `${setId}/`, name: NO_OPTION_NAME, value: unnamedValue, base: true }]
 }
 
-export function oathSetBars(
+function sameFamilyOathOf(
+  catalog: OathCatalog | null,
+  equipmentShortName: string
+): OathCatalog['sets'][number] | undefined {
+  const oathShortName = sameFamilyOathShortName(equipmentShortName)
+
+  return catalog?.sets.find(({ name }) => oathSetShortName(name) === oathShortName)
+}
+
+// 같은 계열 서약이 있는 장비 세트만, 아무도 끼지 않았어도 0%로 모두 보인다.
+export function equipmentSetColumns(
   stats: SetStats,
   catalog: OathCatalog | null,
   filter: SetStatsFilter
-): Bar[] {
-  return stats.oathSets
-    .map((oathSet): Bar => {
-      const { setId, name, count } = oathSet
-      const value = shareOf(count, stats.sampleSize)
-      if (setId === null) {
-        return { key: NO_SET_NAME, name: NO_SET_NAME, value, base: true }
-      }
+): SetColumn[] {
+  return SET_FAMILY_EQUIPMENT_SET_IDS.map((setId): SetColumn => {
+    const counted = stats.equipmentSets.find((set) => set.setId === setId)
+    const value = shareOf(counted?.count ?? 0, stats.sampleSize)
+    const shortName = equipmentSetShortName(setId, null)
+    const link = rankingLink(filter, { equipmentSetId: setId })
+    const oathSet = sameFamilyOathOf(catalog, shortName)
+    const options = oathSet !== undefined ? optionSharesOf(stats, oathSet) : []
 
-      const key = String(setId)
-      const shortName = oathSetShortName(name)
-      const link = rankingLink(filter, { oathSetId: setId })
-      const detailBars = optionBars({ ...oathSet, setId }, catalog, filter)
-
-      return {
-        key,
-        name: shortName,
-        value,
-        link,
-        details: { bars: detailBars, max: FULL_SHARE }
-      }
-    })
-    .toSorted(byCountWithBaseLast)
+    return { key: setId, name: shortName, value, link, options }
+  }).toSorted((a, b) => b.value - a.value)
 }
 
 // 조합의 서약 세트가 서약 세트 목록에 없으면 이름을 알 수 없어 번호를 그대로 보인다.
-function unlistedOathSetName(oathSetId: number | null): string {
-  if (oathSetId === null) {
-    return NO_SET_NAME
-  }
-
-  return String(oathSetId)
-}
-
 export function comboBars(stats: SetStats, filter: SetStatsFilter): Bar[] {
-  const equipmentNames = new Map(
-    stats.equipmentSets.map(({ setId, name }) => [setId, equipmentSetShortName(setId, name)])
-  )
   const oathNames = new Map(
     stats.oathSets.map(({ setId, name }) => [setId, oathSetShortName(name)])
   )
-  const bars = stats.combos.map(({ equipmentSetId, oathSetId, count }): Bar => {
-    const equipmentName =
-      equipmentNames.get(equipmentSetId) ?? equipmentSetShortName(equipmentSetId, null)
-    const oathName = oathNames.get(oathSetId) ?? unlistedOathSetName(oathSetId)
-    const value = shareOf(count, stats.sampleSize)
-    const key = `${equipmentSetId ?? ''}/${oathSetId ?? ''}`
-    if (equipmentSetId === null && oathSetId === null) {
-      return { key, name: NO_SET_NAME, value, base: true }
-    }
 
-    const name = `${equipmentName} + ${oathName}`
-    // 랭킹은 세트 없음으로 거르지 못하므로 한쪽이 없는 조합은 랭킹으로 잇지 않는다.
-    if (equipmentSetId === null || oathSetId === null) {
-      return { key, name, value }
-    }
+  return stats.combos
+    .flatMap(({ equipmentSetId, oathSetId, count }): Bar[] => {
+      if (
+        equipmentSetId === null ||
+        oathSetId === null ||
+        !SET_FAMILY_EQUIPMENT_SET_IDS.includes(equipmentSetId)
+      ) {
+        return []
+      }
 
-    const link = rankingLink(filter, { equipmentSetId, oathSetId })
+      const equipmentName = equipmentSetShortName(equipmentSetId, null)
+      const oathName = oathNames.get(oathSetId) ?? String(oathSetId)
+      const value = shareOf(count, stats.sampleSize)
+      const link = rankingLink(filter, { equipmentSetId, oathSetId })
+      const key = `${equipmentSetId}/${oathSetId}`
+      const name = `${equipmentName} + ${oathName}`
 
-    return { key, name, value, link }
-  })
-  const sorted = bars.toSorted(byCountWithBaseLast)
-
-  return [
-    ...sorted.filter(({ base }) => base !== true).slice(0, COMBO_LIMIT),
-    ...sorted.filter(({ base }) => base === true)
-  ]
+      return [{ key, name, value, link }]
+    })
+    .toSorted((a, b) => b.value - a.value)
+    .slice(0, COMBO_LIMIT)
 }
