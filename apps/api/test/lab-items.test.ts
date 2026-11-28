@@ -424,38 +424,27 @@ test('칭호는 후보 옵션, 버프 줄, 명성이 같으면 같은 performanc
   assert.equal(keys.get('합성 칭호 소유자 B'), keys.get('합성 칭호 소유자 A'))
 })
 
-test('크리쳐는 레벨 꼬리표 판에만 붙는 무게 한도와 최종 데미지 1.5% 줄을 빼고 비교하고, 칭호는 그 줄도 비교한다', async (t) => {
+test('크리쳐는 칭호처럼 옵션 줄로 가르고, 이름의 플래티넘 꼬리표는 보지 않는다', async (t) => {
   const strength = { name: '힘', value: '100' }
-  const levelFormLines = [
+  const platinumGradeLines = [
     { name: '인벤토리 무게 한도', value: '5000g' },
     { name: '최종 데미지 증가', value: '1.5%' }
   ]
-  const candidateOf = (options: { name: string; value: string }[]) => ({
-    ...EMPTY_CANDIDATE,
-    fame: 1261,
-    options
+  const creature = (itemName: string, options: { name: string; value: string }[]) => ({
+    ...row('CREATURE', 'all', '종결', itemName, 1_000),
+    candidate: { ...EMPTY_CANDIDATE, fame: 1261, options }
   })
   const keys = await performanceKeys(t, [
-    { ...row('CREATURE', 'all', '종결', '합성 크리쳐', 1_000), candidate: candidateOf([strength]) },
-    {
-      ...row('CREATURE', 'all', '종결', '합성 크리쳐 알', 2_000),
-      candidate: candidateOf([strength, ...levelFormLines])
-    },
-    {
-      ...row('CREATURE', 'all', '종결', '합성 크리쳐 최종 데미지 다름', 3_000),
-      candidate: candidateOf([strength, { name: '최종 데미지 증가', value: '3%' }])
-    },
-    { ...row('TITLE', 'all', '종결', '합성 칭호', 1_000), candidate: candidateOf([strength]) },
-    {
-      ...row('TITLE', 'all', '종결', '합성 칭호 레벨', 2_000),
-      candidate: candidateOf([strength, ...levelFormLines])
-    }
+    creature('합성 크리쳐 알', [strength]),
+    creature('합성 다른 크리쳐 알', [strength]),
+    creature('합성 크리쳐 플래티넘 알', [strength, ...platinumGradeLines]),
+    creature('합성 꼬리표 없는 크리쳐 알', [strength, ...platinumGradeLines])
   ])
 
-  assert.equal(typeof keys.get('합성 크리쳐'), 'string')
-  assert.equal(keys.get('합성 크리쳐 알'), keys.get('합성 크리쳐'))
-  assert.notEqual(keys.get('합성 크리쳐 최종 데미지 다름'), keys.get('합성 크리쳐'))
-  assert.notEqual(keys.get('합성 칭호 레벨'), keys.get('합성 칭호'))
+  assert.equal(typeof keys.get('합성 크리쳐 알'), 'string')
+  assert.equal(keys.get('합성 다른 크리쳐 알'), keys.get('합성 크리쳐 알'))
+  assert.notEqual(keys.get('합성 크리쳐 플래티넘 알'), keys.get('합성 크리쳐 알'))
+  assert.equal(keys.get('합성 꼬리표 없는 크리쳐 알'), keys.get('합성 크리쳐 플래티넘 알'))
 })
 
 test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름, 설명, 개수와 바꾼 시각이 든 아이콘 경로를 낸다', async (t) => {
