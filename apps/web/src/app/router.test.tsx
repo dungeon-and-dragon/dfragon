@@ -1816,10 +1816,6 @@ function serveSetStats(): void {
   )
 }
 
-function setStatsRequests(): string[] {
-  return requestedPaths('/stats/sets').map(({ search }) => search)
-}
-
 function rankingRequests(): URL[] {
   return requestedPaths('/rankings/fame')
 }
@@ -1832,37 +1828,7 @@ function serveJobStats(): void {
   )
 }
 
-function statsTab(label: string): HTMLAnchorElement | undefined {
-  return [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')].find(
-    (link) => link.textContent === label
-  )
-}
-
-it('세트 탭에서 직업, 전직, 표본을 고른 뒤 직업 탭으로 가면 같은 필터를 주소에 두고 세트 탭으로 돌아올 때도 그대로 둔다', async () => {
-  serveJobStats()
-  const [job] = RANKING_JOBS
-  const [grow] = job!.grows
-  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}&sample=top`
-  window.history.replaceState(null, '', `/stats/sets${search}`)
-  await act(async () => root.render(<WebApp host={host} />))
-
-  await vi.waitFor(() => expect(statsTab('직업')).toBeDefined())
-  await act(async () => statsTab('직업')!.click())
-  await waitForPath('/stats/jobs')
-  expect(window.location.search).toBe(search)
-  await vi.waitFor(() =>
-    expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([
-      `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
-    ])
-  )
-
-  await act(async () => statsTab('세트')!.click())
-  await waitForPath('/stats/sets')
-  expect(window.location.search).toBe(search)
-  expect(statsTab('명성')!.getAttribute('href')).toBe('/stats')
-})
-
-it.each(['/stats/weapons', '/stats/combos', '/stats/skills'])(
+it.each(['/stats/sets', '/stats/weapons', '/stats/combos', '/stats/skills'])(
   '옛 주소 %s를 직업, 전직과 함께 열면 같은 query의 직업 통계로 옮긴다',
   async (path) => {
     serveJobStats()
@@ -1882,47 +1848,7 @@ it.each(['/stats/weapons', '/stats/combos', '/stats/skills'])(
   }
 )
 
-it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
-  serveSetStats()
-  const [job] = RANKING_JOBS
-  const [firstGrow, secondGrow] = job!.grows
-  window.history.replaceState(
-    null,
-    '',
-    `/stats/sets?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}`
-  )
-  await act(async () => root.render(<WebApp host={host} />))
-
-  await vi.waitFor(() =>
-    expect(setStatsRequests()).toEqual([
-      `?jobId=${job!.jobId}&jobGrowId=${firstGrow!.jobGrowId}&sample=all`
-    ])
-  )
-  expect(globalMenu()).toContainEqual(['통계', 'page'])
-  const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
-  expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
-    ['세트', 'page'],
-    ['직업', null],
-    ['명성', null],
-    ['클리어', null]
-  ])
-
-  const secondChip = [...container.querySelectorAll<HTMLButtonElement>('button')].find(
-    (button) => button.textContent === secondGrow!.name
-  )!
-  await act(async () => secondChip.click())
-
-  await vi.waitFor(() =>
-    expect(new URLSearchParams(window.location.search).get('jobGrowId')).toBe(secondGrow!.jobGrowId)
-  )
-  await vi.waitFor(() =>
-    expect(setStatsRequests().at(-1)).toBe(
-      `?jobId=${job!.jobId}&jobGrowId=${secondGrow!.jobGrowId}&sample=all`
-    )
-  )
-})
-
-it('직업 통계 주소를 직접 열면 직업 탭을 고르고 주소의 전직으로 세 통계를 받으며 캐릭터 수는 세트 통계의 표본 수로 보인다', async () => {
+it('직업 통계 주소를 직접 열면 통계 탭의 맨 앞 직업 탭을 고르고 주소의 전직으로 세 통계를 받으며 캐릭터 수는 세트 통계의 표본 수로 보인다', async () => {
   serveJobStats()
   server.use(
     http.get(`${SITE_API_URL}/stats/items`, () =>
@@ -1944,8 +1870,13 @@ it('직업 통계 주소를 직접 열면 직업 탭을 고르고 주소의 전�
     `${jobSearch}&sample=all`
   ])
   expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([jobSearch])
-  const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
-  expect(current?.textContent).toBe('직업')
+  expect(globalMenu()).toContainEqual(['통계', 'page'])
+  const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
+  expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
+    ['직업', 'page'],
+    ['명성', null],
+    ['클리어', null]
+  ])
   await vi.waitFor(() => expect(document.title).toBe('직업 통계 - DFragon'))
   await vi.waitFor(() =>
     expect(
@@ -1958,42 +1889,10 @@ it('직업 통계 주소를 직접 열면 직업 탭을 고르고 주소의 전�
   )
 })
 
-it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세트로 거른 랭킹 주소로 가서 랭킹을 그 조건으로 받는다', async () => {
-  serveSetStats()
+it('직업 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주소로 가고, 새로 열어도 같은 아이템으로 랭킹을 받는다', async () => {
+  serveJobStats()
   const [job] = RANKING_JOBS
-  window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
-  await act(async () => root.render(<WebApp host={host} />))
-
-  const equipmentBox = await vi.waitFor(() => {
-    const box = container.querySelector('section[aria-label="장비 세트"]')
-    expect(box?.querySelector('a')).not.toBeNull()
-
-    return box!
-  })
-  const fairyLink = equipmentBox.querySelector<HTMLAnchorElement>('a')!
-  expect(fairyLink.textContent).toContain('페어리')
-  await act(async () => fairyLink.click())
-
-  await waitForPath('/rankings')
-  const search = new URLSearchParams(window.location.search)
-  expect(Object.fromEntries(search)).toEqual({
-    jobId: job!.jobId,
-    equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
-  })
-  await vi.waitFor(() => {
-    expect(
-      rankingRequests().map(({ searchParams }) => Object.fromEntries(searchParams))
-    ).toContainEqual({
-      jobId: job!.jobId,
-      equipmentSetId: '4ee7bd5912cda6e2a24c1f36d5202b46'
-    })
-  })
-})
-
-it('세트 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주소로 가고, 새로 열어도 같은 아이템으로 랭킹을 받는다', async () => {
-  serveSetStats()
-  const [job] = RANKING_JOBS
-  window.history.replaceState(null, '', `/stats/sets?jobId=${job!.jobId}`)
+  window.history.replaceState(null, '', `/stats/jobs?jobId=${job!.jobId}`)
   await act(async () => root.render(<WebApp host={host} />))
 
   const weaponLink = await vi.waitFor(() => {
@@ -2006,6 +1905,7 @@ it('세트 통계의 무기 막대를 누르면 그 itemId로 거른 랭킹 주�
   await waitForPath('/rankings')
   expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
     jobId: job!.jobId,
+    jobGrowId: job!.grows[0]!.jobGrowId,
     itemIds: 'weapon-1'
   })
 

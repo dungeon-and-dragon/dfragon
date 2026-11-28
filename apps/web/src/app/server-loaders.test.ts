@@ -200,27 +200,6 @@ it('통계 loader는 캐릭터 통계를 서버에서 받아 캐시에 둔다', 
   expect(queryClient.getQueryData(['stats'])).toBeDefined()
 })
 
-it('세트 통계 loader는 주소의 직업으로 세트 통계와 아이템 통계를 함께 받는다', async () => {
-  const { setStatsHandlers } = await import('#entities/ranking/api/set-stats.handlers')
-  const { itemStatsHandlers } = await import('#entities/ranking/api/item-stats.handlers')
-  const { itemStatsQuery, setStatsQuery } = await import('#entities/ranking')
-  const { Route } = await import('./routes/stats.sets')
-  const loader = Route.options.loader as Loader
-  const filter = { jobId: 'job-1' }
-  const setStatsKey = setStatsQuery(filter).queryKey
-  const itemStatsKey = itemStatsQuery(filter).queryKey
-
-  server.use(setStatsHandlers.empty, itemStatsHandlers.empty)
-  await loader({ context: { queryClient }, params: {}, deps: filter })
-
-  expect(requestedSearches().toSorted()).toEqual([
-    '/stats/items?jobId=job-1&sample=all',
-    '/stats/sets?jobId=job-1&sample=all'
-  ])
-  expect(queryClient.getQueryData(setStatsKey)).toBeDefined()
-  expect(queryClient.getQueryData(itemStatsKey)).toBeDefined()
-})
-
 it('직업 통계 loader는 주소의 전직으로, 주소에 직업이 없으면 귀검사(남) 웨펀마스터로 스킬, 세트, 아이템 통계를 받아 캐시에 두고 표본은 세트, 아이템 통계에만 보낸다', async () => {
   const { skillStatsHandlers } = await import('#entities/ranking/api/skill-stats.handlers')
   const { setStatsHandlers } = await import('#entities/ranking/api/set-stats.handlers')
