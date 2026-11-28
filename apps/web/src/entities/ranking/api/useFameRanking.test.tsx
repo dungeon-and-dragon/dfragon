@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { HttpResponse, http, type JsonBodyType } from 'msw'
+import { delay, HttpResponse, http, type JsonBodyType } from 'msw'
 import { act, useEffect } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
@@ -7,29 +7,31 @@ import type { FameRankingFilter } from '#entities/ranking/model/ranking-stats'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
-import { FAME_RANKING_NEXT_CURSOR, fameRankingFixture } from './fame-ranking.fixture'
+import { fameRankingFixture } from './fame-ranking.fixture'
 import { FAME_RANKING_URL } from './fame-ranking.handlers'
-import { type FameRankingPages, useFameRanking } from './useFameRanking'
+import { type FameRankingPage, useFameRanking } from './useFameRanking'
 
 let container: HTMLDivElement
 let root: Root
-let result: LoadedResult<FameRankingPages>
+let result: LoadedResult<FameRankingPage>
 let requests: URLSearchParams[]
 
 function Harness({
   filter,
+  page = 1,
   onResult
 }: {
   filter: FameRankingFilter
-  onResult: (value: LoadedResult<FameRankingPages>) => void
+  page?: number
+  onResult: (value: LoadedResult<FameRankingPage>) => void
 }): null {
-  const value = useFameRanking(filter)
+  const value = useFameRanking(filter, page)
   useEffect(() => onResult(value))
 
   return null
 }
 
-function keep(value: LoadedResult<FameRankingPages>): void {
+function keep(value: LoadedResult<FameRankingPage>): void {
   result = value
 }
 
@@ -56,11 +58,14 @@ function respond(body: JsonBodyType): void {
   )
 }
 
-async function settle(filter: FameRankingFilter): Promise<LoadedResult<FameRankingPages>> {
+async function settle(
+  filter: FameRankingFilter,
+  page?: number
+): Promise<LoadedResult<FameRankingPage>> {
   await act(async () =>
     root.render(
       <TestQueryClient>
-        <Harness filter={filter} onResult={keep} />
+        <Harness filter={filter} page={page} onResult={keep} />
       </TestQueryClient>
     )
   )
@@ -80,7 +85,7 @@ it('응답을 그대로 읽고 정한 직업, 전직, 역할만 query로 보낸�
 
   expect(read).toMatchObject({
     status: 'success',
-    value: { characters: fameRankingFixture.lastPage.characters, hasMore: false }
+    value: { page: 1, characters: fameRankingFixture.lastPage.characters, pageCount: 3 }
   })
   expect(queries()).toEqual([{ jobId: 'job-1', jobGrowId: 'grow-1', role: 'dealer' }])
 })
@@ -90,7 +95,7 @@ it('필터가 없으면 query 없이 요청하고 빈 랭킹도 읽는다', asyn
 
   await expect(settle({})).resolves.toMatchObject({
     status: 'success',
-    value: { characters: [], hasMore: false }
+    value: { characters: [], pageCount: 0 }
   })
   expect(queries()).toEqual([{}])
 })
@@ -206,51 +211,76 @@ it.each<[string, FameRankingFilter]>([
   expect(requests).toEqual([])
 })
 
-it('다음 page는 같은 필터에 nextCursor를 붙여 받고 앞 page에 잇는다', async () => {
+it('2쪽부터는 같은 필터에 page를 붙여 받고, 받는 동안 같은 필터의 앞 쪽을 그대로 둔다', async () => {
+  let finish: () => void = () => {}
   server.use(
-    http.get(FAME_RANKING_URL, ({ request }) => {
+    http.get(FAME_RANKING_URL, async ({ request }) => {
       const params = new URL(request.url).searchParams
       requests.push(params)
 
-      if (params.get('cursor') === FAME_RANKING_NEXT_CURSOR) {
-        return HttpResponse.json(fameRankingFixture.lastPage)
+      if (params.get('page') === '2') {
+        await new Promise<void>((resolve) => {
+          finish = resolve
+        })
+
+        return HttpResponse.json(fameRankingFixture.secondPage)
       }
 
       return HttpResponse.json(fameRankingFixture.firstPage)
     })
   )
-  const first = await settle({ oathSetId: 16204 })
-  expect(first).toMatchObject({ status: 'success', value: { hasMore: true } })
+  await settle({ oathSetId: 16204 })
+  await settle({ oathSetId: 16204 }, 2)
 
-  await act(async () => {
-    if (first.status === 'success') {
-      first.value.loadMore()
-    }
-  })
+  await vi.waitFor(() => expect(requests).toHaveLength(2))
+  expect(result).toMatchObject({ status: 'success', value: { page: 1, pageCount: 3 } })
+  await act(async () => finish())
   await vi.waitFor(() =>
-    expect(result).toMatchObject({ status: 'success', value: { hasMore: false } })
+    expect(result).toMatchObject({
+      status: 'success',
+      value: { page: 2, characters: fameRankingFixture.secondPage.characters, pageCount: 3 }
+    })
+  )
+  expect(queries()).toEqual([{ oathSetId: '16204' }, { oathSetId: '16204', page: '2' }])
+})
+
+it('필터가 바뀌면 앞 필터의 쪽을 두지 않고 받는 중으로 둔다', async () => {
+  server.use(
+    http.get(FAME_RANKING_URL, async ({ request }) => {
+      const params = new URL(request.url).searchParams
+      requests.push(params)
+
+      if (params.get('jobId') === 'job-2') {
+        await delay('infinite')
+      }
+
+      return HttpResponse.json(fameRankingFixture.firstPage)
+    })
+  )
+  await settle({ jobId: 'job-1' })
+  await act(async () =>
+    root.render(
+      <TestQueryClient>
+        <Harness filter={{ jobId: 'job-2' }} onResult={keep} />
+      </TestQueryClient>
+    )
   )
 
-  expect(queries()).toEqual([
-    { oathSetId: '16204' },
-    { oathSetId: '16204', cursor: FAME_RANKING_NEXT_CURSOR }
-  ])
-  expect(result.status === 'success' && result.value.characters).toEqual([
-    ...fameRankingFixture.firstPage.characters,
-    ...fameRankingFixture.lastPage.characters
-  ])
+  await vi.waitFor(() => expect(requests).toHaveLength(2))
+  expect(result).toEqual({ status: 'loading' })
 })
 
 const [character] = fameRankingFixture.lastPage.characters
 
 it.each<[string, JsonBodyType]>([
-  ['모르는 서버', { characters: [{ ...character, serverId: 'unknown' }], nextCursor: null }],
-  ['nextCursor가 없는 응답', { characters: [character] }],
+  ['모르는 서버', { characters: [{ ...character, serverId: 'unknown' }], pageCount: 1 }],
+  ['pageCount가 없는 응답', { characters: [character] }],
+  ['pageCount가 음수인 응답', { characters: [character], pageCount: -1 }],
   [
     '서약 세트 id가 문자열인 행',
     {
       characters: [{ ...character, oathSet: { id: '16204', name: '서약', option: null } }],
-      nextCursor: null
+      pageCount: 1
     }
   ]
 ])('%s: 오류로 끝낸다', async (_name, body) => {

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import {
   applyMigrations,
+  countFameRanking,
   createDatabaseClient,
   readFameRanking,
   recordCharacterBasic,
@@ -166,17 +167,10 @@ test('개화 필터로 page를 나눠 읽어도 빠지거나 겹치는 캐릭터
 
   const filter = { ...pagedJob, evolutions: [{ name: slash, type: 1 }] }
   const pages = []
-  let position
 
-  do {
-    const page = await readFameRanking(client, filter, 3, position)
-    pages.push(page)
-    const last = page.at(-1)
-    position =
-      page.length === 3
-        ? { value: last.fame, serverId: last.serverId, characterId: last.characterId }
-        : undefined
-  } while (position !== undefined)
+  for (let offset = 0; pages.at(-1)?.length !== 0; offset += 3) {
+    pages.push(await readFameRanking(client, filter, 3, offset))
+  }
 
   const read = pages.flat()
   const all = await readFameRanking(client, filter, 100)
@@ -189,4 +183,5 @@ test('개화 필터로 page를 나눠 읽어도 빠지거나 겹치는 캐릭터
     read.map(({ serverId, characterId }) => `${serverId}/${characterId}`).toSorted(),
     expected.map(({ serverId, characterId }) => `${serverId}/${characterId}`).toSorted()
   )
+  assert.equal(await countFameRanking(client, filter), expected.length)
 })

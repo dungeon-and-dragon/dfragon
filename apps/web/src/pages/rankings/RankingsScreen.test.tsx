@@ -7,10 +7,6 @@ import type { ItemStats } from '#entities/ranking'
 import type { OathCatalog } from '#entities/catalog'
 import type { FameRanking, FameRankingFilter, RankedCharacter, SetStats } from '#entities/ranking'
 import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
-import {
-  FAME_RANKING_NEXT_CURSOR,
-  fameRankingFixture
-} from '#entities/ranking/api/fame-ranking.fixture'
 import { FAME_RANKING_URL, fameRankingFailure } from '#entities/ranking/api/fame-ranking.handlers'
 import { ITEM_STATS_URL, itemStatsHandlers } from '#entities/ranking/api/item-stats.handlers'
 import { SET_STATS_URL, setStatsHandlers } from '#entities/ranking/api/set-stats.handlers'
@@ -72,23 +68,38 @@ function rankedCharacter(order: number, overrides: Partial<RankedCharacter> = {}
 }
 
 function rankingOf(count: number): FameRanking {
-  return {
-    characters: Array.from({ length: count }, (_, index) => rankedCharacter(index + 1)),
-    nextCursor: null
-  }
+  const characters = Array.from({ length: count }, (_, index) => rankedCharacter(index + 1))
+  const pageCount = count > 0 ? 1 : 0
+
+  return { characters, pageCount }
 }
 
-// cursor는 요청에 붙은 다음 page cursor이고, 첫 page 요청이면 null이다.
-type RankingResponse = (
-  cursor: string | null
-) => FameRanking | Response | Promise<FameRanking | Response>
+// page는 요청에 붙은 쪽 번호이고, 붙지 않은 첫 쪽 요청이면 1이다.
+type RankingResponse = (page: number) => FameRanking | Response | Promise<FameRanking | Response>
+
+const PAGE_SIZE = 20
+
+function rankingPage(page: number, total: number): FameRanking {
+  const from = (page - 1) * PAGE_SIZE + 1
+  const count = Math.max(0, Math.min(PAGE_SIZE, total - from + 1))
+  const characters = Array.from({ length: count }, (_, index) => rankedCharacter(from + index))
+  const pageCount = Math.ceil(total / PAGE_SIZE)
+
+  return { characters, pageCount }
+}
+
+// API처럼 쪽 번호의 20명과 전체 쪽 수를 준다.
+function rankingOfTotal(total: number): RankingResponse {
+  return (page) => rankingPage(page, total)
+}
 
 function respondRanking(response: RankingResponse): void {
   server.use(
     http.get(FAME_RANKING_URL, async ({ request }) => {
       const params = new URL(request.url).searchParams
       requests.push(params)
-      const body = await response(params.get('cursor'))
+      const page = Number(params.get('page') ?? '1')
+      const body = await response(page)
 
       if (body instanceof Response) {
         return body
@@ -177,63 +188,67 @@ function firstCharacterName(): string | undefined {
   return bodyRows()[0]?.querySelector('a[href^="/c/"]')?.textContent
 }
 
-it('받은 100명을 한 페이지에 20명씩 보이고, 이전은 다시 받지 않고 앞 페이지를 보인다', async () => {
-  await render(async () => rankingOf(100))
+async function showPageOf(firstName: string, click: () => Promise<void>): Promise<void> {
+  await click()
+  await vi.waitFor(() => expect(firstCharacterName()).toBe(firstName))
+}
+
+it('쪽마다 20명을 받아 보이고, 이전은 받아 둔 앞 쪽을 다시 받지 않는다', async () => {
+  await render(rankingOfTotal(100))
 
   expect(bodyRows()).toHaveLength(20)
   expect(firstCharacterName()).toBe('합성1')
   expect(pagination().textContent).toBe('이전12345다음')
   expect(pageButton('이전').disabled).toBe(true)
   expect(currentPage()).toBe('1')
-  await showNext()
-  expect(firstCharacterName()).toBe('합성21')
-  expect(pagination().textContent).toBe('이전12345다음')
+  await showPageOf('합성21', showNext)
   expect(currentPage()).toBe('2')
-  await showNext()
-  await showNext()
-  await showNext()
-  expect(firstCharacterName()).toBe('합성81')
+  await showPageOf('합성41', showNext)
+  await showPageOf('합성61', showNext)
+  await showPageOf('합성81', showNext)
   expect(pageButton('다음').disabled).toBe(true)
-  await showPrevious()
+  await showPageOf('합성61', showPrevious)
 
-  expect(firstCharacterName()).toBe('합성61')
   expect(bodyRows()).toHaveLength(20)
-  expect(requests).toHaveLength(1)
+  expect(queries()).toEqual([{}, { page: '2' }, { page: '3' }, { page: '4' }, { page: '5' }])
 })
 
-it('번호를 누르면 받아 둔 행에서 그 페이지를 보인다', async () => {
-  await render(async () => rankingOf(100))
+it('번호를 누르면 그 쪽을 받아 보이고, API가 준 쪽 수로 누른 쪽을 가운데 둔다', async () => {
+  await render(rankingOfTotal(1000))
 
-  await act(async () => findButton('4')!.click())
+  await showPageOf('합성81', () => act(async () => findButton('5')!.click()))
 
-  expect(firstCharacterName()).toBe('합성61')
-  expect(currentPage()).toBe('4')
-  expect(requests).toHaveLength(1)
+  expect(currentPage()).toBe('5')
+  expect(pagination().textContent).toBe('이전34567다음')
+  expect(queries()).toEqual([{}, { page: '5' }])
 })
 
-it('결과가 한 페이지면 이전과 다음을 모두 막는다', async () => {
+it('결과가 한 쪽이면 이전과 다음을 모두 막는다', async () => {
   await render(async () => rankingOf(20))
 
   expect(pageButton('이전').disabled).toBe(true)
   expect(pageButton('다음').disabled).toBe(true)
 })
 
-it('3페이지에서 이미 받아 둔 필터로 바꿔도 1페이지를 보인다', async () => {
+it('3쪽에서 필터를 바꾸면 1쪽을 보인다', async () => {
   const weapon = { itemIds: ['synthetic-weapon'] }
-  await render(async () => rankingOf(100))
-  await render(async () => rankingOf(100), weapon)
+  await render(rankingOfTotal(100))
+  await render(rankingOfTotal(100), weapon)
   await vi.waitFor(() => expect(firstCharacterName()).toBe('합성1'))
-  await showNext()
-  await showNext()
-  expect(pagination().textContent).toBe('이전12345다음')
+  await showPageOf('합성21', showNext)
+  await showPageOf('합성41', showNext)
   expect(currentPage()).toBe('3')
 
-  await render(async () => rankingOf(100))
+  await render(rankingOfTotal(100))
 
-  expect(pagination().textContent).toBe('이전12345다음')
   expect(currentPage()).toBe('1')
   expect(firstCharacterName()).toBe('합성1')
-  expect(queries()).toEqual([{}, { itemIds: 'synthetic-weapon' }])
+  expect(queries()).toEqual([
+    {},
+    { itemIds: 'synthetic-weapon' },
+    { itemIds: 'synthetic-weapon', page: '2' },
+    { itemIds: 'synthetic-weapon', page: '3' }
+  ])
 })
 
 it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 헤더에 내림차순을 표시하며, 세트 값이나 점수가 없는 행은 그 칸을 -로 그린다', async () => {
@@ -254,7 +269,7 @@ it('열은 캐릭터, 세트, 명성, 점수, 모험단이고 기준인 명성 �
       }),
       rankedCharacter(4, { level: null, jobGrowName: null, jobName: '합성 직업' })
     ],
-    nextCursor: null
+    pageCount: 1
   }))
 
   expect([...container.querySelectorAll('thead th')].map((cell) => cell.textContent)).toEqual([
@@ -295,7 +310,7 @@ function characterLines(row: Element): (string | null)[] {
 it('서버, 이름, 직업명을 한 줄로 두고 만렙이 아니면 직업명 오른쪽 같은 줄에 레벨을, 다음 줄에 명성, 점수, 모험단을 둔다', async () => {
   await render(async () => ({
     characters: [rankedCharacter(1), rankedCharacter(2, { level: 110 })],
-    nextCursor: null
+    pageCount: 1
   }))
 
   const [maxLevel, belowMax] = bodyRows()
@@ -314,7 +329,7 @@ it('동명 전직에는 성별을 붙이고 남성 크루세이더는 역할을 
       rankedCharacter(5, { jobName: '프리스트(남)', jobGrowName: '眞 인파이터', role: 'dealer' }),
       rankedCharacter(6, { jobName: '격투가(여)', jobGrowName: '眞 넨마스터' })
     ],
-    nextCursor: null
+    pageCount: 1
   }))
 
   expect(bodyRows().map((row) => characterLines(row)[0])).toEqual([
@@ -328,7 +343,7 @@ it('동명 전직에는 성별을 붙이고 남성 크루세이더는 역할을 
 })
 
 it('빈 결과는 목록 상자에 빈 문구만 둔다', async () => {
-  await render(async () => ({ characters: [], nextCursor: null }))
+  await render(async () => ({ characters: [], pageCount: 0 }))
 
   expect(container.querySelector('section[aria-label="검색 결과"] p')?.textContent).toBe(
     '조건에 맞는 캐릭터가 없습니다.'
@@ -443,51 +458,15 @@ it('크루세이더(딜러)를 고르면 역할로 조회하고 그 칩만 눌�
   expect(onFilterChange).toHaveBeenLastCalledWith({ jobId: MALE_PRIEST })
 })
 
-function rankingPage(from: number, count: number, nextCursor: string | null): FameRanking {
-  const characters = Array.from({ length: count }, (_, index) => rankedCharacter(from + index))
-
-  return { characters, nextCursor }
-}
-
 function characterLinks(): string[] {
   return bodyRows().map((row) => row.querySelector('a[href^="/c/"]')?.getAttribute('href') ?? '')
 }
 
-function characterLinkOf({ serverId, characterId }: RankedCharacter): string {
-  return `/c/${serverId}/${characterId}`
-}
-
-it('받아 둔 행을 넘는 페이지로 가면 nextCursor로 한 번 더 받고, 마지막 페이지 뒤에는 더 받지 않는다', async () => {
-  await render(async (cursor) => {
-    if (cursor === null) {
-      return fameRankingFixture.firstPage
-    }
-
-    return fameRankingFixture.lastPage
-  })
-
-  for (let step = 0; step < 4; step += 1) {
-    await showNext()
-  }
-  expect(requests).toHaveLength(1)
-  await showNext()
-  await vi.waitFor(() => expect(characterLinks()).toHaveLength(20))
-  expect(queries()).toEqual([{}, { cursor: FAME_RANKING_NEXT_CURSOR }])
-  expect(characterLinks()[0]).toBe(characterLinkOf(fameRankingFixture.lastPage.characters[0]!))
-  await showNext()
-
-  expect(characterLinks()).toHaveLength(10)
-  expect(pagination().textContent).toBe('이전34567다음')
-  expect(currentPage()).toBe('7')
-  expect(pageButton('다음').disabled).toBe(true)
-  expect(requests).toHaveLength(2)
-})
-
-it('다음 페이지를 받는 동안 표 자리에 빈 줄을 두고 이전, 다음을 막으며, 받으면 그 페이지를 보인다', async () => {
+it('다른 쪽을 받는 동안 표 자리에 빈 줄을 두고 이전, 번호, 다음을 막으며, 받으면 그 쪽을 보인다', async () => {
   let finish: (page: FameRanking) => void = () => {}
-  await render(async (cursor) => {
-    if (cursor === null) {
-      return rankingPage(1, 20, 'page-2')
+  await render(async (page) => {
+    if (page === 1) {
+      return rankingPage(1, 25)
     }
 
     return new Promise<FameRanking>((resolve) => {
@@ -500,10 +479,12 @@ it('다음 페이지를 받는 동안 표 자리에 빈 줄을 두고 이전, �
   expect(bodyRows()).toHaveLength(0)
   expect(pagination().textContent).toBe('이전12다음')
   expect(currentPage()).toBe('2')
-  expect(pageButton('이전').disabled).toBe(true)
-  expect(pageButton('다음').disabled).toBe(true)
-  await vi.waitFor(() => expect(requests).toHaveLength(2))
-  await act(async () => finish(rankingPage(21, 5, null)))
+  expect([...pagination().querySelectorAll('button')].map((button) => button.disabled)).toEqual([
+    true,
+    true,
+    true
+  ])
+  await act(async () => finish(rankingPage(2, 25)))
   await vi.waitFor(() => expect(container.querySelectorAll('tr[aria-hidden]')).toHaveLength(0))
   expect(firstCharacterName()).toBe('합성21')
   expect(characterLinks()).toHaveLength(5)
@@ -549,20 +530,13 @@ it('고른 필터가 없으면 초기화를 막고, 필터를 골랐으면 초�
   expect(onFilterChange).toHaveBeenLastCalledWith({})
 })
 
-it('다음 페이지를 받지 못하면 오류 아래 다시 시도를 두고 이전만 누를 수 있으며, 다시 시도하면 그 페이지를 보인다', async () => {
-  let failNext = true
-  await render(async (cursor) => {
-    if (cursor === null) {
-      return rankingPage(1, 20, 'page-2')
+it('다른 쪽을 받지 못하면 오류와 함께 이전만 누를 수 있게 두고, 이전을 누르면 앞 쪽을 보인다', async () => {
+  await render(async (page) => {
+    if (page === 1) {
+      return rankingPage(1, 25)
     }
 
-    if (failNext) {
-      failNext = false
-
-      return fameRankingFailure('합성 API 오류')
-    }
-
-    return rankingPage(21, 5, null)
+    return fameRankingFailure('합성 API 오류')
   })
   await showNext()
 
@@ -573,11 +547,10 @@ it('다음 페이지를 받지 못하면 오류 아래 다시 시도를 두고 �
   )
   expect(pageButton('이전').disabled).toBe(false)
   expect(pageButton('다음').disabled).toBe(true)
-  await act(async () => chip('다시 시도').click())
+  await showPageOf('합성1', showPrevious)
 
-  await vi.waitFor(() => expect(characterLinks()).toHaveLength(5))
-  expect(firstCharacterName()).toBe('합성21')
   expect(container.querySelector('[role="alert"]')).toBeNull()
+  expect(currentPage()).toBe('1')
 })
 
 const GOLDEN = '7f788a703a87d783079b41d0fe6448c9'
@@ -733,7 +706,7 @@ it('세트로 거르면 세트를 query로 보내고 목록 띠 제목에 고른
 
 it('거른 결과가 비면 조건에 맞는 캐릭터가 없다고 알린다', async () => {
   await render(
-    async () => ({ characters: [], nextCursor: null }),
+    async () => ({ characters: [], pageCount: 0 }),
     { oathSetId: DRAGON },
     () => {},
     setResponses()

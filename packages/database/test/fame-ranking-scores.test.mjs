@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { after, before, test } from 'node:test'
 import {
   applyMigrations,
+  countFameRanking,
   createDatabaseClient,
   readFameRanking,
   recordCharacterBasic,
@@ -192,18 +193,12 @@ test('점수 기준으로 page를 나눠 읽어도 같은 점수의 page 경계�
 
   const filter = { ...pagedJob, sort: 'equipmentScore' }
   const pages = []
-  let position
 
-  do {
-    const page = await readFameRanking(client, filter, 2, position)
-    pages.push(page)
-    const last = page.at(-1)
-    position =
-      page.length === 2
-        ? { value: last.score.value, serverId: last.serverId, characterId: last.characterId }
-        : undefined
-  } while (position !== undefined)
+  for (let offset = 0; pages.at(-1)?.length !== 0; offset += 2) {
+    pages.push(await readFameRanking(client, filter, 2, offset))
+  }
 
   assert.deepEqual(ids(pages.flat()), ids(await readFameRanking(client, filter, 100)))
   assert.equal(pages.flat().length, 9)
+  assert.equal(await countFameRanking(client, filter), 9)
 })

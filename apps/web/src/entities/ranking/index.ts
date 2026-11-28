@@ -1,5 +1,5 @@
 export { fameRankingQuery, useFameRanking } from './api/useFameRanking'
-export type { FameRankingPages } from './api/useFameRanking'
+export type { FameRankingPage } from './api/useFameRanking'
 export { itemStatsQuery, useItemStats } from './api/useItemStats'
 export { setStatsQuery, useSetStats } from './api/useSetStats'
 export { skillStatsQuery, skillStatsQueryKey, useSkillStats } from './api/useSkillStats'

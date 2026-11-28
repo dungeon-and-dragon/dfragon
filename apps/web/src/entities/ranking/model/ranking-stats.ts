@@ -34,7 +34,7 @@ export const characterSetsShape = {
 
 export const fameRankingSchema = z.object({
   characters: z.array(storedCharacterSchema.extend(characterSetsShape)),
-  nextCursor: z.string().min(1).nullable()
+  pageCount: count
 })
 
 const fameBucketSchema = z.object({ from: count, to: count, count })

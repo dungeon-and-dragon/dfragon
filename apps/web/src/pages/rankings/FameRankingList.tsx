@@ -1,4 +1,4 @@
-import { Button, Pagination } from '@dfragon/ui'
+import { Pagination } from '@dfragon/ui'
 import { useState } from 'react'
 import type { OathCatalog } from '#entities/catalog'
 import {
@@ -13,12 +13,10 @@ import {
   evolutionsQueryText,
   type FameRankingFilter,
   type RankedCharacter,
-  type FameRankingPages,
   useFameRanking
 } from '#entities/ranking'
 import { RankingSetLines, rankingName } from '#widgets/ranking-filter'
 
-const PAGE_SIZE = 20
 const LOADING_ROWS = 5
 const FAILURE_MESSAGE = '검색 결과를 받지 못했습니다.'
 // 세트 열이 길드 열 자리를 쓴다.
@@ -40,149 +38,103 @@ export function FameRankingList({
   setLabel: string | null
   catalog: OathCatalog | null
 }): React.JSX.Element {
-  const result = useFameRanking(filter)
   const name = rankingName(filter, setLabel)
   const sortedBy: SortedColumn = filter.sort !== undefined ? 'score' : 'fame'
+
+  return (
+    <ListBox name={name}>
+      <RankingPages
+        key={[
+          filter.jobId,
+          filter.jobGrowId,
+          filter.role,
+          filter.equipmentSetId,
+          filter.oathSetId,
+          filter.oathSetOption,
+          filter.itemIds?.join(','),
+          evolutionsQueryText(filter.evolutions ?? []),
+          filter.sort,
+          filter.fameFrom,
+          filter.fameTo,
+          filter.scoreFrom,
+          filter.scoreTo
+        ].join('/')}
+        filter={filter}
+        catalog={catalog}
+        sortedBy={sortedBy}
+      />
+    </ListBox>
+  )
+}
+
+function RankingPages({
+  filter,
+  catalog,
+  sortedBy
+}: {
+  filter: FameRankingFilter
+  catalog: OathCatalog | null
+  sortedBy: SortedColumn
+}): React.JSX.Element {
+  const [page, setPage] = useState(1)
+  const result = useFameRanking(filter, page)
+  const skeletonRows = Array.from({ length: LOADING_ROWS }, (_, index) => (
+    <SkeletonRow
+      key={index}
+      ranked={false}
+      detail
+      scorePlacement="column"
+      affiliations={AFFILIATIONS}
+    />
+  ))
+
+  function table(rows: readonly RankedCharacter[], waiting: boolean): React.JSX.Element {
+    return (
+      <CharacterTable
+        rows={rows}
+        detail={setColumnOf(catalog)}
+        affiliations={AFFILIATIONS}
+        ranked={false}
+        scorePlacement="column"
+        sortedBy={sortedBy}
+        trailing={waiting ? skeletonRows : undefined}
+      />
+    )
+  }
 
   switch (result.status) {
     case 'loading':
       return (
-        <ListBox name={name}>
-          {/* 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다. */}
-          <div aria-busy="true" className="min-h-dvh">
-            <CharacterTable
-              rows={[]}
-              detail={setColumnOf(catalog)}
-              affiliations={AFFILIATIONS}
-              ranked={false}
-              scorePlacement="column"
-              sortedBy={sortedBy}
-              trailing={Array.from({ length: LOADING_ROWS }, (_, index) => (
-                <SkeletonRow
-                  key={index}
-                  ranked={false}
-                  detail
-                  scorePlacement="column"
-                  affiliations={AFFILIATIONS}
-                />
-              ))}
-            />
-          </div>
-        </ListBox>
+        // 필터를 바꿔 다시 받는 동안 문서가 짧아져 스크롤이 위로 밀리지 않게 화면 높이만큼 자리를 둔다.
+        <div aria-busy="true" className="min-h-dvh">
+          {table([], true)}
+        </div>
       )
     case 'error':
       return (
-        <ListBox name={name}>
+        <>
           <p role="alert" className="state state-error">
             {FAILURE_MESSAGE}
           </p>
-        </ListBox>
+          {page > 1 && <Pagination page={page} pageCount={page} onPageChange={setPage} />}
+        </>
       )
-    case 'success':
-      if (result.value.characters.length === 0) {
-        return (
-          <ListBox name={name}>
-            <p className="state">조건에 맞는 캐릭터가 없습니다.</p>
-          </ListBox>
-        )
+    case 'success': {
+      const { characters, pageCount } = result.value
+      const waiting = result.value.page !== page
+
+      if (pageCount === 0) {
+        return <p className="state">조건에 맞는 캐릭터가 없습니다.</p>
       }
 
       return (
-        <ListBox name={name}>
-          <PagedTable
-            key={[
-              filter.jobId,
-              filter.jobGrowId,
-              filter.role,
-              filter.equipmentSetId,
-              filter.oathSetId,
-              filter.oathSetOption,
-              filter.itemIds?.join(','),
-              evolutionsQueryText(filter.evolutions ?? []),
-              filter.sort,
-              filter.fameFrom,
-              filter.fameTo,
-              filter.scoreFrom,
-              filter.scoreTo
-            ].join('/')}
-            ranking={result.value}
-            catalog={catalog}
-            sortedBy={sortedBy}
-          />
-        </ListBox>
+        <>
+          <div aria-busy={waiting ? 'true' : undefined}>
+            {table(waiting ? [] : characters, waiting)}
+          </div>
+          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} disabled={waiting} />
+        </>
       )
-  }
-}
-
-function PagedTable({
-  ranking,
-  catalog,
-  sortedBy
-}: {
-  ranking: FameRankingPages
-  catalog: OathCatalog | null
-  sortedBy: SortedColumn
-}): React.JSX.Element {
-  const [page, setPage] = useState(0)
-  const { characters, hasMore, loadingMore, moreError, loadMore } = ranking
-  const start = page * PAGE_SIZE
-  const end = start + PAGE_SIZE
-  const rows = characters.slice(start, end)
-  const failed = rows.length === 0 && moreError !== null && !loadingMore
-  const waiting = rows.length === 0 && !failed
-  const loadedPageCount = Math.ceil(characters.length / PAGE_SIZE)
-  const unloadedPageCount = hasMore ? 1 : 0
-  const pageCount = Math.max(page + 1, loadedPageCount + unloadedPageCount)
-  const skeletonRows = waiting
-    ? Array.from({ length: LOADING_ROWS }, (_, index) => (
-        <SkeletonRow
-          key={index}
-          ranked={false}
-          detail
-          scorePlacement="column"
-          affiliations={AFFILIATIONS}
-        />
-      ))
-    : undefined
-
-  function showPage(number: number): void {
-    setPage(number - 1)
-
-    if (characters.length < number * PAGE_SIZE && hasMore) {
-      loadMore()
     }
   }
-
-  return (
-    <>
-      {failed ? (
-        <div className="state state-error flex-col border-t border-line">
-          <p role="alert" className="m-0">
-            {FAILURE_MESSAGE}
-          </p>
-          <Button variant="secondary" size="sm" onClick={loadMore}>
-            다시 시도
-          </Button>
-        </div>
-      ) : (
-        <div aria-busy={waiting ? 'true' : undefined}>
-          <CharacterTable
-            rows={rows}
-            detail={setColumnOf(catalog)}
-            affiliations={AFFILIATIONS}
-            ranked={false}
-            scorePlacement="column"
-            sortedBy={sortedBy}
-            trailing={skeletonRows}
-          />
-        </div>
-      )}
-      <Pagination
-        page={page + 1}
-        pageCount={pageCount}
-        onPageChange={showPage}
-        disabled={waiting}
-      />
-    </>
-  )
 }

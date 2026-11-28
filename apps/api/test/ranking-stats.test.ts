@@ -3,7 +3,6 @@ import test from 'node:test'
 import type {
   CharacterStats,
   FameRankingFilter,
-  FameRankingPosition,
   ItemAdoption,
   JobSkillAdoption,
   JobSkillAdoptionQuery,
@@ -100,10 +99,17 @@ function adoptionSnapshot(job: JobSkillAdoptionQuery): JobSkillAdoptionSnapshot 
 
 const unusedReader: RankingStatsRepository = {
   readFameRanking: async () => assert.fail('랭킹을 읽으면 안 된다'),
+  countFameRanking: async () => assert.fail('랭킹 수를 세면 안 된다'),
   readCharacterStatsSnapshot: async () => assert.fail('통계를 읽으면 안 된다'),
   readJobSkillAdoptionSnapshot: async () => assert.fail('스킬 채택률을 읽으면 안 된다'),
   readSetAdoption: async () => assert.fail('세트 선택 수를 읽으면 안 된다'),
   readItemAdoption: async () => assert.fail('아이템 선택 수를 읽으면 안 된다')
+}
+
+// 필터를 넘기는지 보는 테스트가 빈 결과로 끝나지 않게 한 페이지만큼 있다고 센다.
+const rankedReader: RankingStatsRepository = {
+  ...unusedReader,
+  countFameRanking: async () => 1
 }
 
 async function listen(
@@ -129,8 +135,8 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1명을 더해 101명을 읽고 serverId는 무시하며 행에 rank를 붙이지 않는다', async () => {
-  const reads: [FameRankingFilter, number, FameRankingPosition | undefined][] = []
+test('명성 랭킹은 page 없이 부르면 query의 직업과 전직으로 첫 20명을 읽고 serverId는 무시하며 행에 rank를 붙이지 않는다', async () => {
+  const reads: [FameRankingFilter, number, number][] = []
   const characters = [
     {
       ...character('a', 80000),
@@ -142,9 +148,9 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
   ] satisfies RankedStoredCharacter[]
   const scores = [{ calculator: 'equipment', value: 1234567, approximate: null }, null]
   const { app, origin } = await listen({
-    ...unusedReader,
-    readFameRanking: async (filter, limit, after) => {
-      reads.push([filter, limit, after])
+    ...rankedReader,
+    readFameRanking: async (filter, limit, offset) => {
+      reads.push([filter, limit, offset])
 
       return characters
     }
@@ -164,12 +170,12 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
         role: 'dealer',
         score: scores[index]
       })),
-      nextCursor: null
+      pageCount: 1
     })
     assert.equal(all.status, 200)
     assert.deepEqual(reads, [
-      [{ jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 101, undefined],
-      [{}, 101, undefined]
+      [{ jobId: 'synthetic-job', jobGrowId: 'synthetic-grow' }, 20, 0],
+      [{}, 20, 0]
     ])
   } finally {
     await app.close()
@@ -179,7 +185,7 @@ test('명성 랭킹은 query의 직업과 전직으로 다음 page 확인용 1�
 test('명성 랭킹은 세트 필터를 직업 필터와 함께 넘긴다', async () => {
   const reads: FameRankingFilter[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       reads.push(filter)
 
@@ -209,7 +215,7 @@ test('명성 랭킹은 세트 필터를 직업 필터와 함께 넘긴다', asyn
 test('명성 랭킹은 쉼표로 이은 itemIds를 목록으로 바꿔 세트, 직업 필터와 함께 넘긴다', async () => {
   const reads: FameRankingFilter[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       reads.push(filter)
 
@@ -224,7 +230,7 @@ test('명성 랭킹은 쉼표로 이은 itemIds를 목록으로 바꿔 세트, �
     )
 
     assert.equal(one.status, 200)
-    assert.deepEqual(one.body, { characters: [], nextCursor: null })
+    assert.deepEqual(one.body, { characters: [], pageCount: 1 })
     assert.equal(five.status, 200)
     assert.deepEqual(reads, [
       { itemIds: ['weapon-a'] },
@@ -238,7 +244,7 @@ test('명성 랭킹은 쉼표로 이은 itemIds를 목록으로 바꿔 세트, �
 test('명성 랭킹은 fameFrom, fameTo를 숫자로 바꿔 직업 필터와 함께 넘긴다', async () => {
   const reads: FameRankingFilter[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       reads.push(filter)
 
@@ -310,7 +316,7 @@ test('명성 랭킹은 빈 itemIds와 빈 항목, 같은 itemId의 중복, 여�
 test('명성 랭킹은 쉼표로 이은 스킬 이름~개화 종류 쌍을 개화 목록으로 바꿔 직업, 전직, 세트, 아이템 필터와 함께 넘긴다', async () => {
   const reads: FameRankingFilter[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       reads.push(filter)
 
@@ -387,92 +393,59 @@ test('명성 랭킹은 전직 없는 개화, 빈 값과 빈 쌍, 종류가 1, 2�
   }
 })
 
-// fake DB가 받은 위치 뒤의 행만 주도록 해, API가 마지막 행으로 cursor를 만드는지 본다.
-test('명성 랭킹은 100명보다 많으면 nextCursor를 주고, 그 cursor로 다음 page를 이어 받으며 마지막 page는 null이다', async () => {
-  const sorted = Array.from({ length: 150 }, (_, index) =>
-    character(`p${String(index).padStart(3, '0')}`, 90000 - Math.floor(index / 2))
+test('명성 랭킹은 page 번호의 20명을 읽고, 센 수로 페이지 수를 주며 마지막 페이지 뒤는 읽지 않는다', async () => {
+  const sorted = Array.from({ length: 45 }, (_, index) =>
+    character(`p${String(index).padStart(3, '0')}`, 90000 - index)
   )
-  const afters: (FameRankingPosition | undefined)[] = []
+  const offsets: number[] = []
   const { app, origin } = await listen({
     ...unusedReader,
-    readFameRanking: async (_filter, limit, after) => {
-      afters.push(after)
-      const start =
-        after === undefined
-          ? 0
-          : sorted.findIndex((row) => row.characterId === after.characterId) + 1
+    countFameRanking: async () => sorted.length,
+    readFameRanking: async (_filter, limit, offset) => {
+      offsets.push(offset)
 
-      return sorted.slice(start, start + limit)
+      return sorted.slice(offset, offset + limit)
     }
   })
   try {
-    const first = await getJson(origin, '/rankings/fame')
-    const second = await getJson(
-      origin,
-      `/rankings/fame?cursor=${encodeURIComponent(first.body.nextCursor)}`
-    )
-    const ids = [...first.body.characters, ...second.body.characters].map(
-      ({ characterId }: { characterId: string }) => characterId
-    )
+    const second = await getJson(origin, '/rankings/fame?page=2')
+    const last = await getJson(origin, '/rankings/fame?page=3')
+    const beyond = await getJson(origin, '/rankings/fame?page=4')
+    const idsOf = ({ body }: { body: { characters: { characterId: string }[] } }) =>
+      body.characters.map(({ characterId }) => characterId)
 
-    assert.equal(first.body.characters.length, 100)
-    assert.equal(typeof first.body.nextCursor, 'string')
-    assert.equal(second.body.characters.length, 50)
-    assert.equal(second.body.nextCursor, null)
     assert.deepEqual(
-      ids,
-      sorted.map(({ characterId }) => characterId)
+      idsOf(second),
+      sorted.slice(20, 40).map(({ characterId }) => characterId)
     )
-    assert.deepEqual(afters, [
-      undefined,
-      { value: 90000 - 49, serverId: 'cain', characterId: 'p099' }
-    ])
+    assert.deepEqual(idsOf(last), ['p040', 'p041', 'p042', 'p043', 'p044'])
+    assert.deepEqual(beyond.body, { characters: [], pageCount: 3 })
+    assert.deepEqual(
+      [second, last].map(({ body }) => body.pageCount),
+      [3, 3]
+    )
+    assert.deepEqual(offsets, [20, 40])
   } finally {
     await app.close()
   }
 })
 
-test('점수 기준 랭킹은 마지막 행의 점수로 cursor를 만들고, 그 cursor는 같은 기준에서만 받는다', async () => {
-  const sorted = Array.from({ length: 101 }, (_, index) => ({
-    ...character(`s${String(index).padStart(3, '0')}`, 1000),
-    score: { kind: 'buff' as const, value: 500000 - Math.floor(index / 2), approximateSource: null }
-  }))
-  const afters: (FameRankingPosition | undefined)[] = []
+test('랭킹 수는 같은 필터면 한 번만 세고 필터가 다르면 따로 센다', async () => {
+  const counted: FameRankingFilter[] = []
   const { app, origin } = await listen({
     ...unusedReader,
-    readFameRanking: async (_filter, limit, after) => {
-      afters.push(after)
-      const start =
-        after === undefined
-          ? 0
-          : sorted.findIndex((row) => row.characterId === after.characterId) + 1
+    countFameRanking: async (filter) => {
+      counted.push(filter)
 
-      return sorted.slice(start, start + limit)
+      return 0
     }
   })
-
   try {
-    const first = await getJson(origin, '/rankings/fame?sort=buffScore')
-    const cursor = encodeURIComponent(first.body.nextCursor)
-    const second = await getJson(origin, `/rankings/fame?sort=buffScore&cursor=${cursor}`)
-    const otherSorts = await Promise.all(
-      ['', 'sort=fame&', 'sort=equipmentScore&'].map((sort) =>
-        getJson(origin, `/rankings/fame?${sort}cursor=${cursor}`)
-      )
-    )
+    await getJson(origin, '/rankings/fame?jobId=synthetic-job')
+    await getJson(origin, '/rankings/fame?jobId=synthetic-job&page=2')
+    await getJson(origin, '/rankings/fame?sort=buffScore')
 
-    assert.deepEqual(
-      second.body.characters.map(({ characterId }: { characterId: string }) => characterId),
-      ['s100']
-    )
-    assert.deepEqual(afters, [
-      undefined,
-      { value: 500000 - 49, serverId: 'cain', characterId: 's099' }
-    ])
-    assert.deepEqual(
-      otherSorts.map(({ status }) => status),
-      [400, 400, 400]
-    )
+    assert.deepEqual(counted, [{ jobId: 'synthetic-job' }, { sort: 'buffScore' }])
   } finally {
     await app.close()
   }
@@ -481,7 +454,7 @@ test('점수 기준 랭킹은 마지막 행의 점수로 cursor를 만들고, �
 test('랭킹은 sort와 scoreFrom, scoreTo를 숫자로 바꿔 직업 필터와 함께 넘긴다', async () => {
   const reads: FameRankingFilter[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       reads.push(filter)
 
@@ -545,7 +518,7 @@ test('랭킹은 모르는 sort, 기준과 맞지 않는 범위, scoreTo보다 �
   }
 })
 
-test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetId, 해석할 수 없는 cursor와 빈 세트 값을 400으로 거절한다', async () => {
+test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetId, 1보다 작거나 정수가 아닌 page와 빈 세트 값을 400으로 거절한다', async () => {
   const { app, origin } = await listen(unusedReader)
   try {
     for (const query of [
@@ -555,11 +528,12 @@ test('명성 랭킹은 oathSetId 없는 oathSetOption, 숫자가 아닌 oathSetI
       'oathSetId=16204&oathSetId=16205',
       'equipmentSetId=',
       'equipmentSetId=set-a&equipmentSetId=set-b',
-      'cursor=',
-      'cursor=not-a-cursor',
-      `cursor=${Buffer.from('[1,"cain"]').toString('base64url')}`,
-      // rank를 넣던 예전 cursor 모양이다.
-      `cursor=${Buffer.from('[90000,"cain","p099",100]').toString('base64url')}`
+      'page=',
+      'page=0',
+      'page=-1',
+      'page=1.5',
+      'page=01',
+      'page=1&page=2'
     ]) {
       const { status, body } = await getJson(origin, `/rankings/fame?${query}`)
       assert.equal(status, 400, query)
@@ -608,7 +582,7 @@ test('명성 랭킹과 스킬 채택률은 남성 크루세이더의 role을 그
   const rankingReads: FameRankingFilter[] = []
   const adoptionReads: JobSkillAdoptionQuery[] = []
   const { app, origin } = await listen({
-    ...unusedReader,
+    ...rankedReader,
     readFameRanking: async (filter) => {
       rankingReads.push(filter)
 
@@ -726,9 +700,26 @@ test('통계 저장분 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준�
   }
 })
 
-test('명성 랭킹 DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () => {
+test('명성 랭킹 수를 세지 못하면 목록을 읽지 않고 500 INTERNAL_SERVER_ERROR를 준다', async () => {
   const { app, origin } = await listen({
     ...unusedReader,
+    countFameRanking: async () => {
+      throw new Error('synthetic database failure')
+    }
+  })
+  try {
+    const { status, body } = await getJson(origin, '/rankings/fame')
+
+    assert.equal(status, 500)
+    assert.equal(body.error.code, 'INTERNAL_SERVER_ERROR')
+  } finally {
+    await app.close()
+  }
+})
+
+test('명성 랭킹 DB 읽기가 실패하면 500 INTERNAL_SERVER_ERROR를 준다', async () => {
+  const { app, origin } = await listen({
+    ...rankedReader,
     readFameRanking: async () => {
       throw new Error('synthetic database failure')
     }
@@ -847,7 +838,7 @@ test('DB 설정이 없는 API는 빈 랭킹, 0인 통계와 세트, 아이템 �
   try {
     assert.deepEqual(await getJson(origin, '/rankings/fame'), {
       status: 200,
-      body: { characters: [], nextCursor: null }
+      body: { characters: [], pageCount: 0 }
     })
     assert.deepEqual(await getJson(origin, '/stats'), {
       status: 200,

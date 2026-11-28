@@ -175,18 +175,17 @@ it('랭킹 loader는 주소의 필터로 첫 쪽을 서버에서 받아 캐시�
   const loader = Route.options.loader as Loader
   const { queryKey } = fameRankingQuery({ jobId: 'job-1', role: 'buffer' })
 
-  const expectedCharacters = fameRankingFixture.firstPage.characters
-    .slice(0, 20)
-    .map(({ serverId, characterId, characterName }) => ({ serverId, characterId, characterName }))
+  const expectedCharacters = fameRankingFixture.firstPage.characters.map(
+    ({ serverId, characterId, characterName }) => ({ serverId, characterId, characterName })
+  )
 
   server.use(fameRankingHandlers.pages)
 
   await expect(
     loader({ context: { queryClient }, params: {}, deps: { jobId: 'job-1', role: 'buffer' } })
   ).resolves.toEqual({ characters: expectedCharacters })
-  expect(fameRankingFixture.firstPage.characters.length).toBeGreaterThan(20)
   expect(requestedSearches()).toEqual(['/rankings/fame?jobId=job-1&role=buffer'])
-  expect(queryClient.getQueryData(queryKey)?.pages).toEqual([fameRankingFixture.firstPage])
+  expect(queryClient.getQueryData(queryKey)).toEqual({ ...fameRankingFixture.firstPage, page: 1 })
 })
 
 it('통계 loader는 캐릭터 통계를 서버에서 받아 캐시에 둔다', async () => {

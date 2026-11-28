@@ -1,6 +1,6 @@
 import { delay, HttpResponse, http } from 'msw'
 import { API_BASE_URL } from '#shared/api/dfragon-api'
-import { FAME_RANKING_NEXT_CURSOR, fameRankingFixture } from './fame-ranking.fixture'
+import { fameRankingFixture } from './fame-ranking.fixture'
 
 export const FAME_RANKING_URL = `${API_BASE_URL}/rankings/fame`
 
@@ -10,9 +10,13 @@ export function fameRankingFailure(message: string): HttpResponse<object> {
 
 export const fameRankingHandlers = {
   pages: http.get(FAME_RANKING_URL, ({ request }) => {
-    const cursor = new URL(request.url).searchParams.get('cursor')
+    const page = new URL(request.url).searchParams.get('page')
 
-    if (cursor === FAME_RANKING_NEXT_CURSOR) {
+    if (page === '2') {
+      return HttpResponse.json(fameRankingFixture.secondPage)
+    }
+
+    if (page === '3') {
       return HttpResponse.json(fameRankingFixture.lastPage)
     }
 
