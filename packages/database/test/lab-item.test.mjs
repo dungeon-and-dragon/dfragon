@@ -197,7 +197,6 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: '레전더리',
     unitPrice: 3_000_000_000,
     checkedAt,
-    platinum: null,
     cost: null,
     detail: null,
     candidate: null
@@ -207,7 +206,6 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: null,
     unitPrice: null,
     checkedAt: null,
-    platinum: null,
     cost: null,
     detail: null,
     candidate: null
@@ -217,7 +215,6 @@ test('가격은 이름으로, 재화는 비용으로 붙이고, 32bit를 넘는 
     itemRarity: '유니크',
     unitPrice: null,
     checkedAt,
-    platinum: null,
     cost: {
       currencyId,
       currencyName: '합성 재화',
@@ -975,7 +972,7 @@ test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를
   assert.equal(egg?.candidate?.iconUpdatedAt, null)
 })
 
-test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 platinum으로 따로 내고, 매물이 없으면 가격만 비우며, 변형이 없거나 다른 종류면 null이다', {
+test('칭호, 크리쳐의 최저가는 플래티넘 변형을 빼고 고르고, 다른 종류는 플래티넘 이름 변형도 넣는다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
@@ -998,9 +995,10 @@ test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 pl
   })
   await recordPrice(client, titleBase, 50_000)
   await recordPrice(client, '합성 전설[30Lv]', 40_000)
-  await recordPrice(client, titlePlatinum, 90_000)
+  await recordPrice(client, titlePlatinum, 30_000)
   await recordPrice(client, '합성 전설 플래티넘[45Lv]', 70_000)
   await recordPrice(client, '합성 요정[30Lv]', 1_000)
+  await recordPrice(client, '합성 요정 플래티넘[30Lv]', 500)
   await recordPrice(client, '합성 평범', 2_000)
   await recordPrice(client, '합성 오라', 3_000)
   await recordPrice(client, '합성 오라 플래티넘', 1)
@@ -1027,34 +1025,14 @@ test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 pl
   const rows = await readLabItemPrices(client)
 
   assert.deepEqual(
-    rows.map(({ itemName, itemId, unitPrice, platinum }) => [
-      itemName,
-      itemId,
-      unitPrice,
-      platinum
-    ]),
+    rows.map(({ itemName, itemId, unitPrice }) => [itemName, itemId, unitPrice]),
     [
-      [
-        titleBase,
-        'synthetic-합성 전설[30Lv]',
-        40_000,
-        {
-          itemId: 'synthetic-합성 전설 플래티넘[45Lv]',
-          itemRarity: '레어',
-          unitPrice: 70_000,
-          checkedAt: importedAt
-        }
-      ],
-      ['합성 평범', 'synthetic-합성 평범', 2_000, null],
-      [
-        '합성 요정',
-        'synthetic-합성 요정[30Lv]',
-        1_000,
-        { itemId: null, itemRarity: null, unitPrice: null, checkedAt: null }
-      ],
-      ['합성 오라', 'synthetic-합성 오라', 3_000, null],
-      ['합성 겹침', 'synthetic-합성 겹침 플래티넘', 5_000, null],
-      ['합성 카드', 'synthetic-합성 카드', 4_000, null]
+      [titleBase, 'synthetic-합성 전설[30Lv]', 40_000],
+      ['합성 평범', 'synthetic-합성 평범', 2_000],
+      ['합성 요정', 'synthetic-합성 요정[30Lv]', 1_000],
+      ['합성 오라', 'synthetic-합성 오라', 3_000],
+      ['합성 겹침', 'synthetic-합성 겹침 플래티넘', 5_000],
+      ['합성 카드', 'synthetic-합성 카드', 4_000]
     ]
   )
 })
