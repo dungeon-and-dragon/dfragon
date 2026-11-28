@@ -14,7 +14,7 @@ import {
   readContentClearOverviewSamples,
   readContentClearPopulations,
   readContentClearRaidTimes,
-  readContentClearStageMoves,
+  readContentClearWeekMoves,
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
@@ -316,7 +316,7 @@ try {
     readFirstWeeks: (contentId) => readContentClearFirstWeeks(client, contentId),
     readFameBands: (selection, minFame) => readContentClearFameBands(client, selection, minFame),
     readWeekGroups: (comparison) => readContentClearWeekGroups(client, comparison),
-    readStageMoves: (selection) => readContentClearStageMoves(client, selection),
+    readWeekMoves: (selection) => readContentClearWeekMoves(client, selection),
     readStreaks: (selection) => readContentClearStreaks(client, selection),
     readRaidModes: (selection) => readClearRecordRaidModes(client, selection),
     readRaidStageCounts: (selection, stages) =>
@@ -574,10 +574,15 @@ try {
       scores: noScores
     }
   })
-  assert.deepEqual(detail.stageMoves, {
-    hard: { same: 1, other: 1, none: 27 },
-    normal: { same: 1, other: 1, none: 0 }
-  })
+  // clear-a는 이번 주에 두 단계를 다 깨 하드로 센다.
+  assert.deepEqual(detail.weekMoves, [
+    { from: 'hard', to: 'hard', characters: 1 },
+    { from: 'hard', to: 'left', characters: 1 },
+    { from: 'normal', to: 'hard', characters: 1 },
+    { from: 'normal', to: 'normal', characters: 1 },
+    { from: 'returned', to: 'hard', characters: 1 },
+    { from: 'first', to: 'hard', characters: 26 }
+  ])
   assert.deepEqual(detail.streaks, [
     { weeks: 1, characters: 28 },
     { weeks: 3, characters: 1 }
@@ -625,7 +630,7 @@ try {
     '2026-11-05'
   )
   assert.deepEqual(
-    [challengeDetail.weekOverWeek, challengeDetail.stageMoves, challengeDetail.streaks],
+    [challengeDetail.weekOverWeek, challengeDetail.weekMoves, challengeDetail.streaks],
     [null, null, null]
   )
 
@@ -794,7 +799,7 @@ try {
   })
   const legionDetail = await scoredService.contentStats('legion-venus', '2026-11-05')
   assert.deepEqual(
-    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages, legionDetail.stageMoves],
+    [legionDetail.kind, legionDetail.week.cleared, legionDetail.stages, legionDetail.weekMoves],
     ['legion', 2, null, null]
   )
   assert.equal(

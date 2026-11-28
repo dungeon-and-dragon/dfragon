@@ -3,7 +3,7 @@ import test from 'node:test'
 import type {
   ClearContentWeekSamples,
   ClearJobFameSample,
-  ClearStageMoveSelection,
+  ClearWeekMoveSelection,
   ClearWeekComparison,
   ClearWeekGroupSample,
   ClearWeekRatioCount,
@@ -78,7 +78,7 @@ function fakeReader(overrides: Partial<ClearStatsRepository> = {}): ClearStatsRe
     readFirstWeeks: async () => [],
     readFameBands: async () => [],
     readWeekGroups: async () => [],
-    readStageMoves: async () => [],
+    readWeekMoves: async () => [],
     readStreaks: async () => [],
     readRaidModes: async () => [],
     readRaidStageCounts: async () => [],
@@ -290,7 +290,10 @@ const storedContentSamples: ClearContentWeekSamples = {
   times: [],
   weekGroups: [],
   weekGroupScores: [],
-  stageMoves: [],
+  weekMoves: [
+    { from: 'normal', to: 'hard', characters: 4 },
+    { from: 'hard', to: 'hard', characters: 9 }
+  ],
   streaks: [{ weeks: 2, characters: 5 }],
   stages: []
 }
@@ -330,6 +333,10 @@ test('저장한 재료가 있는 주의 상세와 전체 개요는 다시 계산
     assert.equal(latest.status, 200)
     assert.deepEqual(latest.body.adventures, [{ characters: 2, adventures: 3 }])
     assert.deepEqual(latest.body.streaks, [{ weeks: 2, characters: 5 }])
+    assert.deepEqual(latest.body.weekMoves, [
+      { from: 'hard', to: 'hard', characters: 9 },
+      { from: 'normal', to: 'hard', characters: 4 }
+    ])
     assert.equal(previous.status, 200)
     assert.deepEqual(
       previous.body.weeklyClears.map(
@@ -512,7 +519,7 @@ test('DB 설정이 없는 API는 모든 컨텐츠의 weeks를 빈 배열로, 상
       weeklyClears: [],
       fameBands: [],
       weekOverWeek: null,
-      stageMoves: null,
+      weekMoves: null,
       streaks: null,
       stages: null,
       scoreBands: { equipment: [], buff: [] },
@@ -828,7 +835,7 @@ test('목록, 전체 개요, 컨텐츠 상세 요청이 함께 와도 DB 읽기�
     readFirstWeeks: counted(base.readFirstWeeks),
     readFameBands: counted(base.readFameBands),
     readWeekGroups: counted(base.readWeekGroups),
-    readStageMoves: counted(base.readStageMoves),
+    readWeekMoves: counted(base.readWeekMoves),
     readStreaks: counted(base.readStreaks),
     readRaidModes: counted(base.readRaidModes),
     readRaidStageCounts: counted(base.readRaidStageCounts),
@@ -1006,7 +1013,7 @@ const groupSample = (group: ClearWeekGroupSample['group'], cleared: number, fame
 
 test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 읽고 일반과 하드 짝으로 이동을 읽는다', async () => {
   const comparisons: ClearWeekComparison[] = []
-  const stageSelections: ClearStageMoveSelection[] = []
+  const moveSelections: ClearWeekMoveSelection[] = []
   const { app, origin } = await listen(
     fakeReader({
       readWeekGroups: async (comparison) => {
@@ -1018,13 +1025,15 @@ test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 �
           groupSample('first', 3, 3)
         ]
       },
-      readStageMoves: async (selection) => {
-        stageSelections.push(selection)
+      readWeekMoves: async (selection) => {
+        moveSelections.push(selection)
 
         return [
-          { contentId: 'michaela-hard', previous: 'same', characters: 9 },
-          { contentId: 'michaela-hard', previous: 'other', characters: 4 },
-          { contentId: 'michaela-normal', previous: 'other', characters: 2 }
+          { from: 'first', to: 'normal', characters: 1 },
+          { from: 'normal', to: 'left', characters: 3 },
+          { from: 'hard', to: 'hard', characters: 9 },
+          { from: 'returned', to: 'hard', characters: 2 },
+          { from: 'normal', to: 'hard', characters: 4 }
         ]
       },
       readStreaks: async () => [
@@ -1044,7 +1053,7 @@ test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 �
         previousWeekStart: week('2026-10-29')
       }
     ])
-    assert.deepEqual(stageSelections, [
+    assert.deepEqual(moveSelections, [
       {
         hardContentId: 'michaela-hard',
         normalContentId: 'michaela-normal',
@@ -1062,10 +1071,13 @@ test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 �
       ),
       { both: [9, 110_002], returned: [3, null], left: [0, null], first: [3, null] }
     )
-    assert.deepEqual(body.stageMoves, {
-      hard: { same: 9, other: 4, none: 0 },
-      normal: { same: 0, other: 2, none: 0 }
-    })
+    assert.deepEqual(body.weekMoves, [
+      { from: 'hard', to: 'hard', characters: 9 },
+      { from: 'normal', to: 'hard', characters: 4 },
+      { from: 'normal', to: 'left', characters: 3 },
+      { from: 'returned', to: 'hard', characters: 2 },
+      { from: 'first', to: 'normal', characters: 1 }
+    ])
     assert.deepEqual(body.streaks, [
       { weeks: 1, characters: 6 },
       { weeks: 2, characters: 9 }
@@ -1078,15 +1090,15 @@ test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 �
 test('챌린지 상세는 지난주 대비, 이동, 연속 주 수를 읽지 않고 null로 준다', async () => {
   const unread = async (): Promise<never> => assert.fail('챌린지에서 읽으면 안 된다')
   const { app, origin } = await listen(
-    fakeReader({ readWeekGroups: unread, readStageMoves: unread, readStreaks: unread })
+    fakeReader({ readWeekGroups: unread, readWeekMoves: unread, readStreaks: unread })
   )
   try {
     const { status, body } = await getJson(origin, '/stats/clears/engraved-nightmare-1')
 
     assert.equal(status, 200)
     assert.deepEqual(
-      { weekOverWeek: body.weekOverWeek, stageMoves: body.stageMoves, streaks: body.streaks },
-      { weekOverWeek: null, stageMoves: null, streaks: null }
+      { weekOverWeek: body.weekOverWeek, weekMoves: body.weekMoves, streaks: body.streaks },
+      { weekOverWeek: null, weekMoves: null, streaks: null }
     )
   } finally {
     await app.close()
@@ -1098,14 +1110,14 @@ test('일반과 하드가 따로 없는 레이드 상세는 이동을 읽지 않
   const { app, origin } = await listen(
     fakeReader({
       readPopulations: async () => [...populations, population('inae-twilight', '2026-11-05', 700)],
-      readStageMoves: unread
+      readWeekMoves: unread
     })
   )
   try {
     const { status, body } = await getJson(origin, '/stats/clears/inae-twilight')
 
     assert.equal(status, 200)
-    assert.equal(body.stageMoves, null)
+    assert.equal(body.weekMoves, null)
     assert.notEqual(body.weekOverWeek, null)
   } finally {
     await app.close()
@@ -1344,7 +1356,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
         cleared: detail.body.week.cleared,
         bothCleared: detail.body.weekOverWeek?.both.cleared,
         streaks: detail.body.streaks,
-        stageMoves: detail.body.stageMoves,
+        weekMoves: detail.body.weekMoves,
         stages: detail.body.stages
       },
       {
@@ -1356,7 +1368,7 @@ test('레기온 상세는 레이드처럼 그 주 레기온 클리어로 직업,
         cleared: 7,
         bothCleared: 7,
         streaks: [{ weeks: 2, characters: 7 }],
-        stageMoves: null,
+        weekMoves: null,
         stages: null
       }
     )
