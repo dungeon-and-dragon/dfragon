@@ -20,7 +20,7 @@ const SAVES_MIDDLE_LEVEL_TAG_LISTING =
 const SAVES_CREATURE_EGG_LISTING =
   '크리쳐는 정확한 이름 매물이 없으면 앞부분 검색에서 `이름 알`, `이름의 알`과 꼬리표 없는 이름의 `이름[숫자Lv] 알` 크리쳐 매물 가운데 최저가를 저장하고, 꼬리표가 있는 이름은 같은 꼬리표의 알만, 크리쳐가 아닌 알과 칭호의 알은 받지 않는다'
 const SAVES_AURA_BOX_LISTING =
-  '오라는 정확한 이름 매물과 꼬리표 매물이 없으면 이름이 정확히 `이름 오라 상자`인 매물 가운데 최저가와 아이템 검색에서 찾은 오라 본체의 itemId, 등급을 저장하고, 검색에 본체가 없으면 상자 매물의 itemId, 등급을 저장하며, 다른 상자와 칭호의 오라 상자는 받지 않고, 정확한 이름 매물이 있으면 상자를 찾지 않는다'
+  '오라는 정확한 이름 매물과 꼬리표 매물이 없으면 이름이 정확히 `이름 오라 상자`인 매물 가운데 최저가를 저장하고, 다른 상자와 칭호의 오라 상자는 받지 않으며, 정확한 이름 매물이 있으면 상자를 찾지 않는다'
 const KEEPS_SAVED_PRICES_ON_FAILURE =
   '세 번째 이름의 조회가 실패하면 앞의 두 이름은 저장돼 있고 실패를 그대로 던진다'
 
@@ -50,7 +50,6 @@ const boxedAura = '합성 별빛'
 const packagedAura = '합성 달빛'
 const exactAura = '합성 햇빛'
 const boxTitle = '합성 표지'
-const unsearchedBoxedAura = '합성 별무리'
 const checkedAt = new Date('2026-11-26T12:00:00+09:00')
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -489,32 +488,21 @@ test(SAVES_AURA_BOX_LISTING, async () => {
     ],
     [`${packagedAura} 오라 상자`]: [listing('d', `${packagedAura} 오라 상자 패키지`, '에픽', 200)],
     [exactAura]: [listing('e', exactAura, '유니크', 70_000)],
-    [`${boxTitle} 오라 상자`]: [listing('f', `${boxTitle} 오라 상자`, '에픽', 300)],
-    [`${unsearchedBoxedAura} 오라 상자`]: [
-      listing('g', `${unsearchedBoxedAura} 오라 상자`, '에픽', 40_000)
-    ]
+    [`${boxTitle} 오라 상자`]: [listing('f', `${boxTitle} 오라 상자`, '에픽', 300)]
   }
 
-  const searchRows: Record<string, unknown[]> = {
-    [boxedAura]: [{ itemId: '9'.repeat(32), itemName: boxedAura, itemRarity: '레어' }]
-  }
+  const { neople, requested, searched } = auctionNeople((itemName, wordType) => {
+    if (wordType === 'front') {
+      return jsonResponse({ rows: [] })
+    }
 
-  const { neople, requested, searched } = auctionNeople(
-    (itemName, wordType) => {
-      if (wordType === 'front') {
-        return jsonResponse({ rows: [] })
-      }
-
-      return jsonResponse({ rows: matchRows[itemName] ?? [] })
-    },
-    (itemName) => jsonResponse({ rows: searchRows[itemName] ?? [] })
-  )
+    return jsonResponse({ rows: matchRows[itemName] ?? [] })
+  })
 
   const { saved, repository } = memoryPrices()
 
   await priceService(neople, repository).refresh([
     listed(boxedAura, ['AURA']),
-    listed(unsearchedBoxedAura, ['AURA']),
     listed(packagedAura, ['AURA']),
     listed(exactAura, ['AURA']),
     listed(boxTitle, ['TITLE'])
@@ -523,26 +511,17 @@ test(SAVES_AURA_BOX_LISTING, async () => {
   assert.deepEqual(requested, [
     boxedAura,
     `${boxedAura} 오라 상자`,
-    unsearchedBoxedAura,
-    `${unsearchedBoxedAura} 오라 상자`,
     packagedAura,
     `${packagedAura} 오라 상자`,
     exactAura,
     boxTitle
   ])
-  assert.deepEqual(searched, [boxedAura, unsearchedBoxedAura, packagedAura, boxTitle])
+  assert.deepEqual(searched, [packagedAura, boxTitle])
   assert.deepEqual(saved.get(boxedAura), {
     itemName: boxedAura,
-    itemId: '9'.repeat(32),
-    itemRarity: '레어',
+    itemId: 'b'.repeat(32),
+    itemRarity: '레전더리',
     unitPrice: 55_000,
-    checkedAt
-  })
-  assert.deepEqual(saved.get(unsearchedBoxedAura), {
-    itemName: unsearchedBoxedAura,
-    itemId: 'g'.repeat(32),
-    itemRarity: '에픽',
-    unitPrice: 40_000,
     checkedAt
   })
   assert.deepEqual(saved.get(packagedAura), {
