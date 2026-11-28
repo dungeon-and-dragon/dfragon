@@ -27,7 +27,7 @@ DFragon 웹과 운영 화면이 쓰는 토큰, 글꼴, 컴포넌트 CSS입니다
 ## CSS로 쓰기
 
 - 저장소 화면은 Tailwind CSS로 `theme.css`를 컴파일합니다. 토큰은 `bg-canvas`, `text-fg-muted`, `border-line` 같은 utility와 `var(--color-canvas)` 같은 CSS 변수로 씁니다.
-- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `number-field`, `switch`, `checkbox`, `chip`, `badge`, `select`, `listbox`, `tabs`, `tooltip`, `popover`, `confirm-popover`, `status-chip`, `status-spinner`, `page`, `topbar`, `divider-v`, `screen`, `section`, `section-cols`, `section-title`, `screen-head`, `screen-title`, `table`, `num`, `label`, `stat`, `portrait`, `link`, `skeleton`, `state`, `loading-line`, `pagination`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
+- 컴포넌트 모양은 디자인 패키지의 컴포넌트 클래스(`btn`, `icon-btn`, `field`, `number-field`, `switch`, `checkbox`, `chip`, `image-chip`, `badge`, `select`, `listbox`, `tabs`, `tooltip`, `popover`, `confirm-popover`, `status-chip`, `status-spinner`, `page`, `topbar`, `divider-v`, `screen`, `section`, `section-cols`, `section-title`, `screen-head`, `screen-title`, `table`, `num`, `label`, `stat`, `portrait`, `link`, `skeleton`, `state`, `loading-line`, `pagination`)로 쓰고, 화면 배치는 utility나 inline style로 씁니다. 상태는 `disabled`, `aria-pressed`, `data-checked` 같은 속성으로 그립니다.
 - 화면은 카드 상자 대신 선으로 구획을 나눕니다. 화면 상자(`screen`) 양옆 세로 선, 구획(`section`) 아래 창 전체 폭 가로 선과 두 선이 만나는 표식이 틀이고, 구획 안의 행과 줄은 좌우 16px에서 글자가 시작합니다. 600px 미만에서는 가로 선만 남습니다.
 - 표는 `table` 클래스 하나로 그립니다. 셀은 한 줄로 두고 넘치면 말줄임하며, 이름이 두 줄이 되는 표만 `table-wrap`을 붙입니다. 숫자 칸은 `table-num`, 가로 스크롤 상자는 `table-scroll`, 720px 최소 폭은 `table-wide`입니다.
 - Tailwind CSS의 preflight는 쓰지 않습니다. 필요한 초기화는 `base.css`와 각 컴포넌트 클래스가 가집니다.
