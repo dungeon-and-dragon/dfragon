@@ -115,6 +115,45 @@ describe('BarLineChart', () => {
     expect(ticks()).toEqual(['1주차', '4주차', '2주차', '3주차'])
   })
 
+  it('비율을 켜면 툴팁에 켜 둔 계열 합 대비 비율을 붙이고 끈 계열은 합에서 뺀다', async () => {
+    await render(
+      <BarLineChart
+        label="주차별 클리어"
+        x={weeks}
+        bars={bars}
+        layout="stack"
+        formats={formats}
+        toggleable
+        barShares
+      />
+    )
+
+    const hoverWeek = async (index: number) => {
+      const hit = container.querySelectorAll('[role="group"] li')[index]!
+      await act(async () => {
+        hit.dispatchEvent(
+          new MouseEvent('mouseover', { bubbles: true, relatedTarget: document.body })
+        )
+      })
+    }
+
+    const rows = () =>
+      [...container.querySelectorAll('[role="group"] > span .text-xs')]
+        .filter((row) => row.querySelector('i') != null)
+        .map((row) => [...row.querySelectorAll('span')].map((cell) => cell.textContent))
+
+    await hoverWeek(1)
+    expect(rows()).toEqual([
+      ['다시 클리어', '20', '80.0%'],
+      ['첫 클리어', '5', '20.0%']
+    ])
+
+    const [again] = [...container.querySelectorAll<HTMLButtonElement>('ul li button')]
+    await act(async () => again!.click())
+    await hoverWeek(1)
+    expect(rows()).toEqual([['첫 클리어', '5', '100.0%']])
+  })
+
   it('범례를 켤 수 없으면 범례에 버튼을 두지 않는다', async () => {
     await render(
       <BarLineChart label="주차별 클리어" x={weeks} bars={bars} layout="stack" formats={formats} />

@@ -8,6 +8,7 @@ export type TooltipRow = Readonly<{
   color: string
   faded?: boolean
   value: string
+  share?: string
 }>
 
 export type Hover = Readonly<{ key: string | null; open: boolean }>

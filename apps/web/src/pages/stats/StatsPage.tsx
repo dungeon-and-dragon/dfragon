@@ -170,6 +170,7 @@ function JobFameBox({ chart }: { chart: JobFameChart }): React.JSX.Element {
         narrowStep={JOB_FAME_NARROW_STEP}
         toggleable
         sortByTotal
+        barShares
       />
     </ListBox>
   )
