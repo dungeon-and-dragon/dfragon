@@ -34,7 +34,7 @@ export type {
   AdventureTimelinePage
 } from './model/adventure-timeline'
 export { adventureCharactersSchema, guildSchema } from './model/adventure-guild'
-export type { AdventureCharacters, Guild } from './model/adventure-guild'
+export type { AdventureCharacter, AdventureCharacters, Guild } from './model/adventure-guild'
 export { adventureWeeklySchema } from './model/adventure-weekly'
 export type { AdventureWeekly, ClearName, WeeklyCharacter } from './model/adventure-weekly'
 export { useMyAdventureStore } from './model/useMyAdventureStore'

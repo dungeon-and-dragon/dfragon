@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useOathCatalog } from '#entities/catalog'
 import { AdventureNameForm } from '#features/adventure-search'
 import { LabTabs } from '#widgets/lab-tabs'
 import { useAdventureCharacters } from './api/useAdventureCharacters'
@@ -37,6 +38,8 @@ export function LabEpicSoulsScreen({
 
 function AdventureEpicSouls({ adventureName }: { adventureName: string }): React.JSX.Element {
   const result = useAdventureCharacters(adventureName)
+  const catalogResult = useOathCatalog()
+  const catalog = catalogResult.status === 'success' ? catalogResult.value : null
 
   switch (result.status) {
     case 'loading':
@@ -56,7 +59,7 @@ function AdventureEpicSouls({ adventureName }: { adventureName: string }): React
         return <p className="p-4 text-fg-muted">모험단을 찾지 못했습니다.</p>
       }
 
-      return <EpicSoulTable characters={characters} />
+      return <EpicSoulTable characters={characters} catalog={catalog} />
     }
   }
 }

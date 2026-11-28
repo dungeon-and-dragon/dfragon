@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { STORY_ADVENTURE } from './api/epic-souls.fixture'
@@ -25,7 +26,13 @@ function Screen({ adventureName }: { adventureName: string | null }): React.JSX.
 }
 
 export const 에픽소울: Story = {
-  parameters: { msw: [epicSoulsHandlers.characters, epicSoulsHandlers.recoveries] },
+  parameters: {
+    msw: [
+      oathCatalogHandlers.notUploaded,
+      epicSoulsHandlers.characters,
+      epicSoulsHandlers.recoveries
+    ]
+  },
   render: () => <Screen adventureName={STORY_ADVENTURE} />
 }
 
@@ -39,7 +46,13 @@ export const 목록받는중: Story = {
 }
 
 export const 줄받는중: Story = {
-  parameters: { msw: [epicSoulsHandlers.characters, epicSoulsHandlers.recoveriesLoading] },
+  parameters: {
+    msw: [
+      oathCatalogHandlers.notUploaded,
+      epicSoulsHandlers.characters,
+      epicSoulsHandlers.recoveriesLoading
+    ]
+  },
   render: () => <Screen adventureName={STORY_ADVENTURE} />
 }
 
