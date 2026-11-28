@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useMyAdventureStore } from '#entities/adventure-guild'
+import { oathCatalogHandlers } from '#entities/catalog/api/oath-catalog.handlers'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
 import { TestRouter } from '#testing/test-support/test-router'
@@ -19,6 +20,7 @@ beforeEach(() => {
   document.body.append(container)
   root = createRoot(container)
   useMyAdventureStore.setState({ adventureName: null })
+  server.use(oathCatalogHandlers.notUploaded)
 })
 
 afterEach(async () => {
@@ -104,8 +106,25 @@ it('캐릭터 줄은 목록을 받자마자 그리고, 회수 응답이 오기 �
 
   await vi.waitFor(() => expect(characterRows()).toHaveLength(6))
   for (const row of characterRows()) {
-    expect(row.cells[2]?.querySelector('.skeleton')).not.toBeNull()
+    expect(row.cells[5]?.querySelector('.skeleton')).not.toBeNull()
   }
+})
+
+it('줄마다 검색 화면처럼 세트, 명성, 점수를 보이고 그 뒤에 에픽 소울을 둔다', async () => {
+  server.use(epicSoulsHandlers.characters, epicSoulsHandlers.recoveries)
+  await render()
+  await search()
+  await waitForRecoveries()
+
+  const headings = [...container.querySelectorAll('table > thead th')].map(
+    (cell) => cell.textContent
+  )
+  const [, set, fame, score] = rowText(characterRows()[0]!)
+
+  expect(headings).toEqual(['펼치기', '캐릭터', '세트', '명성', '점수', '에픽 소울'])
+  expect(set).toBe('황금향' + '용투 : 세계를 태우는 불꽃')
+  expect(fame).toBe('136,647')
+  expect(score).toContain('1,388,832')
 })
 
 it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 받은 줄의 에픽 소울을 더한다', async () => {
@@ -115,9 +134,9 @@ it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 �
   await waitForRecoveries()
 
   const rows = characterRows()
-  expect(rowText(rows[0]!)[1]).toBe(String(recoveries[0]!.total))
-  expect(rowText(rows[3]!)[1]).toBe('계산하지 못했습니다.')
-  expect(rowText(rows[5]!)[1]).toBe('0')
+  expect(rowText(rows[0]!)[4]).toBe(String(recoveries[0]!.total))
+  expect(rowText(rows[3]!)[4]).toBe('계산하지 못했습니다.')
+  expect(rowText(rows[5]!)[4]).toBe('0')
   expect(rows[5]!.querySelector('button')).toBeNull()
   // 계산하지 못한 넷째 캐릭터를 빼고 226 + 21 + 67 + 11 + 0이다.
   expect(totalText()).toBe('325')

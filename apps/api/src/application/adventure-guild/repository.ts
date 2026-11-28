@@ -1,4 +1,4 @@
-import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
+import type { RankedStoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
 import type {
   AdventureActivityOf,
   AdventureEquipment,
@@ -27,7 +27,7 @@ export type AdventureTimelineRead = {
 }
 
 export interface AdventureGuildRepository {
-  readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]>
+  readAdventureCharacters(adventureName: string): Promise<RankedStoredCharacter[]>
   readGuild(guildId: string): Promise<StoredGuild>
   readAdventureWeeklyClears(adventureName: string): Promise<AdventureWeeklyClears>
   readAdventureEquipment(adventureName: string): Promise<AdventureEquipment>

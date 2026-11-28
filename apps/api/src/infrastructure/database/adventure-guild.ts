@@ -1,8 +1,8 @@
 import {
   type DatabaseClient,
-  type StoredCharacter,
+  type RankedStoredCharacter,
   type StoredGuild,
-  readAdventureCharacters,
+  readAdventureSetCharacters,
   readGuild
 } from '@dfragon/database'
 import type {
@@ -29,8 +29,8 @@ import { readAdventureWeeklyClears } from './adventure-weekly.js'
 export class DatabaseAdventureGuildRepository implements AdventureGuildRepository {
   constructor(private readonly client: DatabaseClient) {}
 
-  readAdventureCharacters(adventureName: string): Promise<StoredCharacter[]> {
-    return readAdventureCharacters(this.client, adventureName)
+  readAdventureCharacters(adventureName: string): Promise<RankedStoredCharacter[]> {
+    return readAdventureSetCharacters(this.client, adventureName)
   }
 
   readGuild(guildId: string): Promise<StoredGuild> {

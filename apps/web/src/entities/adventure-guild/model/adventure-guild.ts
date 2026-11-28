@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { storedCharacterSchema } from '#entities/ranking/@x/adventure-guild'
+import { characterSetsShape, storedCharacterSchema } from '#entities/ranking/@x/adventure-guild'
 
 export const guildSchema = z.object({
   guildId: z.string(),
@@ -12,7 +12,8 @@ export type Guild = z.infer<typeof guildSchema>
 
 export const adventureCharactersSchema = z.object({
   adventureName: z.string(),
-  characters: z.array(storedCharacterSchema)
+  characters: z.array(storedCharacterSchema.extend(characterSetsShape))
 })
 
 export type AdventureCharacters = z.infer<typeof adventureCharactersSchema>
+export type AdventureCharacter = AdventureCharacters['characters'][number]
