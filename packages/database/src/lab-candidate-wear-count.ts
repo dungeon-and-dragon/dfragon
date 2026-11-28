@@ -26,3 +26,26 @@ export async function replaceLabCandidateWearCounts(
     { timeout: REPLACE_TIMEOUT_MS }
   )
 }
+
+export type WornItemId = {
+  itemName: string
+  itemId: string
+}
+
+// 같은 이름에 Neople id가 여럿이면(기간제, 이벤트 판) 가장 많이 낀 id를 고르고, 수가 같으면 id 순으로 정한다.
+export async function readMostWornItemIds(
+  client: DatabaseClient,
+  itemNames: readonly string[]
+): Promise<WornItemId[]> {
+  if (itemNames.length === 0) {
+    return []
+  }
+
+  return client.$queryRaw<WornItemId[]>`
+    SELECT DISTINCT ON ("item_name") "item_name" AS "itemName", "item_id" AS "itemId"
+    FROM "character_items"
+    WHERE "slot_id" = ANY(${LAB_CANDIDATE_WEAR_SLOT_IDS}::text[])
+      AND "item_name" = ANY(${[...itemNames]}::text[])
+    GROUP BY "item_name", "item_id"
+    ORDER BY "item_name", count(*) DESC, "item_id"`
+}

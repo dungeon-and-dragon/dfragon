@@ -5,7 +5,9 @@ import {
   readLabCandidateIcon,
   readLabCurrencyIcon,
   readLabItemDetailIcon,
-  readLabItemPrices
+  readLabItemPrices,
+  readMostWornItemIds,
+  type WornItemId
 } from '@dfragon/database'
 import type { LabItemRepository } from '#application/lab-items/repository.js'
 
@@ -14,6 +16,10 @@ export class DatabaseLabItemRepository implements LabItemRepository {
 
   readLabItemPrices(): Promise<LabItemPriceRow[]> {
     return readLabItemPrices(this.client)
+  }
+
+  readMostWornItemIds(itemNames: readonly string[]): Promise<WornItemId[]> {
+    return readMostWornItemIds(this.client, itemNames)
   }
 
   readCurrencyIcon(id: number): Promise<LabCurrencyIcon | null> {
