@@ -106,7 +106,8 @@ export const clearContentStatsSchema = z.object({
     .nullable(),
   weekMoves: z.array(weekMoveSchema).nullable(),
   streaks: z.array(z.object({ weeks: z.number().int().positive(), characters: count })).nullable(),
-  scoreBands: z.object({ equipment: z.array(scoreBandSchema), buff: z.array(scoreBandSchema) })
+  scoreBands: z.object({ equipment: z.array(scoreBandSchema), buff: z.array(scoreBandSchema) }),
+  scoreBandMinPopulation: count
 })
 
 export const clearOverviewSchema = z.object({

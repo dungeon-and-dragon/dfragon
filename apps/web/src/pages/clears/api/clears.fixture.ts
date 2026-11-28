@@ -301,6 +301,7 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
     weekMoves,
     streaks,
     scoreBands: { equipment: equipmentBands, buff: buffBands },
+    scoreBandMinPopulation: 0,
     weekdays,
     hours
   }

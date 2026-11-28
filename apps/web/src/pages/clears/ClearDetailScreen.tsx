@@ -378,7 +378,10 @@ function DetailStats({
         )}
       </div>
       <div className={clearClasses.row}>
-        <ScoreBandPanel scoreBands={stats.scoreBands} />
+        <ScoreBandPanel
+          scoreBands={stats.scoreBands}
+          minPopulation={stats.scoreBandMinPopulation}
+        />
       </div>
       <div className={clearClasses.row}>
         {hasAdventures && (
@@ -424,8 +427,12 @@ function GroupScorePanel({
 }
 
 function ScoreBandPanel({
-  scoreBands
-}: Readonly<{ scoreBands: ClearContentStats['scoreBands'] }>): React.JSX.Element | null {
+  scoreBands,
+  minPopulation
+}: Readonly<{
+  scoreBands: ClearContentStats['scoreBands']
+  minPopulation: number
+}>): React.JSX.Element | null {
   const choices = bandScoreKindChoices(scoreBands)
   const [kind, setKind] = useChoice(choices)
   if (kind === undefined) {
@@ -441,7 +448,7 @@ function ScoreBandPanel({
         )
       }
     >
-      <Columns groups={[scoreBandColumns(scoreBands[kind])]} />
+      <Columns groups={[scoreBandColumns(scoreBands[kind], minPopulation)]} />
     </Panel>
   )
 }
