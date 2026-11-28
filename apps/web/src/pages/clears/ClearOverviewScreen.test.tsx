@@ -188,7 +188,7 @@ function contentStatsOf(contentId: string): ClearContentStats {
     weeklyClears: [],
     fameBands: [],
     weekOverWeek: null,
-    stageMoves: null,
+    weekMoves: null,
     streaks: null,
     stages: null,
     scoreBands: { equipment: [], buff: [] },
