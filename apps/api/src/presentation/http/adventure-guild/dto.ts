@@ -1,4 +1,9 @@
-import type { StoredCharacter, StoredGuild } from '@dfragon/database'
+import type {
+  CharacterEquipmentSet,
+  CharacterOathSet,
+  RankedStoredCharacter,
+  StoredGuild
+} from '@dfragon/database'
 import { z } from 'zod'
 import {
   ADVENTURE_TIMELINE_KINDS,
@@ -34,7 +39,10 @@ export type SeasonNumber = z.infer<typeof seasonNumber>
 
 export type AdventureCharactersResponse = {
   adventureName: string
-  characters: CharacterRow[]
+  characters: (CharacterRow & {
+    equipmentSet: CharacterEquipmentSet | null
+    oathSet: CharacterOathSet | null
+  })[]
 }
 
 export type GuildMembersResponse = {
@@ -90,9 +98,13 @@ export function parseSeason(season: string): SeasonNumber {
 
 export function toAdventureCharactersResponse(
   adventureName: string,
-  characters: readonly StoredCharacter[]
+  characters: readonly RankedStoredCharacter[]
 ): AdventureCharactersResponse {
-  const rows = characters.map(toCharacterRow)
+  const rows = characters.map(({ equipmentSet, oathSet, ...stored }) => {
+    const row = toCharacterRow(stored)
+
+    return { ...row, equipmentSet, oathSet }
+  })
 
   return { adventureName, characters: rows }
 }

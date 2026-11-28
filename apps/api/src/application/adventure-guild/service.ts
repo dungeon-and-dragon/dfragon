@@ -1,4 +1,4 @@
-import type { StoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
+import type { RankedStoredCharacter, StoredGuild, TimelineCharacter } from '@dfragon/database'
 import {
   type ActivitySeason,
   type AdventureActivity,
@@ -24,7 +24,7 @@ export class AdventureGuildService {
     private readonly seasonBackfill: SeasonBackfillRequests
   ) {}
 
-  adventure(adventureName: string): Promise<StoredCharacter[]> {
+  adventure(adventureName: string): Promise<RankedStoredCharacter[]> {
     return this.repository.readAdventureCharacters(adventureName)
   }
 
