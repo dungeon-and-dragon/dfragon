@@ -366,12 +366,13 @@ it('수집한 주가 하나도 없으면 제목 줄 아래 한 줄만 두고 개
   expect(requested).toEqual(['/stats/clears'])
 })
 
-it('가장 최근 주만 주를 옮기는 휠 없이 보이고 가장 넓은 분모의 기준 명성과 캐릭터 수를 보인다', async () => {
+it('제목은 화면에서 숨기고 가장 최근 주의 기간을 수집 날짜로 기준 명성 왼쪽에 두며 가장 넓은 분모의 기준 명성과 캐릭터 수를 보인다', async () => {
   await open()
 
   expect(container.querySelector('[aria-label="주 선택"]')).toBeNull()
+  expect(container.querySelector('h1')?.className).toBe('sr-only')
   expect(container.querySelector('header')?.textContent).toBe(
-    '클리어 집계11-12 ~ 11-18기준 명성104,292 이상캐릭터 수2,000'
+    '클리어 집계수집 날짜11-12 ~ 11-18기준 명성104,292 이상캐릭터 수2,000'
   )
   expect(requestsTo('/stats/clears/overview')).toEqual([
     `/stats/clears/overview?week=${LATEST_WEEK}`

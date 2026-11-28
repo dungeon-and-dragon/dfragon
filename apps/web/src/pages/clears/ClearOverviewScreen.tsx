@@ -124,9 +124,11 @@ function Overview({
 
   return (
     <div className={clearClasses.screen}>
-      <ClearTitle summary={weekSummaryOf(contents, weekStart)}>
-        <p className="text-base font-semibold tabular-nums text-fg">{weekRangeText(weekStart)}</p>
-      </ClearTitle>
+      <ClearTitle
+        summary={weekSummaryOf(contents, weekStart)}
+        period={weekRangeText(weekStart)}
+        titleHidden
+      />
       <ClearContentCards cards={contentCards(contents, weekStart)} onOpen={openContent} />
       {hasRateValues(contents) && (
         <ClearRatePanel contents={contents} weeks={weeks} weekStart={weekStart} />

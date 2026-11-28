@@ -12,32 +12,34 @@ const integer = new Intl.NumberFormat('ko-KR')
 
 export function ClearTitle({
   summary,
-  children
+  period,
+  titleHidden = false
 }: {
   summary: WeekSummary | undefined
-  children?: ReactNode
+  period?: string
+  titleHidden?: boolean
 }): React.JSX.Element {
   return (
     <header className="section screen-head flex-wrap justify-start">
-      <h1 className="screen-title mr-6">{CLEAR_TITLE}</h1>
-      {children}
-      {summary !== undefined && (
-        <div className="ml-auto flex flex-wrap gap-x-6 gap-y-2 max-sm:gap-x-4">
-          {summary.minFame !== null && (
-            <TitleStat
-              label="기준 명성"
-              numeric={false}
-              value={
-                <span className="text-game-fame">
-                  <span className="num">{integer.format(summary.minFame)}</span>
-                  {' 이상'}
-                </span>
-              }
-            />
-          )}
+      <h1 className={titleHidden ? 'sr-only' : 'screen-title mr-6'}>{CLEAR_TITLE}</h1>
+      <div className="ml-auto flex flex-wrap gap-x-6 gap-y-2 max-sm:gap-x-4">
+        {period !== undefined && <TitleStat label="수집 날짜" value={period} />}
+        {summary?.minFame != null && (
+          <TitleStat
+            label="기준 명성"
+            numeric={false}
+            value={
+              <span className="text-game-fame">
+                <span className="num">{integer.format(summary.minFame)}</span>
+                {' 이상'}
+              </span>
+            }
+          />
+        )}
+        {summary !== undefined && (
           <TitleStat label="캐릭터 수" value={integer.format(summary.population)} />
-        </div>
-      )}
+        )}
+      </div>
     </header>
   )
 }
