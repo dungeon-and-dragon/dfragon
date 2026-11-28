@@ -5,5 +5,7 @@ export type {
   LabItemCurrencyCost,
   LabItemGroupPrices,
   LabItemPrice,
-  LabItems
+  LabItems,
+  LabSlotItemCard,
+  LabSlotItemOptions
 } from './service.js'

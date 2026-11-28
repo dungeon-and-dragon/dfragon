@@ -1,13 +1,21 @@
-import { type SlotItem, type SlotItemCategory, findSlotItem } from '@dfragon/lib/slot-items'
+import { SLOT_ITEM_CATEGORIES, type SlotItemCategory } from '@dfragon/lib/lab-items'
 import { isRecord } from '@dfragon/lib/utils/shape-check'
 import type {
   CharacterPayload,
   CharacterPayloads
 } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { ScoreSimulationInput } from '@dfragon/server-core/domain/score/index.js'
+import {
+  findLabSlotItemOption,
+  type LabEnchantCardPrice,
+  type LabSlotItem,
+  type LabSlotItemGroup
+} from '#domain/lab-enchant-options/index.js'
 import { EquipmentSimulationFailure } from './failure.js'
 
-/** 묶음 id이고, null이면 착용한 아이템을 그대로 둔다. */
+export type LabSlotItemGroups = readonly LabSlotItemGroup<LabEnchantCardPrice>[]
+
+/** 실험실 선택지 id이고, null이면 착용한 아이템을 그대로 둔다. */
 export type SlotItemChanges = Readonly<Record<SlotItemCategory, string | null>>
 
 interface SlotItemEdit {
@@ -15,7 +23,7 @@ interface SlotItemEdit {
   readonly original: CharacterPayload
   /** 원본에 없는 부위에 더하는지다. */
   readonly added: boolean
-  readonly slotItem: SlotItem
+  readonly item: LabSlotItem
 }
 
 export type SlotItemEdits = Readonly<Record<SlotItemCategory, SlotItemEdit | null>>
@@ -83,35 +91,42 @@ function emptyOf(category: SlotItemCategory): CharacterPayload {
 function editOf(
   payloads: CharacterPayloads,
   category: SlotItemCategory,
-  id: string | null
+  id: string | null,
+  options: LabSlotItemGroups
 ): SlotItemEdit | null {
   if (id === null) {
     return null
   }
 
-  const slotItem = findSlotItem(category, id)
+  const option = findLabSlotItemOption(options, category, id)
 
-  if (slotItem === null) {
+  if (option === null) {
     throw new EquipmentSimulationFailure('request')
   }
 
+  const { item } = option
   const worn = originalOf(payloads, category)
 
   if (worn === null) {
-    return { original: emptyOf(category), added: true, slotItem }
+    return { original: emptyOf(category), added: true, item }
   }
 
-  return { original: worn, added: false, slotItem }
+  return { original: worn, added: false, item }
 }
 
-/** 그 카테고리의 목록에 없는 id는 거절하고, 비어 있는 부위는 고른 아이템을 더한다. */
+export function changesSlotItems(changes: SlotItemChanges): boolean {
+  return SLOT_ITEM_CATEGORIES.some((category) => changes[category] !== null)
+}
+
+/** 그 종류의 실험실 선택지에 없는 id는 거절하고, 비어 있는 부위는 고른 아이템을 더한다. */
 export function editSlotItems(
   payloads: CharacterPayloads,
-  changes: SlotItemChanges
+  changes: SlotItemChanges,
+  options: LabSlotItemGroups
 ): SlotItemEdits {
-  const title = editOf(payloads, 'title', changes.title)
-  const creature = editOf(payloads, 'creature', changes.creature)
-  const aura = editOf(payloads, 'aura', changes.aura)
+  const title = editOf(payloads, 'title', changes.title, options)
+  const creature = editOf(payloads, 'creature', changes.creature, options)
+  const aura = editOf(payloads, 'aura', changes.aura, options)
 
   return { title, creature, aura }
 }
@@ -131,13 +146,13 @@ export function slotItemIds(edits: SlotItemEdits): string[] {
       return []
     }
 
-    return [edit.slotItem.item.itemId]
+    return [edit.item.itemId]
   })
 }
 
 function replacedItem(edit: SlotItemEdit): CharacterPayload {
   const item = structuredClone(edit.original)
-  const { itemId, itemName, itemRarity } = edit.slotItem.item
+  const { itemId, itemName, itemRarity } = edit.item
 
   item.itemId = itemId
   item.itemName = itemName
@@ -184,7 +199,7 @@ export function simulatedSlotItems(
   details: ReadonlyMap<string, CharacterPayload>
 ): SimulatedSlotItems {
   const title = simulatedOf(edits.title, (edit) =>
-    simulatedTitle(edit, details.get(edit.slotItem.item.itemId))
+    simulatedTitle(edit, details.get(edit.item.itemId))
   )
   const creature = simulatedOf(edits.creature, replacedItem)
   const aura = simulatedOf(edits.aura, simulatedAura)

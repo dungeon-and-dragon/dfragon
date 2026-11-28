@@ -1,4 +1,10 @@
-import type { LabEnchantCard, LabEnchantOptions, LabItems } from '#application/lab-items/index.js'
+import type {
+  LabEnchantCard,
+  LabEnchantOptions,
+  LabItems,
+  LabSlotItemCard,
+  LabSlotItemOptions
+} from '#application/lab-items/index.js'
 
 export type LabItemsResponse = LabItems
 
@@ -20,7 +26,17 @@ export interface LabEnchantOptionsResponse {
       }[]
     }[]
   }[]
+  slotItems: {
+    category: string
+    tiers: {
+      tier: string
+      options: { id: string; cards: readonly LabSlotItemCard[] }[]
+    }[]
+  }[]
 }
+
+type LabSlotItemGroup = LabSlotItemOptions['slotItems'][number]
+type LabSlotItemGroupResponse = LabEnchantOptionsResponse['slotItems'][number]
 
 type LabEnchantSlot = LabEnchantOptions['slots'][number]
 type LabEnchantTier = LabEnchantSlot['tiers'][number]
@@ -47,10 +63,25 @@ function toSlotResponse({ slotId, role, tiers }: LabEnchantSlot): LabEnchantSlot
   return { slotId, role, tiers: tierResponses }
 }
 
-export function toEnchantOptionsResponse({ slots }: LabEnchantOptions): LabEnchantOptionsResponse {
-  const slotResponses = slots.map(toSlotResponse)
+// 엔진에 넘길 아이템과 정렬에 쓴 명성은 응답에 싣지 않는다.
+function toSlotItemGroupResponse({ category, tiers }: LabSlotItemGroup): LabSlotItemGroupResponse {
+  const tierResponses = tiers.map(({ tier, options }) => {
+    const optionResponses = options.map(({ id, cards }) => ({ id, cards }))
 
-  return { slots: slotResponses }
+    return { tier, options: optionResponses }
+  })
+
+  return { category, tiers: tierResponses }
+}
+
+export function toEnchantOptionsResponse(
+  { slots }: LabEnchantOptions,
+  { slotItems }: LabSlotItemOptions
+): LabEnchantOptionsResponse {
+  const slotResponses = slots.map(toSlotResponse)
+  const slotItemResponses = slotItems.map(toSlotItemGroupResponse)
+
+  return { slots: slotResponses, slotItems: slotItemResponses }
 }
 
 const CURRENCY_ID_DIGITS = /^[1-9]\d{0,14}$/

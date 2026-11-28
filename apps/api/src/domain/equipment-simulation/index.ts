@@ -28,9 +28,10 @@ export { EquipmentSimulationFailure } from './failure.js'
 export type { EquipmentSimulationFailureKind } from './failure.js'
 export type { OathChanges, OathCrystalChange } from './oath.js'
 export { editOath, hasOathEdit, simulatedOath } from './oath.js'
-export type { SimulatedSlotItems, SlotItemChanges } from './slot-items.js'
+export type { LabSlotItemGroups, SimulatedSlotItems, SlotItemChanges } from './slot-items.js'
 export {
   addsSlotItems,
+  changesSlotItems,
   editSlotItems,
   hasSlotItemEdits,
   simulatedSlotItems,
