@@ -73,8 +73,8 @@ const weekGroupSchema = z.object({
 const scoreBandSchema = z.object({ score: count, population: count, cleared: count })
 
 const weekMoveSchema = z.object({
-  from: z.enum(['hard', 'normal', 'returned', 'first']),
-  to: z.enum(['hard', 'normal', 'left']),
+  from: z.enum(['hard', 'normal', 'matching', 'returned', 'first']),
+  to: z.enum(['hard', 'normal', 'matching', 'left']),
   characters: count
 })
 

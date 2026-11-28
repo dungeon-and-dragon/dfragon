@@ -211,15 +211,18 @@ export function weekOverWeekCard(
 
 const HARD_NODE = { name: '하드', color: 'var(--color-chart-base)' }
 const NORMAL_NODE = { name: '일반', color: 'var(--color-chart-base)', faded: true }
+const MATCHING_NODE = { name: '싱글/매칭', color: 'var(--color-chart-base)', faded: true }
 const MOVE_SOURCES: Record<ClearWeekMove['from'], Omit<SankeyNode, 'key'>> = {
   hard: HARD_NODE,
   normal: NORMAL_NODE,
+  matching: MATCHING_NODE,
   returned: { name: '복귀', color: 'var(--color-chart-3)' },
   first: { name: '신규', color: 'var(--color-chart-1)' }
 }
 const MOVE_TARGETS: Record<ClearWeekMove['to'], Omit<SankeyNode, 'key'>> = {
   hard: HARD_NODE,
   normal: NORMAL_NODE,
+  matching: MATCHING_NODE,
   left: { name: '이탈', color: 'var(--color-chart-8)' }
 }
 

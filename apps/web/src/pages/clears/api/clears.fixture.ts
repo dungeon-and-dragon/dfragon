@@ -234,11 +234,17 @@ export function storyClearContentStats(contentId: string, weekStart: string): Cl
         { from: 'hard', to: 'left', characters: 180 },
         { from: 'normal', to: 'hard', characters: 240 },
         { from: 'normal', to: 'normal', characters: 3900 },
+        { from: 'normal', to: 'matching', characters: 260 },
         { from: 'normal', to: 'left', characters: 520 },
+        { from: 'matching', to: 'normal', characters: 210 },
+        { from: 'matching', to: 'matching', characters: 2600 },
+        { from: 'matching', to: 'left', characters: 430 },
         { from: 'returned', to: 'hard', characters: 70 },
         { from: 'returned', to: 'normal', characters: 150 },
+        { from: 'returned', to: 'matching', characters: 120 },
         { from: 'first', to: 'hard', characters: 40 },
-        { from: 'first', to: 'normal', characters: 50 }
+        { from: 'first', to: 'normal', characters: 50 },
+        { from: 'first', to: 'matching', characters: 90 }
       ]
     : null
 
