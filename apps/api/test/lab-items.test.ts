@@ -1533,3 +1533,42 @@ test('착용 id를 읽지 못한 요청은 그 이름을 빼고, 다음 요청�
     }
   ])
 })
+
+test('실험실 목록의 칭호, 크리쳐, 오라 itemId는 후보 게임 아이템 이름의 착용 id나 검색한 id로 내고, 둘 다 없으면 경매장 매물의 itemId를 그대로 낸다', async (t) => {
+  const { findGameItem } = gameItems(['합성 검색 칭호'])
+  const request = await startApi(
+    t,
+    [
+      slotItemRow('AURA', '종결', '합성 오라', 300),
+      slotItemRow('TITLE', '종결', '합성 검색 칭호', 200),
+      slotItemRow('CREATURE', '종결', '합성 크리쳐 알', 100, { itemName: '합성 크리쳐' }),
+      slotItemRow('CREATURE', '종결', '합성 빈 알', 150, { itemName: '합성 없는 크리쳐' }),
+      row('WEAPON', 'dealer', '종결', '합성 무기 카드', 400)
+    ],
+    undefined,
+    undefined,
+    noCatalog,
+    findGameItem,
+    async () => [
+      { itemName: '합성 오라', itemId: 'worn-합성 오라' },
+      { itemName: '합성 크리쳐', itemId: 'worn-합성 크리쳐' }
+    ]
+  )
+
+  const response = await request('/lab/items')
+  assert.equal(response.status, 200)
+  const body = (await response.json()) as {
+    groups: { items: { itemName: string; itemId: string | null }[] }[]
+  }
+  const itemIds = Object.fromEntries(
+    body.groups.flatMap(({ items }) => items.map(({ itemName, itemId }) => [itemName, itemId]))
+  )
+
+  assert.deepEqual(itemIds, {
+    '합성 무기 카드': 'synthetic-item',
+    '합성 검색 칭호': 'neople-합성 검색 칭호',
+    '합성 크리쳐 알': 'worn-합성 크리쳐',
+    '합성 빈 알': 'synthetic-item',
+    '합성 오라': 'worn-합성 오라'
+  })
+})
