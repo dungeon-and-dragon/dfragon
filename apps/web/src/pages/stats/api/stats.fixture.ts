@@ -1,14 +1,24 @@
 import type { CharacterStats } from '#entities/ranking'
 
 const JOBS = [
-  ['귀검사(남)', '眞 웨펀마스터', 9120, 98_400],
-  ['귀검사(남)', '眞 버서커', 8410, 101_200],
-  ['귀검사(여)', '眞 소드마스터', 7630, 96_800],
-  ['격투가(여)', '眞 넨마스터', 6950, 94_300],
-  ['거너(여)', '眞 레인저', 6120, 99_700],
-  ['마법사(여)', '眞 인챈트리스', 5480, 104_600],
-  ['프리스트(남)', '眞 크루세이더', 4870, 107_900],
-  ['도적', '眞 로그', 3910, 92_500]
+  ['귀검사(남)', '眞 웨펀마스터', 9120],
+  ['귀검사(남)', '眞 버서커', 8410],
+  ['귀검사(여)', '眞 소드마스터', 7630],
+  ['격투가(여)', '眞 넨마스터', 6950],
+  ['거너(여)', '眞 레인저', 6120],
+  ['마법사(여)', '眞 인챈트리스', 5480],
+  ['프리스트(남)', '眞 크루세이더', 4870],
+  ['도적', '眞 로그', 3910]
+] as const
+
+const JOB_FAME_SHARES = [
+  [40_000, 0.22],
+  [70_000, 0.3],
+  [80_000, 0.16],
+  [100_000, 0.14],
+  [110_000, 0.08],
+  [120_000, 0.07],
+  [130_000, 0.03]
 ] as const
 
 const SERVER_SHARES = [
@@ -48,11 +58,18 @@ export function storyCharacterStats(computedAt: string): CharacterStats {
 
     return { serverId, count }
   })
-  const jobs = JOBS.map(([jobName, jobGrowName, count, averageFame], index) => {
+  const jobs = JOBS.map(([jobName, jobGrowName, count], index) => {
     const jobId = `job-${index}`
     const jobGrowId = `grow-${index}`
 
-    return { jobId, jobGrowId, jobName, jobGrowName, count, averageFame }
+    const fameBuckets = JOB_FAME_SHARES.map(([from, share]) => {
+      const to = from + 10_000
+      const bucketCount = Math.round(count * share)
+
+      return { from, to, count: bucketCount }
+    })
+
+    return { jobId, jobGrowId, jobName, jobGrowName, count, fameBuckets }
   })
 
   return { computedAt, total, servers, jobs, fameDistribution }

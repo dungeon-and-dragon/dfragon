@@ -62,6 +62,42 @@ describe('BarLineChart', () => {
     lineValue: formatPercent
   }
 
+  it('범례를 켤 수 있으면 누른 계열 조각을 빼고 마지막 남은 계열은 끄지 않는다', async () => {
+    await render(
+      <BarLineChart
+        label="주차별 클리어"
+        x={weeks}
+        bars={bars}
+        layout="stack"
+        formats={formats}
+        toggleable
+      />
+    )
+
+    const pieceCount = () => container.querySelectorAll('[data-chart-bar] path').length
+    const [again, first] = [...container.querySelectorAll<HTMLButtonElement>('ul li button')]
+    expect(pieceCount()).toBe(6)
+
+    await act(async () => again!.click())
+    expect(pieceCount()).toBe(3)
+    expect(again!.getAttribute('aria-pressed')).toBe('false')
+
+    await act(async () => first!.click())
+    expect(pieceCount()).toBe(3)
+    expect(first!.getAttribute('aria-pressed')).toBe('true')
+
+    await act(async () => again!.click())
+    expect(pieceCount()).toBe(6)
+  })
+
+  it('범례를 켤 수 없으면 범례에 버튼을 두지 않는다', async () => {
+    await render(
+      <BarLineChart label="주차별 클리어" x={weeks} bars={bars} layout="stack" formats={formats} />
+    )
+
+    expect(container.querySelectorAll('button')).toHaveLength(0)
+  })
+
   it('쌓은 막대는 칸마다 값이 있는 조각만 그리고 고른 칸에 면을 깐다', async () => {
     await render(
       <BarLineChart

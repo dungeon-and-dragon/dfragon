@@ -218,6 +218,12 @@ export type ServerCount = {
   count: number
 }
 
+export type FameBucket = {
+  from: number
+  to: number
+  count: number
+}
+
 export type JobCount = {
   jobId: string
   jobGrowId: string
@@ -225,12 +231,7 @@ export type JobCount = {
   jobGrowName: string
   count: number
   averageFame: number | null
-}
-
-export type FameBucket = {
-  from: number
-  to: number
-  count: number
+  fameBuckets: FameBucket[]
 }
 
 export type CharacterStats = {
@@ -241,6 +242,7 @@ export type CharacterStats = {
 }
 
 const FAME_BUCKET_SIZE = 1_000
+const JOB_FAME_BUCKET_SIZE = 10_000
 
 export async function readFameRanking(
   client: DatabaseClient,
@@ -315,13 +317,54 @@ async function readJobCounts(client: DatabaseClient): Promise<JobCount[]> {
     orderBy: [{ _count: { jobId: 'desc' } }, { jobId: 'asc' }, { jobGrowId: 'asc' }]
   })
 
+  const bucketsByJob = await readJobFameBuckets(client)
+
   return rows.flatMap(({ jobId, jobGrowId, jobName, jobGrowName, _count, _avg }) => {
     if (jobId === null || jobGrowId === null || jobName === null || jobGrowName === null) {
       return []
     }
 
-    return [{ jobId, jobGrowId, jobName, jobGrowName, count: _count._all, averageFame: _avg.fame }]
+    const fameBuckets = bucketsByJob.get(jobKeyOf(jobId, jobGrowId)) ?? []
+
+    return [
+      {
+        jobId,
+        jobGrowId,
+        jobName,
+        jobGrowName,
+        count: _count._all,
+        averageFame: _avg.fame,
+        fameBuckets
+      }
+    ]
   })
+}
+
+function jobKeyOf(jobId: string, jobGrowId: string): string {
+  return `${jobId}/${jobGrowId}`
+}
+
+async function readJobFameBuckets(client: DatabaseClient): Promise<Map<string, FameBucket[]>> {
+  const rows = await client.$queryRaw<
+    { jobId: string; jobGrowId: string; from: number; count: number }[]
+  >`
+    SELECT job_id AS "jobId", job_grow_id AS "jobGrowId",
+      (fame / ${JOB_FAME_BUCKET_SIZE}::int * ${JOB_FAME_BUCKET_SIZE}::int) AS "from",
+      count(*)::int AS count
+    FROM characters
+    WHERE job_id IS NOT NULL AND job_grow_id IS NOT NULL AND fame IS NOT NULL
+    GROUP BY 1, 2, 3
+    ORDER BY 1, 2, 3`
+
+  const buckets = new Map<string, FameBucket[]>()
+
+  for (const { jobId, jobGrowId, from, count } of rows) {
+    const key = jobKeyOf(jobId, jobGrowId)
+    const bucket = { from, to: from + JOB_FAME_BUCKET_SIZE, count }
+    buckets.set(key, [...(buckets.get(key) ?? []), bucket])
+  }
+
+  return buckets
 }
 
 async function readFameDistribution(client: DatabaseClient): Promise<FameBucket[]> {
@@ -369,12 +412,19 @@ export async function saveCharacterStats(
 export async function readCharacterStatsSnapshot(
   client: DatabaseClient
 ): Promise<CharacterStatsSnapshot | null> {
-  const [snapshot] = await client.$queryRaw<CharacterStatsSnapshot[]>`
+  const [snapshot] = await client.$queryRaw<StoredCharacterStatsSnapshot[]>`
     SELECT computed_at AS "computedAt", total, servers, jobs, fame_distribution AS "fameDistribution"
     FROM character_stats`
   if (snapshot === undefined) {
     return null
   }
 
-  return snapshot
+  // 직업별 명성 구간을 저장하기 전에 만든 스냅샷은 다음 계산 전까지 구간 없이 남아 있다.
+  const jobs = snapshot.jobs.map(({ fameBuckets = [], ...job }) => ({ ...job, fameBuckets }))
+
+  return { ...snapshot, jobs }
+}
+
+type StoredCharacterStatsSnapshot = Omit<CharacterStatsSnapshot, 'jobs'> & {
+  jobs: (Omit<JobCount, 'fameBuckets'> & { fameBuckets?: FameBucket[] })[]
 }

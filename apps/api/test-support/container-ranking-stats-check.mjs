@@ -159,7 +159,11 @@ try {
         jobName: '합성직업',
         jobGrowName: '합성grow-b',
         count: 3,
-        averageFame: 69999.5
+        averageFame: 69999.5,
+        fameBuckets: [
+          { from: 60000, to: 70000, count: 1 },
+          { from: 70000, to: 80000, count: 1 }
+        ]
       },
       {
         jobId,
@@ -167,7 +171,11 @@ try {
         jobName: '합성직업',
         jobGrowName: '합성grow-a',
         count: 2,
-        averageFame: 79999.5
+        averageFame: 79999.5,
+        fameBuckets: [
+          { from: 70000, to: 80000, count: 1 },
+          { from: 80000, to: 90000, count: 1 }
+        ]
       }
     ]
   )
@@ -220,6 +228,19 @@ try {
   // 요청은 계산하지 않으므로 저장 뒤 더한 캐릭터는 다음 job 실행 전까지 응답에 들지 않는다.
   await recordCharacterBasic(client, basic('cain', 'rank-after-snapshot', 'grow-a', 90000))
   assert.deepEqual(await get('/stats'), statsAnswer)
+
+  // 직업별 명성 구간을 저장하기 전에 만든 스냅샷도 구간을 빈 배열로 채워 내려준다.
+  const savedStats = await client.characterStatsSnapshot.findUniqueOrThrow({ where: { id: 1 } })
+  const jobsWithoutBuckets = savedStats.jobs.map(({ fameBuckets: _fameBuckets, ...job }) => job)
+  await client.characterStatsSnapshot.update({
+    where: { id: 1 },
+    data: { jobs: jobsWithoutBuckets }
+  })
+  assert.deepEqual(
+    (await get('/stats')).jobs.map(({ fameBuckets }) => fameBuckets),
+    savedStats.jobs.map(() => [])
+  )
+  await client.characterStatsSnapshot.update({ where: { id: 1 }, data: { jobs: savedStats.jobs } })
 
   // 두 세트를 낀 캐릭터 105명이다. 99~102위가 같은 명성이고 서버가 번갈아, 100위와 101위 사이 page 경계가 같은 명성의 서버 순서에 걸린다.
   const fairy = { id: 'set-rank-fairy', name: '소울 페어리 세트' }
