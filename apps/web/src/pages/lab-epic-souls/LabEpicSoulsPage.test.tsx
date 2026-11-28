@@ -4,6 +4,7 @@ import { delay, HttpResponse, http } from 'msw'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { useMyAdventureStore } from '#entities/adventure-guild'
 import { fromBase64Url } from '#shared/lib/base64url'
 import { server } from '#testing/test-support/msw-server'
 import { TestQueryClient } from '#testing/test-support/test-query-client'
@@ -20,6 +21,7 @@ beforeEach(() => {
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
+  useMyAdventureStore.setState({ adventureName: null })
 })
 
 afterEach(async () => {
@@ -89,6 +91,26 @@ it('검색 전에는 검색 폼만 두고 체크박스와 표를 그리지 않�
   expect(container.querySelector('input[aria-label="모험단"]')).not.toBeNull()
   expect(container.querySelector('[role="checkbox"]')).toBeNull()
   expect(container.querySelector('table')).toBeNull()
+})
+
+it('모험단 탭에서 저장한 모험단이 있으면 검색 폼에 넣고 검색 없이 그 모험단의 캐릭터를 그린다', async () => {
+  useMyAdventureStore.setState({ adventureName: '모험단1' })
+  server.use(epicSoulsHandlers.characters, epicSoulsHandlers.recoveriesLoading)
+  await render()
+
+  await vi.waitFor(() => expect(characterRows()).toHaveLength(6))
+  expect(container.querySelector<HTMLInputElement>('input[aria-label="모험단"]')!.value).toBe(
+    '모험단1'
+  )
+})
+
+it('검색한 모험단은 모험단 탭이 쓰는 저장 모험단으로 바꾼다', async () => {
+  useMyAdventureStore.setState({ adventureName: '모험단1' })
+  server.use(epicSoulsHandlers.noAdventure)
+  await render()
+  await search('모험단2')
+
+  expect(useMyAdventureStore.getState().adventureName).toBe('모험단2')
 })
 
 it('캐릭터 줄은 목록을 받자마자 그리고, 회수 응답이 오기 전에는 에픽 소울 칸을 뼈대로 둔다', async () => {

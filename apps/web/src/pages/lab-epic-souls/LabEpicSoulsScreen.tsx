@@ -8,12 +8,19 @@ import { EpicSoulTable } from './ui/EpicSoulTable'
 const SKELETON_ROWS = 3
 
 export function LabEpicSoulsScreen({
-  initialAdventureName = null
+  initialAdventureName = null,
+  onAdventureOpen
 }: {
   initialAdventureName?: string | null
+  onAdventureOpen?: (adventureName: string) => void
 }): React.JSX.Element {
   const [adventureName, setAdventureName] = useState(initialAdventureName)
   const [includePrimordial, setIncludePrimordial] = useState(false)
+
+  function openAdventure(next: string): void {
+    setAdventureName(next)
+    onAdventureOpen?.(next)
+  }
 
   return (
     <div className="flex flex-col">
@@ -21,7 +28,7 @@ export function LabEpicSoulsScreen({
       <div className="section flex flex-wrap items-center gap-3 px-4">
         <AdventureNameForm
           initialName={initialAdventureName ?? ''}
-          onAdventureOpen={setAdventureName}
+          onAdventureOpen={openAdventure}
           className="max-sm:w-full"
         />
         {adventureName !== null && (
