@@ -37,7 +37,9 @@ function armorSlot({ slotId, tune }: WornSlot): EpicSoulSlot {
     throw new Error(`No epic variant: ${slotId}`)
   }
 
-  return { slotId, ...item, tune, souls: soulsOf(slotId, tune) }
+  const souls = soulsOf(slotId, tune)
+
+  return { slotId, ...item, tune, souls }
 }
 
 function weaponSlot(tune: number): EpicSoulSlot {
@@ -49,7 +51,9 @@ function weaponSlot(tune: number): EpicSoulSlot {
     throw new Error('No epic weapon')
   }
 
-  return { slotId: 'WEAPON', ...item, tune, souls: soulsOf('WEAPON', tune) }
+  const souls = soulsOf('WEAPON', tune)
+
+  return { slotId: 'WEAPON', ...item, tune, souls }
 }
 
 export function storyEpicSouls(worn: readonly WornSlot[], weaponTune: number | null): EpicSouls {

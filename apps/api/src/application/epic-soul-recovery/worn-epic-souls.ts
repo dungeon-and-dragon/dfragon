@@ -42,7 +42,6 @@ function stringOf(value: unknown): string {
   return value
 }
 
-/** 착용 장비 섹션 원문에서 에픽 부위마다 돌려받는 에픽 소울을 센다. */
 export function wornEpicSouls(equipment: CharacterPayload): WornEpicSouls {
   const items = new Map<string, CharacterPayload>()
   const worn = equippedItems(equipment).flatMap((item) => {

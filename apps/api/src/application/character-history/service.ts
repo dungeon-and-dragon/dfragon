@@ -1,5 +1,6 @@
 import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/index.js'
 import {
+  type CharacterPayload,
   projectCharacterDetails,
   projectCharacterFreshness
 } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -16,7 +17,6 @@ import {
   restoreCharacterPayloads,
   toCharacterHeader
 } from '@dfragon/server-core/domain/character-history/index.js'
-import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 import { enrichCharacterDetails } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
@@ -67,7 +67,6 @@ export class CharacterHistoryService {
   /** 가장 최근에 저장한 장비 섹션 원문이고, 없으면 null이다. Neople을 부르지 않는다. */
   async readEquipment(character: CharacterIdentity): Promise<CharacterPayload | null> {
     const stored = await this.repository.readSections(character, ['equipment'])
-
     const latest = stored.at(-1)
 
     if (latest === undefined) {

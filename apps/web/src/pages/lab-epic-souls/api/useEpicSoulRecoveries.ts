@@ -12,14 +12,17 @@ function recoveryKey({ serverId, characterId }: CharacterIdentity) {
   return ['character', serverId, characterId, 'epic-soul-recovery'] as const
 }
 
-/** 줄마다 따로 받아 받는 대로 채운다. 한 줄이 실패해도 다른 줄은 그대로 받는다. */
 export function useEpicSoulRecoveries(
   characters: readonly CharacterIdentity[]
 ): EpicSoulRecoveryResult[] {
-  const queries = characters.map((identity) => ({
-    queryKey: recoveryKey(identity),
-    queryFn: () => requestCharacterJson(identity, '/epic-soul-recovery', epicSoulsSchema)
-  }))
+  const queries = characters.map((identity) => {
+    const queryKey = recoveryKey(identity)
+
+    return {
+      queryKey,
+      queryFn: () => requestCharacterJson(identity, '/epic-soul-recovery', epicSoulsSchema)
+    }
+  })
 
   return useQueries({
     queries,
