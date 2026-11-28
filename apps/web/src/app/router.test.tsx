@@ -497,7 +497,15 @@ it('여러 필터가 붙은 검색 주소에서 초기화를 누르면 query 없
   expect(reset.disabled).toBe(true)
   expect(
     [...container.querySelectorAll('main button[data-pressed]')].map((chip) => chip.textContent)
-  ).toEqual(['직업 전체', '전직 전체'])
+  ).toEqual([])
+  expect(
+    [...container.querySelectorAll('main button[aria-pressed]')].some(
+      (chip) => chip.textContent === RANKING_JOBS[0]!.name
+    )
+  ).toBe(true)
+  expect(
+    [...container.querySelectorAll('main h2')].map((heading) => heading.textContent)
+  ).not.toContain('전직')
   expect(
     [...container.querySelectorAll<HTMLInputElement>('main input[inputmode="numeric"]')].map(
       (input) => input.value
