@@ -17,7 +17,6 @@ import {
   toScoreEngineInput
 } from '@dfragon/server-core/domain/score/index.js'
 import type { CalculateScore } from '@dfragon/server-core/application/character-detail/ports.js'
-import type { CharacterScoreSource } from '#application/character-detail/index.js'
 import {
   type AvatarPresetChoice,
   type EquipmentChange,
@@ -78,16 +77,6 @@ export interface EquipmentSimulationScores {
   simulated: CharacterCardScore | null
 }
 
-export interface SimulatedPlan<T> {
-  readonly plan: T
-  readonly scores: EquipmentSimulationScores
-}
-
-export interface SimulatedPlans<T> {
-  readonly payloads: CharacterPayloads
-  readonly simulated: readonly SimulatedPlan<T>[]
-}
-
 const noScores: EquipmentSimulationScores = { baseline: null, simulated: null }
 
 export class EquipmentSimulationService {
@@ -108,19 +97,7 @@ export class EquipmentSimulationService {
     request: EquipmentSimulationRequest,
     signal: AbortSignal
   ): Promise<EquipmentSimulationScores> {
-    return this.track(this.loadAndRun(identity, request, signal))
-  }
-
-  /**
-   * 같은 원문으로 `planOf`가 만든 요청마다 차례로 점수를 계산한다. 엔진 worker가 하나라 한꺼번에 보내도 빨라지지 않으므로,
-   * 차례로 보내 다른 요청이 사이에 계산되게 한다.
-   */
-  simulateEach<T extends { readonly request: EquipmentSimulationRequest }>(
-    source: CharacterScoreSource,
-    planOf: (payloads: CharacterPayloads) => readonly T[],
-    signal: AbortSignal
-  ): Promise<SimulatedPlans<T>> {
-    return this.track(this.runEach(source, planOf, signal))
+    return this.track(this.run(identity, request, signal))
   }
 
   /** 진행 중인 계산을 끊지 않고 끝나기를 기다린다. */
@@ -128,36 +105,12 @@ export class EquipmentSimulationService {
     await Promise.allSettled([...this.active])
   }
 
-  private async loadAndRun(
+  private async run(
     identity: CharacterIdentity,
     request: EquipmentSimulationRequest,
     signal: AbortSignal
   ): Promise<EquipmentSimulationScores> {
-    const source = await this.loadScoreSource(identity, signal)
-
-    return await this.run(source, request, signal)
-  }
-
-  private async runEach<T extends { readonly request: EquipmentSimulationRequest }>(
-    source: CharacterScoreSource,
-    planOf: (payloads: CharacterPayloads) => readonly T[],
-    signal: AbortSignal
-  ): Promise<SimulatedPlans<T>> {
-    const simulated: SimulatedPlan<T>[] = []
-
-    for (const plan of planOf(source.payloads)) {
-      const scores = await this.run(source, plan.request, signal)
-      simulated.push({ plan, scores })
-    }
-
-    return { payloads: source.payloads, simulated }
-  }
-
-  private async run(
-    { payloads, role, items }: CharacterScoreSource,
-    request: EquipmentSimulationRequest,
-    signal: AbortSignal
-  ): Promise<EquipmentSimulationScores> {
+    const { payloads, role, items } = await this.loadScoreSource(identity, signal)
     const itemEdits = editEquipmentItems(
       payloads.equipment,
       request.equipment,

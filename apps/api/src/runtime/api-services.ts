@@ -21,7 +21,6 @@ import {
 } from '#application/character-detail/index.js'
 import { EpicSoulRecoveryService } from '#application/epic-soul-recovery/index.js'
 import { EquipmentSimulationService } from '#application/equipment-simulation/index.js'
-import type { LoadCharacterScoreSource } from '#application/equipment-simulation/ports.js'
 import type { FetchCharacterImage } from '#application/character-image/ports.js'
 import { CharacterImageService } from '#application/character-image/index.js'
 import { ItemDetailService } from '#application/item-detail/index.js'
@@ -230,10 +229,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     options.labItems ?? emptyLabItemRepository,
     (itemIds, signal) => options.details.catalog.load(itemIds, signal)
   )
-  const loadScoreSource: LoadCharacterScoreSource = (identity, signal) =>
-    details.scoreSource(identity, signal, unrecordedTimings)
   const equipmentSimulation = new EquipmentSimulationService(
-    loadScoreSource,
+    (identity, signal) => details.scoreSource(identity, signal, unrecordedTimings),
     (itemIds, signal) => options.details.catalog.load(itemIds, signal),
     engine.calculate,
     async (signal) => (await labItems.enchantOptions(signal)).slots
@@ -243,9 +240,8 @@ export async function createApiServices(options: ApiServicesOptions, reportCode:
     options.details.catalog
   )
   const epicSoulRecovery = new EpicSoulRecoveryService(
-    equipmentSimulation,
-    (identity, signal) => characterHistory.readScoreSource(identity, signal),
-    loadScoreSource
+    (identity) => characterHistory.readEquipment(identity),
+    (identity, signal) => details.equipment(identity, signal, unrecordedTimings)
   )
   const itemDetail = new ItemDetailService(options.details.catalog)
   const todayGrade = new TodayGradeService(options.todayGrade.fetchShopGrade)

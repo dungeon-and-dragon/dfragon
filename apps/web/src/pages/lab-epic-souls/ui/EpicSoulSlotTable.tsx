@@ -6,7 +6,7 @@ import {
   rarityTextOfName,
   tuneNumeral
 } from '#entities/character'
-import type { EpicSoulRecoverySlot } from '#pages/lab-epic-souls/model/epic-soul-recovery'
+import type { EpicSoulSlot } from '#pages/lab-epic-souls/model/epic-soul-recovery'
 
 const WEAPON_SLOT_ID = 'WEAPON'
 // 캐릭터 상세 장비 탭과 같은 부위 이름이다.
@@ -35,7 +35,9 @@ function isWeaponLine(line: string): line is WeaponVariantLine {
   return Object.hasOwn(WEAPON_LINE_NAMES, line)
 }
 
-function lineNameOf(line: string | null | undefined, itemName: string): string {
+function wornNameOf({ slotId, itemId, itemName }: EpicSoulSlot): string {
+  const line = slotId === WEAPON_SLOT_ID ? findWeaponVariant(itemId)?.variant.line : undefined
+
   if (line == null || !isWeaponLine(line)) {
     return itemName
   }
@@ -43,24 +45,16 @@ function lineNameOf(line: string | null | undefined, itemName: string): string {
   return WEAPON_LINE_NAMES[line]
 }
 
-function wornNameOf({ slotId, before }: EpicSoulRecoverySlot): string {
-  if (slotId !== WEAPON_SLOT_ID) {
-    return before.itemName
-  }
-
-  return lineNameOf(findWeaponVariant(before.itemId)?.variant.line, before.itemName)
-}
-
 function ItemCell({
   itemId,
   name,
   rarity,
-  tune = null
+  tune
 }: {
   itemId: string
   name: string
   rarity: string
-  tune?: number | null
+  tune: number
 }): React.JSX.Element {
   const numeral = tuneNumeral(tune)
 
@@ -76,21 +70,19 @@ function ItemCell({
 export function EpicSoulSlotTable({
   slots
 }: {
-  slots: readonly EpicSoulRecoverySlot[]
+  slots: readonly EpicSoulSlot[]
 }): React.JSX.Element {
   return (
     <table className="table table-fixed max-w-[720px]">
       <colgroup>
         <col className="w-[96px]" />
         <col />
-        <col />
         <col className="w-[96px]" />
       </colgroup>
       <thead>
         <tr>
           <th scope="col">부위</th>
-          <th scope="col">현재</th>
-          <th scope="col">변경 후</th>
+          <th scope="col">장비</th>
           <th scope="col" className="table-num">
             에픽 소울
           </th>
@@ -98,7 +90,7 @@ export function EpicSoulSlotTable({
       </thead>
       <tbody>
         {slots.map((slot) => {
-          const { slotId, before, after, souls } = slot
+          const { slotId, itemId, itemRarity, tune, souls } = slot
 
           return (
             <tr key={slotId}>
@@ -106,21 +98,7 @@ export function EpicSoulSlotTable({
                 {SLOT_NAMES[slotId] ?? slotId}
               </th>
               <td>
-                <ItemCell
-                  itemId={before.itemId}
-                  name={wornNameOf(slot)}
-                  rarity={before.itemRarity}
-                  tune={before.tune}
-                />
-              </td>
-              <td>
-                {after !== null && (
-                  <ItemCell
-                    itemId={after.itemId}
-                    name={lineNameOf(after.line, after.itemName)}
-                    rarity={after.itemRarity}
-                  />
-                )}
+                <ItemCell itemId={itemId} name={wornNameOf(slot)} rarity={itemRarity} tune={tune} />
               </td>
               <td className="table-num font-semibold">{formatCount(souls)}</td>
             </tr>

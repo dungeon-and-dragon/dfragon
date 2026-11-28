@@ -8,6 +8,7 @@ import {
   projectCharacterDetails,
   projectCharacterFreshness,
   type CharacterIdentity,
+  type CharacterPayload,
   type CharacterPayloads,
   type FetchedCharacterPayloads
 } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -101,6 +102,15 @@ export class CharacterDetailService {
     return this.track(this.loadScoreSource(identity, signal, timings))
   }
 
+  /** 상세 조회와 같은 캐시의 장비 섹션 원문만 돌려주며, 상세 본문을 저장하거나 조회를 알리지 않는다. */
+  equipment(
+    identity: CharacterIdentity,
+    signal: AbortSignal,
+    timings: NeopleStageTimings
+  ): Promise<CharacterPayload> {
+    return this.track(this.loadEquipment(identity, signal, timings))
+  }
+
   async close(): Promise<void> {
     this.shutdown.abort()
     await Promise.allSettled([...this.active, this.characters.close(), this.ports.catalog.close()])
@@ -171,6 +181,26 @@ export class CharacterDetailService {
       this.ports.publishCharacterFetched?.(identity, character.payloads, character.fetchedAt, score)
 
       return (await built).response
+    } catch (error) {
+      throw characterDetailFailure(error)
+    }
+  }
+
+  private async loadEquipment(
+    identity: CharacterIdentity,
+    requestSignal: AbortSignal,
+    timings: NeopleStageTimings
+  ): Promise<CharacterPayload> {
+    const signal = AbortSignal.any([requestSignal, this.shutdown.signal])
+
+    try {
+      if (signal.aborted) {
+        throw new CharacterDetailFailure('internal')
+      }
+
+      const { payloads } = await this.characters.get(identity, signal, timings)
+
+      return payloads.equipment
     } catch (error) {
       throw characterDetailFailure(error)
     }
