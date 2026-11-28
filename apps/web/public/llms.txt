@@ -8,7 +8,7 @@
 
 - [메인](https://dfragon.com/): 캐릭터와 모험단 검색, 소울 결정 가격
 - [검색](https://dfragon.com/rankings): 직업, 세트, 무기, 명성과 점수 범위로 거른 캐릭터 목록
-- [통계](https://dfragon.com/stats): 서버 인구, 명성 분포, 직업 분포, 직업별 평균 명성
+- [명성 통계](https://dfragon.com/stats): 명성 분포와 직업별 명성 구간 인원
 - [세트 통계](https://dfragon.com/stats/sets): 장비 세트, 서약 세트, 장비와 서약 조합, 무기, 유일 장비의 착용 비율
 - [조합 통계](https://dfragon.com/stats/combos): 장비 세트와 서약 세트 조합의 착용 비율
 - [무기 통계](https://dfragon.com/stats/weapons): 무기 종류별 착용 비율
