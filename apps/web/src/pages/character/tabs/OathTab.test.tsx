@@ -146,11 +146,39 @@ it('딜러의 서약, 세트, 결정과 진의 단계마다 고른 효과를 그
   ])
 })
 
-it('진의가 없는 버퍼 서약은 진의 영역을 그리지 않는다', async () => {
+it('진의를 배우지 않은 버퍼 서약도 아홉 번째 진의까지 효과 칸을 비워 그린다', async () => {
   await render(characterDetailFixture('buffer'))
 
   expect(container.textContent).toContain('레어 Ⅱ')
-  expect(container.querySelector('section[aria-label="묵언의 진의"]')).toBeNull()
+  expect(lines('묵언의 진의')).toEqual([
+    ['첫 번째 진의', ''],
+    ['두 번째 진의', ''],
+    ['세 번째 진의', ''],
+    ['네 번째 진의', ''],
+    ['다섯 번째 진의', ''],
+    ['여섯 번째 진의', ''],
+    ['일곱 번째 진의', ''],
+    ['여덟 번째 진의', ''],
+    ['아홉 번째 진의', '']
+  ])
+})
+
+it('결정을 일부만 착용하면 남은 칸을 빈 아이콘 줄로 채워 11줄을 둔다', async () => {
+  const dealer = characterDetailFixture('dealer')
+  const oath = dealer.oath
+
+  if (oath === null) {
+    throw new Error('dealer fixture에 서약이 없다')
+  }
+
+  const crystal = oath.crystal.slice(0, 7)
+
+  await render({ ...dealer, oath: { ...oath, crystal } })
+
+  const rows = [...section('서약 결정').querySelectorAll('tbody tr')]
+
+  expect(rows).toHaveLength(11)
+  expect(rows.slice(7).map((row) => row.textContent)).toEqual(['', '', '', ''])
 })
 
 it('서약이 없는 캐릭터는 아무것도 그리지 않는다', async () => {

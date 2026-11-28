@@ -2,6 +2,18 @@ import { describe, expect, it } from 'vitest'
 import { characterDetailFixture } from '#entities/character/api/character-detail.fixture'
 import { toOathView } from './character-oath'
 
+const STEP_NAMES = [
+  '첫 번째 진의',
+  '두 번째 진의',
+  '세 번째 진의',
+  '네 번째 진의',
+  '다섯 번째 진의',
+  '여섯 번째 진의',
+  '일곱 번째 진의',
+  '여덟 번째 진의',
+  '아홉 번째 진의'
+]
+
 function oathOf(role: 'dealer' | 'buffer') {
   const { oath } = characterDetailFixture(role)
 
@@ -45,12 +57,22 @@ describe('서약 탭 값', () => {
     ])
   })
 
-  it('버퍼의 단계가 붙은 세트 등급을 희귀도로 읽고, 진의가 없으면 비운다', () => {
+  it('버퍼의 단계가 붙은 세트 등급을 희귀도로 읽고, 진의를 배우지 않았어도 아홉 단계를 둔다', () => {
     const view = toOathView(oathOf('buffer'))
 
     expect(view.set).toMatchObject({ rarityName: '레어 Ⅱ', rarity: 'rare', point: 905 })
     expect(view.crystals.find(({ slot }) => slot === 1)?.tune).toBeNull()
-    expect(view.upgrade).toBeNull()
+    expect(view.upgrade?.title).toBe('묵언의 진의')
+    expect(view.upgrade?.steps.map(({ name }) => name)).toEqual(STEP_NAMES)
+    expect(view.upgrade?.steps.every(({ choice }) => choice === null)).toBe(true)
+  })
+
+  it('착용하지 않은 결정 칸 수를 11칸에서 센다', () => {
+    const oath = oathOf('dealer')
+    const crystal = oath.crystal.slice(0, 7)
+
+    expect(toOathView(oath).emptyCrystalSlots).toBe(0)
+    expect(toOathView({ ...oath, crystal }).emptyCrystalSlots).toBe(4)
   })
 
   it('결정을 세트 포인트가 높은 순으로 두고, 같으면 칸 번호 순으로 둔다', () => {
@@ -94,7 +116,7 @@ describe('서약 탭 값', () => {
     expect(slots).toEqual([10, 11, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
 
-  it('진의 선택지 이름을 모르면 그 단계를 빼고, 남는 단계가 없으면 진의를 비운다', () => {
+  it('배우지 않은 단계와 선택지 이름을 모르는 단계는 고른 효과를 비운다', () => {
     const oath = oathOf('dealer')
     const info = oath.info
     const upgrade = info?.oathUpgrade
@@ -106,12 +128,12 @@ describe('서약 탭 값', () => {
     const [first, second] = upgrade.options
     const unknown = { ...second, optionName: '알 수 없는 선택지' }
     const withUnknown = { ...info, oathUpgrade: { ...upgrade, options: [first, unknown] } }
-    const onlyUnknown = { ...info, oathUpgrade: { ...upgrade, options: [unknown] } }
 
-    expect(toOathView({ ...oath, info: withUnknown }).upgrade?.steps).toEqual([
-      { name: '첫 번째 진의', choice: 'cooldown' }
-    ])
-    expect(toOathView({ ...oath, info: onlyUnknown }).upgrade).toBeNull()
+    const choices = toOathView({ ...oath, info: withUnknown }).upgrade?.steps.map(
+      ({ choice }) => choice
+    )
+
+    expect(choices).toEqual(['cooldown', null, null, null, null, null, null, null, null])
   })
 
   it('내용이 빈 서약도 실패하지 않고 빈 값으로 읽는다', () => {
@@ -119,6 +141,7 @@ describe('서약 탭 값', () => {
       info: null,
       set: null,
       crystals: [],
+      emptyCrystalSlots: 11,
       upgrade: null
     })
   })
