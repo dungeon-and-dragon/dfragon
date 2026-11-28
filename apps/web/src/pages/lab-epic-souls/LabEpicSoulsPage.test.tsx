@@ -135,7 +135,7 @@ it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 �
 
   const rows = characterRows()
   expect(rowText(rows[0]!)[4]).toBe(String(recoveries[0]!.total))
-  expect(rowText(rows[3]!)[4]).toBe('계산하지 못했습니다.')
+  expect(rowText(rows[3]!)[4]).toBe('-')
   expect(rowText(rows[5]!)[4]).toBe('0')
   expect(rows[5]!.querySelector('button')).toBeNull()
   // 계산하지 못한 넷째 캐릭터를 빼고 226 + 21 + 67 + 11 + 0이다.

@@ -50,7 +50,7 @@ export function EpicSoulTable({
           <col className={SET_COLUMN} />
           <col className={`${FAME_COLUMN} ${WIDE_ONLY}`} />
           <col className={`${SCORE_COLUMN} ${WIDE_ONLY}`} />
-          <col className={SCORE_COLUMN} />
+          <col className="w-[96px]" />
         </colgroup>
         <thead>
           <tr>
@@ -173,7 +173,7 @@ function RecoveryCell({ result }: { result: EpicSoulRecoveryResult }): React.JSX
         </td>
       )
     case 'error':
-      return <td className="table-num text-fg-muted">계산하지 못했습니다.</td>
+      return <td className="table-num text-fg-muted">{MISSING_VALUE}</td>
     case 'success':
       return <td className="table-num font-semibold">{formatCount(result.souls.total)}</td>
   }
