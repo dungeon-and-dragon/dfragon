@@ -43,6 +43,12 @@ export function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[]
 
 export type ItemBar = Bar & Readonly<{ itemId: string | null }>
 
+const headcount = new Intl.NumberFormat('ko-KR', { notation: 'compact', maximumFractionDigits: 1 })
+
+export function formatHeadcount(count: number): string {
+  return `${headcount.format(count)}명`
+}
+
 export function weaponBars(stats: ItemStats, filter: SetStatsFilter): ItemBar[] {
   const weapons = stats.slots.find(({ slotId }) => slotId === WEAPON_SLOT)?.items ?? []
   const sorted = mergePrefixedWeapons(weapons).toSorted(byCountDesc)

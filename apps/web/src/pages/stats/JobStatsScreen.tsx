@@ -24,7 +24,7 @@ import {
 import { StatsTabs } from '#widgets/stats-tabs'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { ItemRowBars } from './ItemRowBars'
-import { weaponBars } from './item-stats-bars'
+import { formatHeadcount, uniqueItemBars, weaponBars } from './item-stats-bars'
 import { comboBars, formatShare } from './set-stats-bars'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
 import {
@@ -38,16 +38,19 @@ import {
 import { StatsNote } from './StatsNote'
 
 const BAR_LIMIT = 5
+const TOP_ROW =
+  'section section-cols md:grid-cols-3 max-md:grid-cols-1 max-md:[&>*+*]:border-l-0 max-md:[&>*+*]:border-t max-md:[&>*+*]:border-line'
 const COMBO_BOX = {
   name: '가장 많이 사용하는 조합',
   empty: '세트 통계가 없습니다.',
   failed: '세트 통계를 받지 못했습니다.'
 } as const
-const WEAPON_BOX = {
-  name: '무기',
+const ITEM_MESSAGES = {
   empty: '아이템 통계가 없습니다.',
   failed: '아이템 통계를 받지 못했습니다.'
 } as const
+const WEAPON_BOX = { name: '무기', ...ITEM_MESSAGES } as const
+const UNIQUE_BOX = { name: '유일 장비', ...ITEM_MESSAGES } as const
 const SKILL_EMPTY = '스킬 통계가 없습니다.'
 const SKILL_FAILED = '스킬 통계를 받지 못했습니다.'
 const FEW_SAMPLES = '표본이 20명 미만입니다.'
@@ -243,33 +246,36 @@ export function JobStatsScreen({
     <div className="flex flex-col">
       <StatsTabs />
       <SetStatsFilterBox filter={statsFilter} onFilterChange={onFilterChange} growRequired />
-      <SkillWindowColumns
-        sideWidth="wide"
-        main={skill.main}
-        side={
-          <>
-            <StatsBox box={COMBO_BOX} result={setStats}>
-              {(stats) => (
-                <RowBars
-                  bars={comboBars(stats, statsFilter).slice(0, BAR_LIMIT)}
-                  tone="chart-3"
-                  formatValue={formatShare}
-                />
-              )}
-            </StatsBox>
-            <StatsBox box={WEAPON_BOX} result={itemStats}>
-              {(stats) => (
-                <ItemRowBars
-                  bars={weaponBars(stats, statsFilter).slice(0, BAR_LIMIT)}
-                  tone="chart-2"
-                  formatValue={formatShare}
-                />
-              )}
-            </StatsBox>
-            {skill.side}
-          </>
-        }
-      />
+      <div className={TOP_ROW}>
+        <StatsBox box={COMBO_BOX} result={setStats}>
+          {(stats) => (
+            <RowBars
+              bars={comboBars(stats, statsFilter).slice(0, BAR_LIMIT)}
+              tone="chart-3"
+              formatValue={formatShare}
+            />
+          )}
+        </StatsBox>
+        <StatsBox box={WEAPON_BOX} result={itemStats}>
+          {(stats) => (
+            <ItemRowBars
+              bars={weaponBars(stats, statsFilter).slice(0, BAR_LIMIT)}
+              tone="chart-2"
+              formatValue={formatShare}
+            />
+          )}
+        </StatsBox>
+        <StatsBox box={UNIQUE_BOX} result={itemStats}>
+          {(stats) => (
+            <ItemRowBars
+              bars={uniqueItemBars(stats, statsFilter)}
+              tone="chart-5"
+              formatValue={formatHeadcount}
+            />
+          )}
+        </StatsBox>
+      </div>
+      <SkillWindowColumns sideWidth="wide" main={skill.main} side={skill.side} />
       {setStats.status === 'success' && setStats.value.computedAt !== null && (
         <StatsNote count={setStats.value.sampleSize} computedAt={setStats.value.computedAt} />
       )}
