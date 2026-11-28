@@ -43,7 +43,7 @@ export function mergePrefixedWeapons(weapons: readonly ItemCount[]): ItemCount[]
 
 export type ItemBar = Bar & Readonly<{ itemId: string | null }>
 
-const headcount = new Intl.NumberFormat('ko-KR')
+const headcount = new Intl.NumberFormat('ko-KR', { notation: 'compact', maximumFractionDigits: 1 })
 
 export function formatHeadcount(count: number): string {
   return `${headcount.format(count)}명`
