@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { LINE_REVEAL, useChartReveal } from './useChartReveal'
+import { useChartSortSlide } from './useChartSortSlide'
 import { useChartSvgBarGrow } from './useChartSvgBarGrow'
 import { useChartTooltipSlide } from './useChartTooltipSlide'
 import { ChartLegend, type LegendItem } from './ChartLegend'
@@ -70,6 +71,7 @@ type BarLineChartProps = Readonly<{
   height?: number
   narrowStep?: number
   toggleable?: boolean
+  sortByTotal?: boolean
 }>
 
 export function BarLineChart(props: BarLineChartProps): React.JSX.Element | null {
@@ -82,18 +84,35 @@ export function BarLineChart(props: BarLineChartProps): React.JSX.Element | null
 
 function BarLinePlot({
   label,
-  x,
+  x: givenX,
   bars,
   layout,
-  line,
+  line: givenLine,
   selectedKey,
   formats,
   height = DEFAULT_HEIGHT,
   narrowStep,
-  toggleable = false
+  toggleable = false,
+  sortByTotal = false
 }: BarLineChartProps): React.JSX.Element {
   const [hiddenKeys, setHiddenKeys] = useState<ReadonlySet<string>>(new Set())
-  const shownBars = bars.filter(({ key }) => !hiddenKeys.has(key))
+  const givenBars = bars.filter(({ key }) => !hiddenKeys.has(key))
+  const order = sortByTotal
+    ? orderByTotal(givenBars, givenX.length)
+    : givenX.map((_, index) => index)
+  const x = order.flatMap((index) => givenX[index] ?? [])
+  const shownBars = givenBars.map((bar) => {
+    const values = reorder(bar.values, order, 0)
+
+    return { ...bar, values }
+  })
+  let line: LineSeries | undefined
+
+  if (givenLine != null) {
+    const values = reorder(givenLine.values, order, null)
+    line = { ...givenLine, values }
+  }
+
   const { hover, show, areaProps } = useChartHover()
   const areaRef = useRef<HTMLDivElement>(null)
   const tooltipRef = useRef<HTMLSpanElement>(null)
@@ -126,6 +145,9 @@ function BarLinePlot({
   function centerOf(index: number): number {
     return left + step * (index + 0.5)
   }
+
+  const centers = new Map(x.map(({ key }, index) => [key, centerOf(index)]))
+  useChartSortSlide(areaRef, centers)
 
   function barY(value: number): number {
     return positionOf(value, barScale, plotBottom, TOP)
@@ -264,6 +286,7 @@ function BarLinePlot({
               <g
                 key={key}
                 data-chart-bar=""
+                data-chart-slot={key}
                 className={`transition-opacity ${hoverIndex >= 0 && hoverIndex !== index ? 'opacity-30' : ''}`}
               >
                 {barPiecesAt(shownBars, layout, index).map((piece) => {
@@ -282,6 +305,7 @@ function BarLinePlot({
                 tick != null && (
                   <text
                     key={key}
+                    data-chart-slot={key}
                     x={centerOf(index)}
                     y={size.height - X_LABEL_BASELINE}
                     textAnchor="middle"
@@ -391,4 +415,19 @@ function hasBarLineValues({ bars, line }: BarLineChartProps): boolean {
 
 function tickCountOf(plotHeight: number): number {
   return Math.max(2, Math.floor(plotHeight / Y_TICK_SPACING))
+}
+
+function orderByTotal(bars: readonly BarSeries[], length: number): number[] {
+  const totals = Array.from({ length }, (_, index) =>
+    bars.reduce((sum, { values }) => sum + Math.max(values[index] ?? 0, 0), 0)
+  )
+
+  return totals
+    .map((total, index) => ({ total, index }))
+    .toSorted((a, b) => b.total - a.total || a.index - b.index)
+    .map(({ index }) => index)
+}
+
+function reorder<T>(values: readonly T[], order: readonly number[], missing: T): T[] {
+  return order.map((index) => values[index] ?? missing)
 }
