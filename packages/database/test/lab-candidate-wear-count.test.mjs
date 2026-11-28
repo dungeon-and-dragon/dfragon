@@ -160,11 +160,12 @@ test('착용 수 교체는 칭호, 오라, 크리쳐만 이름과 부위별로 �
   ])
 })
 
-test('유일 장비 집계는 칭호, 오라, 크리쳐 줄이 더해져도 결과가 같다', {
+test('아이템 집계는 칭호, 크리쳐, 무기 아바타를 부위별로 세고 오라는 세지 않으며 다른 부위의 수는 그대로다', {
   skip: port === undefined
 }, async () => {
   const weapon = item('WEAPON', '합성 집계 무기', '도')
   const ring = item('RING', '합성 집계 반지')
+  const title = item('TITLE', '합성 집계 칭호[30Lv]', '칭호')
 
   await recordWearer('adoption-a', [weapon, ring], 80000)
   await recordWearer('adoption-b', [weapon], 79000)
@@ -178,19 +179,31 @@ test('유일 장비 집계는 칭호, 오라, 크리쳐 줄이 더해져도 결�
     [
       weapon,
       ring,
-      item('TITLE', '합성 집계 칭호', '칭호'),
+      title,
       item('AURORA', '합성 집계 오라'),
-      item('CREATURE', '합성 집계 크리쳐')
+      item('CREATURE', '합성 집계 크리쳐[75Lv]'),
+      item('WEAPON_AVATAR', '합성 집계 무기 아바타[30Lv]')
     ],
     80000
   )
-  await recordWearer('adoption-b', [weapon, item('TITLE', '합성 집계 칭호', '칭호')], 79000)
+  await recordWearer('adoption-b', [weapon, title], 79000)
   await replaceItemAdoption(client, { computedAt: fetchedAt, maleCrusader })
   const { computedAt: _after, ...withWorn } = await readItemAdoption(client, query)
+  const countsOf = (slotId) =>
+    withWorn.slots
+      .find((slot) => slot.slotId === slotId)
+      ?.items.filter(({ name }) => name.startsWith('합성 집계'))
+      .map(({ name, count }) => [name, count])
 
-  assert.deepEqual(withWorn, withoutWorn)
-  assert.ok(withWorn.slots.some(({ slotId }) => slotId === 'RING'))
-  assert.ok(withWorn.slots.every(({ slotId }) => !['TITLE', 'AURORA', 'CREATURE'].includes(slotId)))
+  const equipmentOf = ({ slots }) =>
+    slots.filter(({ slotId }) => ['WEAPON', 'RING'].includes(slotId))
+
+  assert.equal(withWorn.sampleSize, withoutWorn.sampleSize)
+  assert.deepEqual(equipmentOf(withWorn), equipmentOf(withoutWorn))
+  assert.deepEqual(countsOf('TITLE'), [['합성 집계 칭호[30Lv]', 2]])
+  assert.deepEqual(countsOf('CREATURE'), [['합성 집계 크리쳐[75Lv]', 1]])
+  assert.deepEqual(countsOf('WEAPON_AVATAR'), [['합성 집계 무기 아바타[30Lv]', 1]])
+  assert.ok(withWorn.slots.every(({ slotId }) => slotId !== 'AURORA'))
 })
 
 test('후보 조회는 집계 전에는 착용 수가 비고, 집계 뒤에는 종류의 부위로 센 수와 집계 시각을 내며 마법부여는 비운다', {
