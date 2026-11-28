@@ -48,7 +48,6 @@ function row(
       itemRarity: null,
       unitPrice: null,
       checkedAt: null,
-      platinum: null,
       cost: null,
       detail: null,
       candidate: null
@@ -68,7 +67,6 @@ function row(
     itemRarity,
     unitPrice,
     checkedAt: new Date(CHECKED_AT),
-    platinum: null,
     cost: null,
     detail: null,
     candidate: null
@@ -165,7 +163,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: 900,
             checkedAt: CHECKED_AT,
-            platinum: null,
             cost: null,
             performanceKey: null
           },
@@ -179,7 +176,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: 10_000,
             checkedAt: CHECKED_AT,
-            platinum: null,
             cost: null,
             performanceKey: null
           },
@@ -193,7 +189,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: 3_000_000_000,
             checkedAt: CHECKED_AT,
-            platinum: null,
             cost: null,
             performanceKey: null
           },
@@ -207,7 +202,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: null,
             checkedAt: null,
-            platinum: null,
             cost: null,
             performanceKey: null
           },
@@ -221,7 +215,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
-            platinum: null,
             cost: null,
             performanceKey: null
           }
@@ -242,7 +235,6 @@ test('묶음 안은 가격이 낮은 순이고, 가격이 없는 아이템은 �
             fame: null,
             unitPrice: null,
             checkedAt: null,
-            platinum: null,
             cost: null,
             performanceKey: null
           }
@@ -279,31 +271,6 @@ test('고른 아이템이 없으면 200과 빈 groups로 답한다', async (t) =
 
   assert.equal(response.status, 200)
   assert.deepEqual(await response.json(), { groups: [] })
-})
-
-test('칭호의 일반 최저가와 플래티넘 최저가를 나눠 내고, 플래티넘 변형이 없는 아이템은 platinum이 null이다', async (t) => {
-  const platinum = {
-    itemId: 'synthetic-platinum',
-    itemRarity: '레어',
-    unitPrice: 80_000,
-    checkedAt: new Date(CHECKED_AT)
-  }
-  const response = await requestLabItems(t, [
-    { ...row('TITLE', 'all', '종결', '합성 칭호 A', 10_000), platinum },
-    row('TITLE', 'all', '종결', '합성 칭호 B', 20_000)
-  ])
-
-  const { groups } = (await response.json()) as {
-    groups: { items: { itemName: string; unitPrice: number | null; platinum: unknown }[] }[]
-  }
-
-  assert.deepEqual(
-    groups[0].items.map(({ itemName, unitPrice, platinum }) => [itemName, unitPrice, platinum]),
-    [
-      ['합성 칭호 A', 10_000, { ...platinum, checkedAt: CHECKED_AT }],
-      ['합성 칭호 B', 20_000, null]
-    ]
-  )
 })
 
 function cardCandidate(
@@ -480,7 +447,6 @@ test('재화 비용을 붙인 아이템은 경매장 가격 없이 재화 이름
             fame: null,
             unitPrice: null,
             checkedAt: CHECKED_AT,
-            platinum: null,
             cost: {
               currencyName: '합성 재화',
               description: '합성 설명',

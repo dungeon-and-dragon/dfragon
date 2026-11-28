@@ -86,7 +86,6 @@ export type {
   LabItemCost,
   LabItemEntry,
   LabItemGroup,
-  LabItemPlatinumPrice,
   LabItemPriceCandidate,
   LabItemPriceCost,
   LabItemPriceDetail,

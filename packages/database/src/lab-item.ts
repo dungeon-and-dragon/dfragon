@@ -103,13 +103,6 @@ export type LabItemPriceCandidate = LabItemPriceDetail & {
   buffLines: string[]
 }
 
-export type LabItemPlatinumPrice = {
-  itemId: string | null
-  itemRarity: string | null
-  unitPrice: number | null
-  checkedAt: Date | null
-}
-
 export type LabItemPriceRow = {
   category: string
   role: string
@@ -119,7 +112,6 @@ export type LabItemPriceRow = {
   itemRarity: string | null
   unitPrice: number | null
   checkedAt: Date | null
-  platinum: LabItemPlatinumPrice | null
   cost: LabItemPriceCost | null
   detail: LabItemPriceDetail | null
   candidate: LabItemPriceCandidate | null
@@ -127,7 +119,7 @@ export type LabItemPriceRow = {
 
 type StoredLabItemPriceRow = Omit<
   LabItemPriceRow,
-  'unitPrice' | 'platinum' | 'cost' | 'detail' | 'candidate'
+  'unitPrice' | 'cost' | 'detail' | 'candidate'
 > & {
   hasCandidate: boolean
   candidateDescription: string | null
@@ -225,21 +217,6 @@ function toPriceCandidate(row: StoredLabItemPriceRow): LabItemPriceCandidate | n
   }
 }
 
-function platinumPriceOf(
-  category: string,
-  variants: readonly CandidateVariantPrice[]
-): LabItemPlatinumPrice | null {
-  const platinums = variants.filter(({ itemName }) => isPlatinumVariant(itemName))
-
-  if (!isVariantGroupedKind(category) || platinums.length === 0) {
-    return null
-  }
-
-  const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf(platinums)
-
-  return { itemId, itemRarity, unitPrice, checkedAt }
-}
-
 // 가격은 foreign key 없이 아이템 이름으로만 잇고, 재화는 currency_id로 잇는다.
 // 오라 상자, 크리쳐 알처럼 후보에 없는 이름은 경매장 item_id가 같은 후보를 이어 같은 성능으로 묶이게 한다.
 // 아이콘 route는 이름으로만 아이콘을 찾으므로 이렇게 이은 후보의 아이콘 시각은 비워 Neople 아이콘을 쓰게 한다.
@@ -299,7 +276,6 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       ? variants.filter((variant) => !isPlatinumVariant(variant.itemName))
       : variants
     const { itemId, itemRarity, unitPrice, checkedAt } = cheapestVariantOf([own, ...normals])
-    const platinum = platinumPriceOf(category, variants)
     const cost = toPriceCost(row)
     const detail = toPriceDetail(row)
     const candidate = toPriceCandidate(row) ?? variantCandidateOf(itemName, variants)
@@ -313,7 +289,6 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       itemRarity,
       unitPrice,
       checkedAt,
-      platinum,
       cost,
       detail,
       candidate
