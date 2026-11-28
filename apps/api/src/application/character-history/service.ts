@@ -1,6 +1,5 @@
 import { projectCharacterCard } from '@dfragon/server-core/domain/character-card/index.js'
 import {
-  characterDetailSections,
   projectCharacterDetails,
   projectCharacterFreshness
 } from '@dfragon/server-core/domain/character-detail/index.js'
@@ -17,13 +16,11 @@ import {
   restoreCharacterPayloads,
   toCharacterHeader
 } from '@dfragon/server-core/domain/character-history/index.js'
+import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
 import { enrichCharacterDetails } from '@dfragon/server-core/application/character-catalog/index.js'
 import type { CharacterCatalog } from '@dfragon/server-core/application/character-catalog/ports.js'
-import type { CharacterScoreSource } from '#application/character-detail/index.js'
 import type { CharacterHistoryRepository } from './repository.js'
-
-const storedSections = characterDetailSections.filter((section) => section !== 'basic')
 
 export class CharacterHistoryService {
   constructor(
@@ -67,29 +64,16 @@ export class CharacterHistoryService {
     return { ...details, freshness, card }
   }
 
-  /** 가장 최근에 저장한 원문으로 점수 입력 재료를 만들고, 섹션이 하나라도 없으면 null이다. Neople을 부르지 않는다. */
-  async readScoreSource(
-    character: CharacterIdentity,
-    signal: AbortSignal
-  ): Promise<CharacterScoreSource | null> {
-    const snapshot = await this.repository.readSnapshot(character, new Date())
+  /** 가장 최근에 저장한 장비 섹션 원문이고, 없으면 null이다. Neople을 부르지 않는다. */
+  async readEquipment(character: CharacterIdentity): Promise<CharacterPayload | null> {
+    const stored = await this.repository.readSections(character, ['equipment'])
 
-    if (snapshot === null) {
+    const latest = stored.at(-1)
+
+    if (latest === undefined) {
       return null
     }
 
-    const { observedAt, basic, sections } = snapshot
-
-    if (!storedSections.every((section) => Object.hasOwn(sections, section))) {
-      return null
-    }
-
-    const header = toCharacterHeader(character, basic)
-    const payloads = restoreCharacterPayloads(header, sections)
-    const projected = projectCharacterDetails(character, payloads, observedAt)
-    const { items } = await enrichCharacterDetails(projected, this.catalog, signal)
-    const { role } = projectCharacterCard(projected)
-
-    return { payloads, role, items }
+    return latest.data
   }
 }

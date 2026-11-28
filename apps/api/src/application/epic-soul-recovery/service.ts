@@ -1,129 +1,29 @@
-import type { EpicSoulSlot } from '@dfragon/lib/epic-soul-recovery'
-import type { CharacterCardScore } from '@dfragon/server-core/domain/character-card/index.js'
+import type { CharacterPayload } from '@dfragon/server-core/domain/character-detail/index.js'
 import type { CharacterIdentity } from '@dfragon/server-core/domain/character-identity.js'
-import type {
-  EquipmentSimulationService,
-  SimulatedPlan
-} from '#application/equipment-simulation/index.js'
-import type { LoadCharacterScoreSource } from '#application/equipment-simulation/ports.js'
-import type { LoadStoredScoreSource } from './ports.js'
-import {
-  type RecoveryAfterItem,
-  type RecoveryCandidate,
-  recoveryCandidates,
-  wornEpicItems
-} from './candidates.js'
+import { type WornEpicSouls, wornEpicSouls } from './worn-epic-souls.js'
 
-export interface EpicSoulRecoverySlot {
-  readonly slotId: EpicSoulSlot
-  readonly before: {
-    readonly itemId: string
-    readonly itemName: string
-    readonly itemRarity: string
-    readonly tune: number
-    /** 시뮬레이터 주소에 착용 강화, 증폭을 그대로 담는 데 쓴다. */
-    readonly reinforce: number
-    readonly amplified: boolean
-  }
-  /** 최고 세팅이 없으면 null이다. */
-  readonly after: RecoveryAfterItem | null
-  readonly souls: number
-}
+export type LoadEquipment = (
+  identity: CharacterIdentity,
+  signal: AbortSignal
+) => Promise<CharacterPayload>
 
-export interface EpicSoulRecoveryBest {
-  readonly score: CharacterCardScore
-  readonly setItemId: string
-  /** 무기가 에픽이 아니면 null이다. */
-  readonly weaponVariantId: string | null
-}
-
-export interface EpicSoulRecoveryResult {
-  readonly souls: {
-    readonly total: number
-    readonly slots: readonly EpicSoulRecoverySlot[]
-  }
-  readonly baseline: CharacterCardScore | null
-  /** 에픽 부위가 없거나 점수를 낸 세트가 없으면 null이다. */
-  readonly best: EpicSoulRecoveryBest | null
-}
-
-type Simulated = SimulatedPlan<RecoveryCandidate>
-
-interface ScoredCandidate {
-  readonly candidate: RecoveryCandidate
-  readonly score: CharacterCardScore
-  readonly value: number
-}
-
-/** 점수가 같으면 세트 목록과 무기 계열 순서에서 먼저 나온 세팅이다. */
-function bestOf(simulated: readonly Simulated[]): ScoredCandidate | null {
-  let best: ScoredCandidate | null = null
-
-  for (const { plan, scores } of simulated) {
-    const score = scores.simulated
-    const value = score?.value
-
-    if (score != null && value != null && (best === null || value > best.value)) {
-      best = { candidate: plan, score, value }
-    }
-  }
-
-  return best
-}
-
-function baselineOf(simulated: readonly Simulated[]): CharacterCardScore | null {
-  for (const { scores } of simulated) {
-    if (scores.baseline !== null) {
-      return scores.baseline
-    }
-  }
-
-  return null
-}
+export type LoadStoredEquipment = (
+  identity: CharacterIdentity,
+  signal: AbortSignal
+) => Promise<CharacterPayload | null>
 
 export class EpicSoulRecoveryService {
   constructor(
-    private readonly simulation: EquipmentSimulationService,
-    private readonly loadStoredScoreSource: LoadStoredScoreSource,
-    private readonly loadScoreSource: LoadCharacterScoreSource
+    private readonly loadStoredEquipment: LoadStoredEquipment,
+    private readonly loadEquipment: LoadEquipment
   ) {}
 
-  /**
-   * 저장한 원문이 있으면 Neople을 부르지 않고 그 원문으로 계산하고, 없을 때만 상세 조회처럼 받는다.
-   * 가상 점수는 시뮬레이션처럼 상세 응답 캐시, 조회 알림, DB에 남기지 않는다.
-   */
-  async recover(
-    identity: CharacterIdentity,
-    includePrimordial: boolean,
-    signal: AbortSignal
-  ): Promise<EpicSoulRecoveryResult> {
-    const source =
-      (await this.loadStoredScoreSource(identity, signal)) ??
-      (await this.loadScoreSource(identity, signal))
-    const { payloads, simulated } = await this.simulation.simulateEach(
-      source,
-      (payloads) =>
-        recoveryCandidates(
-          payloads.equipment,
-          wornEpicItems(payloads.equipment),
-          includePrimordial
-        ),
-      signal
-    )
-    const worn = wornEpicItems(payloads.equipment)
-    const best = bestOf(simulated)
-    const slots = worn.slots.map(({ slotId, souls, ...before }) => {
-      const after = best?.candidate.after.get(slotId) ?? null
+  /** 저장한 장비 원문이 있으면 Neople을 부르지 않고, 없을 때만 상세 조회와 같은 캐시로 받는다. */
+  async recover(identity: CharacterIdentity, signal: AbortSignal): Promise<WornEpicSouls> {
+    const equipment =
+      (await this.loadStoredEquipment(identity, signal)) ??
+      (await this.loadEquipment(identity, signal))
 
-      return { slotId, before, after, souls }
-    })
-    const bestSetting = best && {
-      score: best.score,
-      setItemId: best.candidate.setItemId,
-      weaponVariantId: best.candidate.weaponVariantId
-    }
-    const baseline = baselineOf(simulated)
-
-    return { souls: { total: worn.total, slots }, baseline, best: bestSetting }
+    return wornEpicSouls(equipment)
   }
 }
