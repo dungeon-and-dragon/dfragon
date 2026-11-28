@@ -485,7 +485,7 @@ export class LabItemService {
     }
   })
 
-  // 게임 아이템 이름의 Neople id는 바뀌지 않아 process 동안 둔다. 실패한 검색은 남기지 않아 다음 요청이 다시 찾는다.
+  // 게임 아이템 이름의 Neople id는 바뀌지 않아 찾지 못한 결과까지 process 동안 둔다. 검색 요청이 실패한 이름만 다음 요청이 다시 찾는다.
   private readonly gameItems = new Map<string, Promise<FoundGameItem | null>>()
 
   constructor(
