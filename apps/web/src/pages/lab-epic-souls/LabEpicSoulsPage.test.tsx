@@ -54,7 +54,7 @@ async function search(name = '모험단1'): Promise<void> {
 
 function characterRows(): HTMLTableRowElement[] {
   return [...container.querySelectorAll<HTMLTableRowElement>('table > tbody > tr')].filter(
-    (row) => row.querySelector('td[colspan]') === null
+    (row) => row.querySelector('td[colspan], th') === null
   )
 }
 
@@ -63,7 +63,11 @@ function rowText(row: HTMLTableRowElement): string[] {
 }
 
 function totalText(): string | null | undefined {
-  return container.querySelector('tfoot td.table-num')?.textContent
+  const firstRow = container.querySelector('table > tbody > tr:first-child')
+
+  expect(firstRow?.querySelector('th')?.textContent).toBe('합계')
+
+  return firstRow?.querySelector('td.table-num')?.textContent
 }
 
 async function waitForRecoveries(): Promise<void> {
@@ -127,7 +131,7 @@ it('줄마다 검색 화면처럼 세트, 명성, 점수를 보이고 그 뒤에
   expect(score).toContain('1,388,832')
 })
 
-it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 합계는 받은 줄의 에픽 소울을 더한다', async () => {
+it('한 캐릭터를 계산하지 못해도 다른 줄을 채우고, 맨 위 합계는 받은 줄의 에픽 소울을 더한다', async () => {
   server.use(epicSoulsHandlers.characters, epicSoulsHandlers.recoveries)
   await render()
   await search()
