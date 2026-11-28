@@ -18,7 +18,6 @@ import {
   Portrait,
   raritySolidOfName
 } from '#entities/character'
-import { MISSING_VALUE } from '#shared/lib/missing-value'
 import { STICKY_HEAD, STICKY_HEAD_CELL, STICKY_TABLE_FRAME } from './sticky-head'
 
 export const LOADING_ROWS = 4
@@ -27,7 +26,6 @@ const CHARACTER_COLUMN = 'w-[232px]'
 const CRYSTAL_COLUMN = 'w-[160px]'
 const CRYSTAL_ICON_LIMIT = 3
 const SLOT_CELL = 'px-0 text-center'
-const MISSING = <span className="text-fg-subtle">{MISSING_VALUE}</span>
 
 function CharacterIdentity({ character }: { character: EquipmentCharacter }): React.JSX.Element {
   const image = characterImageUrl(character)
@@ -82,9 +80,9 @@ function HoldingIcon({
 }: {
   cell: HoldingCell | null
   src?: string | null
-}): React.JSX.Element {
+}): React.JSX.Element | null {
   if (cell === null) {
-    return MISSING
+    return null
   }
 
   return (
@@ -237,9 +235,9 @@ export function EquipmentSkeleton(): React.JSX.Element {
   )
 }
 
-function CrystalIcons({ crystal }: { crystal: CrystalCell | null }): React.JSX.Element {
+function CrystalIcons({ crystal }: { crystal: CrystalCell | null }): React.JSX.Element | null {
   if (crystal === null) {
-    return MISSING
+    return null
   }
 
   const rarity = itemRarityOfGrade(crystal.rarity)

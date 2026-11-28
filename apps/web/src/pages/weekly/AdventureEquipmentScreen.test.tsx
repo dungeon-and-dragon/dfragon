@@ -228,7 +228,7 @@ async function waitForTable(): Promise<void> {
   await vi.waitFor(() => expect(tableRows('장비').length).toBeGreaterThan(0))
 }
 
-const DASHES = Array.from({ length: 10 }, () => '-')
+const BLANKS = Array.from({ length: 10 }, () => '')
 
 it('응답이 고른 서버와 세트의 칩을 켜고 세트 칩은 응답 순서대로 두며, 표에 없는 세트는 원래 이름으로 보이고, 그 서버 캐릭터를 명성 순으로 보이고, 칸에는 가장 높은 등급과 그 등급의 남은 개수를 보인다', async () => {
   serve(json(equipment))
@@ -246,8 +246,8 @@ it('응답이 고른 서버와 세트의 칩을 켜고 세트 칩은 응답 순�
     ['가나다 세트', 'false']
   ])
   expect(tableRows('장비')).toEqual([
-    ['합성2합성 전직', '태초 태초 상의', ...DASHES],
-    ['합성1합성 전직', '에픽 에픽 상의', ...DASHES]
+    ['합성2합성 전직', '태초 태초 상의', ...BLANKS],
+    ['합성1합성 전직', '에픽 에픽 상의', ...BLANKS]
   ])
 
   const topRow = container.querySelector('section[aria-label="장비"] table tbody tr')!
@@ -255,7 +255,7 @@ it('응답이 고른 서버와 세트의 칩을 켜고 세트 칩은 응답 순�
 
   expect(tableRows('서약')).toEqual([
     ['합성2합성 전직', '태초 합성 서약', '합성 태초 결정 5개', '합성 결정 3개'],
-    ['합성1합성 전직', '-', '-', '-']
+    ['합성1합성 전직', '', '', '']
   ])
 })
 
@@ -365,7 +365,7 @@ it('주소의 서버와 세트로 요청하고, 그 서버 캐릭터만 행으�
     ['페어리', 'true'],
     ['가나다 세트', 'false']
   ])
-  expect(tableRows('장비')).toEqual([['합성3합성 전직', '-', ...DASHES]])
+  expect(tableRows('장비')).toEqual([['합성3합성 전직', '', ...BLANKS]])
 
   await act(async () => chip('서버', '카인').click())
 
@@ -421,7 +421,7 @@ it('세트를 바꾸면 그 세트로 한 번 요청하고, 받는 동안 누른
   await act(async () => release())
   await vi.waitFor(() =>
     expect(tableRows('장비')).toEqual([
-      ['합성2합성 전직', '-', '-', '에픽 에픽 하의', ...DASHES.slice(2)]
+      ['합성2합성 전직', '', '', '에픽 에픽 하의', ...BLANKS.slice(2)]
     ])
   )
   expect(requests).toHaveLength(2)
