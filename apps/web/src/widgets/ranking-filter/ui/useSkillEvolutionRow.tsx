@@ -1,5 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { type SkillWindowCatalog, useSkillWindowCatalog } from '#entities/catalog'
+import {
+  type SkillWindowCatalog,
+  skillEvolutionBranchesOf,
+  useSkillWindowCatalog
+} from '#entities/catalog'
 import { RANKING_JOBS } from '#entities/character'
 import {
   type FameRankingFilter,
@@ -24,19 +28,22 @@ function evolutionSkillsOf(
   names: readonly string[],
   catalog: SkillWindowCatalog | null
 ): EvolutionSkill[] {
-  const skills = catalog !== null ? Object.values(catalog.job.skills) : []
+  const skills = catalog !== null ? Object.entries(catalog.job.skills) : []
 
   return names.map((name) => {
-    const skill = skills.find((candidate) => candidate.name === name)
-    const icon =
-      catalog !== null && skill !== undefined
-        ? { sprite: catalog.job.sprite, x: skill.icon.x, y: skill.icon.y }
-        : null
-    const branches = skill?.evolution
-    const branchNames =
-      branches !== undefined ? { 1: branches[0].name, 2: branches[1].name } : FALLBACK_NAMES
+    const entry = skills.find(([, candidate]) => candidate.name === name)
 
-    return { name, icon, branchNames }
+    if (catalog === null || entry === undefined) {
+      return { name, icon: null, branchNames: FALLBACK_NAMES, branches: null }
+    }
+
+    const [skillId, skill] = entry
+    const icon = { sprite: catalog.job.sprite, x: skill.icon.x, y: skill.icon.y }
+    const branches = skillEvolutionBranchesOf(catalog, Number(skillId))
+    const branchNames =
+      branches !== null ? { 1: branches[0].name, 2: branches[1].name } : FALLBACK_NAMES
+
+    return { name, icon, branchNames, branches }
   })
 }
 
