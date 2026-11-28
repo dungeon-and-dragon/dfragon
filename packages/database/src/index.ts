@@ -48,7 +48,8 @@ export {
   readLabCandidateExclusions
 } from './lab-candidate-exclusion.js'
 export type { LabCandidateExclusion } from './lab-candidate-exclusion.js'
-export { replaceLabCandidateWearCounts } from './lab-candidate-wear-count.js'
+export { readMostWornItemIds, replaceLabCandidateWearCounts } from './lab-candidate-wear-count.js'
+export type { WornItemId } from './lab-candidate-wear-count.js'
 export {
   readItemDictionary,
   readUnlistedAcquisitionItemIds,

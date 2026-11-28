@@ -8,7 +8,8 @@ import type {
   LabItemPriceCost,
   LabItemPriceDetail,
   LabItemPriceRow,
-  LabItemStatusLine
+  LabItemStatusLine,
+  WornItemId
 } from '@dfragon/database'
 import {
   isEnchantCategory,
@@ -35,7 +36,7 @@ import {
   neopleCardEntry,
   ownerCardEntry
 } from '#domain/lab-enchant-options/index.js'
-import type { FindGameItem, FoundGameItem, LoadItemDetails } from './ports.js'
+import type { FindGameItem, LoadItemDetails } from './ports.js'
 import type { LabItemRepository } from './repository.js'
 
 export interface LabItemCurrencyCost {
@@ -102,6 +103,7 @@ const ENCHANT_CATEGORIES: ReadonlySet<string> = new Set(
 
 export const emptyLabItemRepository: LabItemRepository = {
   readLabItemPrices: async () => [],
+  readMostWornItemIds: async () => [],
   readCurrencyIcon: async () => null,
   readItemIcon: async () => null
 }
@@ -485,8 +487,8 @@ export class LabItemService {
     }
   })
 
-  // 게임 아이템 이름의 Neople id는 바뀌지 않아 찾지 못한 결과까지 process 동안 둔다. 검색 요청이 실패한 이름만 다음 요청이 다시 찾는다.
-  private readonly gameItems = new Map<string, Promise<FoundGameItem | null>>()
+  // 같은 이름의 Neople id는 어느 것이든 같은 아이템이라 고른 id와 찾지 못한 결과까지 process 동안 둔다. 조회가 실패한 이름만 다음 요청이 다시 찾는다.
+  private readonly gameItemIds = new Map<string, Promise<string | null>>()
 
   constructor(
     private readonly repository: LabItemRepository,
@@ -494,28 +496,59 @@ export class LabItemService {
     private readonly findGameItem: FindGameItem
   ) {}
 
-  private gameItem(itemName: string): Promise<FoundGameItem | null> {
-    const known = this.gameItems.get(itemName)
+  // Neople 아이템 검색은 크리쳐, 오라를 찾지 못해 운영 캐릭터가 착용한 id를 먼저 쓰고, 아무도 끼지 않은 아이템만 검색한다.
+  private async resolveGameItemId(
+    itemName: string,
+    worn: Promise<readonly WornItemId[]>
+  ): Promise<string | null> {
+    const observed = (await worn).find((candidate) => candidate.itemName === itemName)
 
-    if (known !== undefined) {
-      return known
+    if (observed !== undefined) {
+      return observed.itemId
     }
 
-    const found = this.findGameItem(itemName).catch(() => {
-      this.gameItems.delete(itemName)
+    const found = await this.findGameItem(itemName)
 
+    if (found === null) {
       return null
-    })
+    }
 
-    this.gameItems.set(itemName, found)
-
-    return found
+    return found.itemId
   }
 
-  private async slotItemSource(
+  private async gameItemIdsOf(itemNames: readonly string[]): Promise<Map<string, string | null>> {
+    const unknown = [...new Set(itemNames)].filter((itemName) => !this.gameItemIds.has(itemName))
+
+    if (unknown.length > 0) {
+      const worn = this.repository.readMostWornItemIds(unknown)
+
+      for (const itemName of unknown) {
+        const resolved = this.resolveGameItemId(itemName, worn).catch(() => {
+          this.gameItemIds.delete(itemName)
+
+          return null
+        })
+
+        this.gameItemIds.set(itemName, resolved)
+      }
+    }
+
+    const entries = await Promise.all(
+      itemNames.map(async (itemName) => {
+        const itemId = (await this.gameItemIds.get(itemName)) ?? null
+
+        return [itemName, itemId] as const
+      })
+    )
+
+    return new Map(entries)
+  }
+
+  private slotItemSource(
     row: LabItemPriceRow,
-    category: SlotItemCategory
-  ): Promise<LabSlotItemSource<LabSlotItemCard> | null> {
+    category: SlotItemCategory,
+    gameItemIds: ReadonlyMap<string, string | null>
+  ): LabSlotItemSource<LabSlotItemCard> | null {
     const tier = LAB_ITEM_TIERS.find((candidate) => candidate === row.tier)
 
     if (tier === undefined) {
@@ -525,9 +558,8 @@ export class LabItemService {
     const fame = row.detail?.fame ?? row.candidate?.fame ?? null
     const price = toPrice(row, fame, row.candidate)
     const itemName = gameItemNameOf(row)
-    const found = await this.gameItem(itemName)
-    const item = found !== null ? { itemName, ...found } : null
-    const itemId = found?.itemId ?? null
+    const itemId = gameItemIds.get(itemName) ?? null
+    const item = itemId !== null ? { itemId, itemName } : null
     const card: LabSlotItemCard = {
       itemName: price.itemName,
       gameItemName: itemName,
@@ -543,19 +575,27 @@ export class LabItemService {
 
   /** 이름으로 Neople 아이템을 찾지 못한 항목은 다른 항목과 묶인 카드로만 보이고 혼자서는 선택지가 되지 않는다. */
   private async slotItemOptionsOf(rows: readonly LabItemPriceRow[]): Promise<LabSlotItemOptions> {
-    const sources = await Promise.all(
-      rows.map((row) => {
-        const category = slotItemCategoryOf(row)
+    const slotRows = rows.flatMap((row) => {
+      const category = slotItemCategoryOf(row)
 
-        if (category === null) {
-          return null
-        }
+      if (category === null) {
+        return []
+      }
 
-        return this.slotItemSource(row, category)
-      })
-    )
+      return [{ row, category }]
+    })
 
-    const slotItemSources = sources.filter((source) => source !== null)
+    const gameItemIds = await this.gameItemIdsOf(slotRows.map(({ row }) => gameItemNameOf(row)))
+    const slotItemSources = slotRows.flatMap(({ row, category }) => {
+      const source = this.slotItemSource(row, category, gameItemIds)
+
+      if (source === null) {
+        return []
+      }
+
+      return [source]
+    })
+
     const slotItems = labSlotItemOptions(SLOT_ITEM_CATEGORIES, slotItemSources, digestOptionKey)
 
     return { slotItems }

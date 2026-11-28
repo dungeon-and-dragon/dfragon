@@ -86,12 +86,14 @@ async function startApi(
   readCurrencyIcon: LabItemRepository['readCurrencyIcon'] = async () => null,
   readItemIcon: LabItemRepository['readItemIcon'] = async () => null,
   fetchCatalog: FetchCatalog = noCatalog,
-  findGameItem: FindGameItem = async () => null
+  findGameItem: FindGameItem = async () => null,
+  readMostWornItemIds: LabItemRepository['readMostWornItemIds'] = async () => []
 ) {
   const labItems: LabItemRepository = {
     readLabItemPrices: async () => rows,
     readCurrencyIcon,
-    readItemIcon
+    readItemIcon,
+    readMostWornItemIds
   }
   const { app } = await createApiHttpApp({
     search: { searchCharacters: unusedProvider },
@@ -734,6 +736,7 @@ test('같은 아이템 아이콘을 동시에 요청하면 DB를 한 번만 읽�
   const service = new LabItemService(
     {
       readLabItemPrices: async () => [],
+      readMostWornItemIds: async () => [],
       readCurrencyIcon: async () => null,
       readItemIcon: async (name) => {
         requested.push(name)
@@ -1302,9 +1305,18 @@ function gameItems(names: readonly string[]) {
 async function requestSlotItemOptions(
   t: test.TestContext,
   rows: LabItemPriceRow[],
-  findGameItem: FindGameItem
+  findGameItem: FindGameItem,
+  readMostWornItemIds: LabItemRepository['readMostWornItemIds'] = async () => []
 ) {
-  const request = await startApi(t, rows, undefined, undefined, noCatalog, findGameItem)
+  const request = await startApi(
+    t,
+    rows,
+    undefined,
+    undefined,
+    noCatalog,
+    findGameItem,
+    readMostWornItemIds
+  )
 
   return async () => {
     const response = await request('/lab/enchant-options')
@@ -1451,6 +1463,73 @@ test('Neople 아이템 검색이 실패한 이름은 그 요청에서 빼고 다
     {
       category: 'title',
       tiers: [{ tier: '종결', options: [[['합성 칭호', '합성 칭호', 'neople-합성 칭호']]] }]
+    }
+  ])
+})
+
+test('칭호, 크리쳐, 오라는 운영 캐릭터가 착용한 Neople id를 먼저 쓰고, 아무도 끼지 않은 이름만 Neople 아이템 검색으로 찾는다', async (t) => {
+  const strength = [{ name: '힘', value: '100' }]
+  const { searched, findGameItem } = gameItems(['합성 안 낀 칭호'])
+  const options = await requestSlotItemOptions(
+    t,
+    [
+      slotItemRow('CREATURE', '종결', '합성 크리쳐 알', 300, {
+        itemName: '합성 크리쳐',
+        options: strength
+      }),
+      slotItemRow('TITLE', '종결', '합성 안 낀 칭호', 100, { options: strength })
+    ],
+    findGameItem,
+    async (itemNames) => {
+      if (!itemNames.includes('합성 크리쳐')) {
+        return []
+      }
+
+      return [{ itemName: '합성 크리쳐', itemId: 'worn-합성 크리쳐' }]
+    }
+  )
+
+  const slotItems = await options()
+  assert.deepEqual(slotItemNamesOf(slotItems), [
+    {
+      category: 'title',
+      tiers: [
+        {
+          tier: '종결',
+          options: [[['합성 안 낀 칭호', '합성 안 낀 칭호', 'neople-합성 안 낀 칭호']]]
+        }
+      ]
+    },
+    {
+      category: 'creature',
+      tiers: [{ tier: '종결', options: [[['합성 크리쳐 알', '합성 크리쳐', 'worn-합성 크리쳐']]] }]
+    }
+  ])
+  assert.deepEqual(searched, ['합성 안 낀 칭호'])
+})
+
+test('착용 id를 읽지 못한 요청은 그 이름을 빼고, 다음 요청에서 다시 읽는다', async (t) => {
+  let fails = true
+  const options = await requestSlotItemOptions(
+    t,
+    [slotItemRow('AURA', '종결', '합성 오라', 100, { options: [{ name: '힘', value: '1' }] })],
+    async () => null,
+    async (itemNames) => {
+      if (fails) {
+        throw new Error('합성 DB 실패')
+      }
+
+      return itemNames.map((itemName) => ({ itemName, itemId: `worn-${itemName}` }))
+    }
+  )
+
+  assert.deepEqual(await options(), [])
+  fails = false
+  const retried = await options()
+  assert.deepEqual(slotItemNamesOf(retried), [
+    {
+      category: 'aura',
+      tiers: [{ tier: '종결', options: [[['합성 오라', '합성 오라', 'worn-합성 오라']]] }]
     }
   ])
 })
