@@ -269,6 +269,7 @@ test('수집을 끈 레기온은 레이드 분모가 마감해도 클리어를 �
           contentId: 'legion-venus',
           collected: false,
           shown: true,
+          scoreBandMinPopulation: 0,
           updatedAt: week('2026-11-12')
         }
       ],
