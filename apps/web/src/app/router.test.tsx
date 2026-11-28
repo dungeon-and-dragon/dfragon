@@ -1837,7 +1837,7 @@ it('세트, 조합, 무기 탭 사이를 오가면 고른 직업, 전직 필터�
   await act(async () => tab('무기').click())
   await waitForPath('/stats/weapons')
   expect(window.location.search).toBe(search)
-  expect(tab('캐릭터').getAttribute('href')).toBe('/stats')
+  expect(tab('명성').getAttribute('href')).toBe('/stats')
 })
 
 it('무기 탭에서 스킬 탭으로 가면 직업, 전직 필터를 주소에 그대로 두고 표본 없이 그 전직의 스킬 통계를 받는다', async () => {
@@ -1893,7 +1893,7 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
     ['세트', 'page'],
     ['무기', null],
     ['조합', null],
-    ['캐릭터', null],
+    ['명성', null],
     ['스킬', null],
     ['클리어', null]
   ])
