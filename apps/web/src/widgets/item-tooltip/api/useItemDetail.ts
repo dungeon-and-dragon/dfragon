@@ -7,6 +7,7 @@ const requestJson = createJsonRequest(dfragonHttp, API_BASE_URL)
 
 export function useItemDetail(itemId: string): LoadedResult<ItemDetail> {
   return useLoadedResult(['item-detail', itemId], () =>
-    requestJson(`/items/${itemId}`, itemDetailSchema)
+    // 공개 API 요청은 기본으로 HTTP 캐시를 건너뛰지만, 아이템 정보는 API가 정한 기간 동안 다시 받지 않는다.
+    requestJson(`/items/${itemId}`, itemDetailSchema, { cache: 'default' })
   )
 }
