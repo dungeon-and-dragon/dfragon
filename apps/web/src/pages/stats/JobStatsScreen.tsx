@@ -24,7 +24,7 @@ import {
 import { StatsTabs } from '#widgets/stats-tabs'
 import type { LoadedResult } from '#shared/lib/useLoadedResult'
 import { ItemRowBars } from './ItemRowBars'
-import { weaponBars } from './item-stats-bars'
+import { formatHeadcount, uniqueItemBars, weaponBars } from './item-stats-bars'
 import { comboBars, formatShare } from './set-stats-bars'
 import { SetStatsFilterBox } from './SetStatsFilterBox'
 import {
@@ -43,11 +43,12 @@ const COMBO_BOX = {
   empty: '세트 통계가 없습니다.',
   failed: '세트 통계를 받지 못했습니다.'
 } as const
-const WEAPON_BOX = {
-  name: '무기',
+const ITEM_MESSAGES = {
   empty: '아이템 통계가 없습니다.',
   failed: '아이템 통계를 받지 못했습니다.'
 } as const
+const WEAPON_BOX = { name: '무기', ...ITEM_MESSAGES } as const
+const UNIQUE_BOX = { name: '유일 장비', ...ITEM_MESSAGES } as const
 const SKILL_EMPTY = '스킬 통계가 없습니다.'
 const SKILL_FAILED = '스킬 통계를 받지 못했습니다.'
 const FEW_SAMPLES = '표본이 20명 미만입니다.'
@@ -263,6 +264,15 @@ export function JobStatsScreen({
                   bars={weaponBars(stats, statsFilter).slice(0, BAR_LIMIT)}
                   tone="chart-2"
                   formatValue={formatShare}
+                />
+              )}
+            </StatsBox>
+            <StatsBox box={UNIQUE_BOX} result={itemStats}>
+              {(stats) => (
+                <ItemRowBars
+                  bars={uniqueItemBars(stats, statsFilter)}
+                  tone="chart-5"
+                  formatValue={formatHeadcount}
                 />
               )}
             </StatsBox>

@@ -2,14 +2,13 @@ import type { BarTone } from '#shared/ui/chart/RowBars'
 import { ListBox } from '#shared/ui/ListBox'
 import { ItemRowBars } from './ItemRowBars'
 import { type SetStatsFilter, useItemStats } from '#entities/ranking'
-import { type ItemBar, uniqueItemBars, weaponBars } from './item-stats-bars'
+import { formatHeadcount, type ItemBar, uniqueItemBars, weaponBars } from './item-stats-bars'
 import { formatShare } from './set-stats-bars'
 
 const WEAPON = '무기'
 const UNIQUE = '유일 장비'
 const EMPTY = '아이템 통계가 없습니다.'
 const FAILED = '아이템 통계를 받지 못했습니다.'
-const headcount = new Intl.NumberFormat('ko-KR')
 
 type ItemBox = Readonly<{
   name: string
@@ -17,10 +16,6 @@ type ItemBox = Readonly<{
   tone: BarTone
   formatValue: (value: number) => string
 }>
-
-function formatHeadcount(count: number): string {
-  return `${headcount.format(count)}명`
-}
 
 function SameContentRow({ content }: { content: React.JSX.Element }): React.JSX.Element {
   return (
