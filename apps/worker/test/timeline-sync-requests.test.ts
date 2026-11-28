@@ -233,6 +233,51 @@ test('종류마다 정기 동기화 16, 강화 백필 4, 옛 시즌 받기 2개�
   assert(!requests.keys().includes(keyOf(request('enhancement-backfill', 'backfill-0'))))
 })
 
+test('집는 요청이 LIMIT보다 많이 와 처리 중인 요청이 상한을 넘으면 0 이하로 집지 않고 기다렸다가, 상한 아래로 내려오면 다시 집는다', async (t) => {
+  const seed = Array.from({ length: 4 }, (_, index) =>
+    request('season-backfill', `season-${index}`, 9)
+  )
+  const requests = memoryRequests(seed.map((seeded) => ({ request: seeded })))
+  const held = new Map<string, () => void>()
+  const { pause } = pauses(t, [])
+  let overflowed = false
+
+  // 상한을 넘은 원인은 모르지만 그 상태를 만들려고 첫 번째로 집을 때만 LIMIT보다 한 개 더 돌려준다.
+  // PostgreSQL처럼 0 이하의 LIMIT은 거절해, lane이 실패하면 startService가 테스트를 실패시킨다.
+  const claim = requests.repository.claim
+  requests.repository.claim = async (kind, limit) => {
+    assert(limit > 0, `LIMIT ${limit}`)
+
+    if (kind === 'season-backfill' && !overflowed) {
+      overflowed = true
+
+      return claim(kind, limit + 1)
+    }
+
+    return claim(kind, limit)
+  }
+
+  startService(requests, {
+    fetchTimeline: async ({ characterId }) => {
+      if (held.has(characterId)) {
+        return emptyInputs
+      }
+
+      return new Promise((resolve) => {
+        held.set(characterId, () => {
+          resolve(emptyInputs)
+        })
+      })
+    },
+    pause
+  })
+
+  await waitUntil(() => held.size === 3)
+  held.get('season-0')?.()
+  held.get('season-1')?.()
+  await waitUntil(() => held.size === 4)
+})
+
 for (const kind of ['sync', 'enhancement-backfill', 'season-backfill'] as const) {
   test(`${kind} 요청이 쓸 Neople key가 없어 실패하면 행을 남겨 되돌리고 60초 쉰 뒤 다시 처리한다`, async (t) => {
     const requests = memoryRequests([{ request: request(kind, 'no-key', 9) }])
