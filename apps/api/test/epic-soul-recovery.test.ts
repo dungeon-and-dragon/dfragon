@@ -86,13 +86,22 @@ function noEpic(items: Item[]): Item[] {
 }
 
 // 실제 상세 대신 선택지 목록의 이름, 등급, 세트로 만든 합성 아이템 상세다.
+// 엔진은 itemStatus가 빈 상세를 상세가 없다고 보고 교체를 거절하므로 스탯 변화가 없는 줄 하나를 둔다.
+const SYNTHETIC_ITEM_STATUS = [{ name: '모험가 명성', value: 0 }]
+
 function syntheticDetails(): Map<string, Item> {
   const details = new Map<string, Item>()
 
   for (const { setItemId, setItemName } of equipmentSets()) {
     for (const slotId of EQUIPMENT_VARIANT_SLOTS) {
       for (const { item } of equipmentVariantsOf(setItemId, slotId)) {
-        details.set(item.itemId, { ...item, setItemId, setItemName, itemAvailableLevel: 115 })
+        details.set(item.itemId, {
+          ...item,
+          setItemId,
+          setItemName,
+          itemAvailableLevel: 115,
+          itemStatus: SYNTHETIC_ITEM_STATUS
+        })
       }
     }
   }
@@ -102,7 +111,8 @@ function syntheticDetails(): Map<string, Item> {
       ...item,
       itemType: '무기',
       itemTypeDetail: '대검',
-      itemAvailableLevel: 115
+      itemAvailableLevel: 115,
+      itemStatus: SYNTHETIC_ITEM_STATUS
     })
   }
 
@@ -489,7 +499,8 @@ test('실제 엔진의 최고 세팅 점수는 같은 세트, 등급, 무기를 
     '세트 전환과 무기 아이템 교체를 반영하는 0.13.0 이상 엔진이 없음',
   timeout: 120_000
 }, async (t) => {
-  const { details, path } = fixture(epicWeaponAndJacket)
+  // 착용 장비를 바꾸면 Neople 세트 영역의 포인트와 어긋나 엔진이 거절하므로 에픽 무기, 반지, 마법석을 낀 원본을 그대로 쓴다.
+  const { details, path } = fixture((items) => items)
   const origin = await listen(t, { details, scoreLibraryPath: REAL_SCORE_LIBRARY_PATH })
 
   const recovery = await recover(origin, path, false)
