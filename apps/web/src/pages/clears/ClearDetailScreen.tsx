@@ -1,9 +1,10 @@
-import { ArrowRightIcon, ChipGroup } from '@dfragon/ui'
+import { ChipGroup } from '@dfragon/ui'
 import { BarLineChart } from '#shared/ui/chart/BarLineChart'
 import { BoxPlotChart } from '#shared/ui/chart/BoxPlot'
 import { ChartLegend } from '#shared/ui/chart/ChartLegend'
 import { Columns } from '#shared/ui/chart/Columns'
 import { RowBars } from '#shared/ui/chart/RowBars'
+import { Sankey } from '#shared/ui/chart/Sankey'
 import { SplitBar } from '#shared/ui/chart/SplitBar'
 import {
   type ClearContent,
@@ -23,10 +24,10 @@ import {
   stageBars,
   type SplitCard,
   stageChoices,
-  stageMoveCard,
   streakColumns,
   weekGroupRows,
   weeklyClearChart,
+  weekMoveSankey,
   weekNumberText,
   weekOverWeekCard
 } from './clear-detail'
@@ -259,26 +260,16 @@ function ContentHead({
 
 function Figure({
   label,
-  to,
   value,
   tone
 }: Readonly<{
   label: string
-  to?: string
   value: string
   tone?: 'up' | 'down'
 }>): React.JSX.Element {
   return (
     <div className="stat">
-      <dt className="stat-label inline-flex items-center gap-1">
-        {label}
-        {to !== undefined && (
-          <>
-            <ArrowRightIcon className="size-icon-sm" />
-            {to}
-          </>
-        )}
-      </dt>
+      <dt className="stat-label">{label}</dt>
       <dd className={`stat-value ${tone !== undefined ? TONE_CLASSES[tone] : ''}`}>{value}</dd>
     </div>
   )
@@ -310,6 +301,9 @@ function DetailStats({
     DETAIL_FRONT_ADVENTURE_COLUMNS
   )
   const hasAdventures = stats.adventures.length > 0
+  const moves =
+    stats.weekMoves !== null ? weekMoveSankey(stats.weekMoves, week.weekStart, releasedAt) : null
+  const shownMoves = moves?.flows.some(({ value }) => value > 0) ? moves : null
   // 챌린지 기록의 시각은 보스를 잡은 때가 아니라 보상 상자를 연 때다.
   const hasTimes = stats.kind !== 'challenge' && hasClearTimes(stats)
 
@@ -345,16 +339,15 @@ function DetailStats({
         )}
       </div>
       <div className={clearClasses.row}>
-        {stats.weekOverWeek !== null && (
+        {shownMoves !== null && (
+          <Panel name="지난주 대비 이동">
+            <Sankey label="지난주 대비 이동" formatValue={formatInteger} {...shownMoves} />
+          </Panel>
+        )}
+        {moves === null && stats.weekOverWeek !== null && (
           <SplitPanel
             name="지난주 대비 이탈과 복귀"
             card={weekOverWeekCard(stats.weekOverWeek, week.weekStart, releasedAt)}
-          />
-        )}
-        {stats.stageMoves !== null && (
-          <SplitPanel
-            name="난이도 이동"
-            card={stageMoveCard(stats.stageMoves, week.weekStart, releasedAt)}
           />
         )}
       </div>
@@ -468,8 +461,8 @@ function SplitPanel({
     <Panel name={name}>
       <div className="flex flex-col gap-3 p-4">
         <dl className="flex gap-6">
-          {card.figures.map(({ label, to, value }) => (
-            <Figure key={label} label={label} to={to} value={value} />
+          {card.figures.map(({ label, value }) => (
+            <Figure key={label} label={label} value={value} />
           ))}
         </dl>
         <div className="mt-auto flex flex-col gap-2">

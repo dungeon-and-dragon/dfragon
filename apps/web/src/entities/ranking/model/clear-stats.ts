@@ -72,7 +72,11 @@ const weekGroupSchema = z.object({
 
 const scoreBandSchema = z.object({ score: count, population: count, cleared: count })
 
-const stageCountsSchema = z.object({ same: count, other: count, none: count })
+const weekMoveSchema = z.object({
+  from: z.enum(['hard', 'normal', 'returned', 'first']),
+  to: z.enum(['hard', 'normal', 'left']),
+  characters: count
+})
 
 export const clearContentStatsSchema = z.object({
   ...clearContentHeader,
@@ -100,7 +104,7 @@ export const clearContentStatsSchema = z.object({
       first: weekGroupSchema
     })
     .nullable(),
-  stageMoves: z.object({ hard: stageCountsSchema, normal: stageCountsSchema }).nullable(),
+  weekMoves: z.array(weekMoveSchema).nullable(),
   streaks: z.array(z.object({ weeks: z.number().int().positive(), characters: count })).nullable(),
   stages: z.array(z.object({ stage: z.string(), characters: count })).nullable(),
   scoreBands: z.object({ equipment: z.array(scoreBandSchema), buff: z.array(scoreBandSchema) })
@@ -128,7 +132,7 @@ export type ClearContentStats = z.infer<typeof clearContentStatsSchema>
 export type ClearJob = ClearContentStats['jobs'][number]
 export type ClearAdventureSize = ClearContentStats['adventures'][number]
 export type ClearWeekOverWeek = NonNullable<ClearContentStats['weekOverWeek']>
-export type ClearStageMoves = NonNullable<ClearContentStats['stageMoves']>
+export type ClearWeekMove = z.infer<typeof weekMoveSchema>
 export type ClearTimes = Pick<ClearContentStats, 'weekdays' | 'hours'>
 export type ClearScoreDistributions = z.infer<typeof scoreDistributionsSchema>
 export type ClearScoreKind = keyof ClearScoreDistributions

@@ -6,6 +6,7 @@ import type { ColumnBar } from '#shared/ui/chart/Columns'
 import type { LineSeries } from '#shared/ui/chart/LineChart'
 import type { ChartX } from '#shared/ui/chart/plot-layout'
 import type { Bar } from '#shared/ui/chart/RowBars'
+import type { SankeyFlow, SankeyNode } from '#shared/ui/chart/Sankey'
 import type { SplitSegment } from '#shared/ui/chart/SplitBar'
 import {
   type ClearContent,
@@ -13,8 +14,8 @@ import {
   type ClearFameDistribution,
   type ClearJob,
   type ClearScoreBand,
-  type ClearStageMoves,
   type ClearWeek,
+  type ClearWeekMove,
   type ClearWeekOverWeek,
   isAwakenedJob,
   shareText
@@ -146,7 +147,7 @@ export function fameBandChart({ fameBands }: ClearContentStats): FameBandChart {
   return { x, bars, line }
 }
 
-export type Figure = Readonly<{ label: string; to?: string; value: string }>
+export type Figure = Readonly<{ label: string; value: string }>
 
 export type SplitRow = Readonly<{
   key: string
@@ -208,31 +209,69 @@ export function weekOverWeekCard(
   return { figures, rows: [previous, current], legend }
 }
 
-export function stageMoveCard(
-  { hard, normal }: ClearStageMoves,
+const HARD_NODE = { name: '하드', color: 'var(--color-chart-base)' }
+const NORMAL_NODE = { name: '일반', color: 'var(--color-chart-base)', faded: true }
+const MOVE_SOURCES: Record<ClearWeekMove['from'], Omit<SankeyNode, 'key'>> = {
+  hard: HARD_NODE,
+  normal: NORMAL_NODE,
+  returned: { name: '복귀', color: 'var(--color-chart-3)' },
+  first: { name: '신규', color: 'var(--color-chart-1)' }
+}
+const MOVE_TARGETS: Record<ClearWeekMove['to'], Omit<SankeyNode, 'key'>> = {
+  hard: HARD_NODE,
+  normal: NORMAL_NODE,
+  left: { name: '이탈', color: 'var(--color-chart-8)' }
+}
+
+export type WeekMoveSankey = Readonly<{
+  sourceTitle: string
+  targetTitle: string
+  sources: SankeyNode[]
+  targets: SankeyNode[]
+  flows: SankeyFlow[]
+}>
+
+function moveColor({ from, to }: ClearWeekMove): string {
+  if (from === 'returned' || from === 'first') {
+    return MOVE_SOURCES[from].color
+  }
+
+  if (to === 'left') {
+    return MOVE_TARGETS.left.color
+  }
+
+  if (from === to) {
+    return 'var(--color-chart-base)'
+  }
+
+  return 'var(--color-chart-7)'
+}
+
+export function weekMoveSankey(
+  moves: readonly ClearWeekMove[],
   weekStart: string,
   releasedAt: string
-): SplitCard {
-  const toHardCount = integer.format(hard.other)
-  const toNormalCount = integer.format(normal.other)
-  const figures = [
-    { label: '일반', to: '하드', value: toHardCount },
-    { label: '하드', to: '일반', value: toNormalCount }
-  ]
-  const current = weekNumberText(weekStart, releasedAt)
-  const segmentsOf = (counts: ClearStageMoves['hard']) => [
-    segment('same', '같은 단계', counts.same, 'var(--color-chart-base)'),
-    segment('other', '이동', counts.other, 'var(--color-chart-7)'),
-    segment('none', '클리어 없음', counts.none, 'var(--color-line-strong)')
-  ]
-  const hardSegments = segmentsOf(hard)
-  const rows = [
-    splitRow('hard', `${current} 하드`, hardSegments),
-    splitRow('normal', `${current} 일반`, segmentsOf(normal))
-  ]
-  const legend = legendOf(hardSegments)
+): WeekMoveSankey {
+  const sources = Object.entries(MOVE_SOURCES).map(([key, node]) => ({ key, ...node }))
+  const targets = Object.entries(MOVE_TARGETS).map(([key, node]) => ({ key, ...node }))
+  const flows = moves.map((move) => {
+    const key = `${move.from}-${move.to}`
+    const name = `${MOVE_SOURCES[move.from].name} → ${MOVE_TARGETS[move.to].name}`
+    const color = moveColor(move)
 
-  return { figures, rows, legend }
+    return { key, name, from: move.from, to: move.to, value: move.characters, color }
+  })
+
+  const sourceTitle = previousWeekText(weekStart, releasedAt)
+  const targetTitle = weekNumberText(weekStart, releasedAt)
+
+  return {
+    sourceTitle,
+    targetTitle,
+    sources,
+    targets,
+    flows
+  }
 }
 
 type WeekGroup = ClearWeekOverWeek['both']
