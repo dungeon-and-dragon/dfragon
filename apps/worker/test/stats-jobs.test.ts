@@ -29,7 +29,8 @@ const stats: CharacterStats = {
       jobName: '귀검사(남)',
       jobGrowName: '眞 웨펀마스터',
       count: 2,
-      averageFame: 70000.5
+      averageFame: 70000.5,
+      fameBuckets: [{ from: 70000, to: 80000, count: 2 }]
     },
     {
       jobId: 'synthetic-job',
@@ -37,7 +38,8 @@ const stats: CharacterStats = {
       jobName: '귀검사(남)',
       jobGrowName: '없음',
       count: 1,
-      averageFame: null
+      averageFame: null,
+      fameBuckets: []
     }
   ],
   fameDistribution: [{ from: 70000, to: 71000, count: 2 }]
