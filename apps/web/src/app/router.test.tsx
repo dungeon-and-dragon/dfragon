@@ -928,7 +928,6 @@ function serveClears(): void {
     weekOverWeek: null,
     weekMoves: null,
     streaks: null,
-    stages: null,
     scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []

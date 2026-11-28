@@ -84,7 +84,6 @@ it('수집한 주가 없거나 챌린지인 컨텐츠 집계는 week와 레이�
     weekOverWeek: null,
     weekMoves: null,
     streaks: null,
-    stages: null,
     scoreBands: { equipment: [], buff: [] },
     weekdays: [],
     hours: []
