@@ -36,6 +36,7 @@ export function AdventureNameForm({
         <TextField size="sm">
           <TextFieldInput
             aria-label="모험단"
+            placeholder="모험단을 입력해 주세요."
             autoComplete="off"
             spellCheck={false}
             value={draft}
