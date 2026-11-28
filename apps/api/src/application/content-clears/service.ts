@@ -30,6 +30,7 @@ type ClearVersion = {
   key: string
   contents: readonly ClearContent[]
   legions: readonly ClearContent[]
+  scoreBandMinPopulations: ReadonlyMap<string, number>
 }
 
 type ClearSnapshot = ClearVersion & {
@@ -185,8 +186,10 @@ export class ClearStatsService {
     summary: ClearContentSummary,
     population: StoredClearPopulation | undefined
   ): Promise<ClearContentStats> {
+    const scoreBandMinPopulation = current.scoreBandMinPopulations.get(content.id) ?? 0
+
     if (population === undefined) {
-      return toEmptyContentStats(summary)
+      return toEmptyContentStats(summary, scoreBandMinPopulation)
     }
 
     const week = { contentId: content.id, weekStart: population.weekStart }
@@ -195,7 +198,12 @@ export class ClearStatsService {
       (await this.samples.loadContent(content, population))
     const firstWeeks = await this.firstWeeksOf(current, content.id)
 
-    return toClearContentStats(summary, population, { ...samples, firstWeeks })
+    return toClearContentStats(
+      summary,
+      population,
+      { ...samples, firstWeeks },
+      scoreBandMinPopulation
+    )
   }
 
   private async loadOverview(
@@ -325,16 +333,20 @@ export class ClearStatsService {
     }
   }
 
-  // 노출 설정은 운영 화면에서 바뀌므로 수집 시각과 함께 읽어, 둘 중 하나가 바뀌면 다시 계산한다.
+  // 노출 설정과 점수 구간 최소 인원은 운영 화면에서 바뀌므로 수집 시각과 함께 읽어, 하나라도 바뀌면 다시 계산한다.
   private async readVersion(): Promise<ClearVersion> {
     const collectedAt = await this.repository.readCollectedAt()
     const settings = await this.repository.readSettings()
     const contents = filterClearContents(CLEAR_CONTENTS, settings, 'shown')
     const legions = filterClearContents(CLEAR_LEGIONS, settings, 'shown')
     const shownIds = [...contents, ...legions].map(({ id }) => id)
-    const key = JSON.stringify([collectedAt?.getTime() ?? null, shownIds])
+    const scoreBandMinPopulations = new Map(
+      settings.map(({ contentId, scoreBandMinPopulation }) => [contentId, scoreBandMinPopulation])
+    )
+    const shownMinPopulations = shownIds.map((id) => scoreBandMinPopulations.get(id) ?? 0)
+    const key = JSON.stringify([collectedAt?.getTime() ?? null, shownIds, shownMinPopulations])
 
-    return { key, contents, legions }
+    return { key, contents, legions, scoreBandMinPopulations }
   }
 
   private refreshTo(version: ClearVersion): ClearRefresh {
