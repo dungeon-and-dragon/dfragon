@@ -8,7 +8,6 @@ import { formatShare } from './set-stats-bars'
 const BOX_NAME = '장비와 서약 조합'
 const EMPTY = '세트 통계가 없습니다.'
 const FAILED = '세트 통계를 받지 못했습니다.'
-const SET_NAME_WIDTH = 200
 
 export function ComboStatsScreen({
   filter,
@@ -38,7 +37,6 @@ export function ComboStatsScreen({
             bars={equipmentComboBars(stats, filter)}
             tone="chart-3"
             formatValue={formatShare}
-            nameWidth={SET_NAME_WIDTH}
           />
         </ListBox>
       )}

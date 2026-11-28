@@ -15,8 +15,6 @@ const BOX_NAMES = {
   equipment: '장비 세트',
   combo: '장비와 서약 조합'
 } as const
-// 조합 상자는 반 폭이라 "나아가려는 자의 마음 세트 + 한계"처럼 줄임말이 없는 조합도 들어가게 둔다.
-const COMBO_NAME_WIDTH = 200
 
 export function SetStatsScreen({
   filter,
@@ -102,7 +100,6 @@ function SetStatsBody({
               bars={comboBars(stats, filter)}
               tone="chart-3"
               formatValue={formatShare}
-              nameWidth={COMBO_NAME_WIDTH}
             />
           )}
         </ListBox>

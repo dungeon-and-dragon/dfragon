@@ -5,6 +5,7 @@ import { ROW_BAR_GROW, useChartBarGrow } from './useChartBarGrow'
 import { type TooltipPlace, useChartTooltipSlide } from './useChartTooltipSlide'
 import { TOOLTIP_CLASS, TOOLTIP_COUNT_CLASS } from './plot-layout'
 import { useChartHover } from './useChartHover'
+import { useRowBarFit } from './useRowBarFit'
 
 const integer = new Intl.NumberFormat('ko-KR')
 
@@ -34,13 +35,15 @@ const TONE_FILL: Readonly<Record<BarTone, string>> = {
 
 const TOOLTIP_GAP = 8
 const TOOLTIP_INSIDE_GAP = 10
-// 값 열은 Monoplex KR 14px 숫자 9자(예: 1,914,430, 약 67px)가 한 줄에 들어가는 폭이다.
-const ROW_COLUMNS_CLASS = 'grid-cols-[120px_minmax(0,1fr)_80px]'
-// 좁은 폭에서도 막대가 보이도록 이름 칸은 줄 폭의 40%를 넘지 않는다.
-const SIZED_NAME_ROW_COLUMNS_CLASS = 'grid-cols-[min(var(--bar-name-width),40%)_minmax(0,1fr)_80px]'
-const NO_BAR_NARROW_COLUMNS_CLASS = 'max-md:grid-cols-[minmax(0,1fr)_80px]'
+// 이름 칸과 값 칸은 useRowBarFit이 잰 가장 긴 이름, 값 폭이고(재기 전인 서버 렌더링은 120px, 80px), 좁은 폭에서도 막대가 보이도록 이름 칸은 줄 폭의 40%를 넘지 않는다.
+const ROW_COLUMNS_CLASS =
+  'grid-cols-[min(var(--bar-name-width,120px),40%)_minmax(0,1fr)_var(--bar-value-width,80px)]'
+const DETAIL_ROW_COLUMNS_CLASS =
+  'grid-cols-[min(calc(var(--bar-name-width,120px)_-_8px),40%)_minmax(0,1fr)_var(--bar-value-width,80px)]'
+const NO_BAR_NARROW_COLUMNS_CLASS = 'max-md:grid-cols-[minmax(0,1fr)_var(--bar-value-width,80px)]'
 const LINK_COLUMN_CLASS = 'grid-cols-[minmax(0,1fr)_16px]'
 // 하위 막대는 펼침 단추 아래 세로 선 오른쪽으로 들여 쓰고, 이름 칸을 이만큼만 줄여 막대가 부모 막대보다 조금 안쪽에서 시작한다.
+// DETAIL_ROW_COLUMNS_CLASS의 8px과 같은 값이다.
 const DETAIL_NAME_SHRINK = 8
 const BODY_CLASS = 'absolute inset-0 transition-opacity'
 const RAIL_CLASS =
@@ -82,14 +85,12 @@ export function RowBars({
   tone = 'count',
   max = Math.max(0, ...bars.map(({ value }) => value)),
   formatValue,
-  nameWidth,
   barFromMd = false
 }: {
   bars: readonly Bar[]
   tone?: BarTone
   max?: number
   formatValue?: (value: number) => string
-  nameWidth?: number
   // true면 900px 미만에서 가운데 막대를 숨기고 이름과 값만 둔다.
   barFromMd?: boolean
 }): React.JSX.Element {
@@ -102,6 +103,7 @@ export function RowBars({
   const linked = bars.some(({ link }) => link != null)
   const toggleSlot = bars.some(({ details }) => details != null)
   const shownBar = bars.find(({ key }) => key === hover.key)
+  useRowBarFit(listRef, DETAIL_NAME_SHRINK, bars)
   useChartBarGrow(listRef, ROW_BAR_GROW)
   useChartTooltipSlide({
     chartRef: listRef,
@@ -124,23 +126,12 @@ export function RowBars({
     })
   }
 
-  function columnsOf(shrink: number): Pick<RowLayout, 'columns' | 'style' | 'barFromMd'> {
+  function columnsOf(detail: boolean): Pick<RowLayout, 'columns' | 'barFromMd'> {
     const narrow = barFromMd ? ` ${NO_BAR_NARROW_COLUMNS_CLASS}` : ''
+    const fitColumns = detail ? DETAIL_ROW_COLUMNS_CLASS : ROW_COLUMNS_CLASS
+    const columns = `${fitColumns}${narrow}`
 
-    if (nameWidth === undefined) {
-      const columns = `${ROW_COLUMNS_CLASS}${narrow}`
-
-      return { columns, barFromMd }
-    }
-
-    const width = `${nameWidth - shrink}px`
-    const columns = `${SIZED_NAME_ROW_COLUMNS_CLASS}${narrow}`
-
-    return {
-      columns,
-      style: { '--bar-name-width': width },
-      barFromMd
-    }
+    return { columns, barFromMd }
   }
 
   function registerMark(key: string, element: HTMLSpanElement): () => void {
@@ -156,7 +147,7 @@ export function RowBars({
       <ul ref={listRef} {...areaProps} className="m-0 list-none p-4">
         {bars.map((bar) => {
           const open = !collapsed.has(bar.key)
-          const rowColumns = columnsOf(0)
+          const rowColumns = columnsOf(false)
           const layout: RowLayout = {
             ...rowColumns,
             tone,
@@ -180,7 +171,7 @@ export function RowBars({
               {bar.details !== undefined && open && (
                 <ul className="m-0 ml-[7px] list-none border-l border-line p-0 pl-[41px]">
                   {bar.details.bars.map((detail) => {
-                    const detailColumns = columnsOf(DETAIL_NAME_SHRINK)
+                    const detailColumns = columnsOf(true)
                     const detailLinked =
                       bar.details?.bars.some((item) => item.link != null) ?? false
                     const detailLayout: RowLayout = {
@@ -220,7 +211,6 @@ export function RowBars({
 
 type RowLayout = Readonly<{
   columns: string
-  style?: React.CSSProperties
   tone: BarTone
   formatValue: (value: number) => string
   countUp: boolean
@@ -244,7 +234,6 @@ function BarRow({
   bar: { key, name, label, value, link, base = false },
   layout: {
     columns,
-    style,
     tone,
     formatValue,
     countUp,
@@ -288,7 +277,10 @@ function BarRow({
   const rowClass = `grid items-center gap-x-3 ${columns} ${small ? 'h-[24px] text-xs' : 'h-[28px] text-sm'}`
   const cells = (
     <>
-      <span data-chart-name="" className={`truncate ${small || base ? 'text-fg-muted' : ''}`}>
+      <span
+        data-chart-name={small ? 'detail' : ''}
+        className={`truncate ${small || base ? 'text-fg-muted' : ''}`}
+      >
         {label ?? name}
       </span>
       <span className={`${RAIL_CLASS} ${railHeightOf(small)}${barFromMd ? ' max-md:hidden' : ''}`}>
@@ -302,6 +294,7 @@ function BarRow({
         </span>
       </span>
       <span
+        data-chart-value=""
         data-chart-count={countUp ? value : undefined}
         className={`text-right num ${fame ? 'text-game-fame' : ''} ${small ? 'text-fg-muted' : ''}`}
       >
@@ -312,17 +305,13 @@ function BarRow({
 
   if (!linked && !toggleSlot) {
     return (
-      <li data-chart-item="" onMouseEnter={handleMouseEnter} className={rowClass} style={style}>
+      <li data-chart-item="" onMouseEnter={handleMouseEnter} className={rowClass}>
         {cells}
       </li>
     )
   }
 
-  const row = (
-    <span className={rowClass} style={style}>
-      {cells}
-    </span>
-  )
+  const row = <span className={rowClass}>{cells}</span>
 
   return (
     <li data-chart-item="" onMouseEnter={handleMouseEnter}>
