@@ -67,6 +67,7 @@ export function storyCharacterStats(computedAt: string): CharacterStats {
     const weighted = JOB_FAME_SHARES.map(
       ([, share], bucket) => share * (1 + tilt * ((bucket - 3) / 3))
     )
+
     const weightSum = weighted.reduce((sum, weight) => sum + weight, 0)
     const fameBuckets = JOB_FAME_SHARES.map(([from], bucket) => {
       const to = from + 10_000
