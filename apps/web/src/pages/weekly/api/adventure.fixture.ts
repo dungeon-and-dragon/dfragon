@@ -347,6 +347,7 @@ type StoryHolding = EquipmentCharacter['equipment'][number]
 type StoryOath = EquipmentCharacter['oaths'][number]
 
 const STORY_RARITIES = ['태초', '에픽', '레전더리'] as const
+type StoryRarity = (typeof STORY_RARITIES)[number]
 const STORY_OATH_NAMES = {
   태초: '태초로 인도하는 서약',
   에픽: '안내하는 서약',
@@ -374,6 +375,14 @@ function storyHolding(setItemId: StorySetId, slot: EquipmentSlot, seed: number):
   return [holding]
 }
 
+const STORY_CRYSTAL_ITEM_IDS: Partial<Record<StorySetId, Record<StoryRarity, string>>> = {
+  '7f788a703a87d783079b41d0fe6448c9': {
+    태초: 'b0c80cc630ca0d458eb9608774d47cd0',
+    에픽: '1bf8c2d64c3ed8cf73c902d7dc4fc808',
+    레전더리: '2a2074e9f9b5697a75a138bb2840a47f'
+  }
+}
+
 function storyOaths(setItemId: StorySetId, seed: number): StoryOath[] {
   const rarity = STORY_RARITIES[seed % 4]
 
@@ -391,12 +400,14 @@ function storyOaths(setItemId: StorySetId, seed: number): StoryOath[] {
   }
   const crystals = STORY_RARITIES.map((crystalRarity, index) => {
     const count = (seed + index * 3) % 7
+    const itemId =
+      STORY_CRYSTAL_ITEM_IDS[setItemId]?.[crystalRarity] ?? `story-crystal-${setItemId}-${index}`
 
     return {
       setItemId,
       kind: 'crystal' as const,
       rarity: crystalRarity,
-      itemId: `story-crystal-${setItemId}-${index}`,
+      itemId,
       itemName: `합성 ${crystalRarity} 결정`,
       count
     }
