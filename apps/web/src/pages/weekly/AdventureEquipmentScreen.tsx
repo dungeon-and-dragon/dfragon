@@ -3,7 +3,8 @@ import type { CSSProperties, Ref } from 'react'
 import {
   type AdventureEquipment,
   type EquipmentSelection,
-  toEquipmentBoard
+  toEquipmentBoard,
+  visibleEquipmentSets
 } from '#entities/adventure-guild'
 import { equipmentSetShortName } from '#entities/ranking'
 import { serverNames } from '#shared/config/servers/servers'
@@ -69,7 +70,7 @@ function EquipmentPickers({
     value: serverId,
     label: serverLabel(serverId)
   }))
-  const sets = equipment.sets.map(({ setItemId, setItemName }) => ({
+  const sets = visibleEquipmentSets(equipment.sets).map(({ setItemId, setItemName }) => ({
     value: setItemId,
     label: equipmentSetShortName(setItemId, setItemName)
   }))
