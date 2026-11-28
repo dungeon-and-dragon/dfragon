@@ -15,6 +15,7 @@ import {
   readContentClearPopulations,
   readContentClearRaidTimes,
   readContentClearWeekMoves,
+  readContentClearSettings,
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
@@ -305,6 +306,7 @@ try {
 
   const reader = {
     readCollectedAt: () => readContentClearCollectedAt(client),
+    readSettings: () => readContentClearSettings(client),
     readPopulations: () => readContentClearPopulations(client),
     readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
     readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
@@ -546,6 +548,17 @@ try {
     assert.ok(!overviewJson.includes(identifier), identifier)
   }
 
+  const record = (kind, characterId, name, clearedAt, weekStart, raid = {}) => ({
+    kind,
+    serverId: 'cain',
+    characterId,
+    name,
+    clearedAt: at(clearedAt),
+    weekStart: at(weekStart),
+    ...(kind === 'raid' ? { modeName: null, hard: false, partyName: null, ...raid } : {})
+  })
+  const michaelaRaid = '무너진 성자 미카엘라'
+
   // 컨텐츠 상세다. 미카엘라 하드에서 clear-a는 3주 연속, clear-c는 지난주를 건너뛰고 복귀, clear-g는 이번 주에 이탈한다.
   // 일반 단계는 clear-d가 지난주에만, clear-h가 두 주 모두 깬다.
   const twoWeeksAgo = '2026-10-22T06:00:00'
@@ -556,6 +569,21 @@ try {
     clear('michaela-normal', 'raid', 'clear-d', '2026-10-30T20:00:00', lastWeek),
     clear('michaela-normal', 'raid', 'clear-h', '2026-10-30T20:00:00', lastWeek),
     clear('michaela-normal', 'raid', 'clear-h', '2026-11-06T20:00:00', thisWeek)
+  ])
+  // 싱글/매칭은 컨텐츠 클리어가 없어 클리어 기록으로 센다. clear-m1은 두 주 모두, clear-m2는 지난주에만 깨고,
+  // clear-m3은 2주 전에 깬 뒤 복귀, clear-m4는 이번 주가 처음이다. 일반도 깬 clear-h는 일반으로 센다.
+  const matching = (characterId, clearedAt, weekStart) =>
+    record('raid', characterId, michaelaRaid, clearedAt, weekStart, {
+      modeName: '미카엘라 : 균열서'
+    })
+  await recordClearRecords(client, [
+    matching('clear-m1', '2026-10-30T19:00:00', lastWeek),
+    matching('clear-m1', '2026-11-06T19:00:00', thisWeek),
+    matching('clear-m2', '2026-10-30T19:00:00', lastWeek),
+    matching('clear-m3', '2026-10-23T19:00:00', twoWeeksAgo),
+    matching('clear-m3', '2026-11-06T19:00:00', thisWeek),
+    matching('clear-m4', '2026-11-06T19:00:00', thisWeek),
+    matching('clear-h', '2026-11-06T19:00:00', thisWeek)
   ])
   const detail = await new ClearStatsService(reader, reportRefreshFailure).contentStats(
     'michaela-hard',
@@ -580,8 +608,12 @@ try {
     { from: 'hard', to: 'left', characters: 1 },
     { from: 'normal', to: 'hard', characters: 1 },
     { from: 'normal', to: 'normal', characters: 1 },
+    { from: 'matching', to: 'matching', characters: 1 },
+    { from: 'matching', to: 'left', characters: 1 },
     { from: 'returned', to: 'hard', characters: 1 },
-    { from: 'first', to: 'hard', characters: 26 }
+    { from: 'returned', to: 'matching', characters: 1 },
+    { from: 'first', to: 'hard', characters: 26 },
+    { from: 'first', to: 'matching', characters: 1 }
   ])
   assert.deepEqual(detail.streaks, [
     { weeks: 1, characters: 28 },
@@ -635,16 +667,6 @@ try {
   )
 
   // 레기온, 단계별 기록이다. clear-l1은 같은 주에 베누스를 두 번 깨고, 화면에 쓰지 않는 레기온 기록도 섞는다.
-  const record = (kind, characterId, name, clearedAt, weekStart, raid = {}) => ({
-    kind,
-    serverId: 'cain',
-    characterId,
-    name,
-    clearedAt: at(clearedAt),
-    weekStart: at(weekStart),
-    ...(kind === 'raid' ? { modeName: null, hard: false, partyName: null, ...raid } : {})
-  })
-  const michaelaRaid = '무너진 성자 미카엘라'
   await recordClearRecords(client, [
     record('legion', 'clear-l1', '베누스', '2026-11-06T20:00:00', thisWeek),
     record('legion', 'clear-l1', '베누스', '2026-11-08T20:00:00', thisWeek),
@@ -774,7 +796,7 @@ try {
 
   const scoredDetail = await scoredService.contentStats('michaela-hard', '2026-11-05')
   assert.deepEqual(scoredDetail.stages, [
-    { stage: '싱글/매칭', characters: 1 },
+    { stage: '싱글/매칭', characters: 5 },
     { stage: '일반', characters: 2 },
     { stage: '하드', characters: 1 }
   ])

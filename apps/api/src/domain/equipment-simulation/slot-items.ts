@@ -150,13 +150,13 @@ export function slotItemIds(edits: SlotItemEdits): string[] {
   })
 }
 
-function replacedItem(edit: SlotItemEdit): CharacterPayload {
+// 엔진은 아이템 칸의 이름과 등급을 상세와 맞춰 보므로, 받은 Neople 상세의 값을 쓴다.
+function replacedItem(edit: SlotItemEdit, detail: CharacterPayload | undefined): CharacterPayload {
   const item = structuredClone(edit.original)
-  const { itemId, itemName, itemRarity } = edit.item
 
-  item.itemId = itemId
-  item.itemName = itemName
-  item.itemRarity = itemRarity
+  item.itemId = edit.item.itemId
+  item.itemName = typeof detail?.itemName === 'string' ? detail.itemName : edit.item.itemName
+  item.itemRarity = typeof detail?.itemRarity === 'string' ? detail.itemRarity : null
 
   return item
 }
@@ -165,7 +165,7 @@ function simulatedTitle(
   edit: SlotItemEdit,
   detail: CharacterPayload | undefined
 ): CharacterPayload {
-  const title = replacedItem(edit)
+  const title = replacedItem(edit, detail)
 
   if (typeof detail?.itemAvailableLevel === 'number') {
     title.itemAvailableLevel = detail.itemAvailableLevel
@@ -175,8 +175,8 @@ function simulatedTitle(
 }
 
 // 모션 오라는 clone 칸의 아이템이 실제 효과를 내므로, 바꾼 오라가 적용되게 clone을 비운다.
-function simulatedAura(edit: SlotItemEdit): CharacterPayload {
-  const aura = replacedItem(edit)
+function simulatedAura(edit: SlotItemEdit, detail: CharacterPayload | undefined): CharacterPayload {
+  const aura = replacedItem(edit, detail)
   aura.clone = { itemId: null, itemName: null }
 
   return aura
@@ -184,13 +184,14 @@ function simulatedAura(edit: SlotItemEdit): CharacterPayload {
 
 function simulatedOf(
   edit: SlotItemEdit | null,
-  simulate: (edit: SlotItemEdit) => CharacterPayload
+  details: ReadonlyMap<string, CharacterPayload>,
+  simulate: (edit: SlotItemEdit, detail: CharacterPayload | undefined) => CharacterPayload
 ): CharacterPayload | null {
   if (edit === null) {
     return null
   }
 
-  return simulate(edit)
+  return simulate(edit, details.get(edit.item.itemId))
 }
 
 /** 원본 항목을 깊은 복사해 아이템 칸만 바꾸고, 칭호 마법부여, 크리쳐 아티팩트, 오라 엠블렘은 그대로 둔다. */
@@ -198,11 +199,9 @@ export function simulatedSlotItems(
   edits: SlotItemEdits,
   details: ReadonlyMap<string, CharacterPayload>
 ): SimulatedSlotItems {
-  const title = simulatedOf(edits.title, (edit) =>
-    simulatedTitle(edit, details.get(edit.item.itemId))
-  )
-  const creature = simulatedOf(edits.creature, replacedItem)
-  const aura = simulatedOf(edits.aura, simulatedAura)
+  const title = simulatedOf(edits.title, details, simulatedTitle)
+  const creature = simulatedOf(edits.creature, details, replacedItem)
+  const aura = simulatedOf(edits.aura, details, simulatedAura)
 
   return { title, creature, aura }
 }

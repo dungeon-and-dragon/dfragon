@@ -5,6 +5,7 @@ import {
   createDatabaseClient,
   readItemAdoption,
   readLabCandidates,
+  readMostWornItemIds,
   recordCharacterBasic,
   recordCharacterSets,
   replaceItemAdoption,
@@ -247,4 +248,37 @@ test('후보 조회는 집계 전에는 착용 수가 비고, 집계 뒤에는 �
     ['합성 후보 안 낀 칭호', 0, computedAt],
     ['합성 후보 카드', null, null]
   ])
+})
+
+test('착용 id 조회는 칭호, 오라, 크리쳐 부위에서 이름마다 가장 많이 낀 id를 내고, 수가 같으면 id 순이며 다른 부위와 없는 이름은 내지 않는다', {
+  skip: port === undefined
+}, async () => {
+  const worn = (slotId, itemName, itemId) => ({ slotId, itemId, itemName, typeDetail: null })
+
+  await recordWearer('worn-id-a', [
+    worn('CREATURE', '합성 착용 크리쳐', 'creature-b'),
+    worn('AURORA', '합성 착용 오라', 'aura-b'),
+    worn('WEAPON', '합성 착용 무기 이름', 'weapon-a')
+  ])
+  await recordWearer('worn-id-b', [
+    worn('CREATURE', '합성 착용 크리쳐', 'creature-b'),
+    worn('AURORA', '합성 착용 오라', 'aura-a')
+  ])
+  await recordWearer('worn-id-c', [worn('CREATURE', '합성 착용 크리쳐', 'creature-a')])
+
+  const ids = await readMostWornItemIds(client, [
+    '합성 착용 크리쳐',
+    '합성 착용 오라',
+    '합성 착용 무기 이름',
+    '합성 아무도 안 낀 이름'
+  ])
+
+  assert.deepEqual(
+    ids.toSorted((left, right) => left.itemName.localeCompare(right.itemName)),
+    [
+      { itemName: '합성 착용 오라', itemId: 'aura-a' },
+      { itemName: '합성 착용 크리쳐', itemId: 'creature-b' }
+    ]
+  )
+  assert.deepEqual(await readMostWornItemIds(client, []), [])
 })

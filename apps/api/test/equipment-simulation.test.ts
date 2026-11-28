@@ -652,7 +652,8 @@ function labItemsOf(rows: readonly LabItemPriceRow[]) {
   return {
     readLabItemPrices: async () => [...rows],
     readCurrencyIcon: async () => null,
-    readItemIcon: async () => null
+    readItemIcon: async () => null,
+    readMostWornItemIds: async () => []
   }
 }
 
@@ -711,7 +712,8 @@ test('실험실 선택지 id로 계산하면 그 부위 enchant에 카드의 가
   const labItems = {
     readLabItemPrices: async () => rows,
     readCurrencyIcon: async () => null,
-    readItemIcon: async () => null
+    readItemIcon: async () => null,
+    readMostWornItemIds: async () => []
   }
   const origin = await listen(t, { details, labItems, ...engine.options })
   const enchantId = (await labOptionIds(origin)).get('JACKET:dealer')
@@ -753,7 +755,8 @@ test('소유자가 넣은 버프 패시브 스킬 항목으로 계산하면 직�
   const labItems = {
     readLabItemPrices: async () => rows,
     readCurrencyIcon: async () => null,
-    readItemIcon: async () => null
+    readItemIcon: async () => null,
+    readMostWornItemIds: async () => []
   }
   const origin = await listen(t, { details, labItems, ...engine.options })
   const enchantId = (await labOptionIds(origin)).get('WAIST:buffer')
@@ -802,7 +805,8 @@ test('다른 부위, 다른 역할의 실험실 선택지 id와 지운 뒤의 �
   const labItems = {
     readLabItemPrices: async () => rows,
     readCurrencyIcon: async () => null,
-    readItemIcon: async () => null
+    readItemIcon: async () => null,
+    readMostWornItemIds: async () => []
   }
   const origin = await listen(t, { details, labItems, ...engine.options })
   const ids = await labOptionIds(origin)

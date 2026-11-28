@@ -602,13 +602,15 @@ export type ClearWeekGroupSample = ClearFameQuantiles & {
 export type ClearWeekMoveSelection = {
   hardContentId: string
   normalContentId: string
+  raidName: string
+  matchingModeNames: readonly string[]
   weekStart: Date
   previousWeekStart: Date
 }
 
-export type ClearWeekMoveFrom = 'hard' | 'normal' | 'returned' | 'first'
+export type ClearWeekMoveFrom = 'hard' | 'normal' | 'matching' | 'returned' | 'first'
 
-export type ClearWeekMoveTo = 'hard' | 'normal' | 'left'
+export type ClearWeekMoveTo = 'hard' | 'normal' | 'matching' | 'left'
 
 export type ClearWeekMoveCount = {
   from: ClearWeekMoveFrom
@@ -736,16 +738,39 @@ export function readContentClearWeekGroups(
     GROUP BY clear."group"`
 }
 
-// 한 주에 두 단계를 모두 깬 캐릭터는 하드로 센다. 두 주 모두 깨지 않은 캐릭터는 세지 않는다.
+// 한 주에 여러 단계를 깬 캐릭터는 하드, 일반, 싱글/매칭 순으로 앞 단계 하나로 센다. 두 주 모두 깨지 않은 캐릭터는 세지 않는다.
+// 하드와 일반은 컨텐츠 클리어로, 컨텐츠가 없는 싱글/매칭은 레이드 클리어 기록의 modeName으로 읽는다.
 export function readContentClearWeekMoves(
   client: DatabaseClient,
-  { hardContentId, normalContentId, weekStart, previousWeekStart }: ClearWeekMoveSelection
+  {
+    hardContentId,
+    normalContentId,
+    raidName,
+    matchingModeNames,
+    weekStart,
+    previousWeekStart
+  }: ClearWeekMoveSelection
 ): Promise<ClearWeekMoveCount[]> {
+  const matchingRecordsSql = Prisma.sql`
+    SELECT server_id, character_id, week_start
+    FROM clear_records
+    WHERE kind = 'raid' AND name = ${raidName} AND mode_name = ANY(${matchingModeNames}::text[])`
+
   const stageWeekSql = (week: Date) => Prisma.sql`
-    SELECT server_id, character_id, bool_or(content_id = ${hardContentId}) AS hard
-    FROM content_clears
-    WHERE content_id IN (${hardContentId}, ${normalContentId}) AND week_start = ${week}
+    SELECT server_id, character_id, max(stage_rank) AS stage_rank
+    FROM (
+      SELECT server_id, character_id, CASE WHEN content_id = ${hardContentId} THEN 3 ELSE 2 END AS stage_rank
+      FROM content_clears
+      WHERE content_id IN (${hardContentId}, ${normalContentId}) AND week_start = ${week}
+      UNION ALL
+      SELECT server_id, character_id, 1 AS stage_rank
+      FROM (${matchingRecordsSql}) matching
+      WHERE week_start = ${week}
+    ) stage
     GROUP BY server_id, character_id`
+
+  const stageOfSql = (week: string) => Prisma.sql`
+    CASE ${Prisma.raw(week)}.stage_rank WHEN 3 THEN 'hard' WHEN 2 THEN 'normal' ELSE 'matching' END`
 
   return client.$queryRaw<ClearWeekMoveCount[]>`
     WITH current_week AS (${stageWeekSql(weekStart)}),
@@ -753,8 +778,7 @@ export function readContentClearWeekMoves(
     moves AS (
       SELECT
         CASE
-          WHEN previous_week.server_id IS NOT NULL
-            THEN CASE WHEN previous_week.hard THEN 'hard' ELSE 'normal' END
+          WHEN previous_week.server_id IS NOT NULL THEN ${stageOfSql('previous_week')}
           WHEN EXISTS (
             SELECT 1
             FROM content_clears earlier
@@ -762,13 +786,18 @@ export function readContentClearWeekMoves(
               AND earlier.server_id = current_week.server_id
               AND earlier.character_id = current_week.character_id
               AND earlier.week_start < ${previousWeekStart}
+          ) OR EXISTS (
+            SELECT 1
+            FROM (${matchingRecordsSql}) earlier
+            WHERE earlier.server_id = current_week.server_id
+              AND earlier.character_id = current_week.character_id
+              AND earlier.week_start < ${previousWeekStart}
           ) THEN 'returned'
           ELSE 'first'
         END AS "from",
         CASE
           WHEN current_week.server_id IS NULL THEN 'left'
-          WHEN current_week.hard THEN 'hard'
-          ELSE 'normal'
+          ELSE ${stageOfSql('current_week')}
         END AS "to"
       FROM current_week
       FULL JOIN previous_week USING (server_id, character_id)

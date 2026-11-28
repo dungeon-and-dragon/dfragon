@@ -1058,7 +1058,7 @@ const groupSample = (group: ClearWeekGroupSample['group'], cleared: number, fame
   ...fameSample(famed, 110_000)
 })
 
-test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 읽고 일반과 하드 짝으로 이동을 읽는다', async () => {
+test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 읽고 일반과 하드 짝, 싱글/매칭 modeName으로 이동을 읽는다', async () => {
   const comparisons: ClearWeekComparison[] = []
   const moveSelections: ClearWeekMoveSelection[] = []
   const { app, origin } = await listen(
@@ -1104,6 +1104,8 @@ test('레이드 상세는 이번 주와 지난주로 그룹, 연속 주 수를 �
       {
         hardContentId: 'michaela-hard',
         normalContentId: 'michaela-normal',
+        raidName: '무너진 성자 미카엘라',
+        matchingModeNames: ['미카엘라 : 균열서', '무의지의 장벽'],
         weekStart: week('2026-11-05'),
         previousWeekStart: week('2026-10-29')
       }

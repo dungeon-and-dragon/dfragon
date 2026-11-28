@@ -200,6 +200,7 @@ export type StatsResponse = {
     jobGrowName: string
     count: number
     averageFame: number | null
+    fameBuckets: { from: number; to: number; count: number }[]
   }[]
   fameDistribution: { from: number; to: number; count: number }[]
   computedAt: string | null

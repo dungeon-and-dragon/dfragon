@@ -30,3 +30,7 @@ export function toRaidStageLabel({
 
   return difficultyLabel
 }
+
+export function toRaidStageModeNames(stage: string): string[] {
+  return [...RAID_STAGE_LABELS].filter(([, label]) => label === stage).map(([modeName]) => modeName)
+}

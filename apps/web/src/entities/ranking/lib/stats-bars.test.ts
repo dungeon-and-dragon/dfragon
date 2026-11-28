@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import type { CharacterStats } from '#entities/ranking/model/ranking-stats'
-import { fameBars, shareText } from './stats-bars'
+import { fameBars, jobFameChart, shareText } from './stats-bars'
 
 function statsOf(fameDistribution: CharacterStats['fameDistribution']): CharacterStats {
   return {
@@ -132,4 +132,43 @@ it('비율은 전체 캐릭터 수 대비 백분율을 소수 첫째 자리로 �
   expect(shareText(2, 3)).toBe('66.7%')
   expect(shareText(2_624_132, 2_624_132)).toBe('100.0%')
   expect(shareText(0, 0)).toBe('0.0%')
+})
+
+it('직업별 명성은 1만 구간 인원을 8만, 10만, 12만, 13만 경계로 묶고 각성 전직만 둔다', () => {
+  const job = {
+    jobId: 'job',
+    jobGrowId: 'grow',
+    jobName: '격투가(여)',
+    jobGrowName: '眞 넨마스터',
+    count: 100
+  }
+  const chart = jobFameChart({
+    ...statsOf([]),
+    jobs: [
+      {
+        ...job,
+        fameBuckets: bucketsOf(10_000, {
+          0: 1,
+          70_000: 2,
+          80_000: 3,
+          90_000: 4,
+          100_000: 5,
+          110_000: 6,
+          120_000: 7,
+          130_000: 8,
+          150_000: 9
+        })
+      },
+      { ...job, jobGrowId: 'base', jobGrowName: '넨마스터', fameBuckets: [] }
+    ]
+  })
+
+  expect(chart.x.map(({ key, title }) => [key, title])).toEqual([['job/grow', '넨마스터(여)']])
+  expect(chart.bars.map(({ name, values }) => [name, values])).toEqual([
+    ['8만 미만', [3]],
+    ['8만~10만', [7]],
+    ['10만~12만', [11]],
+    ['12만~13만', [7]],
+    ['13만 이상', [17]]
+  ])
 })

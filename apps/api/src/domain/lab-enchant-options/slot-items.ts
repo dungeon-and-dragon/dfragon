@@ -4,7 +4,6 @@ import { compareCards, type DigestOptionKey, type LabEnchantCardPrice } from './
 export interface LabSlotItem {
   readonly itemId: string
   readonly itemName: string
-  readonly itemRarity: string
 }
 
 /** performanceKey가 같은 아이템은 효과가 같아 한 선택지로 묶는다. item이 null이면 엔진에 넘길 아이템을 찾지 못한 항목이다. */

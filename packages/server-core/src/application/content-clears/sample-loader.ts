@@ -5,7 +5,7 @@ import type {
   StoredClearPopulation
 } from '@dfragon/database'
 import { subWeeks } from 'date-fns'
-import { toRaidStageLabel } from '#domain/raid-stage.js'
+import { toRaidStageLabel, toRaidStageModeNames } from '#domain/raid-stage.js'
 import {
   type ClearContent,
   findStagePair,
@@ -32,6 +32,7 @@ export class ClearSampleLoader {
     const comparison = { contentId: content.id, weekStart, previousWeekStart }
     const raidName =
       content.kind === 'raid' && content.rule.type === 'clear' ? content.rule.name : undefined
+    const matchingModeNames = toRaidStageModeNames('싱글/매칭')
     const jobFames = await this.repository.readContentJobFames(selection)
     const jobScores = scored ? await this.repository.readContentJobScores(selection) : []
     const adventures = await this.repository.readAdventureSizes(selection)
@@ -41,10 +42,12 @@ export class ClearSampleLoader {
     const weekGroups = weekly ? await this.repository.readWeekGroups(comparison) : null
     const weekGroupScores = weekly ? await this.loadWeekGroupScores(comparison) : null
     const weekMoves =
-      pair !== undefined
+      pair !== undefined && raidName !== undefined
         ? await this.repository.readWeekMoves({
             hardContentId: pair.hard.id,
             normalContentId: pair.normal.id,
+            raidName,
+            matchingModeNames,
             weekStart,
             previousWeekStart
           })
