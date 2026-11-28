@@ -929,7 +929,7 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래�
   )
 })
 
-test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를 붙이고, 이름이 같은 후보가 있으면 그 후보를 쓴다', {
+test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를 아이콘 없이 붙이고, 이름이 같은 후보가 있으면 그 후보를 쓴다', {
   skip: port === undefined
 }, async (t) => {
   const client = await connectWithEmptyTables(t)
@@ -952,6 +952,7 @@ test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를
     })
   await record('합성 오라', 'synthetic-aura')
   await record('합성 오라 상자', 'synthetic-aura')
+  await saveLabCandidateIcon(client, '합성 크리쳐', pngIcon)
   await record('합성 크리쳐', 'synthetic-creature')
   await record('합성 크리쳐 알', 'synthetic-creature')
   await record('합성 다른 알', 'synthetic-other')
@@ -970,6 +971,8 @@ test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를
       ['합성 다른 알', null]
     ]
   )
+  const egg = rows.find(({ itemName }) => itemName === '합성 크리쳐 알')
+  assert.equal(egg?.candidate?.iconUpdatedAt, null)
 })
 
 test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 platinum으로 따로 내고, 매물이 없으면 가격만 비우며, 변형이 없거나 다른 종류면 null이다', {
