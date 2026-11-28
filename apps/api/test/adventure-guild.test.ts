@@ -79,12 +79,26 @@ async function getJson(origin: string, path: string) {
   return { status: response.status, body }
 }
 
-test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 근사 여부를 포함한 저장된 점수가 붙은 캐릭터 행을 준다', async () => {
+test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 근사 여부를 포함한 저장된 점수, 세트가 붙은 캐릭터 행을 준다', async () => {
   const names: string[] = []
+  const equipmentSet = { id: 'synthetic-set', name: '합성 세트' }
+  const oathSet = { id: 1, name: '합성 서약', option: null }
+  const noSets = { equipmentSet: null, oathSet: null }
   const characters = [
-    member('a', 70000, { kind: 'equipment', value: 1234567, approximateSource: null }),
-    member('b', null),
-    member('c', 69000, { kind: 'buff', value: 4000000, approximateSource: 'synthetic-source' })
+    {
+      ...member('a', 70000, { kind: 'equipment', value: 1234567, approximateSource: null }),
+      equipmentSet,
+      oathSet
+    },
+    { ...member('b', null), ...noSets },
+    {
+      ...member('c', 69000, {
+        kind: 'buff',
+        value: 4000000,
+        approximateSource: 'synthetic-source'
+      }),
+      ...noSets
+    }
   ]
   const { app, origin } = await listen({
     readAdventureCharacters: async (adventureName) => {
@@ -111,13 +125,20 @@ test('모험단 조회는 인코딩한 이름을 풀어 읽고 그 이름과 근
     assert.deepEqual(answer.body, {
       adventureName: '합성 모험단/1',
       characters: [
-        memberRow('a', 70000, { calculator: 'equipment', value: 1234567, approximate: null }),
-        memberRow('b', null, null),
-        memberRow('c', 69000, {
-          calculator: 'buff',
-          value: 4000000,
-          approximate: { source: 'synthetic-source' }
-        })
+        {
+          ...memberRow('a', 70000, { calculator: 'equipment', value: 1234567, approximate: null }),
+          equipmentSet,
+          oathSet
+        },
+        { ...memberRow('b', null, null), ...noSets },
+        {
+          ...memberRow('c', 69000, {
+            calculator: 'buff',
+            value: 4000000,
+            approximate: { source: 'synthetic-source' }
+          }),
+          ...noSets
+        }
       ].map((character) => ({
         ...character,
         fetchedAt: '2026-11-06T00:00:00.000Z'
