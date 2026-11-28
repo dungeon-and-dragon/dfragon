@@ -5,16 +5,23 @@ import {
   type EquipmentVariantSlot,
   equipmentVariantsOf
 } from '@dfragon/lib/equipment-variants'
-import { slotItemsOf } from '@dfragon/lib/slot-items'
 import { expect, it } from 'vitest'
 import {
+  AURA_FINAL,
+  AURA_SEMI,
   BUFFER_JACKET_FINAL,
+  CREATURE_FINAL,
+  CREATURE_SEMI,
   DEALER_AMULET_FINAL,
   DEALER_EARRING_FINAL,
   DEALER_PANTS_FINAL,
   DEALER_PANTS_WORN,
   enchantOptionsFixture,
-  loadedEnchantOptions
+  loadedEnchantOptions,
+  TITLE_BARRACKS,
+  TITLE_FINAL,
+  TITLE_FINAL_PLATINUM,
+  TITLE_SEMI
 } from '#pages/character-simulator/api/enchant-options.fixture'
 import { enchantOptionsSchema } from '#pages/character-simulator/api/useEnchantOptions'
 import type { CharacterDetailView } from '#entities/character'
@@ -271,7 +278,7 @@ it('고른 마법부여가 다시 받은 선택지에 없으면 착용한 마법
     draft: { enchantId: DEALER_PANTS_WORN }
   })
   const slots = enchantOptionsFixture.slots.filter(({ slotId }) => slotId !== 'PANTS')
-  const options = enchantOptionsSchema.parse({ slots })
+  const options = enchantOptionsSchema.parse({ slots, slotItems: enchantOptionsFixture.slotItems })
   const refetched = toSimulatorRows(characterDetailFixture('dealer'), {
     status: 'success',
     options
@@ -321,35 +328,31 @@ it('칭호는 응답의 부위 자리에, 크리쳐와 오라는 장비 뒤에 �
     ['오라', '고결한 영혼의 잔상']
   ])
   expect([title, creature, aura].map((slotItem) => slotItem!.wornChoiceId)).toEqual([
-    'title:1123:character/common/title/100333448',
-    'creature:1261:creature/100991296',
-    'aura:645:character/swordman/avatar/aura/101590961'
+    TITLE_FINAL_PLATINUM,
+    CREATURE_FINAL,
+    AURA_SEMI
   ])
-  expect(title!.choices).toEqual(
-    slotItemsOf('title').map(({ id, name, item }) => ({
-      id,
-      name,
-      itemId: item.itemId,
-      rarity: 'rare'
-    }))
-  )
+  expect(title!.choices.map(({ id, tier, name, itemId }) => [id, tier, name, itemId])).toEqual([
+    [TITLE_FINAL_PLATINUM, '종결', '프로스트의 전설 플래티넘', '53ebb215d0249e099ed0cd456e7ff2e4'],
+    [TITLE_FINAL, '종결', '군자의 사계', 'efef96c0ebc3ace0a7aed5bb82b4ff67'],
+    [TITLE_SEMI, '준종결', '진정한 각성을 이룬 자', 'c89a01593a155a3cbaaf272084d8fb57'],
+    [TITLE_BARRACKS, '배럭', '세리아의 풍성한 선물 Ver.2', '29f088750881775babb636fdfda1d705']
+  ])
   expect(slotItemChoiceOf(title!, NO_CHANGES)).toBeNull()
 })
 
 it('칭호, 크리쳐, 오라는 고른 것만 장비 변경과 함께 body에 넣고, 장비를 바꾸지 않았으면 빈 equipment로 보낸다', () => {
-  const [, titleItem] = slotItemsOf('title')
-  const [auraItem] = slotItemsOf('aura')
   const chosen = apply(
     NO_CHANGES,
-    { type: 'slotItem', slotItem: title!, id: titleItem!.id },
-    { type: 'slotItem', slotItem: aura!, id: auraItem!.id }
+    { type: 'slotItem', slotItem: title!, id: TITLE_FINAL },
+    { type: 'slotItem', slotItem: aura!, id: AURA_FINAL }
   )
 
-  expect(slotItemChoiceOf(title!, chosen)).toBe(titleItem!.id)
+  expect(slotItemChoiceOf(title!, chosen)).toBe(TITLE_FINAL)
   expect(simulationBody(dealerRows, null, chosen)).toEqual({
     equipment: [],
-    title: titleItem!.id,
-    aura: auraItem!.id
+    title: TITLE_FINAL,
+    aura: AURA_FINAL
   })
 
   const withWeapon = apply(chosen, { type: 'change', slot: weapon, draft: { reinforce: 11 } })
@@ -358,14 +361,13 @@ it('칭호, 크리쳐, 오라는 고른 것만 장비 변경과 함께 body에 �
     equipment: [
       { ...KEPT_ITEM, slotId: 'WEAPON', reinforce: 11, amplified: false, enchantId: null }
     ],
-    title: titleItem!.id,
-    aura: auraItem!.id
+    title: TITLE_FINAL,
+    aura: AURA_FINAL
   })
 })
 
 it('현재 아이템으로 되돌리거나 초기화하면 고른 칭호, 크리쳐, 오라를 지운다', () => {
-  const [creatureItem] = slotItemsOf('creature')
-  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: creature!, id: creatureItem!.id })
+  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: creature!, id: CREATURE_SEMI })
 
   expect(hasChanges(chosen)).toBe(true)
   expect(apply(chosen, { type: 'slotItem', slotItem: creature!, id: null })).toEqual(NO_CHANGES)
@@ -373,8 +375,7 @@ it('현재 아이템으로 되돌리거나 초기화하면 고른 칭호, 크리
 })
 
 it('착용 아이템이 속한 선택지를 고르면 바꾸지 않은 상태로 둔다', () => {
-  const [, otherTitle] = slotItemsOf('title')
-  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: otherTitle!.id })
+  const chosen = apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: TITLE_FINAL })
 
   expect(apply(chosen, { type: 'slotItem', slotItem: title!, id: title!.wornChoiceId })).toEqual(
     NO_CHANGES
@@ -385,7 +386,7 @@ it('착용 아이템이 속한 선택지를 고르면 바꾸지 않은 상태로
 })
 
 it('선택지에 없는 착용 아이템은 속한 선택지가 없다', () => {
-  // 849 명성의 플래티넘 칭호는 선택 목록에 없다. itemId는 합성 값이다.
+  // 849 명성의 플래티넘 칭호는 실험실 선택지에 없다. itemId는 합성 값이다.
   const detail = withItem(characterDetailFixture('dealer'), 'TITLE', {
     itemId: 'f'.repeat(32),
     itemName: '진정한 각성을 이룬 자 플래티넘[35Lv]'
@@ -397,11 +398,54 @@ it('선택지에 없는 착용 아이템은 속한 선택지가 없다', () => {
 })
 
 it('그 부위의 목록에 없는 id는 받지 않는다', () => {
-  const [creatureItem] = slotItemsOf('creature')
-
-  expect(apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: creatureItem!.id })).toEqual(
+  expect(apply(NO_CHANGES, { type: 'slotItem', slotItem: title!, id: CREATURE_SEMI })).toEqual(
     NO_CHANGES
   )
+})
+
+it('받은 선택지에 없는 칭호 id는 고르지 않은 것으로 보고 요청에 넣지 않는다', () => {
+  const changes = { ...NO_CHANGES, slotItems: { title: 'lab:title:removed', aura: AURA_FINAL } }
+
+  expect(slotItemChoiceOf(title!, changes)).toBeNull()
+  expect(simulationBody(dealerRows, null, changes)).toEqual({ equipment: [], aura: AURA_FINAL })
+})
+
+it('착용 크리쳐는 실험실 알 이름 대신 선택지의 게임 아이템 이름으로, 착용 오라는 Neople id로 선택지를 찾는다', () => {
+  const detail = characterDetailFixture('dealer')
+  // 크리쳐는 id를, 오라는 이름을 선택지 카드와 다르게 둔 합성 값이다.
+  const otherForms = {
+    ...detail,
+    creature: { ...detail.creature!, itemId: 'c'.repeat(32), itemName: '운명을 담는 재단사' },
+    avatar: detail.avatar.map((item) =>
+      item.slotId === 'AURORA' ? { ...item, itemName: '고결한 영혼의 잔상[기간제]' } : item
+    )
+  }
+  const [, wornCreature, wornAura] = slotItemsIn(toSimulatorRows(otherForms, loadedEnchantOptions))
+
+  expect(wornCreature!.choices.find(({ id }) => id === CREATURE_FINAL)!.cards[0]!.itemName).toBe(
+    '운명을 담는 재단사 알'
+  )
+  expect(wornCreature!.wornChoiceId).toBe(CREATURE_FINAL)
+  expect(wornAura!.wornChoiceId).toBe(AURA_SEMI)
+})
+
+it('실험실 목록을 받기 전과 받지 못했을 때는 칭호, 크리쳐, 오라 선택지가 없고 받은 상태를 준다', () => {
+  for (const status of ['loading', 'error'] as const) {
+    const rows = toSimulatorRows(characterDetailFixture('dealer'), { status, options: null })
+
+    expect(
+      slotItemsIn(rows).map(({ choices, choicesStatus, wornChoiceId }) => [
+        choices.length,
+        choicesStatus,
+        wornChoiceId
+      ]),
+      status
+    ).toEqual([
+      [0, status, null],
+      [0, status, null],
+      [0, status, null]
+    ])
+  }
 })
 
 it('칭호, 크리쳐, 오라를 착용하지 않은 캐릭터도 그 줄을 비어 있음으로 두고 묶음을 고를 수 있다', () => {
