@@ -31,6 +31,14 @@ export type CollectionBody = {
   failures: Array<{ failure: string; count: number; lastAttemptedAt: string | null }>
 }
 
+export type ContentClearSettingBody = {
+  id: string
+  kind: 'raid' | 'challenge' | 'legion'
+  name: string
+  collected: boolean
+  shown: boolean
+}
+
 export type BatchKeyBody = {
   id: number
   label: string
@@ -246,6 +254,7 @@ function json(status: number, body: unknown): Response {
 const API_PREFIX_PATTERN = /^\/api\//
 const JOB_ACTION_PATH_PATTERN = /^jobs\/([^/]+)\/(runs|pause|resume)$/
 const BATCH_KEY_PATH_PATTERN = /^batch-neople-keys\/(\d+)(?:\/(enable|disable))?$/
+const CONTENT_CLEAR_SETTING_PATH_PATTERN = /^content-clear-settings\/([^/]+)$/
 const LAB_CURRENCY_PATH_PATTERN = /^lab-currencies\/(\d+)$/
 
 const failure = (status: number, code: string) => json(status, { error: { code } })
@@ -265,6 +274,7 @@ export class FakeOpsApi {
   ]
   collection: CollectionBody = { waiting: 0, oldestQueuedAt: null, failures: [] }
   batchKeys: BatchKeyBody[] = []
+  contentClearSettings: ContentClearSettingBody[] = []
   labItems: LabItemGroupBody[] = []
   labCurrencies: LabCurrencyBody[] = []
   labCurrencyIcons = new Map<number, string>()
@@ -402,6 +412,16 @@ export class FakeOpsApi {
 
     if (BATCH_KEY_PATH_PATTERN.test(path)) {
       return this.changeBatchKey(method, path)
+    }
+
+    if (method === 'GET' && path === 'content-clear-settings') {
+      return json(200, { contents: this.contentClearSettings })
+    }
+
+    if (method === 'PATCH' && CONTENT_CLEAR_SETTING_PATH_PATTERN.test(path)) {
+      const [, id] = CONTENT_CLEAR_SETTING_PATH_PATTERN.exec(path) ?? []
+
+      return this.changeContentClearSetting(decodeURIComponent(id ?? ''), body)
     }
 
     if (method === 'GET' && path === 'jobs/runs') {
@@ -637,6 +657,18 @@ export class FakeOpsApi {
     if (icon !== undefined) {
       this.labCurrencyIcons.set(id, icon)
     }
+
+    return new Response(null, { status: 204 })
+  }
+
+  private changeContentClearSetting(id: string, body: unknown): Response {
+    const target = this.contentClearSettings.find((candidate) => candidate.id === id)
+
+    if (target === undefined) {
+      return failure(404, 'CONTENT_CLEAR_NOT_FOUND')
+    }
+
+    Object.assign(target, body)
 
     return new Response(null, { status: 204 })
   }

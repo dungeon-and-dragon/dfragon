@@ -7,6 +7,8 @@ import {
   batchKeyListSchema,
   type Collection,
   collectionSchema,
+  type ContentClearSettingList,
+  contentClearSettingListSchema,
   failureSchema,
   type JobList,
   jobListSchema,
@@ -66,6 +68,12 @@ export type LabCandidateQuery =
   | { kind: Exclude<LabCandidateKind, 'ENCHANT'> }
   | { kind: 'ENCHANT'; category: EnchantGradeSlot; role: EnchantGradeRole }
 
+export type ContentClearSettingChange = {
+  contentId: string
+  collected?: boolean
+  shown?: boolean
+}
+
 export type OpsClient = {
   readJobs: () => Promise<JobList>
   readRuns: (before: number | undefined) => Promise<RunPage>
@@ -78,6 +86,8 @@ export type OpsClient = {
   addBatchKey: (label: string, key: string) => Promise<void>
   setBatchKeyEnabled: (id: number, enabled: boolean) => Promise<void>
   deleteBatchKey: (id: number) => Promise<void>
+  readContentClearSettings: () => Promise<ContentClearSettingList>
+  changeContentClearSetting: (change: ContentClearSettingChange) => Promise<void>
   readLabItems: () => Promise<LabItemList>
   replaceLabItems: (group: LabItemGroup) => Promise<void>
   readLabCurrencies: () => Promise<LabCurrencyList>
@@ -186,6 +196,12 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
     deleteBatchKey: async (id) => {
       const path = batchKeyPath(id)
       await expectNoContent(await http.delete(path, { json: {} }))
+    },
+    readContentClearSettings: async () =>
+      readBody(await http.get('content-clear-settings'), contentClearSettingListSchema),
+    changeContentClearSetting: async ({ contentId, ...switches }) => {
+      const path = `content-clear-settings/${encodeURIComponent(contentId)}`
+      await expectNoContent(await http.patch(path, { json: switches }))
     },
     readLabItems: async () => readBody(await http.get('lab-items'), labItemListSchema),
     replaceLabItems: async (group) => {

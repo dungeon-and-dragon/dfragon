@@ -2,6 +2,7 @@ import { Tabs } from '@dfragon/ui'
 import { useQueryClient } from '@tanstack/react-query'
 import { BatchKeyPanel } from '#ops-components/BatchKeyPanel'
 import { CollectionPanel } from '#ops-components/CollectionPanel'
+import { ContentClearSettingPanel } from '#ops-components/ContentClearSettingPanel'
 import { JobTable } from '#ops-components/JobTable'
 import { LabCandidateExclusionPanel } from '#ops-components/LabCandidateExclusionPanel'
 import { LabCandidatePanel } from '#ops-components/LabCandidatePanel'
@@ -58,6 +59,7 @@ function OperationsContent(): React.JSX.Element {
             <Tabs.Tab value="jobs">Job</Tabs.Tab>
             <Tabs.Tab value="queues">타임라인 queue</Tabs.Tab>
             <Tabs.Tab value="batch-keys">batch key</Tabs.Tab>
+            <Tabs.Tab value="content-clears">클리어 집계</Tabs.Tab>
             <Tabs.Tab value="lab-items">실험실 아이템</Tabs.Tab>
           </Tabs.List>
         </div>
@@ -69,6 +71,9 @@ function OperationsContent(): React.JSX.Element {
         </Tabs.Panel>
         <Tabs.Panel value="batch-keys" className={TAB_PANEL}>
           <BatchKeyPanel />
+        </Tabs.Panel>
+        <Tabs.Panel value="content-clears" className={TAB_PANEL}>
+          <ContentClearSettingPanel />
         </Tabs.Panel>
         <Tabs.Panel value="lab-items" className={TAB_PANEL}>
           <LabCurrencyPanel />
