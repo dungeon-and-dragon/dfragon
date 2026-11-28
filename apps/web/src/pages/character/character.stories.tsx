@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { useState } from 'react'
-import type { CharacterHistory } from '#entities/character'
+import type { CharacterDetailView, CharacterHistory } from '#entities/character'
 import { StoryFrame } from '#testing/story-support/StoryFrame'
 import { StoryScreen } from '#testing/story-support/StoryScreen'
 import { oathCatalogFixture } from '#entities/catalog/api/oath-catalog.fixture'
@@ -64,6 +64,36 @@ function tabStory(
 export const 장비: Story = tabStory('equipment')
 
 export const 서약: Story = tabStory('oath')
+
+function partialOathDetail(): CharacterDetailView {
+  const detail = storyCharacterDetail('dealer')
+  const { oath } = detail
+
+  if (oath?.info == null) {
+    return detail
+  }
+
+  const upgrade = oath.info.oathUpgrade
+  const oathUpgrade = upgrade != null ? { ...upgrade, options: upgrade.options.slice(0, 6) } : null
+  const info = { ...oath.info, oathUpgrade }
+  const crystal = oath.crystal.slice(0, 7)
+
+  return { ...detail, oath: { ...oath, info, crystal } }
+}
+
+export const 서약빈칸: Story = {
+  parameters: {
+    msw: [
+      ...characterDetailHandlers(partialOathDetail(), storyHistory),
+      oathCatalogHandlers.catalog(oathCatalogFixture.characterDetail)
+    ]
+  },
+  render: () => (
+    <StoryFrame>
+      <Screen initialTab="oath" />
+    </StoryFrame>
+  )
+}
 
 export const 스킬: Story = tabStory('skill')
 
