@@ -929,6 +929,52 @@ test('실험실 아이템에 기본 이름만 있으면 가격 읽기는 플래�
   )
 })
 
+test('후보에 없는 이름은 경매장 item_id가 같은 후보의 상세를 아이콘 없이 붙이고, 이름이 같은 후보가 있으면 그 후보를 쓴다', {
+  skip: port === undefined
+}, async (t) => {
+  const client = await connectWithEmptyTables(t)
+  await upsertLabCandidates(client, {
+    versionId: 'first',
+    importedAt,
+    items: [
+      candidate('합성 오라', { description: '합성 오라 설명' }),
+      candidate('합성 오라 상자', { description: '합성 상자 설명' }),
+      candidate('합성 크리쳐', { description: '합성 크리쳐 설명' })
+    ]
+  })
+  const record = (itemName, itemId) =>
+    recordAuctionPrice(client, {
+      itemName,
+      itemId,
+      itemRarity: '레어',
+      unitPrice: 1_000,
+      checkedAt: importedAt
+    })
+  await record('합성 오라', 'synthetic-aura')
+  await record('합성 오라 상자', 'synthetic-aura')
+  await saveLabCandidateIcon(client, '합성 크리쳐', pngIcon)
+  await record('합성 크리쳐', 'synthetic-creature')
+  await record('합성 크리쳐 알', 'synthetic-creature')
+  await record('합성 다른 알', 'synthetic-other')
+  await replaceLabItemGroup(client, {
+    ...titleFinal,
+    items: [unpriced('합성 오라 상자'), unpriced('합성 크리쳐 알'), unpriced('합성 다른 알')]
+  })
+
+  const rows = await readLabItemPrices(client)
+
+  assert.deepEqual(
+    rows.map(({ itemName, candidate: detail }) => [itemName, detail?.description ?? null]),
+    [
+      ['합성 오라 상자', '합성 상자 설명'],
+      ['합성 크리쳐 알', '합성 크리쳐 설명'],
+      ['합성 다른 알', null]
+    ]
+  )
+  const egg = rows.find(({ itemName }) => itemName === '합성 크리쳐 알')
+  assert.equal(egg?.candidate?.iconUpdatedAt, null)
+})
+
 test('칭호, 크리쳐는 플래티넘 변형 가운데 가장 싼 가격을 platinum으로 따로 내고, 매물이 없으면 가격만 비우며, 변형이 없거나 다른 종류면 null이다', {
   skip: port === undefined
 }, async (t) => {

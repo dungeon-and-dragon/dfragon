@@ -43,6 +43,18 @@ export const labItemsFixture = {
             checkedAt: CHECKED_AT,
             cost: null,
             performanceKey: 'synthetic-bakal'
+          },
+          {
+            itemName: '합성 에픽 무기 카드',
+            fame: 210,
+            itemId: null,
+            itemRarity: '에픽',
+            iconPath: null,
+            description: null,
+            unitPrice: 9_800_000_000,
+            checkedAt: CHECKED_AT,
+            cost: null,
+            performanceKey: 'synthetic-bakal'
           }
         ]
       },

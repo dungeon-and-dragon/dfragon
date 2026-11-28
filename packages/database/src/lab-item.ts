@@ -241,6 +241,8 @@ function platinumPriceOf(
 }
 
 // 가격은 foreign key 없이 아이템 이름으로만 잇고, 재화는 currency_id로 잇는다.
+// 오라 상자, 크리쳐 알처럼 후보에 없는 이름은 경매장 item_id가 같은 후보를 이어 같은 성능으로 묶이게 한다.
+// 아이콘 route는 이름으로만 아이콘을 찾으므로 이렇게 이은 후보의 아이콘 시각은 비워 Neople 아이콘을 쓰게 한다.
 export async function readLabItemPrices(client: DatabaseClient): Promise<LabItemPriceRow[]> {
   const rows = await client.$queryRaw<StoredLabItemPriceRow[]>`
     SELECT
@@ -256,7 +258,10 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
       d."fame" AS "detailFame", d."card" AS "detailCard",
       candidate."item_name" IS NOT NULL AS "hasCandidate",
       candidate."description" AS "candidateDescription", candidate."item_rarity" AS "candidateRarity",
-      CASE WHEN candidate."icon" IS NULL THEN NULL ELSE candidate."icon_updated_at" END AS "candidateIconUpdatedAt",
+      CASE
+        WHEN candidate."icon" IS NULL OR candidate."item_name" <> i."item_name" THEN NULL
+        ELSE candidate."icon_updated_at"
+      END AS "candidateIconUpdatedAt",
       candidate."item_type_detail" AS "candidateItemTypeDetail",
       candidate."available_level" AS "candidateAvailableLevel",
       candidate."fame" AS "candidateFame", candidate."card" AS "candidateCard",
@@ -265,7 +270,15 @@ export async function readLabItemPrices(client: DatabaseClient): Promise<LabItem
     LEFT JOIN "auction_prices" p ON p."item_name" = i."item_name"
     LEFT JOIN "lab_currencies" c ON c."id" = i."currency_id"
     LEFT JOIN "lab_item_details" d ON d."item_name" = i."item_name"
-    LEFT JOIN "lab_candidates" candidate ON candidate."item_name" = i."item_name"
+    LEFT JOIN LATERAL (
+      SELECT matched.* FROM "lab_candidates" matched
+      WHERE matched."item_name" = i."item_name"
+        OR matched."item_name" IN (
+          SELECT same."item_name" FROM "auction_prices" same WHERE same."item_id" = p."item_id"
+        )
+      ORDER BY matched."item_name" = i."item_name" DESC, matched."item_name"
+      LIMIT 1
+    ) candidate ON true
     ORDER BY i."id"`
 
   const variantGroups = await readCandidateVariantGroups(client)
