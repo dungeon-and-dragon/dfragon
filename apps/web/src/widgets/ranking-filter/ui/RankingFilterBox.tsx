@@ -172,6 +172,7 @@ export function RankingFilterBox({
           onValueChange={selectJob}
         />
       </div>
+      {job === undefined && <GrowRowPlaceholder />}
       {job !== undefined && (
         <div className={FILTER_ROW}>
           <h2 id={growLabelId} className={FILTER_LABEL}>
@@ -233,6 +234,15 @@ function ImageChoiceField({
       </div>
       <ChoiceSelect label={label} items={items} value={value} onValueChange={onValueChange} />
     </>
+  )
+}
+
+// 그림 칩 화면에서는 직업을 고를 때 전직 줄이 생기며 아래 내용이 밀리지 않도록 칩 한 줄 높이를 미리 비워 둔다.
+function GrowRowPlaceholder(): React.JSX.Element {
+  return (
+    <div aria-hidden className="invisible max-md:hidden">
+      <span className="image-chip box-border" />
+    </div>
   )
 }
 
