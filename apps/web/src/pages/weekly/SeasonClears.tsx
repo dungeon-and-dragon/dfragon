@@ -166,7 +166,7 @@ function StageCountItem({ stage, count }: StageCount): React.JSX.Element {
   const label = stage ?? '클리어'
 
   return (
-    <span className="inline-flex items-baseline gap-1 max-sm:flex-col max-sm:items-end max-sm:gap-0">
+    <span className="inline-flex items-center gap-1 max-sm:flex-col max-sm:items-end max-sm:gap-0">
       <span className={HARD_STAGES.has(label) ? HARD_BADGE : MUTED_LABEL}>{label}</span>
       <span className="num inline-block min-w-[5ch] text-right text-xl font-semibold max-sm:text-base">
         {numberFormat.format(count)}
@@ -192,7 +192,7 @@ function ClearRowItem({ row }: { row: ClearRow }): React.JSX.Element {
       )}
       <span className={`relative ${MUTED_LABEL} max-sm:hidden`}>{KIND_LABELS[row.kind]}</span>
       <span className="relative min-w-0 flex-1 truncate font-semibold">{row.name}</span>
-      <span className="relative flex items-baseline">
+      <span className="relative flex items-center">
         {STAGE_SLOTS.map((slot) => {
           const stage = row.stages.find(({ stage }) => stageSlotOf(stage) === slot)
 
