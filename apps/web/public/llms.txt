@@ -9,7 +9,6 @@
 - [메인](https://dfragon.com/): 캐릭터와 모험단 검색, 소울 결정 가격
 - [검색](https://dfragon.com/rankings): 직업, 세트, 무기, 명성과 점수 범위로 거른 캐릭터 목록
 - [명성 통계](https://dfragon.com/stats): 명성 분포와 직업별 명성 구간 인원
-- [세트 통계](https://dfragon.com/stats/sets): 장비 세트, 서약 세트, 장비와 서약 조합, 무기, 유일 장비의 착용 비율
 - [직업 통계](https://dfragon.com/stats/jobs): 전직별 스킬 레벨, 개화, 강화 채택률, 스킬 체인 조합과 많이 쓰는 장비와 서약 조합, 무기
 - [클리어 집계](https://dfragon.com/clears): 레이드, 레기온 등 컨텐츠의 주간 클리어율과 클리어 캐릭터의 명성, 점수 분포
 - [실험실 마법부여](https://dfragon.com/lab/enchants): 부위, 역할별 종결, 준종결 마법부여 카드와 칭호, 크리쳐, 오라의 경매장 최저가

@@ -38,20 +38,8 @@ const OATH_SET_SHORT_NAMES: Readonly<Record<string, string>> = {
 export const SET_FAMILY_EQUIPMENT_SET_IDS: readonly string[] =
   Object.keys(EQUIPMENT_SET_SHORT_NAMES)
 
-// 세렌디 세트의 짝은 행운 서약이다. 서약 효과가 세렌디 세트의 행운의 날개, 신의 축복을 바꾼다.
-const OATH_SHORT_NAME_BY_EQUIPMENT: Readonly<Record<string, string>> = { 세렌디: '행운' }
-
-export function sameFamilyOathShortName(equipmentShortName: string): string {
-  const oathShortName = OATH_SHORT_NAME_BY_EQUIPMENT[equipmentShortName]
-  if (oathShortName !== undefined) {
-    return oathShortName
-  }
-
-  return equipmentShortName
-}
-
 // 서약 카탈로그는 선택지를 게임 서약 선택 화면의 왼쪽부터 오른쪽 순서로 둔다.
-export const OATH_OPTION_POSITIONS = ['왼쪽', '가운데', '오른쪽'] as const
+const OATH_OPTION_POSITIONS = ['왼쪽', '가운데', '오른쪽'] as const
 
 export function equipmentSetShortName(setId: string | null, name: string | null): string {
   if (setId === null) {
