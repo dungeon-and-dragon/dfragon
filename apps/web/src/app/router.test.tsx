@@ -1824,59 +1824,63 @@ function rankingRequests(): URL[] {
   return requestedPaths('/rankings/fame')
 }
 
-it('세트, 조합, 무기 탭 사이를 오가면 고른 직업, 전직 필터를 주소에 그대로 둔다', async () => {
-  serveSetStats()
-  const [job] = RANKING_JOBS
-  const [grow] = job!.grows
-  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
-  window.history.replaceState(null, '', `/stats/sets${search}`)
-  await act(async () => root.render(<WebApp host={host} />))
-
-  const tab = (label: string) =>
-    [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')].find(
-      (link) => link.textContent === label
-    )!
-  await vi.waitFor(() => expect(tab('조합')).toBeDefined())
-  await act(async () => tab('조합').click())
-  await waitForPath('/stats/combos')
-  expect(window.location.search).toBe(search)
-
-  await act(async () => tab('무기').click())
-  await waitForPath('/stats/weapons')
-  expect(window.location.search).toBe(search)
-  expect(tab('명성').getAttribute('href')).toBe('/stats')
-})
-
-it('무기 탭에서 스킬 탭으로 가면 직업, 전직 필터를 주소에 그대로 두고 표본 없이 그 전직의 스킬 통계를 받는다', async () => {
+function serveJobStats(): void {
   serveSetStats()
   server.use(
     http.get(`${SITE_API_URL}/stats/skills`, () => HttpResponse.json(SKILL_STATS)),
     ...skillWindowHandlers([])
   )
+}
+
+function statsTab(label: string): HTMLAnchorElement | undefined {
+  return [...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')].find(
+    (link) => link.textContent === label
+  )
+}
+
+it('세트 탭에서 직업, 전직, 표본을 고른 뒤 직업 탭으로 가면 같은 필터를 주소에 두고 세트 탭으로 돌아올 때도 그대로 둔다', async () => {
+  serveJobStats()
   const [job] = RANKING_JOBS
   const [grow] = job!.grows
-  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
-  window.history.replaceState(null, '', `/stats/weapons${search}`)
+  const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}&sample=top`
+  window.history.replaceState(null, '', `/stats/sets${search}`)
   await act(async () => root.render(<WebApp host={host} />))
 
-  const skillTab = await vi.waitFor(() => {
-    const link = [
-      ...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="통계 종류"] a')
-    ].find((candidate) => candidate.textContent === '스킬')
-    expect(link).toBeDefined()
-
-    return link!
-  })
-  await act(async () => skillTab.click())
-  await waitForPath('/stats/skills')
-
+  await vi.waitFor(() => expect(statsTab('직업')).toBeDefined())
+  await act(async () => statsTab('직업')!.click())
+  await waitForPath('/stats/jobs')
   expect(window.location.search).toBe(search)
   await vi.waitFor(() =>
-    expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([search])
+    expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([
+      `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
+    ])
   )
-  const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
-  expect(current?.textContent).toBe('스킬')
+
+  await act(async () => statsTab('세트')!.click())
+  await waitForPath('/stats/sets')
+  expect(window.location.search).toBe(search)
+  expect(statsTab('명성')!.getAttribute('href')).toBe('/stats')
 })
+
+it.each(['/stats/weapons', '/stats/combos', '/stats/skills'])(
+  '옛 주소 %s를 직업, 전직과 함께 열면 같은 query의 직업 통계로 옮긴다',
+  async (path) => {
+    serveJobStats()
+    const [job] = RANKING_JOBS
+    const [, grow] = job!.grows
+    const search = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
+    window.history.replaceState(null, '', `${path}${search}`)
+    await act(async () => root.render(<WebApp host={host} />))
+
+    await waitForPath('/stats/jobs')
+    expect(window.location.search).toBe(search)
+    await vi.waitFor(() =>
+      expect(
+        container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')?.textContent
+      ).toBe('직업')
+    )
+  }
+)
 
 it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계를 받고, 전직을 고르면 주소를 바꿔 다시 받는다', async () => {
   serveSetStats()
@@ -1898,10 +1902,8 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   const statsTabs = [...container.querySelectorAll('nav[aria-label="통계 종류"] a')]
   expect(statsTabs.map((tab) => [tab.textContent, tab.getAttribute('aria-current')])).toEqual([
     ['세트', 'page'],
-    ['무기', null],
-    ['조합', null],
+    ['직업', null],
     ['명성', null],
-    ['스킬', null],
     ['클리어', null]
   ])
 
@@ -1920,26 +1922,41 @@ it('세트 통계 주소를 직접 열면 주소의 직업, 전직으로 통계�
   )
 })
 
-it.each([
-  ['조합', '/stats/combos', '/stats/sets'],
-  ['무기', '/stats/weapons', '/stats/items']
-])(
-  '%s 통계 주소를 직접 열면 그 탭을 고르고 주소의 직업으로 통계를 받는다',
-  async (tab, path, api) => {
-    serveSetStats()
-    const [job] = RANKING_JOBS
-    window.history.replaceState(null, '', `${path}?jobId=${job!.jobId}`)
-    await act(async () => root.render(<WebApp host={host} />))
-
-    await vi.waitFor(() =>
-      expect(requestedPaths(api).map(({ search }) => search)).toEqual([
-        `?jobId=${job!.jobId}&sample=all`
-      ])
+it('직업 통계 주소를 직접 열면 직업 탭을 고르고 주소의 전직으로 세 통계를 받으며 캐릭터 수는 세트 통계의 표본 수로 보인다', async () => {
+  serveJobStats()
+  server.use(
+    http.get(`${SITE_API_URL}/stats/items`, () =>
+      HttpResponse.json({ ...ITEM_STATS, sampleSize: SET_STATS.sampleSize + 2 })
     )
-    const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
-    expect(current?.textContent).toBe(tab)
-  }
-)
+  )
+  const [job] = RANKING_JOBS
+  const [grow] = job!.grows
+  const jobSearch = `?jobId=${job!.jobId}&jobGrowId=${grow!.jobGrowId}`
+  window.history.replaceState(null, '', `/stats/jobs${jobSearch}`)
+  await act(async () => root.render(<WebApp host={host} />))
+
+  await vi.waitFor(() =>
+    expect(requestedPaths('/stats/items').map(({ search }) => search)).toEqual([
+      `${jobSearch}&sample=all`
+    ])
+  )
+  expect(requestedPaths('/stats/sets').map(({ search }) => search)).toEqual([
+    `${jobSearch}&sample=all`
+  ])
+  expect(requestedPaths('/stats/skills').map(({ search }) => search)).toEqual([jobSearch])
+  const current = container.querySelector('nav[aria-label="통계 종류"] a[aria-current="page"]')
+  expect(current?.textContent).toBe('직업')
+  await vi.waitFor(() => expect(document.title).toBe('직업 통계 - DFragon'))
+  await vi.waitFor(() =>
+    expect(
+      [...container.querySelectorAll('div')].some(
+        (element) =>
+          element.closest('main, header, footer') === null &&
+          element.textContent.startsWith(`캐릭터 ${SET_STATS.sampleSize}, 마지막 업데이트 `)
+      )
+    ).toBe(true)
+  )
+})
 
 it('세트 통계의 장비 세트 막대를 누르면 고른 직업과 그 세트로 거른 랭킹 주소로 가서 랭킹을 그 조건으로 받는다', async () => {
   serveSetStats()
