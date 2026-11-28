@@ -72,6 +72,7 @@ export type ContentClearSettingChange = {
   contentId: string
   collected?: boolean
   shown?: boolean
+  scoreBandMinPopulation?: number
 }
 
 export type OpsClient = {
@@ -199,9 +200,9 @@ export function createOpsClient(baseUrl: string, transport: typeof fetch): OpsCl
     },
     readContentClearSettings: async () =>
       readBody(await http.get('content-clear-settings'), contentClearSettingListSchema),
-    changeContentClearSetting: async ({ contentId, ...switches }) => {
+    changeContentClearSetting: async ({ contentId, ...change }) => {
       const path = `content-clear-settings/${encodeURIComponent(contentId)}`
-      await expectNoContent(await http.patch(path, { json: switches }))
+      await expectNoContent(await http.patch(path, { json: change }))
     },
     readLabItems: async () => readBody(await http.get('lab-items'), labItemListSchema),
     replaceLabItems: async (group) => {
