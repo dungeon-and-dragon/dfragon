@@ -97,7 +97,8 @@ export class TimelineSyncRequestService {
 
       const free = concurrency - running.size
 
-      if (free === 0) {
+      // 운영에서 처리 중인 요청이 상한을 넘어 음수 LIMIT으로 집다가 worker가 죽은 적이 있다. 넘은 까닭은 확인하지 못해, 넘으면 집지 않고 기다린다.
+      if (free <= 0) {
         await Promise.race(running)
         continue
       }
