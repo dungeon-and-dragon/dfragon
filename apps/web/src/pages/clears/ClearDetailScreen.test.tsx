@@ -724,7 +724,7 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
 
   const columns = [...(panel('장비 점수 구간별 클리어율')?.querySelectorAll('li') ?? [])]
   expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
-    '300,000~10  20.0%',
+    '300,000~350,00010  20.0%',
     '350,000~40  10.0%'
   ])
   const heights = columns.map((column) =>
@@ -734,18 +734,21 @@ it('장비 점수 구간별 클리어율은 클리어 수가 아니라 그 구�
   expect(heights[1]).toContain('50%')
 })
 
-it('장비 점수 구간별 클리어율은 캐릭터가 5% 이상 처음 몰리는 구간 아래를 한 막대로 접고 그 위는 사람이 적어도 구간마다 그린다', async () => {
+it('장비 점수 구간별 클리어율은 분모가 전체의 3%에 못 미치는 구간을 3% 이상이 될 때까지 다음 구간과 묶고 끝에 남은 구간은 앞 막대에 묶는다', async () => {
   await open(
     { contentKey: 'michaela' },
     {
       contentStats: (contentId, weekStart) => {
         const stats = scoredStatsOf(contentId, weekStart)
         const equipment = [
-          { score: 0, population: 10, cleared: 1 },
-          { score: 50000, population: 10, cleared: 0 },
-          { score: 300000, population: 900, cleared: 90 },
-          { score: 350000, population: 70, cleared: 35 },
-          { score: 400000, population: 10, cleared: 10 }
+          { score: 0, population: 20, cleared: 3 },
+          { score: 50000, population: 20, cleared: 1 },
+          { score: 100000, population: 800, cleared: 80 },
+          { score: 150000, population: 10, cleared: 5 },
+          { score: 200000, population: 10, cleared: 5 },
+          { score: 250000, population: 20, cleared: 10 },
+          { score: 300000, population: 100, cleared: 90 },
+          { score: 350000, population: 10, cleared: 10 }
         ]
 
         return HttpResponse.json({ ...stats, scoreBands: { ...stats.scoreBands, equipment } })
@@ -754,10 +757,10 @@ it('장비 점수 구간별 클리어율은 캐릭터가 5% 이상 처음 몰리
   )
 
   expect(await columnTooltips('장비 점수 구간별 클리어율')).toEqual([
-    '~300,0001  5.0%',
-    '300,000~90  10.0%',
-    '350,000~35  50.0%',
-    '400,000~10  100.0%'
+    '0~100,0004  10.0%',
+    '100,000~150,00080  10.0%',
+    '150,000~300,00020  50.0%',
+    '300,000~100  90.9%'
   ])
 })
 
