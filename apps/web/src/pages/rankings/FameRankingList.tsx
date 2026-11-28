@@ -130,7 +130,9 @@ function PagedTable({
   const rows = characters.slice(start, end)
   const failed = rows.length === 0 && moreError !== null && !loadingMore
   const waiting = rows.length === 0 && !failed
-  const isLastPage = end >= characters.length && !hasMore
+  const loadedPageCount = Math.ceil(characters.length / PAGE_SIZE)
+  const unloadedPageCount = hasMore ? 1 : 0
+  const pageCount = Math.max(page + 1, loadedPageCount + unloadedPageCount)
   const skeletonRows = waiting
     ? Array.from({ length: LOADING_ROWS }, (_, index) => (
         <SkeletonRow
@@ -143,18 +145,12 @@ function PagedTable({
       ))
     : undefined
 
-  function showNext(): void {
-    const nextEnd = end + PAGE_SIZE
+  function showPage(number: number): void {
+    setPage(number - 1)
 
-    setPage(page + 1)
-
-    if (characters.length < nextEnd && hasMore) {
+    if (characters.length < number * PAGE_SIZE && hasMore) {
       loadMore()
     }
-  }
-
-  function showPrevious(): void {
-    setPage(page - 1)
   }
 
   return (
@@ -183,10 +179,9 @@ function PagedTable({
       )}
       <Pagination
         page={page + 1}
-        onPrevious={showPrevious}
-        onNext={showNext}
-        previousDisabled={page === 0 || waiting}
-        nextDisabled={isLastPage || waiting || failed}
+        pageCount={pageCount}
+        onPageChange={showPage}
+        disabled={waiting}
       />
     </>
   )
