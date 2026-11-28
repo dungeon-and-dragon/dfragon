@@ -61,19 +61,33 @@ function slotCell(row: ReturnType<typeof toEquipmentBoard>[number], slot: string
 
 it('같은 부위에 에픽과 태초가 있으면 태초를 보이고, 남은 개수는 태초만 세며 레전더리를 뺀 등급별 개수를 따로 둔다', () => {
   const source = character('가', 1, [
-    equipment('상의', '에픽', 2),
-    equipment('상의', '태초', 3),
-    equipment('상의', '레전더리')
+    equipment('목걸이', '에픽', 2),
+    equipment('목걸이', '태초', 3),
+    equipment('목걸이', '레전더리')
   ])
   const [row] = toEquipmentBoard([source], SET)
 
-  expect(slotCell(row!, '상의')).toEqual({
-    itemId: '상의-태초',
-    itemName: '태초 상의',
+  expect(slotCell(row!, '목걸이')).toEqual({
+    itemId: '목걸이-태초',
+    itemName: '태초 목걸이',
     rarity: '태초',
     extraCount: 2,
-    rarityCounts: [3, 2]
+    rarityCounts: [
+      { rarity: '태초', count: 3 },
+      { rarity: '에픽', count: 2 }
+    ]
   })
+})
+
+it('목걸이, 팔찌, 반지가 아닌 부위는 태초가 없어 등급별 개수에 에픽만 둔다', () => {
+  const source = character('가', 1, [equipment('상의', '에픽', 2), equipment('팔찌', '에픽')])
+  const [row] = toEquipmentBoard([source], SET)
+
+  expect(slotCell(row!, '상의')?.rarityCounts).toEqual([{ rarity: '에픽', count: 2 }])
+  expect(slotCell(row!, '팔찌')?.rarityCounts).toEqual([
+    { rarity: '태초', count: 0 },
+    { rarity: '에픽', count: 1 }
+  ])
 })
 
 it('에픽과 레전더리가 하나씩이면 에픽을 보이고 남은 개수는 없다', () => {
@@ -83,7 +97,10 @@ it('에픽과 레전더리가 하나씩이면 에픽을 보이고 남은 개수�
   expect(slotCell(row!, '반지')).toMatchObject({
     rarity: '에픽',
     extraCount: 0,
-    rarityCounts: [0, 1]
+    rarityCounts: [
+      { rarity: '태초', count: 0 },
+      { rarity: '에픽', count: 1 }
+    ]
   })
 })
 
