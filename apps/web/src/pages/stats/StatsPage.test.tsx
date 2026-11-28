@@ -124,6 +124,7 @@ it('큰 수는 줄여 쓰고 서버 인구 없이 명성 분포, 직업별 명�
     ['', '0'],
     ['', '4만'],
     ['', '8만'],
+    ['', '10만'],
     ['', '12만'],
     ['', '']
   ])
@@ -149,11 +150,12 @@ function moveMouse(from: Element, to: Element): Promise<void> {
   })
 }
 
-it('명성 분포는 4만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
+it('명성 분포는 12만 미만 막대와 1천 막대 사이에 구분선을 두고 막대에 마우스를 올릴 때만 구간과 인원을 띄운다', async () => {
   await render(stats)
 
   const items = [...boxOf('명성 분포').querySelectorAll('li')]
   expect(items.map((item) => item.getAttribute('aria-hidden'))).toEqual([
+    null,
     null,
     null,
     null,
@@ -186,15 +188,15 @@ it('명성 분포는 12만~13만 막대와 13만 이상 막대 사이에도 구�
     item.getAttribute('aria-hidden') === 'true' ? [index] : []
   )
 
-  expect(items).toHaveLength(3 + 1 + 10 + 1 + 1)
-  expect(dividerIndexes).toEqual([3, 14])
+  expect(items).toHaveLength(4 + 1 + 10 + 1 + 1)
+  expect(dividerIndexes).toEqual([4, 15])
 })
 
 it('명성 분포 막대 사이 간격과 구분선을 지나도 툴팁을 닫지 않고 다음 막대의 구간과 인원으로 바꾼다', async () => {
   await render(stats)
 
   const chart = boxOf('명성 분포').querySelector('ul')!
-  const [, coarseBar, , divider, firstFineBar] = [...chart.querySelectorAll('li')]
+  const [, coarseBar, , , divider, firstFineBar] = [...chart.querySelectorAll('li')]
   await moveMouse(document.body, coarseBar!)
   expect(tooltipText('명성 분포')).toBe('4만~8만10')
 
