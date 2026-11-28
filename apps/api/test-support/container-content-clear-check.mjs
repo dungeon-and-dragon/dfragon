@@ -15,6 +15,7 @@ import {
   readContentClearPopulations,
   readContentClearRaidTimes,
   readContentClearWeekMoves,
+  readContentClearSettings,
   readContentClearStreaks,
   readContentClearWeekGroups,
   readContentClearWeekRatioCounts,
@@ -305,6 +306,7 @@ try {
 
   const reader = {
     readCollectedAt: () => readContentClearCollectedAt(client),
+    readSettings: () => readContentClearSettings(client),
     readPopulations: () => readContentClearPopulations(client),
     readWeekRatioCounts: () => readContentClearWeekRatioCounts(client),
     readAdventureSizes: (selection) => readContentClearAdventureSizes(client, selection),
