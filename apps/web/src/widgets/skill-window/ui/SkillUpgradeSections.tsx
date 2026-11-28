@@ -1,5 +1,7 @@
 import {
   type EnhancementRow,
+  type EvolutionBranch,
+  EvolutionBranchTooltip,
   type EvolutionRow,
   type SkillMarks,
   type SkillUpgradeBoard,
@@ -7,7 +9,6 @@ import {
   SkillSprite
 } from '#entities/catalog'
 import { ENHANCEMENT_LABELS } from '#widgets/skill-window/lib/upgrade-labels'
-import { BranchTooltip, EvolutionBranchExplain } from './BranchTooltip'
 import { type SkillAdoptionSource, SkillAdoptionHover } from './SkillAdoptionTooltip'
 import { EVOLUTION_MARK, PIXELATED, SKILL_ICON } from './skill-classes'
 
@@ -26,12 +27,12 @@ function Branch({
   picked,
   mark,
   label,
-  tooltip
+  branch
 }: {
   picked: boolean
   mark: string
   label: string
-  tooltip?: React.ReactNode
+  branch?: EvolutionBranch
 }): React.JSX.Element {
   const content = (
     <>
@@ -45,7 +46,7 @@ function Branch({
     </>
   )
   const branchClassName = `${BRANCH} ${picked ? BRANCH_PICKED : BRANCH_IDLE}`
-  if (tooltip === undefined) {
+  if (branch === undefined) {
     return (
       <span aria-current={picked || undefined} className={branchClassName}>
         {content}
@@ -54,9 +55,11 @@ function Branch({
   }
 
   return (
-    <BranchTooltip tooltip={tooltip} current={picked} className={branchClassName}>
-      {content}
-    </BranchTooltip>
+    <EvolutionBranchTooltip branch={branch}>
+      <button type="button" aria-current={picked || undefined} className={branchClassName}>
+        {content}
+      </button>
+    </EvolutionBranchTooltip>
   )
 }
 
@@ -145,7 +148,7 @@ function EvolutionSection({
                     picked={row.picked === branch.type}
                     mark={skillMarkOf(marks, 'evolution', branch.type)}
                     label={branch.name}
-                    tooltip={<EvolutionBranchExplain branch={branch} />}
+                    branch={branch}
                   />
                 ))}
               </div>

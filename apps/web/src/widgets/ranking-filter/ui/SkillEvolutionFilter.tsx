@@ -1,5 +1,12 @@
 import { Button, CloseIcon, Select } from '@dfragon/ui'
-import { type SkillIconImage, type SkillMarks, SkillSprite, skillMarkOf } from '#entities/catalog'
+import {
+  type EvolutionBranch,
+  EvolutionBranchTooltip,
+  type SkillIconImage,
+  type SkillMarks,
+  SkillSprite,
+  skillMarkOf
+} from '#entities/catalog'
 import type { SkillEvolutionChoice, SkillEvolutionType } from '#entities/ranking'
 import { EVOLUTION_FILTER_LIMIT } from '#shared/config/ranking'
 
@@ -17,6 +24,7 @@ export type EvolutionSkill = Readonly<{
   name: string
   icon: SkillIconImage | null
   branchNames: Readonly<Record<SkillEvolutionType, string>>
+  branches: readonly [EvolutionBranch, EvolutionBranch] | null
 }>
 
 export function SkillEvolutionGrid({
@@ -185,7 +193,7 @@ function PickedEvolution({
 }
 
 function EvolutionCell({
-  skill: { name, icon, branchNames },
+  skill: { name, icon, branchNames, branches },
   marks,
   picked,
   blocked,
@@ -218,6 +226,7 @@ function EvolutionCell({
             skillName={name}
             type={type}
             label={branchNames[type]}
+            branch={branches?.[type - 1] ?? null}
             mark={marks !== null ? skillMarkOf(marks, 'evolution', type) : null}
             picked={picked === type}
             disabled={blocked}
@@ -233,6 +242,7 @@ function EvolutionButton({
   skillName,
   type,
   label,
+  branch,
   mark,
   picked,
   disabled,
@@ -241,6 +251,7 @@ function EvolutionButton({
   skillName: string
   type: SkillEvolutionType
   label: string
+  branch: EvolutionBranch | null
   mark: string | null
   picked: boolean
   disabled: boolean
@@ -250,7 +261,7 @@ function EvolutionButton({
     onPick(skillName, type)
   }
 
-  return (
+  const button = (
     <button
       type="button"
       aria-pressed={picked}
@@ -270,6 +281,12 @@ function EvolutionButton({
       {label}
     </button>
   )
+
+  if (branch === null) {
+    return button
+  }
+
+  return <EvolutionBranchTooltip branch={branch}>{button}</EvolutionBranchTooltip>
 }
 
 export function SkillEvolutionSkeleton(): React.JSX.Element {
