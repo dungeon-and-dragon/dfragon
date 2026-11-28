@@ -29,12 +29,6 @@ export type FameRankingFilter = {
   scoreTo?: number
 }
 
-export type FameRankingPosition = {
-  value: number
-  serverId: string
-  characterId: string
-}
-
 export type RankedStoredCharacter = StoredCharacter & {
   equipmentSet: CharacterEquipmentSet | null
   oathSet: CharacterOathSet | null
@@ -89,8 +83,6 @@ export async function readAdventureSetCharacters(
   return rows.map(toRankedCharacter)
 }
 
-// 명성은 내림차순, 서버와 캐릭터 ID는 오름차순이라 row 비교 하나로 쓸 수 없다.
-// 앞의 fame <= 조건이 index 범위가 되어 이전 page의 행을 다시 훑지 않는다(합성 100만 행에서 365ms가 0.4ms로 줄었다).
 // 낀 캐릭터가 이 수보다 적은 아이템은 그 캐릭터를 먼저 모아 명성 순으로 정렬하고, 많으면 명성 index를 따라 읽으며 거른다.
 // planner는 드문 아이템에도 명성 순서로 읽어, 합성 100만 명에서 50명이 낀 아이템이 4.7초, 아무도 끼지 않은 아이템이 3.1초였다.
 // 먼저 모으는 형태는 30만 명이 낀 아이템에서 page마다 0.7초였다. 아이템 하나만 걸었을 때 1만 명에서 두 형태가 87ms, 238ms, 2만 명에서 162ms, 132ms라
@@ -155,14 +147,6 @@ function selectsEvolutionsSql(evolutions: readonly SkillStyleSelection[]): Prism
       AND style.job_grow_id = c.job_grow_id
       AND style.evolutions @> ${selected}::jsonb
   )`
-}
-
-function afterPositionSql(
-  sortValue: Prisma.Sql,
-  { value, serverId, characterId }: FameRankingPosition
-): Prisma.Sql {
-  return Prisma.sql`${sortValue} <= ${value}
-    AND (${sortValue} < ${value} OR (c.server_id, c.character_id) > (${serverId}, ${characterId}))`
 }
 
 const SCORE_KINDS: Record<Exclude<RankingSort, 'fame'>, CharacterScoreKind> = {
@@ -244,12 +228,16 @@ export type CharacterStats = {
 const FAME_BUCKET_SIZE = 1_000
 const JOB_FAME_BUCKET_SIZE = 10_000
 
-export async function readFameRanking(
+type FameRankingSource = {
+  sortValue: Prisma.Sql
+  joins: Prisma.Sql
+  where: Prisma.Sql
+}
+
+async function fameRankingSource(
   client: DatabaseClient,
-  filter: FameRankingFilter,
-  limit: number,
-  after?: FameRankingPosition
-): Promise<RankedStoredCharacter[]> {
+  filter: FameRankingFilter
+): Promise<FameRankingSource> {
   const {
     jobId,
     jobGrowId,
@@ -271,26 +259,56 @@ export async function readFameRanking(
     ...(oathSetId !== undefined ? [Prisma.sql`c.oath_set_id = ${oathSetId}::int`] : []),
     ...(oathSetOption !== undefined ? [Prisma.sql`c.oath_set_option = ${oathSetOption}`] : []),
     ...itemIds.filter((itemId) => itemId !== gatheredItem).map(wearsItemSql),
-    ...(evolutions.length > 0 ? [selectsEvolutionsSql(evolutions)] : []),
-    ...(after !== undefined ? [afterPositionSql(sortBy.value, after)] : [])
+    ...(evolutions.length > 0 ? [selectsEvolutionsSql(evolutions)] : [])
   ]
 
   const gatheredJoin = gatheredItem !== undefined ? gatheredWearersSql(gatheredItem) : Prisma.empty
   const where =
     conditions.length > 0 ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}` : Prisma.empty
+  const joins = Prisma.sql`${sortBy.join} ${gatheredJoin}`
+
+  return { sortValue: sortBy.value, joins, where }
+}
+
+export async function readFameRanking(
+  client: DatabaseClient,
+  filter: FameRankingFilter,
+  limit: number,
+  offset = 0
+): Promise<RankedStoredCharacter[]> {
+  const { sortValue, joins, where } = await fameRankingSource(client, filter)
 
   // 명성 기준일 때 ORDER BY의 fame DESC는 명성 index와 같은 NULLS FIRST여야 index 순서로 앞부분만 읽는다.
   const rows = await readStoredCharacterRows<RankedRow>(
     client,
     Prisma.sql`
       ${where}
-      ORDER BY ${sortBy.value} DESC, c.server_id, c.character_id
-      LIMIT ${limit}`,
+      ORDER BY ${sortValue} DESC, c.server_id, c.character_id
+      LIMIT ${limit} OFFSET ${offset}`,
     setColumns,
-    Prisma.sql`${sortBy.join} ${gatheredJoin}`
+    joins
   )
 
   return rows.map(toRankedCharacter)
+}
+
+// characters.adventure_id는 NOT NULL 외래 키라 목록이 거는 adventures join은 행 수를 바꾸지 않아 세지 않는다.
+export async function countFameRanking(
+  client: DatabaseClient,
+  filter: FameRankingFilter
+): Promise<number> {
+  const { joins, where } = await fameRankingSource(client, filter)
+  const [row] = await client.$queryRaw<{ count: number }[]>`
+    SELECT count(*)::int AS count
+    FROM characters c
+    ${joins}
+    ${where}`
+
+  if (row === undefined) {
+    return 0
+  }
+
+  return row.count
 }
 
 async function readServerCounts(client: DatabaseClient): Promise<ServerCount[]> {

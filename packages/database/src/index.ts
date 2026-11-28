@@ -396,6 +396,7 @@ export type {
 export {
   readAdventureSetCharacters,
   readCharacterStats,
+  countFameRanking,
   readCharacterStatsSnapshot,
   readFameRanking,
   saveCharacterStats
@@ -405,7 +406,6 @@ export type {
   CharacterStatsSnapshot,
   FameBucket,
   FameRankingFilter,
-  FameRankingPosition,
   JobCount,
   RankedStoredCharacter,
   RankingSort,
