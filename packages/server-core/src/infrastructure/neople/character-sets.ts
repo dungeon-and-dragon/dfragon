@@ -94,6 +94,9 @@ function toEquipmentSet({
 
 const KEPT_EQUIPMENT_SLOT_IDS = new Set(['WEAPON', 'TITLE'])
 const AURA_SLOT_ID = 'AURORA'
+// 무기 아바타는 Neople 응답의 부위 id가 장비 무기와 같은 WEAPON이라, character_items에서 장비 무기와 겹치지 않게 이 부위 id로 둔다.
+const WEAPON_AVATAR_SOURCE_SLOT_ID = 'WEAPON'
+const WEAPON_AVATAR_SLOT_ID = 'WEAPON_AVATAR'
 // 크리쳐 응답에는 부위가 없어 character_items에 이 부위 id로 둔다.
 const CREATURE_SLOT_ID = 'CREATURE'
 
@@ -110,13 +113,20 @@ function toEquipmentItems({ equipment }: z.output<typeof equipmentSchema>): Char
   })
 }
 
-function toAuraItems({ avatar }: z.output<typeof avatarSchema>): CharacterItem[] {
+const KEPT_AVATAR_SLOT_IDS: ReadonlyMap<string, string> = new Map([
+  [AURA_SLOT_ID, AURA_SLOT_ID],
+  [WEAPON_AVATAR_SOURCE_SLOT_ID, WEAPON_AVATAR_SLOT_ID]
+])
+
+function toAvatarItems({ avatar }: z.output<typeof avatarSchema>): CharacterItem[] {
   return (avatar ?? []).flatMap(({ slotId, itemId, itemName }) => {
-    if (slotId !== AURA_SLOT_ID || !itemId || !itemName) {
+    const keptSlotId = slotId != null ? KEPT_AVATAR_SLOT_IDS.get(slotId) : undefined
+
+    if (keptSlotId === undefined || !itemId || !itemName) {
       return []
     }
 
-    return [{ slotId, itemId, itemName, typeDetail: null }]
+    return [{ slotId: keptSlotId, itemId, itemName, typeDetail: null }]
   })
 }
 
@@ -154,7 +164,7 @@ export const parseCharacterSets: ParseCharacterSets = (payloads) => {
   const oathSet = toOathSet(oath.data)
   const items = [
     ...toEquipmentItems(equipment.data),
-    ...toAuraItems(avatar.data),
+    ...toAvatarItems(avatar.data),
     ...toCreatureItems(creature.data)
   ]
 
