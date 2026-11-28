@@ -293,6 +293,30 @@ it('스킬 체인은 응답 순서대로 조합마다 아이콘 4칸과 체인 �
   ])
 })
 
+it.each(['크리에이터', '다크나이트'])(
+  '%s는 스킬 창을 그리고 스킬 체인은 그리지 않는다',
+  async (jobName) => {
+    const job = RANKING_JOBS.find(({ name }) => name === jobName)!
+    const [advancement] = skillStatsCatalogFixture.job.advancements
+    const catalog = {
+      ...skillStatsCatalogFixture,
+      job: {
+        ...skillStatsCatalogFixture.job,
+        jobId: job.jobId,
+        jobName,
+        advancements: [{ ...advancement!, growtype: 0, name: jobName }]
+      }
+    }
+
+    server.use(...skillWindowHandlers([catalog]), skillStatsHandlers.of(skillStatsFixture))
+    await render({ jobId: job.jobId, jobGrowId: job.grows[0]!.jobGrowId })
+    await vi.waitFor(() => expect(container.querySelector('[aria-busy="true"]')).toBeNull())
+
+    expect(cellOf('발도').level).toBe('20')
+    expect(container.querySelector('section[aria-label="스킬 체인"]')).toBeNull()
+  }
+)
+
 it('스킬 Tooltip은 채택률과 레벨 분포를 보이고 레벨 분포에 점을 찍지 않는다', async () => {
   await renderStats(skillStatsFixture)
 
