@@ -72,7 +72,7 @@ type FameBucket = CharacterStats['fameDistribution'][number]
 
 const FINE_FROM = 120_000
 const HIGH_FROM = 130_000
-const COARSE_WIDTH = 40_000
+const COARSE_FROMS = [0, 40_000, 80_000, 100_000] as const
 const LABEL_STEP = 5_000
 const DENSITY_WIDTH = 1_000
 const MAN = 10_000
@@ -88,9 +88,8 @@ function fameText(fame: number): string {
 }
 
 function coarseBuckets(distribution: readonly FameBucket[]): FameBucket[] {
-  return Array.from({ length: FINE_FROM / COARSE_WIDTH }, (_, index) => {
-    const from = index * COARSE_WIDTH
-    const to = from + COARSE_WIDTH
+  return COARSE_FROMS.map((from, index) => {
+    const to = COARSE_FROMS[index + 1] ?? FINE_FROM
     const count = distribution
       .filter((bucket) => bucket.from >= from && bucket.from < to)
       .reduce((sum, bucket) => sum + bucket.count, 0)
