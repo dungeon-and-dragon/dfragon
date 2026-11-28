@@ -658,8 +658,24 @@ export class LabItemService {
     return await Promise.all([this.enchantOptionsOf(rows, signal), this.slotItemOptionsOf(rows)])
   }
 
+  // 오라 상자, 크리쳐 알로 가격을 받은 행은 itemId가 상자, 알이라, 아이템 정보 tooltip이 게임 아이템을 보이도록 게임 아이템 id로 바꾼다.
+  private async withGameItemIds(rows: readonly LabItemPriceRow[]): Promise<LabItemPriceRow[]> {
+    const slotRows = rows.filter((row) => slotItemCategoryOf(row) !== null)
+    const gameItemIds = await this.gameItemIdsOf(slotRows.map(gameItemNameOf))
+
+    return rows.map((row) => {
+      if (slotItemCategoryOf(row) === null) {
+        return row
+      }
+
+      const itemId = gameItemIds.get(gameItemNameOf(row)) ?? row.itemId
+
+      return { ...row, itemId }
+    })
+  }
+
   async get(signal: AbortSignal): Promise<LabItems> {
-    const rows = await this.repository.readLabItemPrices()
+    const rows = await this.withGameItemIds(await this.repository.readLabItemPrices())
     const fames = await this.neopleFames(rows, signal)
     const toItem = (row: LabItemPriceRow) => toPrice(row, fameOf(row, fames), row.candidate)
     const keys = LAB_ITEM_CATEGORIES.flatMap((category) =>
